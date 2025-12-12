@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Filter, Search, X } from "lucide-react";
+import { Download, Filter, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Sparkles } from "lucide-react";
 import { FilterDropdown, TextFilterContent, MultiSelectContent } from "@/components/conversation/FilterDropdown";
 import { DateRangeFilter } from "@/components/conversation/DateRangeFilter";
 import { ConversationTable } from "@/components/conversation/ConversationTable";
@@ -12,6 +13,7 @@ import { LoadingSkeleton } from "@/components/conversation/LoadingSkeleton";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord, FilterState, DateRangeValue } from "@/types/conversation";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const initialFilters: FilterState = {
   searchKey: '',
@@ -123,267 +125,364 @@ export default function ConversationHistory() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
       <div className="max-w-[1600px] mx-auto">
-        <Card className="shadow-sm">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-xl font-semibold tracking-tight">Conversation History</h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  View and analyze all customer conversations
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExport}
-                  className="h-9"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+        >
+          <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="pb-4 border-b border-border/30">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export CSV
-                </Button>
-                <Button
-                  variant={filtersOpen ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFiltersOpen(!filtersOpen)}
-                  className="h-9 relative"
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-semibold tracking-tight text-foreground">
+                        Conversation History
+                      </h1>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        View and analyze all customer conversations
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex items-center gap-2"
                 >
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                  {activeFilterCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                    >
-                      {activeFilterCount}
-                    </Badge>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-0">
-            {isLoading ? (
-              <LoadingSkeleton />
-            ) : (
-              <>
-                <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-                  <CollapsibleContent className="animate-fade-in">
-                    <div className="pb-4 border-b mb-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                        {/* Search by Keyword */}
-                        <FilterDropdown
-                          label="Search Keyword"
-                          selectedValue={filters.searchKey}
-                          onClear={() => updateFilter('searchKey', '')}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExport}
+                    className="h-10 px-4 rounded-xl border-border/60 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant={filtersOpen ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                    className={cn(
+                      "h-10 px-4 rounded-xl relative transition-all duration-200",
+                      filtersOpen 
+                        ? "bg-primary text-primary-foreground shadow-md" 
+                        : "border-border/60 hover:bg-primary/5 hover:border-primary/50"
+                    )}
+                  >
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filters
+                    <AnimatePresence>
+                      {activeFilterCount > 0 && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="absolute -top-2 -right-2"
                         >
-                          <TextFilterContent
-                            label="Search keyword"
-                            value={filters.searchKey}
-                            onChange={(v) => updateFilter('searchKey', v)}
-                            onApply={() => {}}
+                          <Badge
+                            variant="destructive"
+                            className="h-5 w-5 p-0 flex items-center justify-center text-xs rounded-full shadow-lg"
+                          >
+                            {activeFilterCount}
+                          </Badge>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Button>
+                </motion.div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-6">
+              {isLoading ? (
+                <LoadingSkeleton />
+              ) : (
+                <>
+                  <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+                    <CollapsibleContent>
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="pb-6 border-b border-border/30 mb-6"
+                      >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                          {/* Search by Keyword */}
+                          <FilterDropdown
+                            label="Search Keyword"
+                            selectedValue={filters.searchKey}
                             onClear={() => updateFilter('searchKey', '')}
-                          />
-                        </FilterDropdown>
+                          >
+                            <TextFilterContent
+                              label="Search keyword"
+                              value={filters.searchKey}
+                              onChange={(v) => updateFilter('searchKey', v)}
+                              onApply={() => {}}
+                              onClear={() => updateFilter('searchKey', '')}
+                            />
+                          </FilterDropdown>
 
-                        {/* VDN */}
-                        <FilterDropdown
-                          label="VDN"
-                          selectedValue={filters.vdnKey}
-                          onClear={() => updateFilter('vdnKey', '')}
-                        >
-                          <TextFilterContent
+                          {/* VDN */}
+                          <FilterDropdown
                             label="VDN"
-                            value={filters.vdnKey}
-                            onChange={(v) => updateFilter('vdnKey', v)}
-                            onApply={() => {}}
+                            selectedValue={filters.vdnKey}
                             onClear={() => updateFilter('vdnKey', '')}
-                          />
-                        </FilterDropdown>
+                          >
+                            <TextFilterContent
+                              label="VDN"
+                              value={filters.vdnKey}
+                              onChange={(v) => updateFilter('vdnKey', v)}
+                              onApply={() => {}}
+                              onClear={() => updateFilter('vdnKey', '')}
+                            />
+                          </FilterDropdown>
 
-                        {/* MSISDN */}
-                        <FilterDropdown
-                          label="MSISDN"
-                          selectedValue={filters.msisdnKey}
-                          onClear={() => updateFilter('msisdnKey', '')}
-                        >
-                          <TextFilterContent
+                          {/* MSISDN */}
+                          <FilterDropdown
                             label="MSISDN"
-                            value={filters.msisdnKey}
-                            onChange={(v) => updateFilter('msisdnKey', v)}
-                            onApply={() => {}}
+                            selectedValue={filters.msisdnKey}
                             onClear={() => updateFilter('msisdnKey', '')}
-                          />
-                        </FilterDropdown>
+                          >
+                            <TextFilterContent
+                              label="MSISDN"
+                              value={filters.msisdnKey}
+                              onChange={(v) => updateFilter('msisdnKey', v)}
+                              onApply={() => {}}
+                              onClear={() => updateFilter('msisdnKey', '')}
+                            />
+                          </FilterDropdown>
 
-                        {/* Unique ID */}
-                        <FilterDropdown
-                          label="Unique ID"
-                          selectedValue={filters.uniqueIdKey}
-                          onClear={() => updateFilter('uniqueIdKey', '')}
-                        >
-                          <TextFilterContent
+                          {/* Unique ID */}
+                          <FilterDropdown
                             label="Unique ID"
-                            value={filters.uniqueIdKey}
-                            onChange={(v) => updateFilter('uniqueIdKey', v)}
-                            onApply={() => {}}
+                            selectedValue={filters.uniqueIdKey}
                             onClear={() => updateFilter('uniqueIdKey', '')}
-                          />
-                        </FilterDropdown>
+                          >
+                            <TextFilterContent
+                              label="Unique ID"
+                              value={filters.uniqueIdKey}
+                              onChange={(v) => updateFilter('uniqueIdKey', v)}
+                              onApply={() => {}}
+                              onClear={() => updateFilter('uniqueIdKey', '')}
+                            />
+                          </FilterDropdown>
 
-                        {/* VDN Source */}
-                        <FilterDropdown
-                          label="VDN Source"
-                          selectedValue={filters.selectedVdnSources[0]}
-                          plusCount={Math.max(0, filters.selectedVdnSources.length - 1)}
-                          onClear={() => updateFilter('selectedVdnSources', [])}
-                        >
-                          <MultiSelectContent
-                            options={filterOptions.vdnSources}
-                            selected={filters.selectedVdnSources}
-                            onChange={(v) => updateFilter('selectedVdnSources', v)}
-                          />
-                        </FilterDropdown>
+                          {/* VDN Source */}
+                          <FilterDropdown
+                            label="VDN Source"
+                            selectedValue={filters.selectedVdnSources[0]}
+                            plusCount={Math.max(0, filters.selectedVdnSources.length - 1)}
+                            onClear={() => updateFilter('selectedVdnSources', [])}
+                          >
+                            <MultiSelectContent
+                              options={filterOptions.vdnSources}
+                              selected={filters.selectedVdnSources}
+                              onChange={(v) => updateFilter('selectedVdnSources', v)}
+                            />
+                          </FilterDropdown>
 
-                        {/* Call Type */}
-                        <FilterDropdown
-                          label="Type"
-                          selectedValue={filters.selectedCallTypes[0]}
-                          plusCount={Math.max(0, filters.selectedCallTypes.length - 1)}
-                          onClear={() => updateFilter('selectedCallTypes', [])}
-                        >
-                          <MultiSelectContent
-                            options={filterOptions.callTypes}
-                            selected={filters.selectedCallTypes}
-                            onChange={(v) => updateFilter('selectedCallTypes', v)}
-                          />
-                        </FilterDropdown>
+                          {/* Call Type */}
+                          <FilterDropdown
+                            label="Type"
+                            selectedValue={filters.selectedCallTypes[0]}
+                            plusCount={Math.max(0, filters.selectedCallTypes.length - 1)}
+                            onClear={() => updateFilter('selectedCallTypes', [])}
+                          >
+                            <MultiSelectContent
+                              options={filterOptions.callTypes}
+                              selected={filters.selectedCallTypes}
+                              onChange={(v) => updateFilter('selectedCallTypes', v)}
+                            />
+                          </FilterDropdown>
 
-                        {/* Category */}
-                        <FilterDropdown
-                          label="Category"
-                          selectedValue={filters.selectedCategories[0]}
-                          plusCount={Math.max(0, filters.selectedCategories.length - 1)}
-                          onClear={() => {
-                            updateFilter('selectedCategories', []);
-                            updateFilter('selectedSubCategories', []);
-                          }}
-                        >
-                          <MultiSelectContent
-                            options={filterOptions.categories}
-                            selected={filters.selectedCategories}
-                            onChange={(v) => {
-                              updateFilter('selectedCategories', v);
+                          {/* Category */}
+                          <FilterDropdown
+                            label="Category"
+                            selectedValue={filters.selectedCategories[0]}
+                            plusCount={Math.max(0, filters.selectedCategories.length - 1)}
+                            onClear={() => {
+                              updateFilter('selectedCategories', []);
                               updateFilter('selectedSubCategories', []);
                             }}
+                          >
+                            <MultiSelectContent
+                              options={filterOptions.categories}
+                              selected={filters.selectedCategories}
+                              onChange={(v) => {
+                                updateFilter('selectedCategories', v);
+                                updateFilter('selectedSubCategories', []);
+                              }}
+                            />
+                          </FilterDropdown>
+
+                          {/* Sub Category */}
+                          <FilterDropdown
+                            label="Sub Category"
+                            selectedValue={filters.selectedSubCategories[0]}
+                            plusCount={Math.max(0, filters.selectedSubCategories.length - 1)}
+                            onClear={() => updateFilter('selectedSubCategories', [])}
+                            disabled={filters.selectedCategories.length === 0}
+                          >
+                            <MultiSelectContent
+                              options={subCategoryOptions}
+                              selected={filters.selectedSubCategories}
+                              onChange={(v) => updateFilter('selectedSubCategories', v)}
+                            />
+                          </FilterDropdown>
+
+                          {/* Date Range */}
+                          <DateRangeFilter
+                            value={filters.dateRange}
+                            onChange={(v) => updateFilter('dateRange', v)}
                           />
-                        </FilterDropdown>
 
-                        {/* Sub Category */}
-                        <FilterDropdown
-                          label="Sub Category"
-                          selectedValue={filters.selectedSubCategories[0]}
-                          plusCount={Math.max(0, filters.selectedSubCategories.length - 1)}
-                          onClear={() => updateFilter('selectedSubCategories', [])}
-                          disabled={filters.selectedCategories.length === 0}
-                        >
-                          <MultiSelectContent
-                            options={subCategoryOptions}
-                            selected={filters.selectedSubCategories}
-                            onChange={(v) => updateFilter('selectedSubCategories', v)}
-                          />
-                        </FilterDropdown>
-
-                        {/* Date Range */}
-                        <DateRangeFilter
-                          value={filters.dateRange}
-                          onChange={(v) => updateFilter('dateRange', v)}
-                        />
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2">
-                          <Button onClick={handleSearch} className="flex-1">
-                            <Search className="h-4 w-4 mr-2" />
-                            Search
-                          </Button>
-                          {activeFilterCount > 0 && (
-                            <Button variant="outline" onClick={handleClearFilters}>
-                              <X className="h-4 w-4" />
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              onClick={handleSearch} 
+                              className="flex-1 h-10 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                            >
+                              <Search className="h-4 w-4 mr-2" />
+                              Search
                             </Button>
-                          )}
+                            <AnimatePresence>
+                              {activeFilterCount > 0 && (
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.8 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  exit={{ opacity: 0, scale: 0.8 }}
+                                >
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={handleClearFilters}
+                                    className="h-10 w-10 p-0 rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                      </motion.div>
+                    </CollapsibleContent>
+                  </Collapsible>
 
-                {hasError ? (
-                  <EmptyState
-                    type="error"
-                    message="Failed to load conversation history. Please try again."
-                    onRetry={() => setHasError(false)}
-                  />
-                ) : filteredData.length === 0 ? (
-                  <EmptyState
-                    type="no-data"
-                    message="No conversations found matching your criteria. Try adjusting your filters."
-                  />
-                ) : (
-                  <>
-                    <ConversationTable data={paginatedData} onView={handleViewRecord} />
+                  {hasError ? (
+                    <EmptyState
+                      type="error"
+                      message="Failed to load conversation history. Please try again."
+                      onRetry={() => setHasError(false)}
+                    />
+                  ) : filteredData.length === 0 ? (
+                    <EmptyState
+                      type="no-data"
+                      message="No conversations found matching your criteria. Try adjusting your filters."
+                    />
+                  ) : (
+                    <>
+                      <ConversationTable data={paginatedData} onView={handleViewRecord} />
 
-                    {/* Pagination */}
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <p className="text-sm text-muted-foreground">
-                        Showing {(currentPage - 1) * pageSize + 1} to{' '}
-                        {Math.min(currentPage * pageSize, filteredData.length)} of{' '}
-                        {filteredData.length} results
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCurrentPage(1)}
-                          disabled={currentPage === 1}
-                        >
-                          First
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                          disabled={currentPage === 1}
-                        >
-                          Previous
-                        </Button>
-                        <span className="text-sm px-2">
-                          Page {currentPage} of {totalPages}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                          disabled={currentPage === totalPages}
-                        >
-                          Next
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCurrentPage(totalPages)}
-                          disabled={currentPage === totalPages}
-                        >
-                          Last
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+                      {/* Enhanced Pagination */}
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-border/30"
+                      >
+                        <p className="text-sm text-muted-foreground">
+                          Showing <span className="font-medium text-foreground">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+                          <span className="font-medium text-foreground">{Math.min(currentPage * pageSize, filteredData.length)}</span> of{' '}
+                          <span className="font-medium text-foreground">{filteredData.length}</span> results
+                        </p>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(1)}
+                            disabled={currentPage === 1}
+                            className="h-9 w-9 p-0 rounded-lg"
+                          >
+                            <ChevronsLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="h-9 w-9 p-0 rounded-lg"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          
+                          <div className="flex items-center gap-1 mx-2">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                              let pageNum;
+                              if (totalPages <= 5) {
+                                pageNum = i + 1;
+                              } else if (currentPage <= 3) {
+                                pageNum = i + 1;
+                              } else if (currentPage >= totalPages - 2) {
+                                pageNum = totalPages - 4 + i;
+                              } else {
+                                pageNum = currentPage - 2 + i;
+                              }
+                              
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={currentPage === pageNum ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  className={cn(
+                                    "h-9 w-9 p-0 rounded-lg transition-all duration-200",
+                                    currentPage === pageNum && "shadow-md"
+                                  )}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="h-9 w-9 p-0 rounded-lg"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="h-9 w-9 p-0 rounded-lg"
+                          >
+                            <ChevronsRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       <ConversationDetailSheet

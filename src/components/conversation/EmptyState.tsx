@@ -1,5 +1,7 @@
-import { FileX, AlertCircle, RefreshCw } from "lucide-react";
+import { motion } from "framer-motion";
+import { FileX, AlertCircle, RefreshCw, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
   type: 'no-data' | 'error';
@@ -8,25 +10,74 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ type, message, onRetry }: EmptyStateProps) {
+  const isError = type === 'error';
+  
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="rounded-full bg-muted p-4 mb-4">
-        {type === 'no-data' ? (
-          <FileX className="h-8 w-8 text-muted-foreground" />
-        ) : (
-          <AlertCircle className="h-8 w-8 text-destructive" />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      className="flex flex-col items-center justify-center py-20 text-center"
+    >
+      <motion.div 
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 15 }}
+        className={cn(
+          "rounded-2xl p-5 mb-6 relative",
+          isError 
+            ? "bg-destructive/10 text-destructive" 
+            : "bg-muted text-muted-foreground"
         )}
-      </div>
-      <h3 className="text-lg font-medium mb-2">
-        {type === 'no-data' ? 'No Data Found' : 'Something went wrong'}
-      </h3>
-      <p className="text-sm text-muted-foreground max-w-sm mb-4">{message}</p>
-      {type === 'error' && onRetry && (
-        <Button onClick={onRetry} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Try Again
-        </Button>
+      >
+        {/* Decorative rings */}
+        <div className={cn(
+          "absolute inset-0 rounded-2xl animate-pulse",
+          isError ? "bg-destructive/5" : "bg-primary/5"
+        )} />
+        
+        {isError ? (
+          <AlertCircle className="h-10 w-10 relative z-10" />
+        ) : (
+          <Inbox className="h-10 w-10 relative z-10" />
+        )}
+      </motion.div>
+      
+      <motion.h3 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="text-lg font-semibold mb-2 text-foreground"
+      >
+        {isError ? 'Something went wrong' : 'No Data Found'}
+      </motion.h3>
+      
+      <motion.p 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="text-sm text-muted-foreground max-w-sm mb-6 leading-relaxed"
+      >
+        {message}
+      </motion.p>
+      
+      {isError && onRetry && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Button 
+            onClick={onRetry} 
+            variant="outline" 
+            size="sm"
+            className="rounded-full px-6 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try Again
+          </Button>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

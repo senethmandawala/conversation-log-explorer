@@ -1,13 +1,14 @@
+import { motion } from "framer-motion";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import { ConversationRecord } from "@/types/conversation";
 import { StatusBadge, getResolutionVariant, getVdnSourceVariant } from "./StatusBadge";
-import { Separator } from "@/components/ui/separator";
+import { Calendar, Clock, Phone, Tag, FileText, Building2, MapPin, Timer, Hash, Radio, PhoneOff } from "lucide-react";
 
 interface ConversationDetailSheetProps {
   record: ConversationRecord | null;
@@ -15,94 +16,56 @@ interface ConversationDetailSheetProps {
   onClose: () => void;
 }
 
-export function ConversationDetailSheet({
-  record,
-  open,
-  onClose,
-}: ConversationDetailSheetProps) {
-  if (!record) return null;
+function DetailItem({ icon, label, value, delay = 0 }: { icon: React.ReactNode; label: string; value: React.ReactNode; delay?: number }) {
+  return (
+    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay }} className="flex items-start gap-4 py-3">
+      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
+        <div className="text-sm font-medium text-foreground">{value || <span className="text-muted-foreground">N/A</span>}</div>
+      </div>
+    </motion.div>
+  );
+}
 
-  const detailGroups = [
-    {
-      title: 'Basic Information',
-      items: [
-        { label: 'Date', value: record.date },
-        { label: 'Time', value: record.time },
-        { label: 'MSISDN', value: record.msisdn },
-        { label: 'Unique ID', value: record.uniqueID },
-        { label: 'Channel', value: record.channel },
-      ],
-    },
-    {
-      title: 'Classification',
-      items: [
-        { label: 'Category', value: record.category },
-        { label: 'Sub Category', value: record.subCategory || 'N/A' },
-        { label: 'Department', value: record.department || 'N/A' },
-      ],
-    },
-    {
-      title: 'Call Details',
-      items: [
-        { label: 'Duration', value: record.duration },
-        { label: 'VDN', value: record.vdn || 'N/A' },
-        { label: 'City', value: record.city || 'N/A' },
-        { label: 'Disconnect Reason', value: record.callDisReason },
-      ],
-    },
-  ];
+export function ConversationDetailSheet({ record, open, onClose }: ConversationDetailSheetProps) {
+  if (!record) return null;
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Conversation Details</SheetTitle>
-          <SheetDescription>
-            Conversation ID: {record.uniqueID}
-          </SheetDescription>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-background/95 backdrop-blur-lg border-l border-border/50">
+        <SheetHeader className="pb-6">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+            <SheetTitle className="text-xl font-semibold flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              Conversation Details
+            </SheetTitle>
+          </motion.div>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
-          {/* Status Badges */}
-          <div className="flex items-center gap-3">
-            <StatusBadge
-              label={record.resolution}
-              variant={getResolutionVariant(record.resolution)}
-              size="md"
-            />
-            <StatusBadge
-              label={record.vdnSource || 'N/A'}
-              variant={getVdnSourceVariant(record.vdnSource)}
-              size="md"
-            />
-          </div>
-
-          {/* Summary */}
-          {record.summary && (
-            <div>
-              <h4 className="text-sm font-medium mb-2">Summary</h4>
-              <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
-                {record.summary}
-              </p>
+        <div className="space-y-1">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl bg-muted/30 p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">Resolution</span>
+              <StatusBadge label={record.resolution} variant={getResolutionVariant(record.resolution)} />
             </div>
-          )}
+          </motion.div>
 
-          <Separator />
-
-          {/* Detail Groups */}
-          {detailGroups.map((group) => (
-            <div key={group.title}>
-              <h4 className="text-sm font-medium mb-3">{group.title}</h4>
-              <div className="space-y-2">
-                {group.items.map((item) => (
-                  <div key={item.label} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{item.label}</span>
-                    <span className="font-medium">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          <DetailItem icon={<Calendar className="h-5 w-5 text-primary" />} label="Date" value={record.date} delay={0.15} />
+          <DetailItem icon={<Clock className="h-5 w-5 text-primary" />} label="Time" value={record.time} delay={0.2} />
+          <Separator className="my-4" />
+          <DetailItem icon={<Phone className="h-5 w-5 text-primary" />} label="MSISDN" value={record.msisdn} delay={0.25} />
+          <DetailItem icon={<Hash className="h-5 w-5 text-primary" />} label="Unique ID" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{record.uniqueID}</code>} delay={0.3} />
+          <Separator className="my-4" />
+          <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Category" value={record.category} delay={0.35} />
+          <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Sub Category" value={record.subCategory} delay={0.4} />
+          <Separator className="my-4" />
+          <DetailItem icon={<Timer className="h-5 w-5 text-primary" />} label="Duration" value={record.duration} delay={0.45} />
+          <DetailItem icon={<PhoneOff className="h-5 w-5 text-primary" />} label="Disconnect Reason" value={record.callDisReason} delay={0.5} />
+          <DetailItem icon={<Building2 className="h-5 w-5 text-primary" />} label="Department" value={record.department} delay={0.55} />
+          <DetailItem icon={<MapPin className="h-5 w-5 text-primary" />} label="City" value={record.city} delay={0.6} />
         </div>
       </SheetContent>
     </Sheet>
