@@ -123,9 +123,8 @@ export default function ConversationHistory() {
   }, [filters.selectedCategories]);
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1600px] mx-auto">
-        <motion.div
+    <div className="p-4 md:p-6">
+      <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
@@ -481,9 +480,8 @@ export default function ConversationHistory() {
                 </>
               )}
             </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+        </Card>
+      </motion.div>
 
       <ConversationDetailSheet
         record={selectedRecord}
