@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FilterDropdownProps {
@@ -35,40 +36,70 @@ export function FilterDropdown({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "w-full justify-between h-9 text-sm font-normal",
-            hasSelection && "border-primary/50 bg-primary/5"
+            "w-full justify-between h-10 text-sm font-normal rounded-xl transition-all duration-200",
+            "border-border/60 hover:border-primary/50 hover:bg-primary/5",
+            hasSelection && "border-primary/50 bg-primary/5 shadow-sm",
+            disabled && "opacity-50 cursor-not-allowed"
           )}
         >
           <span className="truncate">
             {hasSelection ? (
-              <span className="flex items-center gap-1">
-                <span className="truncate max-w-[100px]">{selectedValue}</span>
-                {plusCount > 0 && (
-                  <span className="text-xs bg-primary text-primary-foreground rounded px-1">
-                    +{plusCount}
-                  </span>
-                )}
+              <span className="flex items-center gap-1.5">
+                <span className="truncate max-w-[100px] font-medium">{selectedValue}</span>
+                <AnimatePresence>
+                  {plusCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="text-xs bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-medium"
+                    >
+                      +{plusCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </span>
             ) : (
-              label
+              <span className="text-muted-foreground">{label}</span>
             )}
           </span>
-          <div className="flex items-center gap-1 ml-2">
-            {hasSelection && (
-              <X
-                className="h-3 w-3 opacity-50 hover:opacity-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClear();
-                }}
-              />
-            )}
-            <ChevronDown className="h-4 w-4 opacity-50" />
+          <div className="flex items-center gap-1.5 ml-2">
+            <AnimatePresence>
+              {hasSelection && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  className="h-5 w-5 rounded-full bg-muted hover:bg-destructive/20 hover:text-destructive flex items-center justify-center transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClear();
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+            <motion.div
+              animate={{ rotate: open ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </motion.div>
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-56 p-0 bg-popover" align="start">
-        {children}
+      <PopoverContent 
+        className="w-64 p-0 bg-popover/95 backdrop-blur-lg border-border/50 shadow-lg rounded-xl overflow-hidden" 
+        align="start"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {children}
+        </motion.div>
       </PopoverContent>
     </Popover>
   );
@@ -90,25 +121,35 @@ export function TextFilterContent({
   onClear,
 }: TextFilterContentProps) {
   return (
-    <div className="p-3 space-y-3">
+    <div className="p-4 space-y-4">
       <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={label}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="h-9 pr-8"
+          className="h-10 pl-9 pr-9 rounded-lg bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-primary/30"
         />
-        {value && (
-          <button
-            onClick={onClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
+        <AnimatePresence>
+          {value && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              onClick={onClear}
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted-foreground/20 hover:bg-destructive/20 hover:text-destructive flex items-center justify-center transition-colors"
+            >
+              <X className="h-3 w-3" />
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
-      <Button onClick={onApply} className="w-full h-8" size="sm">
-        Apply
+      <Button 
+        onClick={onApply} 
+        className="w-full h-10 rounded-lg bg-primary hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md" 
+        size="sm"
+      >
+        Apply Filter
       </Button>
     </div>
   );
@@ -134,19 +175,45 @@ export function MultiSelectContent({
   };
 
   return (
-    <div className="p-2 max-h-60 overflow-auto">
-      {options.map((option) => (
-        <label
-          key={option.value}
-          className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
-        >
-          <Checkbox
-            checked={selected.includes(option.value)}
-            onCheckedChange={() => toggleOption(option.value)}
-          />
-          <span className="text-sm">{option.label}</span>
-        </label>
-      ))}
+    <div className="p-2 max-h-64 overflow-auto custom-scrollbar">
+      {options.length === 0 ? (
+        <div className="py-6 text-center text-muted-foreground text-sm">
+          No options available
+        </div>
+      ) : (
+        options.map((option, index) => {
+          const isSelected = selected.includes(option.value);
+          return (
+            <motion.label
+              key={option.value}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.03 }}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200",
+                isSelected 
+                  ? "bg-primary/10 hover:bg-primary/15" 
+                  : "hover:bg-muted"
+              )}
+            >
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => toggleOption(option.value)}
+                className={cn(
+                  "transition-all duration-200",
+                  "data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                )}
+              />
+              <span className={cn(
+                "text-sm transition-colors",
+                isSelected && "font-medium text-primary"
+              )}>
+                {option.label}
+              </span>
+            </motion.label>
+          );
+        })
+      )}
     </div>
   );
 }

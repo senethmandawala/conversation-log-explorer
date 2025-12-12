@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Table,
   TableBody,
@@ -14,9 +15,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, Columns3 } from "lucide-react";
+import { Eye, Columns3, Settings2 } from "lucide-react";
 import { ConversationRecord, ColumnDefinition } from "@/types/conversation";
 import { StatusBadge, getResolutionVariant, getVdnSourceVariant } from "./StatusBadge";
+import { cn } from "@/lib/utils";
 
 interface ConversationTableProps {
   data: ConversationRecord[];
@@ -40,6 +42,19 @@ const defaultColumns: ColumnDefinition[] = [
   { id: 'duration', label: 'Duration', visible: true },
 ];
 
+const rowVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.03,
+      duration: 0.3,
+      ease: [0.4, 0, 0.2, 1],
+    },
+  }),
+};
+
 export function ConversationTable({ data, onView }: ConversationTableProps) {
   const [columns, setColumns] = useState<ColumnDefinition[]>(defaultColumns);
 
@@ -57,9 +72,9 @@ export function ConversationTable({ data, onView }: ConversationTableProps) {
     switch (columnId) {
       case 'date':
         return (
-          <div>
-            <div className="font-medium">{record.date}</div>
-            <div className="text-xs text-muted-foreground">{record.time}</div>
+          <div className="flex flex-col">
+            <span className="font-medium text-foreground">{record.date}</span>
+            <span className="text-xs text-muted-foreground">{record.time}</span>
           </div>
         );
       case 'resolution':
@@ -80,72 +95,126 @@ export function ConversationTable({ data, onView }: ConversationTableProps) {
       case 'department':
       case 'city':
       case 'vdn':
-        return record[columnId] || 'N/A';
+        return <span className="text-muted-foreground">{record[columnId] || 'N/A'}</span>;
       default:
-        return record[columnId as keyof ConversationRecord] as string;
+        return <span>{record[columnId as keyof ConversationRecord] as string}</span>;
     }
   };
 
   return (
-    <div className="rounded-lg border bg-card">
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            {visibleColumns.map((col) => (
-              <TableHead key={col.id} className="whitespace-nowrap">
-                {col.label}
-              </TableHead>
-            ))}
-            <TableHead className="w-[50px] text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Columns3 className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-popover">
-                  <div className="p-2">
-                    <h4 className="mb-2 text-sm font-medium">Configure Columns</h4>
-                    {columns.map((col) => (
-                      <label
-                        key={col.id}
-                        className="flex items-center gap-2 py-1 cursor-pointer hover:bg-muted rounded px-1"
-                      >
-                        <Checkbox
-                          checked={col.visible}
-                          onCheckedChange={() => toggleColumn(col.id)}
-                        />
-                        <span className="text-sm">{col.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((record) => (
-            <TableRow key={record.id}>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      className="rounded-xl border bg-card shadow-sm overflow-hidden"
+    >
+      <div className="overflow-x-auto custom-scrollbar">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent border-b border-border/50 bg-muted/30">
               {visibleColumns.map((col) => (
-                <TableCell key={col.id} className="whitespace-nowrap">
-                  {renderCell(record, col.id)}
-                </TableCell>
-              ))}
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => onView(record)}
+                <TableHead 
+                  key={col.id} 
+                  className="whitespace-nowrap font-semibold text-foreground/80 text-xs uppercase tracking-wider py-4"
                 >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </TableCell>
+                  {col.label}
+                </TableHead>
+              ))}
+              <TableHead className="w-[60px] text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="end" 
+                    className="w-56 bg-popover/95 backdrop-blur-lg border-border/50 shadow-lg animate-scale-in"
+                  >
+                    <div className="p-3">
+                      <h4 className="mb-3 text-sm font-semibold flex items-center gap-2">
+                        <Columns3 className="h-4 w-4 text-primary" />
+                        Configure Columns
+                      </h4>
+                      <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
+                        {columns.map((col) => (
+                          <label
+                            key={col.id}
+                            className={cn(
+                              "flex items-center gap-3 py-2 px-2 cursor-pointer rounded-lg transition-all duration-200",
+                              col.visible 
+                                ? "bg-primary/10 hover:bg-primary/15" 
+                                : "hover:bg-muted"
+                            )}
+                          >
+                            <Checkbox
+                              checked={col.visible}
+                              onCheckedChange={() => toggleColumn(col.id)}
+                              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <span className="text-sm">{col.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            <AnimatePresence mode="popLayout">
+              {data.map((record, index) => (
+                <motion.tr
+                  key={record.id}
+                  custom={index}
+                  variants={rowVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, x: -20 }}
+                  className={cn(
+                    "group border-b border-border/30 transition-all duration-200",
+                    "hover:bg-primary/[0.03] hover:shadow-[inset_3px_0_0_0_hsl(var(--primary))]"
+                  )}
+                >
+                  {visibleColumns.map((col) => (
+                    <TableCell 
+                      key={col.id} 
+                      className="whitespace-nowrap py-4 text-sm"
+                    >
+                      {renderCell(record, col.id)}
+                    </TableCell>
+                  ))}
+                  <TableCell className="text-right py-4">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-9 w-9 rounded-lg transition-all duration-200",
+                          "opacity-0 group-hover:opacity-100",
+                          "hover:bg-primary hover:text-primary-foreground",
+                          "shadow-none hover:shadow-md"
+                        )}
+                        onClick={() => onView(record)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </TableCell>
+                </motion.tr>
+              ))}
+            </AnimatePresence>
+          </TableBody>
+        </Table>
+      </div>
+    </motion.div>
   );
 }

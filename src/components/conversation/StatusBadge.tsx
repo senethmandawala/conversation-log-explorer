@@ -1,30 +1,37 @@
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
-type BadgeVariant = 'success' | 'warning' | 'destructive' | 'info' | 'default';
+type BadgeVariant = "success" | "warning" | "destructive" | "info" | "default";
 
 interface StatusBadgeProps {
   label: string;
   variant?: BadgeVariant;
-  size?: 'sm' | 'md';
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  success: 'bg-success/10 text-success border-success/20',
-  warning: 'bg-warning/10 text-warning border-warning/20',
-  destructive: 'bg-destructive/10 text-destructive border-destructive/20',
-  info: 'bg-info/10 text-info border-info/20',
-  default: 'bg-muted text-muted-foreground border-border',
+  success: "bg-success/15 text-success border-success/30",
+  warning: "bg-warning/15 text-warning border-warning/30",
+  destructive: "bg-destructive/15 text-destructive border-destructive/30",
+  info: "bg-info/15 text-info border-info/30",
+  default: "bg-muted text-muted-foreground border-border/50",
 };
 
-export function StatusBadge({ label, variant = 'default', size = 'sm' }: StatusBadgeProps) {
+export function StatusBadge({ label, variant = "default" }: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border font-medium",
-        size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm',
+        "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-200",
         variantStyles[variant]
       )}
     >
+      <span className={cn(
+        "w-1.5 h-1.5 rounded-full mr-1.5",
+        variant === "success" && "bg-success",
+        variant === "warning" && "bg-warning",
+        variant === "destructive" && "bg-destructive",
+        variant === "info" && "bg-info",
+        variant === "default" && "bg-muted-foreground"
+      )} />
       {label}
     </span>
   );
@@ -32,28 +39,34 @@ export function StatusBadge({ label, variant = 'default', size = 'sm' }: StatusB
 
 export function getResolutionVariant(resolution: string): BadgeVariant {
   switch (resolution) {
-    case 'Resolved':
-      return 'success';
-    case 'Unresolved':
-      return 'destructive';
-    case 'Pending':
-      return 'warning';
-    case 'Transferred':
-      return 'info';
+    case "Success Call":
+    case "Resolved":
+      return "success";
+    case "Abandoned Call":
+    case "Failed Call":
+    case "Unresolved":
+      return "destructive";
+    case "Transferred to Agent":
+    case "Pending":
+    case "Transferred":
+      return "warning";
     default:
-      return 'default';
+      return "default";
   }
 }
 
-export function getVdnSourceVariant(source: string | null): BadgeVariant {
-  switch (source) {
-    case 'Inbound':
-      return 'info';
-    case 'Outbound':
-      return 'success';
-    case 'Callback':
-      return 'warning';
-    default:
-      return 'default';
+export function getVdnSourceVariant(vdnSource?: string | null): BadgeVariant {
+  if (!vdnSource || vdnSource === "N/A" || vdnSource.toLowerCase() === "unknown") {
+    return "warning";
   }
+  if (vdnSource.toLowerCase().includes("default") || vdnSource === "Inbound") {
+    return "info";
+  }
+  if (vdnSource.toLowerCase().includes("specific") || vdnSource === "Outbound") {
+    return "success";
+  }
+  if (vdnSource === "Callback") {
+    return "warning";
+  }
+  return "default";
 }
