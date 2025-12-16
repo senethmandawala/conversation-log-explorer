@@ -4,7 +4,10 @@ import {
   MessageSquare, 
   UserCheck, 
   Settings,
-  Info
+  Info,
+  BarChart3,
+  FileText,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,19 +19,28 @@ interface Tab {
   label: string;
 }
 
-const tabs: Tab[] = [
+const autopilotTabs: Tab[] = [
   { id: "dashboard", icon: LayoutGrid, label: "Dashboard" },
   { id: "conversations", icon: MessageSquare, label: "Conversation History" },
   { id: "agent-performance", icon: UserCheck, label: "Agent Performance" },
   { id: "settings", icon: Settings, label: "Settings" },
 ];
 
+const postCallAnalyzerTabs: Tab[] = [
+  { id: "overview", icon: BarChart3, label: "Overview" },
+  { id: "analytics", icon: Activity, label: "Analytics" },
+  { id: "reports", icon: FileText, label: "Reports" },
+  { id: "settings", icon: Settings, label: "Settings" },
+];
+
 interface ModuleTabsProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
+  currentPath: string;
 }
 
-export function ModuleTabs({ activeTab, onTabChange }: ModuleTabsProps) {
+export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsProps) {
+  const tabs = currentPath === "/post-call-analyzer" ? postCallAnalyzerTabs : autopilotTabs;
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -36,36 +48,7 @@ export function ModuleTabs({ activeTab, onTabChange }: ModuleTabsProps) {
       transition={{ delay: 0.1 }}
       className="px-6 py-4 bg-card border-b border-border/30"
     >
-      <div className="flex items-center justify-between">
-        {/* Module Title */}
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-6 w-6 text-primary"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-          </div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-primary">Autopilot</h2>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-5 w-5 rounded-full">
-                  <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Autopilot module for automated call handling</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-
+      <div className="flex items-center justify-center">
         {/* Tab Navigation */}
         <div className="flex items-center bg-muted/50 rounded-2xl p-1">
           {tabs.map((tab) => {

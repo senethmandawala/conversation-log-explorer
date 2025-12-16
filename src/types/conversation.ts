@@ -5,7 +5,7 @@ export interface ConversationRecord {
   msisdn: string;
   category: string;
   subCategory: string | null;
-  resolution: 'Resolved' | 'Unresolved' | 'Pending' | 'Transferred';
+  resolution: string;
   callDisReason: string;
   uniqueID: string;
   summary: string;
@@ -13,8 +13,11 @@ export interface ConversationRecord {
   department: string | null;
   city: string | null;
   vdn: string | null;
-  vdnSource: 'Inbound' | 'Outbound' | 'Callback' | null;
+  vdnSource: string | null;
   duration: string;
+  agentId?: string;
+  agentName?: string;
+  status?: string;
 }
 
 export interface FilterState {

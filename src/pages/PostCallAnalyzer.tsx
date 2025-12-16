@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { InstanceSelector } from "@/components/post-call/InstanceSelector";
 import { PostCallDashboard } from "@/components/post-call/PostCallDashboard";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { Cpu } from "lucide-react";
+import { useModule } from "@/contexts/ModuleContext";
 
 export interface Instance {
   id: string;
@@ -27,17 +27,18 @@ const mockInstances: Instance[] = [
 
 const PostCallAnalyzer = () => {
   const [selectedInstance, setSelectedInstance] = useState<Instance | null>(null);
+  const { setShowModuleTabs } = useModule();
+
+  useEffect(() => {
+    // Hide ModuleTabs on instances page, show on dashboard
+    setShowModuleTabs(!!selectedInstance);
+    
+    // Cleanup: show ModuleTabs when leaving this page
+    return () => setShowModuleTabs(true);
+  }, [selectedInstance, setShowModuleTabs]);
 
   return (
     <div className="min-h-full">
-      {/* Page Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Cpu className="h-5 w-5 text-primary" />
-        </div>
-        <h1 className="text-xl font-semibold text-primary">Post Call Analyzer</h1>
-      </div>
-
       <AnimatePresence mode="wait">
         {!selectedInstance ? (
           <motion.div

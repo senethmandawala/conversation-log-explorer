@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -12,6 +12,8 @@ import { EmptyState } from "@/components/conversation/EmptyState";
 import { LoadingSkeleton } from "@/components/conversation/LoadingSkeleton";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord, FilterState, DateRangeValue } from "@/types/conversation";
+import { fetchConversationHistory } from "@/lib/api";
+import { transformApiToConversationRecord } from "@/lib/transformers";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -28,17 +30,56 @@ const initialFilters: FilterState = {
 };
 
 export default function ConversationHistory() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [appliedFilters, setAppliedFilters] = useState<FilterState>(initialFilters);
   const [selectedRecord, setSelectedRecord] = useState<ConversationRecord | null>(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+  const [conversations, setConversations] = useState<ConversationRecord[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  useEffect(() => {
+    const loadConversations = async () => {
+      setIsLoading(true);
+      setHasError(false);
+      try {
+        const fromTime = appliedFilters.dateRange?.from 
+          ? appliedFilters.dateRange.from.toISOString().split('.')[0]
+          : '2025-11-01T00:00:00';
+        const toTime = appliedFilters.dateRange?.to 
+          ? appliedFilters.dateRange.to.toISOString().split('.')[0]
+          : '2025-11-30T23:59:59';
+
+        const response = await fetchConversationHistory({
+          page: currentPage,
+          size: pageSize,
+          sort: 'call_start_time',
+          sortOrder: 'DESC',
+          fromTime,
+          toTime,
+          projectId: '706',
+        });
+
+        const transformedData = response.data.ConversationHistoryList.map(transformApiToConversationRecord);
+        setConversations(transformedData);
+        setTotalRecords(response.data.total);
+      } catch (error) {
+        console.error('Failed to fetch conversations:', error);
+        setHasError(true);
+        setConversations([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadConversations();
+  }, [currentPage, appliedFilters.dateRange]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -55,7 +96,7 @@ export default function ConversationHistory() {
   }, [appliedFilters]);
 
   const filteredData = useMemo(() => {
-    return mockConversations.filter((record) => {
+    return conversations.filter((record) => {
       if (appliedFilters.searchKey) {
         const searchLower = appliedFilters.searchKey.toLowerCase();
         const matchesSearch = 
@@ -73,10 +114,10 @@ export default function ConversationHistory() {
       if (appliedFilters.selectedSubCategories.length && record.subCategory && !appliedFilters.selectedSubCategories.includes(record.subCategory)) return false;
       return true;
     });
-  }, [appliedFilters]);
+  }, [conversations, appliedFilters]);
 
-  const paginatedData = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const paginatedData = filteredData;
+  const totalPages = Math.ceil(totalRecords / pageSize);
 
   const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -382,7 +423,10 @@ export default function ConversationHistory() {
                     <EmptyState
                       type="error"
                       message="Failed to load conversation history. Please try again."
-                      onRetry={() => setHasError(false)}
+                      onRetry={() => {
+                        setHasError(false);
+                        setCurrentPage(1);
+                      }}
                     />
                   ) : filteredData.length === 0 ? (
                     <EmptyState
@@ -402,8 +446,8 @@ export default function ConversationHistory() {
                       >
                         <p className="text-sm text-muted-foreground">
                           Showing <span className="font-medium text-foreground">{(currentPage - 1) * pageSize + 1}</span> to{' '}
-                          <span className="font-medium text-foreground">{Math.min(currentPage * pageSize, filteredData.length)}</span> of{' '}
-                          <span className="font-medium text-foreground">{filteredData.length}</span> results
+                          <span className="font-medium text-foreground">{Math.min(currentPage * pageSize, totalRecords)}</span> of{' '}
+                          <span className="font-medium text-foreground">{totalRecords}</span> results
                         </p>
                         <div className="flex items-center gap-1">
                           <Button

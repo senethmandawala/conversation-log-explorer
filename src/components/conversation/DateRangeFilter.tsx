@@ -11,9 +11,7 @@ import { cn } from "@/lib/utils";
 
 const DATE_OPTIONS = [
   { value: 'today', label: 'Today' },
-  { value: 'yesterday', label: 'Yesterday' },
   { value: 'this-week', label: 'This Week' },
-  { value: 'last-week', label: 'Last Week' },
   { value: 'this-month', label: 'This Month' },
   { value: 'last-month', label: 'Last Month' },
   { value: 'custom', label: 'Custom Range' },

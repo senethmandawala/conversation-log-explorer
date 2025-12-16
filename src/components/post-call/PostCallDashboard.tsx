@@ -62,90 +62,93 @@ const statCards = [
   },
 ];
 
+// Mock data for charts
+const performanceData = [
+  { name: "Mon", calls: 120, resolved: 95 },
+  { name: "Tue", calls: 150, resolved: 130 },
+  { name: "Wed", calls: 180, resolved: 160 },
+  { name: "Thu", calls: 140, resolved: 120 },
+  { name: "Fri", calls: 200, resolved: 175 },
+  { name: "Sat", calls: 90, resolved: 80 },
+  { name: "Sun", calls: 60, resolved: 55 },
+];
+
+const redAlertData = [
+  { name: "Long Wait", value: 45 },
+  { name: "Escalations", value: 32 },
+  { name: "Dropped Calls", value: 28 },
+  { name: "Low CSAT", value: 18 },
+  { name: "Repeat Calls", value: 25 },
+];
+
+const caseClassificationData = [
+  { name: "Billing", value: 350 },
+  { name: "Technical", value: 280 },
+  { name: "Account", value: 180 },
+  { name: "Sales", value: 120 },
+  { name: "Complaints", value: 90 },
+  { name: "Other", value: 60 },
+];
+
+const sentimentData = [
+  { name: "Positive", value: 45 },
+  { name: "Neutral", value: 35 },
+  { name: "Negative", value: 20 },
+];
+
+const agentPerformanceData = [
+  { name: "John D.", value: 156 },
+  { name: "Sarah M.", value: 142 },
+  { name: "Mike R.", value: 128 },
+  { name: "Emily K.", value: 115 },
+  { name: "David L.", value: 98 },
+  { name: "Lisa P.", value: 87 },
+];
+
 const reports = [
   { 
     id: "performance", 
     title: "Overall Performance", 
     description: "14 December 2025",
-    hasChart: true 
+    hasChart: true,
+    chartType: "line" as const,
+    chartData: performanceData
   },
   { 
     id: "red-alerts", 
     title: "Red Alert Metrics", 
     description: "Highlighting key areas that require immediate attention",
-    note: "Note: Data is based on the selected date range"
+    note: "Note: Data is based on the selected date range",
+    chartType: "bar" as const,
+    chartData: redAlertData
   },
   { 
     id: "case-classification", 
     title: "Case Classification", 
     description: "14 December 2025",
-    hasFilter: true
+    hasFilter: true,
+    chartType: "treemap" as const,
+    chartData: caseClassificationData
   },
   { 
     id: "sentiment-analysis", 
     title: "Sentiment Analysis", 
-    description: "Customer sentiment breakdown"
+    description: "Customer sentiment breakdown",
+    chartType: "pie" as const,
+    chartData: sentimentData
   },
   { 
     id: "agent-performance", 
     title: "Agent Performance", 
-    description: "Individual agent metrics"
+    description: "Individual agent metrics",
+    chartType: "bar" as const,
+    chartData: agentPerformanceData
   },
 ];
 
 export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) => {
   return (
     <div className="space-y-6">
-      {/* Top Navigation */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Instances
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Instance: <span className="font-medium text-foreground">{instance.name}</span>
-          </span>
-        </div>
-
-        {/* Tab Navigation */}
-        <Tabs defaultValue="dashboard" className="hidden md:block">
-          <TabsList className="bg-muted/50">
-            <TabsTrigger value="dashboard" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="tools" className="gap-2">
-              <FileText className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="gap-2">
-              <Lightbulb className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="calls" className="gap-2">
-              <Headphones className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="table" className="gap-2">
-              <Table className="h-4 w-4" />
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filter
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Calendar className="h-4 w-4" />
-            Today
-          </Button>
-        </div>
-      </div>
-
       {/* Stat Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {statCards.map((stat, index) => (

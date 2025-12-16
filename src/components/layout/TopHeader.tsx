@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import { 
   ChevronDown, 
   Image as ImageIcon,
   Globe,
-  User
+  User,
+  Bot,
+  PhoneCall
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,21 +18,29 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function TopHeader() {
+  const location = useLocation();
+  const isPostCallAnalyzer = location.pathname === "/post-call-analyzer";
+  
+  const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
+  const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className="h-16 bg-card border-b border-border/50 px-6 flex items-center justify-between"
     >
-      {/* Left side - Agent selector */}
+      {/* Left side - Module title and Agent selector */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-10 w-10 rounded-xl border-border/60"
-        >
-          <ImageIcon className="h-4 w-4" />
-        </Button>
+        {/* Module Title */}
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <ModuleIcon className="h-5 w-5 text-primary" />
+          </div>
+          <h1 className="text-lg font-semibold text-primary">{moduleTitle}</h1>
+        </div>
+
+        <div className="h-6 w-px bg-border/60" />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
