@@ -78,10 +78,10 @@ export const StatCard = ({ title, value, icon, iconColor, trend }: StatCardProps
       <div className={`absolute inset-0 bg-gradient-to-br ${colors.bg} opacity-50`} />
       
       {/* Content */}
-      <div className="relative p-5">
+      <div className="relative p-3">
         <div className="flex items-start justify-between">
-          <div className={`p-3 rounded-xl ${colors.icon} transition-transform group-hover:scale-110 duration-300`}>
-            <Icon className="h-5 w-5" />
+          <div className={`p-2 rounded-lg ${colors.icon} transition-transform group-hover:scale-110 duration-300`}>
+            <Icon className="h-4 w-4" />
           </div>
           
           {trend && (
@@ -92,16 +92,16 @@ export const StatCard = ({ title, value, icon, iconColor, trend }: StatCardProps
           )}
         </div>
         
-        <div className="mt-4 space-y-1">
+        <div className="mt-2 space-y-0.5">
           <motion.p 
-            className="text-3xl font-bold text-foreground tracking-tight"
+            className="text-2xl font-bold text-foreground tracking-tight"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
             {value}
           </motion.p>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-xs font-medium text-muted-foreground">{title}</p>
         </div>
       </div>
     </Card>

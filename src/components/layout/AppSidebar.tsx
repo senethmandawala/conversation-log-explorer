@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
-  LayoutGrid, 
   Compass, 
   PhoneCall, 
   Bot, 
@@ -75,7 +74,9 @@ export function AppSidebar() {
             animate={{ opacity: 1 }}
             className="mx-auto"
           >
-            <LayoutGrid className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+
+            </span>
           </motion.div>
         )}
       </div>

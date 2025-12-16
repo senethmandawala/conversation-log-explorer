@@ -58,6 +58,7 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
               <XAxis dataKey="name" className="text-xs" axisLine={false} tickLine={false} />
               <YAxis className="text-xs" axisLine={false} tickLine={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
               <Line 
                 type="monotone" 
                 dataKey="calls" 
@@ -65,6 +66,7 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
                 strokeWidth={2.5} 
                 dot={{ fill: "hsl(226, 70%, 55%)", strokeWidth: 0, r: 4 }}
                 activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+                name="Calls"
               />
               <Line 
                 type="monotone" 
@@ -73,6 +75,7 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
                 strokeWidth={2.5}
                 dot={{ fill: "hsl(142, 71%, 45%)", strokeWidth: 0, r: 4 }}
                 activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+                name="Resolved"
               />
             </LineChart>
           </ChartContainer>
@@ -92,12 +95,17 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
               <XAxis dataKey="name" className="text-xs" axisLine={false} tickLine={false} />
               <YAxis className="text-xs" axisLine={false} tickLine={false} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} name="Value" />
             </BarChart>
           </ChartContainer>
         );
 
       case "pie":
+        const pieDataWithNames = chartData.map((item, index) => ({
+          ...item,
+          fill: COLORS[index % COLORS.length],
+        }));
         return (
           <ChartContainer config={chartConfig} className="h-[280px] w-full">
             <PieChart>
@@ -110,21 +118,24 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
                 ))}
               </defs>
               <Pie
-                data={chartData}
+                data={pieDataWithNames}
                 cx="50%"
                 cy="50%"
-                innerRadius={70}
-                outerRadius={110}
+                innerRadius={60}
+                outerRadius={90}
                 paddingAngle={3}
                 dataKey="value"
+                nameKey="name"
                 strokeWidth={0}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
               >
-                {chartData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={`url(#pieGradient${index % COLORS.length})`} />
+                {pieDataWithNames.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={`url(#pieGradient${index % COLORS.length})`} name={entry.name} />
                 ))}
               </Pie>
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
+              <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+              <ChartLegend content={<ChartLegendContent nameKey="name" />} />
             </PieChart>
           </ChartContainer>
         );
@@ -187,12 +198,6 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
               <Calendar className="h-3.5 w-3.5" />
               Today
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-              <Download className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-              <Maximize2 className="h-4 w-4" />
             </Button>
           </div>
         </div>

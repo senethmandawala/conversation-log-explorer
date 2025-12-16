@@ -30,18 +30,8 @@ export function TopHeader() {
       animate={{ opacity: 1, y: 0 }}
       className="h-16 bg-card border-b border-border/50 px-6 flex items-center justify-between"
     >
-      {/* Left side - Module title and Agent selector */}
+      {/* Left side - Agent selector */}
       <div className="flex items-center gap-4">
-        {/* Module Title */}
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <ModuleIcon className="h-5 w-5 text-primary" />
-          </div>
-          <h1 className="text-lg font-semibold text-primary">{moduleTitle}</h1>
-        </div>
-
-        <div className="h-6 w-px bg-border/60" />
-        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

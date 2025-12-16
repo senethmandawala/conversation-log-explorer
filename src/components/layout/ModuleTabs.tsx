@@ -7,7 +7,9 @@ import {
   Info,
   BarChart3,
   FileText,
-  Activity
+  Activity,
+  PhoneCall,
+  Bot
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -41,6 +43,10 @@ interface ModuleTabsProps {
 
 export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsProps) {
   const tabs = currentPath === "/post-call-analyzer" ? postCallAnalyzerTabs : autopilotTabs;
+  const isPostCallAnalyzer = currentPath === "/post-call-analyzer";
+  const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
+  const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -48,8 +54,19 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
       transition={{ delay: 0.1 }}
       className="px-6 py-4 bg-card border-b border-border/30"
     >
-      <div className="flex items-center justify-center">
-        {/* Tab Navigation */}
+      <div className="flex items-center justify-between">
+        {/* Module Title - Left */}
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+            <ModuleIcon className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground tracking-tight">{moduleTitle}</h1>
+            <p className="text-xs text-muted-foreground">Dashboard Overview</p>
+          </div>
+        </div>
+
+        {/* Tab Navigation - Center */}
         <div className="flex items-center bg-muted/50 rounded-2xl p-1">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -85,6 +102,9 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
             );
           })}
         </div>
+
+        {/* Spacer for balance */}
+        <div className="w-[200px]" />
       </div>
     </motion.div>
   );
