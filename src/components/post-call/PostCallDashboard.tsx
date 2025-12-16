@@ -14,51 +14,57 @@ interface PostCallDashboardProps {
 const statCards = [
   { 
     title: "Total Calls", 
-    value: "0", 
+    value: "1,247", 
     icon: "phone",
     color: "bg-blue-100 dark:bg-blue-900/30",
     iconColor: "text-blue-600 dark:text-blue-400",
-    borderColor: "border-l-blue-500"
+    borderColor: "border-l-blue-500",
+    trend: { value: 12.5, isPositive: true }
   },
   { 
     title: "FCR Rate", 
-    value: "0%", 
+    value: "78.3%", 
     icon: "check",
     color: "bg-green-100 dark:bg-green-900/30",
     iconColor: "text-green-600 dark:text-green-400",
-    borderColor: "border-l-green-500"
+    borderColor: "border-l-green-500",
+    trend: { value: 4.2, isPositive: true }
   },
   { 
     title: "Avg. Handling Time", 
-    value: "0sec", 
+    value: "4m 32s", 
     icon: "clock",
     color: "bg-purple-100 dark:bg-purple-900/30",
     iconColor: "text-purple-600 dark:text-purple-400",
-    borderColor: "border-l-purple-500"
+    borderColor: "border-l-purple-500",
+    trend: { value: 8.1, isPositive: false }
   },
   { 
     title: "Open Cases", 
-    value: "0", 
+    value: "156", 
     icon: "folder",
     color: "bg-red-100 dark:bg-red-900/30",
     iconColor: "text-red-600 dark:text-red-400",
-    borderColor: "border-l-red-500"
+    borderColor: "border-l-red-500",
+    trend: { value: 3.4, isPositive: false }
   },
   { 
     title: "Avg. Waiting Time", 
-    value: "0sec", 
+    value: "1m 15s", 
     icon: "timer",
     color: "bg-amber-100 dark:bg-amber-900/30",
     iconColor: "text-amber-600 dark:text-amber-400",
-    borderColor: "border-l-amber-500"
+    borderColor: "border-l-amber-500",
+    trend: { value: 15.2, isPositive: true }
   },
   { 
     title: "Avg. Silence Time", 
-    value: "0sec", 
+    value: "23s", 
     icon: "volume",
     color: "bg-orange-100 dark:bg-orange-900/30",
     iconColor: "text-orange-600 dark:text-orange-400",
-    borderColor: "border-l-orange-500"
+    borderColor: "border-l-orange-500",
+    trend: { value: 5.7, isPositive: true }
   },
 ];
 
