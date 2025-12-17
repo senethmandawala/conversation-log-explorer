@@ -7,6 +7,11 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { ModuleProvider } from "./contexts/ModuleContext";
 import Index from "./pages/Index";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
+import CallInsight from "./pages/post-call-analyzer/CallInsight";
+import AgentPerformance from "./pages/post-call-analyzer/AgentPerformance";
+import ContentUploader from "./pages/post-call-analyzer/ContentUploader";
+import Reports from "./pages/post-call-analyzer/Reports";
+import Configuration from "./pages/post-call-analyzer/Configuration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +28,11 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/get-started" element={<Index />} />
             <Route path="/post-call-analyzer" element={<PostCallAnalyzer />} />
+            <Route path="/post-call-analyzer/call-insight" element={<CallInsight />} />
+            <Route path="/post-call-analyzer/agent-performance" element={<AgentPerformance />} />
+            <Route path="/post-call-analyzer/content-uploader" element={<ContentUploader />} />
+            <Route path="/post-call-analyzer/reports" element={<Reports />} />
+            <Route path="/post-call-analyzer/configuration" element={<Configuration />} />
             <Route path="/user-management" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

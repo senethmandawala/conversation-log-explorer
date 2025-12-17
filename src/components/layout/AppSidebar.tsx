@@ -75,7 +75,6 @@ export function AppSidebar() {
             className="mx-auto"
           >
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-
             </span>
           </motion.div>
         )}

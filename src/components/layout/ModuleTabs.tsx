@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { 
   LayoutGrid, 
   MessageSquare, 
@@ -9,7 +10,9 @@ import {
   FileText,
   Activity,
   PhoneCall,
-  Bot
+  Bot,
+  Upload,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,10 +32,12 @@ const autopilotTabs: Tab[] = [
 ];
 
 const postCallAnalyzerTabs: Tab[] = [
-  { id: "overview", icon: BarChart3, label: "Overview" },
-  { id: "analytics", icon: Activity, label: "Analytics" },
+  { id: "dashboard", icon: LayoutGrid, label: "Dashboard" },
+  { id: "call-insight", icon: PhoneCall, label: "Call Insight" },
+  { id: "agent-performance", icon: Users, label: "Agent Performance" },
+  { id: "content-uploader", icon: Upload, label: "Content Uploader" },
   { id: "reports", icon: FileText, label: "Reports" },
-  { id: "settings", icon: Settings, label: "Settings" },
+  { id: "configuration", icon: Settings, label: "Configuration" },
 ];
 
 interface ModuleTabsProps {
@@ -42,8 +47,9 @@ interface ModuleTabsProps {
 }
 
 export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsProps) {
-  const tabs = currentPath === "/post-call-analyzer" ? postCallAnalyzerTabs : autopilotTabs;
-  const isPostCallAnalyzer = currentPath === "/post-call-analyzer";
+  const navigate = useNavigate();
+  const isPostCallAnalyzer = currentPath.startsWith("/post-call-analyzer");
+  const tabs = isPostCallAnalyzer ? postCallAnalyzerTabs : autopilotTabs;
   const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
   const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;
 
@@ -74,7 +80,15 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
               <Tooltip key={tab.id}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => onTabChange(tab.id)}
+                    onClick={() => {
+                      onTabChange(tab.id);
+                      if (isPostCallAnalyzer) {
+                        const route = tab.id === "dashboard" 
+                          ? "/post-call-analyzer" 
+                          : `/post-call-analyzer/${tab.id}`;
+                        navigate(route);
+                      }
+                    }}
                     className={cn(
                       "relative h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-200",
                       isActive
