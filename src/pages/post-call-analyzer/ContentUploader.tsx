@@ -293,9 +293,8 @@ export default function ContentUploader() {
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2 mb-1">
                                 <p className="font-medium truncate">{file.name}</p>
-                                {getStatusBadge(file.status)}
                               </div>
                               <div className="flex items-center gap-4">
                                 <span className="text-xs text-muted-foreground">{file.size}</span>
@@ -307,22 +306,26 @@ export default function ContentUploader() {
                               </div>
                             </div>
 
-                            {file.status === "pending" && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => removeFile(file.id)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(file.status)}
+                              
+                              {file.status === "pending" && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => removeFile(file.id)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
 
-                            {file.status === "completed" && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Play className="h-4 w-4" />
-                              </Button>
-                            )}
+                              {file.status === "completed" && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Play className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
                           </motion.div>
                         ))}
                       </div>

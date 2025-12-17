@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
   FileText, 
   TrendingUp,
@@ -105,8 +107,8 @@ const reportCards: ReportCard[] = [
 ];
 
 export default function Reports() {
+  const navigate = useNavigate();
   const { setShowModuleTabs } = useModule();
-  const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [isHovering, setIsHovering] = useState<string | null>(null);
 
   useEffect(() => {
@@ -114,32 +116,20 @@ export default function Reports() {
     return () => setShowModuleTabs(true);
   }, [setShowModuleTabs]);
 
-  if (selectedReport) {
-    // For now, show a placeholder for selected reports
-    return (
-      <>
-        <div className="p-6">
-          <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader className="pb-4 border-b border-border/30">
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => setSelectedReport(null)}>
-                  <ArrowRight className="h-5 w-5 rotate-180" />
-                </Button>
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  {reportCards.find(r => r.id === selectedReport)?.title}
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center h-64 text-muted-foreground">
-                Report content coming soon...
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        <AIHelper />
-      </>
-  }
+  const handleReportClick = (reportId: string) => {
+    // Navigate to specific report pages
+    switch (reportId) {
+      case "cross-up-sell":
+        navigate("/post-call-analyzer/reports/cross-upsell");
+        break;
+      case "bad-practice":
+        navigate("/post-call-analyzer/reports/bad-practice");
+        break;
+      default:
+        // For other reports, we could add more routes later
+        break;
+    }
+  };
 
   return (
     <>
@@ -170,7 +160,7 @@ export default function Reports() {
                   transition={{ delay: index * 0.05 }}
                   onMouseEnter={() => setIsHovering(report.id)}
                   onMouseLeave={() => setIsHovering(null)}
-                  onClick={() => report.available && setSelectedReport(report.id)}
+                  onClick={() => report.available && handleReportClick(report.id)}
                   className={`
                     relative group cursor-pointer rounded-xl border border-border/50 
                     bg-gradient-to-br ${report.bgGradient} backdrop-blur-sm

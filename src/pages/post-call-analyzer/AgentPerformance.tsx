@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,12 @@ import {
   Clock,
   Target,
   Award,
-  BarChart3
+  BarChart3,
+  Search,
+  X,
+  Calendar,
+  ChevronDown,
+  Eye
 } from "lucide-react";
 import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
@@ -28,17 +34,27 @@ import {
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 interface AgentMetric {
   id: string;
@@ -61,21 +77,23 @@ const mockAgents: AgentMetric[] = [
   { id: "5", name: "David Brown", avatar: "DB", totalCalls: 175, avgHandleTime: "5:30", fcr: 82, csat: 4.4, sentiment: 70, trend: "up", rank: 5 },
 ];
 
-const performanceTrend = [
-  { month: "Jan", avgFCR: 82, avgCSAT: 4.2 },
-  { month: "Feb", avgFCR: 84, avgCSAT: 4.3 },
-  { month: "Mar", avgFCR: 83, avgCSAT: 4.4 },
-  { month: "Apr", avgFCR: 86, avgCSAT: 4.5 },
-  { month: "May", avgFCR: 88, avgCSAT: 4.6 },
-  { month: "Jun", avgFCR: 87, avgCSAT: 4.5 },
+interface PerformingAgent {
+  name: string;
+  score: number;
+}
+
+const topPerformingAgents: PerformingAgent[] = [
+  { name: "John Smith", score: 9.2 },
+  { name: "Sarah Johnson", score: 8.8 },
+  { name: "Mike Wilson", score: 8.5 },
+  { name: "David Brown", score: 8.2 },
 ];
 
-const categoryBreakdown = [
-  { category: "Billing", calls: 450 },
-  { category: "Technical", calls: 380 },
-  { category: "Sales", calls: 290 },
-  { category: "Complaints", calls: 180 },
-  { category: "General", calls: 220 },
+const agentsNeedAttention: PerformingAgent[] = [
+  { name: "Emily Davis", score: 6.5 },
+  { name: "Robert Taylor", score: 6.2 },
+  { name: "Lisa Anderson", score: 5.8 },
+  { name: "James Martinez", score: 5.5 },
 ];
 
 interface StatCardProps {
@@ -113,9 +131,26 @@ const StatCard = ({ title, value, change, trend, icon: Icon, color }: StatCardPr
   </motion.div>
 );
 
+const groups = ["Sales Team", "Support Team", "Technical Team", "Billing Team"];
+const categories = ["Billing", "Technical Support", "Sales", "Complaints", "General Inquiry"];
+const caseStates = ["Open", "Closed", "Pending", "Escalated"];
+const callTypes = ["Inbound", "Outbound"];
+const sentiments = ["Positive", "Neutral", "Negative"];
+
 export default function AgentPerformance() {
+  const navigate = useNavigate();
   const { setShowModuleTabs } = useModule();
   const [isLoading, setIsLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  
+  // Filter states
+  const [agentName, setAgentName] = useState("");
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCaseState, setSelectedCaseState] = useState("");
+  const [selectedCallType, setSelectedCallType] = useState("");
+  const [selectedSentiment, setSelectedSentiment] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   useEffect(() => {
     setShowModuleTabs(true);
@@ -125,6 +160,39 @@ export default function AgentPerformance() {
       clearTimeout(timer);
     };
   }, [setShowModuleTabs]);
+
+  const activeFiltersCount = [
+    agentName,
+    selectedGroups.length > 0,
+    selectedCategory,
+    selectedCaseState,
+    selectedCallType,
+    selectedSentiment,
+    dateRange?.from,
+  ].filter(Boolean).length;
+
+  const clearAllFilters = () => {
+    setAgentName("");
+    setSelectedGroups([]);
+    setSelectedCategory("");
+    setSelectedCaseState("");
+    setSelectedCallType("");
+    setSelectedSentiment("");
+    setDateRange(undefined);
+  };
+
+  const handleSearch = () => {
+    // Implement search logic here
+    console.log("Searching with filters:", {
+      agentName,
+      selectedGroups,
+      selectedCategory,
+      selectedCaseState,
+      selectedCallType,
+      selectedSentiment,
+      dateRange,
+    });
+  };
 
   return (
     <>
@@ -151,13 +219,156 @@ export default function AgentPerformance() {
                   <Download className="h-4 w-4" />
                   Export
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button 
+                  variant={filtersOpen ? "default" : "outline"} 
+                  size="sm" 
+                  className="gap-2 relative"
+                  onClick={() => setFiltersOpen(!filtersOpen)}
+                >
                   <Filter className="h-4 w-4" />
                   Filters
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
                 </Button>
               </div>
             </div>
           </CardHeader>
+
+          {/* Filters Panel */}
+          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <CollapsibleContent>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="p-4 border-t border-border/30 bg-muted/20"
+              >
+                <div className="flex flex-wrap items-center gap-4">
+                  {/* Agent Name */}
+                  <div className="relative">
+                    <Input
+                      placeholder="Agent Name"
+                      value={agentName}
+                      onChange={(e) => setAgentName(e.target.value)}
+                      className="h-10 w-44 pr-8"
+                    />
+                    {agentName && (
+                      <button
+                        onClick={() => setAgentName("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Group */}
+                  <Select value={selectedGroups[0] || ""} onValueChange={(val) => setSelectedGroups(val ? [val] : [])}>
+                    <SelectTrigger className="h-10 w-40">
+                      <SelectValue placeholder="Group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {groups.map((group) => (
+                        <SelectItem key={group} value={group}>{group}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Category */}
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="h-10 w-44">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Case Status */}
+                  <Select value={selectedCaseState} onValueChange={setSelectedCaseState}>
+                    <SelectTrigger className="h-10 w-40">
+                      <SelectValue placeholder="Case Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {caseStates.map((state) => (
+                        <SelectItem key={state} value={state}>{state}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Call Type */}
+                  <Select value={selectedCallType} onValueChange={setSelectedCallType}>
+                    <SelectTrigger className="h-10 w-36">
+                      <SelectValue placeholder="Call Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {callTypes.map((type) => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* User Sentiment */}
+                  <Select value={selectedSentiment} onValueChange={setSelectedSentiment}>
+                    <SelectTrigger className="h-10 w-40">
+                      <SelectValue placeholder="Sentiment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sentiments.map((sentiment) => (
+                        <SelectItem key={sentiment} value={sentiment}>{sentiment}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Date Range */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="h-10 w-48 justify-start text-left font-normal">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            <span className="truncate">
+                              {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
+                            </span>
+                          ) : (
+                            format(dateRange.from, "MMM d, yyyy")
+                          )
+                        ) : (
+                          <span className="text-muted-foreground">Date Range</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={1}
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Search & Clear Buttons */}
+                  <Button className="h-10" onClick={handleSearch}>
+                    <Search className="h-4 w-4 mr-1" />
+                    Search
+                  </Button>
+                  {activeFiltersCount > 0 && (
+                    <Button variant="outline" className="h-10" onClick={clearAllFilters}>
+                      Clear
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            </CollapsibleContent>
+          </Collapsible>
         </Card>
 
         {/* Stats Grid */}
@@ -196,72 +407,76 @@ export default function AgentPerformance() {
           />
         </div>
 
-        {/* Charts Row */}
+        {/* Agent Performance Cards Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Performance Trend */}
+          {/* Best Performing Agents */}
           <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base font-medium flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                Performance Trend
-              </CardTitle>
+              <div className="flex flex-col">
+                <CardTitle className="text-base font-medium">Best Performing Agents</CardTitle>
+                <span className="text-sm text-muted-foreground">
+                  Top agents based on overall performance score
+                </span>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[120px] w-full" />
               ) : (
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={performanceTrend}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))", 
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px"
-                      }} 
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="avgFCR" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2}
-                      dot={{ fill: "hsl(var(--primary))" }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                  {topPerformingAgents.map((agent, index) => (
+                    <motion.div
+                      key={agent.name}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-green-500/10 border border-green-500/20 px-3 py-2 rounded-lg"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold truncate mr-2">{agent.name}</span>
+                        <span className="font-bold text-sm text-green-500" title="Agent Performance">
+                          {agent.score * 10}%
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Category Distribution */}
+          {/* Agents Requiring Attention */}
           <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base font-medium flex items-center gap-2">
-                <Phone className="h-4 w-4 text-primary" />
-                Calls by Category
-              </CardTitle>
+              <div className="flex flex-col">
+                <CardTitle className="text-base font-medium">Agents Requiring Attention</CardTitle>
+                <span className="text-sm text-muted-foreground">
+                  Agents who may need additional support or training
+                </span>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[120px] w-full" />
               ) : (
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={categoryBreakdown}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="category" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))", 
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px"
-                      }} 
-                    />
-                    <Bar dataKey="calls" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                  {agentsNeedAttention.map((agent, index) => (
+                    <motion.div
+                      key={agent.name}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold truncate mr-2">{agent.name}</span>
+                        <span className="font-bold text-sm text-amber-500" title="Agent Performance">
+                          {agent.score * 10}%
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -294,6 +509,7 @@ export default function AgentPerformance() {
                     <TableHead className="font-semibold">CSAT</TableHead>
                     <TableHead className="font-semibold">Sentiment Score</TableHead>
                     <TableHead className="font-semibold">Trend</TableHead>
+                    <TableHead className="font-semibold w-16"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -303,7 +519,7 @@ export default function AgentPerformance() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="border-b border-border/30 hover:bg-muted/20 cursor-pointer"
+                      className="group border-b border-border/30 hover:bg-muted/20 cursor-pointer"
                     >
                       <TableCell>
                         <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm ${
@@ -363,6 +579,21 @@ export default function AgentPerformance() {
                         ) : (
                           <Badge variant="outline" className="bg-muted">Stable</Badge>
                         )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground shadow-none hover:shadow-md"
+                            onClick={() => navigate(`/post-call-analyzer/agent-performance/${agent.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </motion.div>
                       </TableCell>
                     </motion.tr>
                   ))}

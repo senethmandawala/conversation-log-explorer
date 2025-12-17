@@ -17,11 +17,18 @@ import {
   MessageSquare,
   TrendingUp,
   TrendingDown,
-  Minus
+  Minus,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { CallLogDetails } from "@/components/post-call/CallLogDetails";
 import {
   Table,
   TableBody,
@@ -85,6 +92,9 @@ export default function CallInsight() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSentiment, setSelectedSentiment] = useState<string>("");
+  const [selectedCall, setSelectedCall] = useState<CallRecord | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => {
     setShowModuleTabs(true);
@@ -105,6 +115,11 @@ export default function CallInsight() {
   });
 
   const activeFiltersCount = [selectedCategory, selectedSentiment].filter(Boolean).length;
+
+  // Pagination
+  const totalRecords = filteredCalls.length;
+  const totalPages = Math.ceil(totalRecords / pageSize);
+  const paginatedCalls = filteredCalls.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <>
@@ -175,12 +190,12 @@ export default function CallInsight() {
                     {/* Category Filter */}
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Category</label>
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value === "all" ? "" : value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Categories</SelectItem>
+                          <SelectItem value="all">All Categories</SelectItem>
                           <SelectItem value="Billing">Billing</SelectItem>
                           <SelectItem value="Technical Support">Technical Support</SelectItem>
                           <SelectItem value="Sales">Sales</SelectItem>
@@ -193,12 +208,12 @@ export default function CallInsight() {
                     {/* Sentiment Filter */}
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Sentiment</label>
-                      <Select value={selectedSentiment} onValueChange={setSelectedSentiment}>
+                      <Select value={selectedSentiment} onValueChange={(value) => setSelectedSentiment(value === "all" ? "" : value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="All Sentiments" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Sentiments</SelectItem>
+                          <SelectItem value="all">All Sentiments</SelectItem>
                           <SelectItem value="positive">Positive</SelectItem>
                           <SelectItem value="neutral">Neutral</SelectItem>
                           <SelectItem value="negative">Negative</SelectItem>
@@ -253,16 +268,20 @@ export default function CallInsight() {
                       <TableHead className="font-semibold">Duration</TableHead>
                       <TableHead className="font-semibold">Date & Time</TableHead>
                       <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="font-semibold text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCalls.map((call, index) => (
+                    {paginatedCalls.map((call, index) => (
                       <motion.tr
                         key={call.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="border-b border-border/30 hover:bg-muted/20 cursor-pointer transition-colors"
+                        transition={{ delay: index * 0.03, duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        className={cn(
+                          "group border-b border-border/30 transition-all duration-200",
+                          "hover:bg-primary/[0.03] hover:shadow-[inset_3px_0_0_0_hsl(var(--primary))]"
+                        )}
                       >
                         <TableCell className="font-mono text-sm">{call.msisdn}</TableCell>
                         <TableCell>
@@ -304,6 +323,26 @@ export default function CallInsight() {
                             {call.status}
                           </Badge>
                         </TableCell>
+                        <TableCell className="text-right">
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={cn(
+                                "h-9 w-9 rounded-lg transition-all duration-200",
+                                "opacity-0 group-hover:opacity-100",
+                                "hover:bg-primary hover:text-primary-foreground",
+                                "shadow-none hover:shadow-md"
+                              )}
+                              onClick={() => setSelectedCall(call)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </motion.div>
+                        </TableCell>
                       </motion.tr>
                     ))}
                   </TableBody>
@@ -312,18 +351,115 @@ export default function CallInsight() {
             )}
 
             {/* Pagination */}
-            <div className="flex items-center justify-between mt-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center justify-between mt-4 pt-4 border-t border-border/30"
+            >
               <p className="text-sm text-muted-foreground">
-                Showing {filteredCalls.length} of {mockCalls.length} calls
+                Showing <span className="font-medium text-foreground">{paginatedCalls.length}</span> of{" "}
+                <span className="font-medium text-foreground">{totalRecords}</span> results
               </p>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled>Previous</Button>
-                <Button variant="outline" size="sm">Next</Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="h-9 w-9 p-0 rounded-lg"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="h-9 w-9 p-0 rounded-lg"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="flex items-center gap-1 mx-2">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={cn(
+                          "h-9 w-9 p-0 rounded-lg transition-all duration-200",
+                          currentPage === pageNum && "shadow-md"
+                        )}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="h-9 w-9 p-0 rounded-lg"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="h-9 w-9 p-0 rounded-lg"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
               </div>
-            </div>
+            </motion.div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Call Log Details Sheet */}
+      <CallLogDetails
+        callLog={selectedCall ? {
+          id: selectedCall.id,
+          date: selectedCall.date,
+          time: selectedCall.time,
+          msisdn: selectedCall.msisdn,
+          agent: selectedCall.agentName,
+          callDuration: selectedCall.duration,
+          category: selectedCall.category,
+          subCategory: "General",
+          userSentiment: selectedCall.sentiment,
+          agentSentiment: "positive",
+          summary: "Customer called regarding " + selectedCall.category.toLowerCase() + " inquiry. Agent " + selectedCall.agentName + " handled the call professionally and addressed all customer concerns.",
+          transcription: [
+            { speaker: "Agent", text: "Thank you for calling. How may I assist you today?", timestamp: "00:00" },
+            { speaker: "Customer", text: "Hi, I need help with my account.", timestamp: "00:05" },
+            { speaker: "Agent", text: "I'd be happy to help you with that. Can you please provide your account details?", timestamp: "00:10" },
+            { speaker: "Customer", text: "Sure, let me give you that information.", timestamp: "00:18" },
+            { speaker: "Agent", text: "Thank you. I can see your account now. How can I assist you further?", timestamp: "00:25" },
+          ],
+        } : null}
+        open={!!selectedCall}
+        onClose={() => setSelectedCall(null)}
+      />
+
       <AIHelper />
     </>
   );
