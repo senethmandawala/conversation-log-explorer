@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ModuleProvider } from "./contexts/ModuleContext";
 import Index from "./pages/Index";
+import GetStarted from "./pages/GetStarted";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
+import Autopilot from "./pages/Autopilot";
 import CallInsight from "./pages/post-call-analyzer/CallInsight";
 import AgentPerformance from "./pages/post-call-analyzer/AgentPerformance";
 import ContentUploader from "./pages/post-call-analyzer/ContentUploader";
@@ -28,9 +30,10 @@ const App = () => (
         <ModuleProvider>
         <MainLayout>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/get-started" element={<Index />} />
+            <Route path="/" element={<GetStarted />} />
+            <Route path="/get-started" element={<GetStarted />} />
             <Route path="/post-call-analyzer" element={<PostCallAnalyzer />} />
+            <Route path="/autopilot" element={<Autopilot />} />
             <Route path="/post-call-analyzer/call-insight" element={<CallInsight />} />
             <Route path="/post-call-analyzer/agent-performance" element={<AgentPerformance />} />
             <Route path="/post-call-analyzer/agent-performance/:agentId" element={<AgentInsights />} />
