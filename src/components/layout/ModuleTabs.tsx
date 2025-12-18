@@ -28,7 +28,7 @@ const autopilotTabs: Tab[] = [
   { id: "dashboard", icon: LayoutGrid, label: "Dashboard" },
   { id: "conversations", icon: MessageSquare, label: "Conversation History" },
   { id: "reports", icon: FileText, label: "Reports" },
-  { id: "settings", icon: Settings, label: "Settings" },
+  { id: "settings", icon: Settings, label: "Configuration" },
 ];
 
 const postCallAnalyzerTabs: Tab[] = [

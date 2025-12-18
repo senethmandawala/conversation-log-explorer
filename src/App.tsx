@@ -5,10 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ModuleProvider } from "./contexts/ModuleContext";
+import { AutopilotProvider } from "./contexts/AutopilotContext";
 import Index from "./pages/Index";
 import GetStarted from "./pages/GetStarted";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
 import Autopilot from "./pages/Autopilot";
+import AutopilotDashboard from "./pages/autopilot/AutopilotDashboard";
 import AutopilotConversations from "./pages/autopilot/AutopilotConversations";
 import AutopilotReports from "./pages/autopilot/AutopilotReports";
 import AutopilotSettings from "./pages/autopilot/AutopilotSettings";
@@ -31,12 +33,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ModuleProvider>
+        <AutopilotProvider>
         <MainLayout>
           <Routes>
             <Route path="/" element={<GetStarted />} />
             <Route path="/get-started" element={<GetStarted />} />
             <Route path="/post-call-analyzer" element={<PostCallAnalyzer />} />
             <Route path="/autopilot" element={<Autopilot />} />
+            <Route path="/autopilot/dashboard" element={<AutopilotDashboard />} />
             <Route path="/autopilot/conversations" element={<AutopilotConversations />} />
             <Route path="/autopilot/reports" element={<AutopilotReports />} />
             <Route path="/autopilot/settings" element={<AutopilotSettings />} />
@@ -53,6 +57,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </MainLayout>
+        </AutopilotProvider>
         </ModuleProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,13 +10,26 @@ import { ConversationDetailSheet } from "@/components/conversation/ConversationD
 import { FilterDropdown, MultiSelectContent } from "@/components/conversation/FilterDropdown";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord } from "@/types/conversation";
+import { useAutopilot } from "@/contexts/AutopilotContext";
 
 export default function AutopilotConversations() {
+  const navigate = useNavigate();
+  const { selectedInstance } = useAutopilot();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRecord, setSelectedRecord] = useState<ConversationRecord | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedVdnSources, setSelectedVdnSources] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!selectedInstance) {
+      navigate("/autopilot");
+    }
+  }, [selectedInstance, navigate]);
+
+  if (!selectedInstance) {
+    return null;
+  }
 
   const filteredData = mockConversations.filter((record) => {
     const matchesSearch =
@@ -42,7 +56,7 @@ export default function AutopilotConversations() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

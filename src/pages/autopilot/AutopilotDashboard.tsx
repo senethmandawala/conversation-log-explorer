@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAutopilot } from "@/contexts/AutopilotContext";
 import {
   Phone,
   PhoneIncoming,
@@ -170,9 +172,36 @@ const frequentCallersData = [
 
 export default function AutopilotDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { selectedInstance } = useAutopilot();
+
+  useEffect(() => {
+    if (!selectedInstance) {
+      navigate("/autopilot");
+    }
+  }, [selectedInstance, navigate]);
+
+  if (!selectedInstance) {
+    return null;
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+      {/* Instance Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex items-center gap-3 mb-2"
+      >
+        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+          <Bot className="h-6 w-6 text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">{selectedInstance.name}</h1>
+          <p className="text-sm text-muted-foreground">{selectedInstance.description}</p>
+        </div>
+      </motion.div>
       {/* Wide Stat Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

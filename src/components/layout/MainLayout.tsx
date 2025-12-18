@@ -17,9 +17,9 @@ export function MainLayout({ children }: MainLayoutProps) {
   useEffect(() => {
     const path = location.pathname;
     
-    // Show tabs on module pages but not on instance selector (root module page)
+    // Show tabs on module sub-routes (dashboard, conversations, etc.)
     const isPostCallAnalyzerSubRoute = path.startsWith("/post-call-analyzer/");
-    const isAutopilotSubRoute = path.startsWith("/autopilot/");
+    const isAutopilotSubRoute = path.startsWith("/autopilot/") && path !== "/autopilot";
     const shouldShowTabs = isPostCallAnalyzerSubRoute || isAutopilotSubRoute;
     
     setShowModuleTabs(shouldShowTabs);
