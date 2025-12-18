@@ -44,6 +44,7 @@ const App = () => (
             <Route path="/autopilot/conversations" element={<AutopilotConversations />} />
             <Route path="/autopilot/reports" element={<AutopilotReports />} />
             <Route path="/autopilot/settings" element={<AutopilotSettings />} />
+            <Route path="/post-call-analyzer/dashboard" element={<PostCallAnalyzer />} />
             <Route path="/post-call-analyzer/call-insight" element={<CallInsight />} />
             <Route path="/post-call-analyzer/agent-performance" element={<AgentPerformance />} />
             <Route path="/post-call-analyzer/agent-performance/:agentId" element={<AgentInsights />} />

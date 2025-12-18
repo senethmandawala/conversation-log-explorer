@@ -98,15 +98,9 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
                     onClick={() => {
                       onTabChange(tab.id);
                       if (isPostCallAnalyzer) {
-                        const route = tab.id === "dashboard" 
-                          ? "/post-call-analyzer" 
-                          : `/post-call-analyzer/${tab.id}`;
-                        navigate(route);
+                        navigate(`/post-call-analyzer/${tab.id}`);
                       } else {
-                        const route = tab.id === "dashboard" 
-                          ? "/autopilot" 
-                          : `/autopilot/${tab.id}`;
-                        navigate(route);
+                        navigate(`/autopilot/${tab.id}`);
                       }
                     }}
                     className={cn(
