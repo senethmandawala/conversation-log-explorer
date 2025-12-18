@@ -3,19 +3,31 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAutopilot } from "@/contexts/AutopilotContext";
 import {
   FileText,
   BarChart3,
-  PieChart,
   TrendingUp,
   Clock,
   FileBarChart,
   Coins,
   ArrowLeft,
-  Calendar,
+  Filter,
   ChevronRight,
+  Calendar,
 } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ResponsiveContainer,
   LineChart,
@@ -123,6 +135,8 @@ export default function AutopilotReports() {
   const navigate = useNavigate();
   const { selectedInstance } = useAutopilot();
   const [activeReport, setActiveReport] = useState<string>("landing");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState<string>("");
 
   useEffect(() => {
     if (!selectedInstance) {
@@ -133,6 +147,9 @@ export default function AutopilotReports() {
   if (!selectedInstance) {
     return null;
   }
+
+  const activeReportData = reports.find((r) => r.option === activeReport);
+  const activeFiltersCount = selectedDateRange ? 1 : 0;
 
   const renderReportContent = () => {
     switch (activeReport) {
@@ -328,23 +345,115 @@ export default function AutopilotReports() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="space-y-4">
-              <Button
-                variant="ghost"
-                onClick={() => setActiveReport("landing")}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Reports
-              </Button>
+            <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+              {/* Report Header - matching Angular template */}
+              <div className="p-6 border-b border-border/30">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setActiveReport("landing")}
+                      className="h-10 w-10 rounded-lg"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">
+                        {activeReportData?.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {activeReportData?.desc}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant={filtersOpen ? "default" : "outline"}
+                    size="icon"
+                    className="relative h-10 w-10 rounded-lg"
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                  >
+                    <Filter className="h-4 w-4" />
+                    {activeFiltersCount > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                      >
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
+              </div>
 
-              <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-                <h2 className="text-xl font-semibold text-foreground mb-6">
-                  {reports.find((r) => r.option === activeReport)?.name}
-                </h2>
+              {/* Filters Panel */}
+              <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <CollapsibleContent>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 bg-muted/30 border-b border-border/30"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Date Range Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-muted-foreground">Date Range</label>
+                        <Button variant="outline" className="w-full justify-start gap-2">
+                          <Calendar className="h-4 w-4" />
+                          {selectedDateRange || "Select dates"}
+                        </Button>
+                      </div>
+
+                      {/* VDN Source Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-muted-foreground">VDN Source</label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="All Sources" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Sources</SelectItem>
+                            <SelectItem value="IVR">IVR</SelectItem>
+                            <SelectItem value="Web">Web Chat</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Category Filter */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-muted-foreground">Category</label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="All Categories" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Categories</SelectItem>
+                            <SelectItem value="billing">Billing</SelectItem>
+                            <SelectItem value="support">Support</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end mt-4 gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setSelectedDateRange("")}
+                      >
+                        Clear All
+                      </Button>
+                      <Button size="sm">Apply Filters</Button>
+                    </div>
+                  </motion.div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Report Content */}
+              <div className="p-6">
                 {renderReportContent()}
-              </Card>
-            </div>
+              </div>
+            </Card>
           </motion.div>
         )}
       </AnimatePresence>
