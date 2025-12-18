@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAutopilot } from "@/contexts/AutopilotContext";
 import {
   FileText,
   BarChart3,
@@ -118,7 +120,19 @@ const weeklyTrendsData = [
 ];
 
 export default function AutopilotReports() {
+  const navigate = useNavigate();
+  const { selectedInstance } = useAutopilot();
   const [activeReport, setActiveReport] = useState<string>("landing");
+
+  useEffect(() => {
+    if (!selectedInstance) {
+      navigate("/autopilot");
+    }
+  }, [selectedInstance, navigate]);
+
+  if (!selectedInstance) {
+    return null;
+  }
 
   const renderReportContent = () => {
     switch (activeReport) {
@@ -256,7 +270,7 @@ export default function AutopilotReports() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
       <AnimatePresence mode="wait">
         {activeReport === "landing" ? (
           <motion.div
