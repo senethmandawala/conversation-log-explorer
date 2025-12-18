@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/get-started" element={<GetStarted />} />
             <Route path="/post-call-analyzer" element={<PostCallAnalyzer />} />
             <Route path="/autopilot" element={<Autopilot />} />
+            <Route path="/autopilot" element={<Autopilot />} />
             <Route path="/post-call-analyzer/call-insight" element={<CallInsight />} />
             <Route path="/post-call-analyzer/agent-performance" element={<AgentPerformance />} />
             <Route path="/post-call-analyzer/agent-performance/:agentId" element={<AgentInsights />} />

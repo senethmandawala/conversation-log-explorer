@@ -45,18 +45,6 @@ export default function Autopilot() {
         transition={{ duration: 0.5 }}
         className="mb-6"
       >
-        <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToInstances}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Instances
-          </Button>
-        </div>
-
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
             <Bot className="h-6 w-6 text-white" />
@@ -70,21 +58,6 @@ export default function Autopilot() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
-          <TabsTrigger value="dashboard" className="gap-2">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Reports
-          </TabsTrigger>
-          <TabsTrigger value="configuration" className="gap-2">
-            <Settings className="h-4 w-4" />
-            Configuration
-          </TabsTrigger>
-        </TabsList>
-
         <TabsContent value="dashboard">
           <AutopilotDashboard />
         </TabsContent>
