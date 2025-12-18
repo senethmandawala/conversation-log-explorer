@@ -12,19 +12,34 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const [activeTab, setActiveTab] = useState("dashboard");
   const location = useLocation();
-  const { showModuleTabs } = useModule();
+  const { showModuleTabs, setShowModuleTabs } = useModule();
 
   useEffect(() => {
     const path = location.pathname;
+    
+    // Show tabs on module pages but not on instance selector (root module page)
+    const isPostCallAnalyzerSubRoute = path.startsWith("/post-call-analyzer/");
+    const isAutopilotSubRoute = path.startsWith("/autopilot/");
+    const shouldShowTabs = isPostCallAnalyzerSubRoute || isAutopilotSubRoute;
+    
+    setShowModuleTabs(shouldShowTabs);
+
     if (path.startsWith("/post-call-analyzer")) {
       const segment = path.split("/post-call-analyzer/")[1];
       if (segment) {
-        setActiveTab(segment);
+        setActiveTab(segment.split("/")[0]);
+      } else {
+        setActiveTab("dashboard");
+      }
+    } else if (path.startsWith("/autopilot")) {
+      const segment = path.split("/autopilot/")[1];
+      if (segment) {
+        setActiveTab(segment.split("/")[0]);
       } else {
         setActiveTab("dashboard");
       }
     }
-  }, [location.pathname]);
+  }, [location.pathname, setShowModuleTabs]);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">

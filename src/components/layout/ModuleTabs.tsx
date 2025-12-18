@@ -27,7 +27,7 @@ interface Tab {
 const autopilotTabs: Tab[] = [
   { id: "dashboard", icon: LayoutGrid, label: "Dashboard" },
   { id: "conversations", icon: MessageSquare, label: "Conversation History" },
-  { id: "agent-performance", icon: UserCheck, label: "Agent Performance" },
+  { id: "reports", icon: FileText, label: "Reports" },
   { id: "settings", icon: Settings, label: "Settings" },
 ];
 
@@ -49,9 +49,24 @@ interface ModuleTabsProps {
 export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsProps) {
   const navigate = useNavigate();
   const isPostCallAnalyzer = currentPath.startsWith("/post-call-analyzer");
+  const isAutopilot = currentPath.startsWith("/autopilot");
   const tabs = isPostCallAnalyzer ? postCallAnalyzerTabs : autopilotTabs;
   const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
   const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;
+
+  // Determine active tab from URL
+  const getActiveTabFromPath = () => {
+    if (isPostCallAnalyzer) {
+      const subPath = currentPath.replace("/post-call-analyzer", "").replace("/", "");
+      return subPath || "dashboard";
+    } else if (isAutopilot) {
+      const subPath = currentPath.replace("/autopilot", "").replace("/", "");
+      return subPath || "dashboard";
+    }
+    return activeTab;
+  };
+
+  const currentActiveTab = getActiveTabFromPath();
 
   return (
     <motion.div
@@ -75,7 +90,7 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
         {/* Tab Navigation - Center */}
         <div className="flex items-center bg-muted/50 rounded-2xl p-1">
           {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
+            const isActive = currentActiveTab === tab.id;
             return (
               <Tooltip key={tab.id}>
                 <TooltipTrigger asChild>
@@ -86,6 +101,11 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
                         const route = tab.id === "dashboard" 
                           ? "/post-call-analyzer" 
                           : `/post-call-analyzer/${tab.id}`;
+                        navigate(route);
+                      } else {
+                        const route = tab.id === "dashboard" 
+                          ? "/autopilot" 
+                          : `/autopilot/${tab.id}`;
                         navigate(route);
                       }
                     }}
