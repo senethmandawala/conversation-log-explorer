@@ -9,6 +9,9 @@ import Index from "./pages/Index";
 import GetStarted from "./pages/GetStarted";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
 import Autopilot from "./pages/Autopilot";
+import AutopilotConversations from "./pages/autopilot/AutopilotConversations";
+import AutopilotReports from "./pages/autopilot/AutopilotReports";
+import AutopilotSettings from "./pages/autopilot/AutopilotSettings";
 import CallInsight from "./pages/post-call-analyzer/CallInsight";
 import AgentPerformance from "./pages/post-call-analyzer/AgentPerformance";
 import ContentUploader from "./pages/post-call-analyzer/ContentUploader";
@@ -34,7 +37,9 @@ const App = () => (
             <Route path="/get-started" element={<GetStarted />} />
             <Route path="/post-call-analyzer" element={<PostCallAnalyzer />} />
             <Route path="/autopilot" element={<Autopilot />} />
-            <Route path="/autopilot" element={<Autopilot />} />
+            <Route path="/autopilot/conversations" element={<AutopilotConversations />} />
+            <Route path="/autopilot/reports" element={<AutopilotReports />} />
+            <Route path="/autopilot/settings" element={<AutopilotSettings />} />
             <Route path="/post-call-analyzer/call-insight" element={<CallInsight />} />
             <Route path="/post-call-analyzer/agent-performance" element={<AgentPerformance />} />
             <Route path="/post-call-analyzer/agent-performance/:agentId" element={<AgentInsights />} />
