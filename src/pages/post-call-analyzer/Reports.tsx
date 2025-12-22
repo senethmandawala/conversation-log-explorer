@@ -33,6 +33,15 @@ interface ReportCard {
 
 const reportCards: ReportCard[] = [
   {
+    id: "case-classification",
+    title: "Case Classification",
+    description: "View case distribution across categories and subcategories with drill-down",
+    icon: PieChart,
+    color: "text-blue-500",
+    bgGradient: "from-blue-500/20 to-blue-600/5",
+    available: true,
+  },
+  {
     id: "bad-practice",
     title: "Bad Practice Analysis",
     description: "Identify and analyze agent behaviors that deviate from best practices",
@@ -55,8 +64,8 @@ const reportCards: ReportCard[] = [
     title: "Training Needs Analysis",
     description: "Identify skill gaps and training requirements for agents",
     icon: GraduationCap,
-    color: "text-blue-500",
-    bgGradient: "from-blue-500/20 to-blue-600/5",
+    color: "text-purple-500",
+    bgGradient: "from-purple-500/20 to-purple-600/5",
     available: true,
   },
   {
@@ -69,12 +78,48 @@ const reportCards: ReportCard[] = [
     available: true,
   },
   {
-    id: "category-distribution",
-    title: "Category Distribution",
-    description: "View distribution of calls across different categories",
-    icon: PieChart,
-    color: "text-purple-500",
-    bgGradient: "from-purple-500/20 to-purple-600/5",
+    id: "sentiment-analysis",
+    title: "Sentiment Analysis",
+    description: "Analyze user and agent sentiment patterns across calls",
+    icon: BarChart3,
+    color: "text-teal-500",
+    bgGradient: "from-teal-500/20 to-teal-600/5",
+    available: true,
+  },
+  {
+    id: "call-resolution",
+    title: "Call Resolution",
+    description: "Track resolution rates and average handling times",
+    icon: Shield,
+    color: "text-emerald-500",
+    bgGradient: "from-emerald-500/20 to-emerald-600/5",
+    available: true,
+  },
+  {
+    id: "frequent-callers",
+    title: "Frequent Callers",
+    description: "Identify top callers and repeat call patterns",
+    icon: UserX,
+    color: "text-orange-500",
+    bgGradient: "from-orange-500/20 to-orange-600/5",
+    available: true,
+  },
+  {
+    id: "call-duration",
+    title: "Call Duration Analysis",
+    description: "Analyze call duration patterns and identify long calls",
+    icon: Volume2,
+    color: "text-cyan-500",
+    bgGradient: "from-cyan-500/20 to-cyan-600/5",
+    available: true,
+  },
+  {
+    id: "traffic-trends",
+    title: "Traffic Trends & Patterns",
+    description: "Visualize traffic trends across categories and time periods",
+    icon: TrendingUp,
+    color: "text-violet-500",
+    bgGradient: "from-violet-500/20 to-violet-600/5",
     available: true,
   },
   {
@@ -91,8 +136,8 @@ const reportCards: ReportCard[] = [
     title: "Silence Reason Report",
     description: "Analyze silence periods during calls and identify causes",
     icon: Volume2,
-    color: "text-cyan-500",
-    bgGradient: "from-cyan-500/20 to-cyan-600/5",
+    color: "text-slate-500",
+    bgGradient: "from-slate-500/20 to-slate-600/5",
     available: true,
   },
   {
@@ -119,6 +164,9 @@ export default function Reports() {
   const handleReportClick = (reportId: string) => {
     // Navigate to specific report pages
     switch (reportId) {
+      case "case-classification":
+        navigate("/post-call-analyzer/reports/case-classification");
+        break;
       case "cross-up-sell":
         navigate("/post-call-analyzer/reports/cross-upsell");
         break;
