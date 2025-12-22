@@ -25,6 +25,12 @@ import AgentInsights from "./pages/post-call-analyzer/AgentInsights";
 import CrossUpsellReport from "./pages/post-call-analyzer/CrossUpsellReport";
 import BadPracticeReport from "./pages/post-call-analyzer/BadPracticeReport";
 import CaseClassificationReport from "./pages/post-call-analyzer/CaseClassificationReport";
+import SentimentAnalysisReport from "./pages/post-call-analyzer/SentimentAnalysisReport";
+import CallResolutionReport from "./pages/post-call-analyzer/CallResolutionReport";
+import FrequentCallersReport from "./pages/post-call-analyzer/FrequentCallersReport";
+import CallDurationReport from "./pages/post-call-analyzer/CallDurationReport";
+import TrafficTrendsReport from "./pages/post-call-analyzer/TrafficTrendsReport";
+import TrainingNeedsReport from "./pages/post-call-analyzer/TrainingNeedsReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +63,12 @@ const App = () => (
             <Route path="/post-call-analyzer/reports/cross-upsell" element={<CrossUpsellReport />} />
             <Route path="/post-call-analyzer/reports/bad-practice" element={<BadPracticeReport />} />
             <Route path="/post-call-analyzer/reports/case-classification" element={<CaseClassificationReport />} />
+            <Route path="/post-call-analyzer/reports/sentiment-analysis" element={<SentimentAnalysisReport />} />
+            <Route path="/post-call-analyzer/reports/call-resolution" element={<CallResolutionReport />} />
+            <Route path="/post-call-analyzer/reports/frequent-callers" element={<FrequentCallersReport />} />
+            <Route path="/post-call-analyzer/reports/call-duration" element={<CallDurationReport />} />
+            <Route path="/post-call-analyzer/reports/traffic-trends" element={<TrafficTrendsReport />} />
+            <Route path="/post-call-analyzer/reports/training-needs" element={<TrainingNeedsReport />} />
             <Route path="/post-call-analyzer/configuration" element={<Configuration />} />
             <Route path="/user-management" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -51,7 +51,7 @@ const reportCards: ReportCard[] = [
     available: true,
   },
   {
-    id: "cross-up-sell",
+    id: "cross-upsell",
     title: "Cross/Up-Sell Analysis",
     description: "Track opportunities and conversion rates for cross-selling and up-selling",
     icon: TrendingUp,
@@ -66,15 +66,6 @@ const reportCards: ReportCard[] = [
     icon: GraduationCap,
     color: "text-purple-500",
     bgGradient: "from-purple-500/20 to-purple-600/5",
-    available: true,
-  },
-  {
-    id: "unresolved-calls",
-    title: "Unresolved Calls Analysis",
-    description: "Analyze calls that were not resolved to identify patterns",
-    icon: PhoneOff,
-    color: "text-amber-500",
-    bgGradient: "from-amber-500/20 to-amber-600/5",
     available: true,
   },
   {
@@ -122,33 +113,6 @@ const reportCards: ReportCard[] = [
     bgGradient: "from-violet-500/20 to-violet-600/5",
     available: true,
   },
-  {
-    id: "churn-analysis",
-    title: "Churn Analysis",
-    description: "Identify customers at risk of churning based on call patterns",
-    icon: UserX,
-    color: "text-rose-500",
-    bgGradient: "from-rose-500/20 to-rose-600/5",
-    available: true,
-  },
-  {
-    id: "silence-reason",
-    title: "Silence Reason Report",
-    description: "Analyze silence periods during calls and identify causes",
-    icon: Volume2,
-    color: "text-slate-500",
-    bgGradient: "from-slate-500/20 to-slate-600/5",
-    available: true,
-  },
-  {
-    id: "recommendations",
-    title: "Overall Recommendations",
-    description: "AI-generated recommendations to improve call center performance",
-    icon: Sparkles,
-    color: "text-indigo-500",
-    bgGradient: "from-indigo-500/20 to-indigo-600/5",
-    available: true,
-  },
 ];
 
 export default function Reports() {
@@ -162,21 +126,7 @@ export default function Reports() {
   }, [setShowModuleTabs]);
 
   const handleReportClick = (reportId: string) => {
-    // Navigate to specific report pages
-    switch (reportId) {
-      case "case-classification":
-        navigate("/post-call-analyzer/reports/case-classification");
-        break;
-      case "cross-up-sell":
-        navigate("/post-call-analyzer/reports/cross-upsell");
-        break;
-      case "bad-practice":
-        navigate("/post-call-analyzer/reports/bad-practice");
-        break;
-      default:
-        // For other reports, we could add more routes later
-        break;
-    }
+    navigate(`/post-call-analyzer/reports/${reportId}`);
   };
 
   return (
