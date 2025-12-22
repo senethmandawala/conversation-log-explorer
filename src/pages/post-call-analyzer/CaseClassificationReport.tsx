@@ -142,6 +142,45 @@ const level3Data: Record<string, { name: string; value: number }[]> = {
     { name: "Invalid Details", value: 15 },
     { name: "Expired Card", value: 10 },
   ],
+  "Login Problems": [
+    { name: "Forgot Password", value: 35 },
+    { name: "Account Locked", value: 30 },
+    { name: "2FA Issues", value: 20 },
+    { name: "Session Expired", value: 10 },
+  ],
+};
+
+// Level 4 data
+const level4Data: Record<string, { name: string; value: number }[]> = {
+  "Incorrect Amount": [
+    { name: "Overcharged", value: 20 },
+    { name: "Undercharged", value: 15 },
+    { name: "Wrong Rate", value: 10 },
+  ],
+  "Card Declined": [
+    { name: "Insufficient Funds", value: 18 },
+    { name: "Card Expired", value: 12 },
+    { name: "Bank Block", value: 10 },
+  ],
+  "Forgot Password": [
+    { name: "Email Not Received", value: 15 },
+    { name: "Link Expired", value: 12 },
+    { name: "Wrong Email", value: 8 },
+  ],
+};
+
+// Level 5 data
+const level5Data: Record<string, { name: string; value: number }[]> = {
+  "Overcharged": [
+    { name: "Tax Error", value: 10 },
+    { name: "Promo Not Applied", value: 7 },
+    { name: "System Glitch", value: 3 },
+  ],
+  "Insufficient Funds": [
+    { name: "Account Empty", value: 10 },
+    { name: "Hold on Funds", value: 5 },
+    { name: "Pending Transactions", value: 3 },
+  ],
 };
 
 // Call logs for the final level
@@ -151,11 +190,13 @@ const callLogsData = [
   { date: "2024-01-14", time: "02:30 PM", msisdn: "+1122334455", sentiment: "Neutral", status: "Resolved" },
   { date: "2024-01-14", time: "04:15 PM", msisdn: "+1555666777", sentiment: "Positive", status: "Escalated" },
   { date: "2024-01-13", time: "11:00 AM", msisdn: "+1888999000", sentiment: "Negative", status: "Resolved" },
+  { date: "2024-01-13", time: "03:45 PM", msisdn: "+1777888999", sentiment: "Positive", status: "Resolved" },
+  { date: "2024-01-12", time: "08:15 AM", msisdn: "+1666777888", sentiment: "Neutral", status: "Pending" },
 ];
 
 interface Slide {
   id: number;
-  type: "category" | "subcategory" | "level3" | "level4" | "callLogs";
+  type: "category" | "subcategory" | "level3" | "level4" | "level5" | "callLogs";
   title: string;
   breadcrumb: string[];
   data?: any[];
@@ -211,16 +252,54 @@ export default function CaseClassificationReport() {
   };
 
   const handleLevel3Click = (itemName: string) => {
+    const level4 = level4Data[itemName] || [
+      { name: "Detail A", value: 15 },
+      { name: "Detail B", value: 10 },
+      { name: "Detail C", value: 5 },
+    ];
+    
     const newSlide: Slide = {
       id: 4,
-      type: "callLogs",
-      title: "Call Logs",
+      type: "level4",
+      title: "Category Level 4",
       breadcrumb: [...slides[2].breadcrumb, itemName],
-      data: callLogsData,
+      data: level4,
     };
     
     setSlides(prev => [...prev.slice(0, 3), newSlide]);
     setCurrentSlideIndex(3);
+  };
+
+  const handleLevel4Click = (itemName: string) => {
+    const level5 = level5Data[itemName] || [
+      { name: "Sub-detail A", value: 8 },
+      { name: "Sub-detail B", value: 5 },
+      { name: "Sub-detail C", value: 3 },
+    ];
+    
+    const newSlide: Slide = {
+      id: 5,
+      type: "level5",
+      title: "Category Level 5",
+      breadcrumb: [...slides[3].breadcrumb, itemName],
+      data: level5,
+    };
+    
+    setSlides(prev => [...prev.slice(0, 4), newSlide]);
+    setCurrentSlideIndex(4);
+  };
+
+  const handleLevel5Click = (itemName: string) => {
+    const newSlide: Slide = {
+      id: 6,
+      type: "callLogs",
+      title: "Call Logs",
+      breadcrumb: [...slides[4].breadcrumb, itemName],
+      data: callLogsData,
+    };
+    
+    setSlides(prev => [...prev.slice(0, 5), newSlide]);
+    setCurrentSlideIndex(5);
   };
 
   const closeSlide = (slideId: number) => {
@@ -368,6 +447,8 @@ export default function CaseClassificationReport() {
                   if (slide.type === "category") handleCategoryClick(name);
                   else if (slide.type === "subcategory") handleSubcategoryClick(name);
                   else if (slide.type === "level3") handleLevel3Click(name);
+                  else if (slide.type === "level4") handleLevel4Click(name);
+                  else if (slide.type === "level5") handleLevel5Click(name);
                 }
               }}
             >
