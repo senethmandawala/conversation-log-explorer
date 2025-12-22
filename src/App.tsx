@@ -24,6 +24,7 @@ import PostCallDashboard from "./pages/post-call-analyzer/Dashboard";
 import AgentInsights from "./pages/post-call-analyzer/AgentInsights";
 import CrossUpsellReport from "./pages/post-call-analyzer/CrossUpsellReport";
 import BadPracticeReport from "./pages/post-call-analyzer/BadPracticeReport";
+import CaseClassificationReport from "./pages/post-call-analyzer/CaseClassificationReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/post-call-analyzer/reports" element={<Reports />} />
             <Route path="/post-call-analyzer/reports/cross-upsell" element={<CrossUpsellReport />} />
             <Route path="/post-call-analyzer/reports/bad-practice" element={<BadPracticeReport />} />
+            <Route path="/post-call-analyzer/reports/case-classification" element={<CaseClassificationReport />} />
             <Route path="/post-call-analyzer/configuration" element={<Configuration />} />
             <Route path="/user-management" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
