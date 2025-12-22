@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { usePostCall } from "@/contexts/PostCallContext";
+import { useAutopilot } from "@/contexts/AutopilotContext";
 
 interface NavItem {
   title: string;
@@ -48,6 +50,17 @@ const navigation: NavSection[] = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { setSelectedInstance: setPostCallInstance } = usePostCall();
+  const { setSelectedInstance: setAutopilotInstance } = useAutopilot();
+
+  const handleNavClick = (href: string) => {
+    // Clear instance when navigating to module root (instances page)
+    if (href === "/post-call-analyzer") {
+      setPostCallInstance(null);
+    } else if (href === "/autopilot") {
+      setAutopilotInstance(null);
+    }
+  };
 
   return (
     <motion.aside
@@ -95,11 +108,12 @@ export function AppSidebar() {
             )}
             <ul className="space-y-1">
               {section.items.map((item) => {
-                const isActive = location.pathname === item.href;
+                const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
                 return (
                   <li key={item.title}>
                     <NavLink
                       to={item.href}
+                      onClick={() => handleNavClick(item.href)}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                         isActive

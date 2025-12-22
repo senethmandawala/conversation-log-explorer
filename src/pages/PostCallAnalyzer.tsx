@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { InstanceSelector } from "@/components/post-call/InstanceSelector";
 import { PostCallDashboard } from "@/components/post-call/PostCallDashboard";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 
 export interface Instance {
   id: string;
@@ -26,7 +27,7 @@ const mockInstances: Instance[] = [
 ];
 
 const PostCallAnalyzer = () => {
-  const [selectedInstance, setSelectedInstance] = useState<Instance | null>(null);
+  const { selectedInstance, setSelectedInstance } = usePostCall();
   const { setShowModuleTabs } = useModule();
 
   useEffect(() => {

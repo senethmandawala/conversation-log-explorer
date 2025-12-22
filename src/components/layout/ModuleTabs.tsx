@@ -17,6 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAutopilot } from "@/contexts/AutopilotContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 
 interface Tab {
   id: string;
@@ -48,11 +50,18 @@ interface ModuleTabsProps {
 
 export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsProps) {
   const navigate = useNavigate();
+  const { selectedInstance: autopilotInstance } = useAutopilot();
+  const { selectedInstance: postCallInstance } = usePostCall();
   const isPostCallAnalyzer = currentPath.startsWith("/post-call-analyzer");
   const isAutopilot = currentPath.startsWith("/autopilot");
   const tabs = isPostCallAnalyzer ? postCallAnalyzerTabs : autopilotTabs;
   const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
   const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;
+  
+  // Get the selected instance name based on current module
+  const instanceName = isPostCallAnalyzer 
+    ? postCallInstance?.name 
+    : autopilotInstance?.name;
 
   // Determine active tab from URL
   const getActiveTabFromPath = () => {
@@ -83,7 +92,7 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
           </div>
           <div>
             <h1 className="text-lg font-semibold text-foreground tracking-tight">{moduleTitle}</h1>
-            <p className="text-xs text-muted-foreground">Dashboard Overview</p>
+            <p className="text-xs text-muted-foreground">{instanceName || "Dashboard Overview"}</p>
           </div>
         </div>
 

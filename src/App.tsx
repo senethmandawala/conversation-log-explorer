@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ModuleProvider } from "./contexts/ModuleContext";
 import { AutopilotProvider } from "./contexts/AutopilotContext";
+import { PostCallProvider } from "./contexts/PostCallContext";
 import Index from "./pages/Index";
 import GetStarted from "./pages/GetStarted";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
@@ -19,6 +20,7 @@ import AgentPerformance from "./pages/post-call-analyzer/AgentPerformance";
 import ContentUploader from "./pages/post-call-analyzer/ContentUploader";
 import Reports from "./pages/post-call-analyzer/Reports";
 import Configuration from "./pages/post-call-analyzer/Configuration";
+import PostCallDashboard from "./pages/post-call-analyzer/Dashboard";
 import AgentInsights from "./pages/post-call-analyzer/AgentInsights";
 import CrossUpsellReport from "./pages/post-call-analyzer/CrossUpsellReport";
 import BadPracticeReport from "./pages/post-call-analyzer/BadPracticeReport";
@@ -34,6 +36,7 @@ const App = () => (
       <BrowserRouter>
         <ModuleProvider>
         <AutopilotProvider>
+        <PostCallProvider>
         <MainLayout>
           <Routes>
             <Route path="/" element={<GetStarted />} />
@@ -44,7 +47,7 @@ const App = () => (
             <Route path="/autopilot/conversations" element={<AutopilotConversations />} />
             <Route path="/autopilot/reports" element={<AutopilotReports />} />
             <Route path="/autopilot/settings" element={<AutopilotSettings />} />
-            <Route path="/post-call-analyzer/dashboard" element={<PostCallAnalyzer />} />
+            <Route path="/post-call-analyzer/dashboard" element={<PostCallDashboard />} />
             <Route path="/post-call-analyzer/call-insight" element={<CallInsight />} />
             <Route path="/post-call-analyzer/agent-performance" element={<AgentPerformance />} />
             <Route path="/post-call-analyzer/agent-performance/:agentId" element={<AgentInsights />} />
@@ -58,6 +61,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </MainLayout>
+        </PostCallProvider>
         </AutopilotProvider>
         </ModuleProvider>
       </BrowserRouter>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Filter, Calendar, BarChart3, FileText, Lightbulb, Headphones, Table, PhoneCall } from "lucide-react";
+import { ArrowLeft, Filter, Calendar, BarChart3, FileText, Lightbulb, Headphones, Table, PhoneCall, Phone, CheckCircle, Clock, FolderOpen, Timer, VolumeX, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StatCard } from "./StatCard";
+import { Card } from "@/components/ui/card";
 import { ReportSection } from "./ReportSection";
 import { CaseClassificationReport } from "./CaseClassificationReport";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +22,106 @@ interface PostCallDashboardProps {
   instance: Instance;
   onBack: () => void;
 }
+
+// Compact stat card component with Autopilot design (sized for grid layout)
+interface CompactStatCardProps {
+  color: string;
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  trend?: { value: number; isPositive: boolean };
+}
+
+const CompactStatCard = ({ color, icon, label, value, trend }: CompactStatCardProps) => {
+  const colorConfig: Record<string, { gradient: string; iconBg: string; border: string; glow: string }> = {
+    blue: {
+      gradient: "from-blue-500/10 via-blue-500/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30",
+      border: "border-blue-500/20",
+      glow: "shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)]",
+    },
+    green: {
+      gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/30",
+      border: "border-emerald-500/20",
+      glow: "shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]",
+    },
+    red: {
+      gradient: "from-red-500/10 via-red-500/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/30",
+      border: "border-red-500/20",
+      glow: "shadow-[0_0_20px_-5px_rgba(239,68,68,0.3)]",
+    },
+    amber: {
+      gradient: "from-amber-500/10 via-amber-500/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-amber-500 to-amber-600 shadow-amber-500/30",
+      border: "border-amber-500/20",
+      glow: "shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]",
+    },
+    purple: {
+      gradient: "from-purple-500/10 via-purple-500/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-500/30",
+      border: "border-purple-500/20",
+      glow: "shadow-[0_0_20px_-5px_rgba(139,92,246,0.3)]",
+    },
+    orange: {
+      gradient: "from-orange-500/10 via-orange-500/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-orange-500 to-orange-600 shadow-orange-500/30",
+      border: "border-orange-500/20",
+      glow: "shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)]",
+    },
+  };
+
+  const config = colorConfig[color] || colorConfig.blue;
+
+  return (
+    <Card className={`relative overflow-hidden bg-card/80 backdrop-blur-xl border ${config.border} ${config.glow} hover:scale-[1.02] transition-all duration-300`}>
+      {/* Background gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
+      
+      <div className="relative p-4">
+        <div className="flex items-center gap-4">
+          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${config.iconBg} shadow-lg`}>
+            {icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-muted-foreground mb-0.5">{label}</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-foreground tracking-tight">{value}</p>
+              {trend && (
+                <span className={`flex items-center gap-0.5 text-xs font-medium ${trend.isPositive ? "text-emerald-500" : "text-red-500"}`}>
+                  {trend.isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                  {trend.value}%
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
+// Icon mapping for stat cards
+const iconMap: Record<string, React.ReactNode> = {
+  phone: <Phone className="h-5 w-5 text-white" />,
+  check: <CheckCircle className="h-5 w-5 text-white" />,
+  clock: <Clock className="h-5 w-5 text-white" />,
+  folder: <FolderOpen className="h-5 w-5 text-white" />,
+  timer: <Timer className="h-5 w-5 text-white" />,
+  volume: <VolumeX className="h-5 w-5 text-white" />,
+};
+
+// Color mapping for stat cards
+const getColorFromIconColor = (iconColor: string): string => {
+  if (iconColor.includes("blue")) return "blue";
+  if (iconColor.includes("green")) return "green";
+  if (iconColor.includes("purple")) return "purple";
+  if (iconColor.includes("red")) return "red";
+  if (iconColor.includes("amber")) return "amber";
+  if (iconColor.includes("orange")) return "orange";
+  return "blue";
+};
 
 // Helper to format time string (HH:MM:SS) to readable format
 const formatTimeValue = (timeStr: string): string => {
@@ -116,8 +216,19 @@ const transformPerformanceData = (performance: OverallPerformanceResponse['overa
   });
 };
 
+// Stat card type definition
+interface StatCardData {
+  title: string;
+  value: string;
+  icon: string;
+  color: string;
+  iconColor: string;
+  borderColor: string;
+  trend?: { value: number; isPositive: boolean };
+}
+
 // Default fallback data
-const defaultStatCards = [
+const defaultStatCards: StatCardData[] = [
   { title: "Total Calls", value: "—", icon: "phone", color: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-600 dark:text-blue-400", borderColor: "border-l-blue-500" },
   { title: "FCR Rate", value: "—", icon: "check", color: "bg-green-100 dark:bg-green-900/30", iconColor: "text-green-600 dark:text-green-400", borderColor: "border-l-green-500" },
   { title: "Avg. Handling Time", value: "—", icon: "clock", color: "bg-purple-100 dark:bg-purple-900/30", iconColor: "text-purple-600 dark:text-purple-400", borderColor: "border-l-purple-500" },
@@ -280,7 +391,13 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
           >
-            <StatCard {...stat} />
+            <CompactStatCard
+              color={getColorFromIconColor(stat.iconColor)}
+              icon={iconMap[stat.icon]}
+              label={stat.title}
+              value={stat.value}
+              trend={stat.trend}
+            />
           </motion.div>
         ))}
       </div>
