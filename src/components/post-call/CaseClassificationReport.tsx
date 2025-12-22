@@ -95,6 +95,28 @@ const subcategoryData: Record<string, { name: string; value: number }[]> = {
   ],
 };
 
+// Level 3 data for each subcategory
+const level3Data: Record<string, { name: string; value: number }[]> = {
+  "Invoice Issues": [
+    { name: "Incorrect Amount", value: 45 },
+    { name: "Missing Discount", value: 35 },
+    { name: "Duplicate Charge", value: 25 },
+    { name: "Late Fee", value: 15 },
+  ],
+  "Payment Failed": [
+    { name: "Card Declined", value: 35 },
+    { name: "Bank Error", value: 25 },
+    { name: "Invalid Details", value: 15 },
+    { name: "Expired Card", value: 10 },
+  ],
+  "Login Issues": [
+    { name: "Forgot Password", value: 40 },
+    { name: "Account Locked", value: 30 },
+    { name: "2FA Issues", value: 15 },
+    { name: "Session Expired", value: 10 },
+  ],
+};
+
 interface CaseClassificationReportProps {
   id: string;
   title: string;
@@ -110,6 +132,7 @@ export const CaseClassificationReport = ({
   chartData 
 }: CaseClassificationReportProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   const mainTreemapData = chartData.map((item, idx) => ({
     ...item,
@@ -123,14 +146,36 @@ export const CaseClassificationReport = ({
       })) || []
     : [];
 
+  const level3TreemapData = selectedSubcategory
+    ? level3Data[selectedSubcategory]?.map((item, idx) => ({
+        ...item,
+        fill: COLORS[idx % COLORS.length],
+      })) || []
+    : [];
+
   const handleCategoryClick = (data: any) => {
     if (data && data.name) {
       setSelectedCategory(data.name);
+      setSelectedSubcategory(null);
+    }
+  };
+
+  const handleSubcategoryClick = (data: any) => {
+    if (data && data.name) {
+      setSelectedSubcategory(data.name);
     }
   };
 
   const handleBack = () => {
-    setSelectedCategory(null);
+    if (selectedSubcategory) {
+      setSelectedSubcategory(null);
+    } else {
+      setSelectedCategory(null);
+    }
+  };
+
+  const handleCloseLevel3 = () => {
+    setSelectedSubcategory(null);
   };
 
   return (
@@ -138,13 +183,13 @@ export const CaseClassificationReport = ({
       {selectedCategory ? (
         <motion.div 
           key="split-view"
-          className="grid grid-cols-2 gap-4"
+          className={`grid gap-4 ${selectedSubcategory ? 'grid-cols-3' : 'grid-cols-2'}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3, ease: "linear" }}
         >
-          {/* Left Card: Category Distribution */}
+          {/* Card 1: Category Distribution */}
           <motion.div
             layout
             initial={{ opacity: 0, scale: 0.95 }}
@@ -160,33 +205,25 @@ export const CaseClassificationReport = ({
                     <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
                     <div>
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg font-semibold">Category Distribution</CardTitle>
+                        <CardTitle className="text-sm font-semibold">Categories</CardTitle>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                              <Info className="h-4 w-4" />
+                              <Info className="h-3.5 w-3.5" />
                             </button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Click on a category to change selection</p>
+                            <p>Click to change category</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
-                      <Calendar className="h-3.5 w-3.5" />
-                      Today
-                    </Button>
                   </div>
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-4">
-                <ChartContainer config={chartConfig} className="h-[220px] w-full">
+              <CardContent className="pt-3">
+                <ChartContainer config={chartConfig} className="h-[180px] w-full">
                   <Treemap
                     data={mainTreemapData}
                     dataKey="value"
@@ -201,11 +238,10 @@ export const CaseClassificationReport = ({
                     <ChartTooltip content={<ChartTooltipContent />} />
                   </Treemap>
                 </ChartContainer>
-                {/* Legend */}
-                <div className="flex flex-wrap gap-2 mt-3 justify-center">
+                <div className="flex flex-wrap gap-1.5 mt-2 justify-center">
                   {mainTreemapData.map((entry, index) => (
-                    <div key={index} className="flex items-center gap-1.5 text-xs">
-                      <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.fill }} />
+                    <div key={index} className="flex items-center gap-1 text-[10px]">
+                      <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: entry.fill }} />
                       <span className={`${selectedCategory === entry.name ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{entry.name}</span>
                     </div>
                   ))}
@@ -214,12 +250,12 @@ export const CaseClassificationReport = ({
             </Card>
           </motion.div>
 
-          {/* Right Card: Subcategory Distribution */}
+          {/* Card 2: Subcategory Distribution */}
           <motion.div
             layout
-            initial={{ opacity: 0, x: 100 }}
+            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
+            exit={{ opacity: 0, x: 50 }}
             transition={{ duration: 0.3, ease: "linear" }}
             className="h-full"
           >
@@ -230,38 +266,109 @@ export const CaseClassificationReport = ({
                     <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
                     <div>
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg font-semibold">Subcategory Distribution</CardTitle>
+                        <CardTitle className="text-sm font-semibold">Top Sub Categories</CardTitle>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                              <Info className="h-4 w-4" />
+                              <Info className="h-3.5 w-3.5" />
                             </button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Breakdown of {selectedCategory} category</p>
+                            <p>Click to drill down further</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-0.5">{selectedCategory}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{selectedCategory}</p>
                     </div>
                   </div>
                   
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
                     onClick={handleBack}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-4">
-                <div className="bg-white rounded-lg p-2">
-                  <ChartContainer config={chartConfig} className="h-[220px] w-full">
+              <CardContent className="pt-3">
+                <ChartContainer config={chartConfig} className="h-[180px] w-full">
+                  <Treemap
+                    data={subTreemapData}
+                    dataKey="value"
+                    nameKey="name"
+                    aspectRatio={1}
+                    onClick={handleSubcategoryClick}
+                    isAnimationActive={true}
+                    animationDuration={300}
+                    animationEasing="linear"
+                    content={<CustomTreemapContent />}
+                  >
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </Treemap>
+                </ChartContainer>
+                <div className="flex flex-wrap gap-1.5 mt-2 justify-center">
+                  {subTreemapData.map((entry, index) => (
+                    <div key={index} className="flex items-center gap-1 text-[10px]">
+                      <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: entry.fill }} />
+                      <span className={`${selectedSubcategory === entry.name ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{entry.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Card 3: Level 3 Distribution (only when subcategory selected) */}
+          {selectedSubcategory && (
+            <motion.div
+              layout
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.3, ease: "linear" }}
+              className="h-full"
+            >
+              <Card className="overflow-hidden border-border/50 bg-card shadow-sm hover:shadow-md transition-shadow duration-300 h-full">
+                <CardHeader className="pb-2 border-b border-border/30">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-sm font-semibold">Category Level 3</CardTitle>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                                <Info className="h-3.5 w-3.5" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Detailed breakdown of {selectedSubcategory}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{selectedCategory} / {selectedSubcategory}</p>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      onClick={handleCloseLevel3}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-3">
+                  <ChartContainer config={chartConfig} className="h-[180px] w-full">
                     <Treemap
-                      data={subTreemapData}
+                      data={level3TreemapData}
                       dataKey="value"
                       nameKey="name"
                       aspectRatio={1}
@@ -273,19 +380,18 @@ export const CaseClassificationReport = ({
                       <ChartTooltip content={<ChartTooltipContent />} />
                     </Treemap>
                   </ChartContainer>
-                  {/* Legend */}
-                  <div className="flex flex-wrap gap-2 mt-3 justify-center">
-                    {subTreemapData.map((entry, index) => (
-                      <div key={index} className="flex items-center gap-1.5 text-xs">
-                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.fill }} />
+                  <div className="flex flex-wrap gap-1.5 mt-2 justify-center">
+                    {level3TreemapData.map((entry, index) => (
+                      <div key={index} className="flex items-center gap-1 text-[10px]">
+                        <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: entry.fill }} />
                         <span className="text-muted-foreground">{entry.name}</span>
                       </div>
                     ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </motion.div>
       ) : (
         <motion.div
