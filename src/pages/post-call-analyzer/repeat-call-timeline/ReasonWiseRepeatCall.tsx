@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell } from "recharts";
+import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
 
@@ -12,26 +13,6 @@ const mockData = [
   { reason: "Product Info", count: 28, fill: COLORS[3] },
   { reason: "Complaint", count: 22, fill: COLORS[4] },
 ];
-
-const CustomBarTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0];
-    return (
-      <div className="bg-card border border-border rounded-lg p-2 shadow-lg">
-        <div className="flex items-center gap-2">
-          <div 
-            className="w-3 h-3 rounded-sm flex-shrink-0" 
-            style={{ backgroundColor: data.payload.fill }}
-          />
-          <span className="text-sm font-medium text-foreground">
-            {data.payload.reason}: <span className="font-semibold">{data.value}</span>
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
 
 export function ReasonWiseRepeatCall() {
   const [loading, setLoading] = useState(false);
@@ -79,7 +60,7 @@ export function ReasonWiseRepeatCall() {
               axisLine={false} 
               tickLine={false}
             />
-            <RechartsTooltip content={<CustomBarTooltip />} />
+            <RechartsTooltip content={<BarChartTooltip />} />
             <Bar dataKey="count" radius={[6, 6, 0, 0]}>
               {mockData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

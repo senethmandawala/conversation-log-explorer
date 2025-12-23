@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 interface TopSubCategoryProps {
   category: { name: string; color: string };
@@ -94,13 +95,7 @@ export function TopSubCategory({ category, onSubCategorySelect }: TopSubCategory
               stroke="hsl(var(--muted-foreground))" 
               fontSize={11}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "8px",
-              }}
-            />
+            <Tooltip content={<BarChartTooltip />} />
             <Bar dataKey="value" radius={[4, 4, 0, 0]} cursor="pointer">
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />

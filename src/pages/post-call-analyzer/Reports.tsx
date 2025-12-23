@@ -19,7 +19,7 @@ import {
 import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
-import { CaseClassificationReport } from "@/components/post-call/CaseClassificationReport";
+import { CaseClassificationReport } from "@/pages/post-call-analyzer/case-classification/CaseClassificationReport";
 
 interface ReportCard {
   id: string;

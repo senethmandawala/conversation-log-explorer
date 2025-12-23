@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
+import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 const mockData = [
   { category: "Billing", repeatCalls: 52, totalCalls: 120 },
@@ -10,27 +11,6 @@ const mockData = [
   { category: "Service", repeatCalls: 32, totalCalls: 76 },
   { category: "General Inquiry", repeatCalls: 18, totalCalls: 95 },
 ];
-
-const CustomBarTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-card border border-border rounded-lg p-2 shadow-lg space-y-1">
-        {payload.map((item: any, index: number) => (
-          <div key={index} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-sm flex-shrink-0" 
-              style={{ backgroundColor: item.fill }}
-            />
-            <span className="text-sm font-medium text-foreground">
-              {item.name}: <span className="font-semibold">{item.value}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 export function CategoryWiseRepeatCall() {
   const [loading, setLoading] = useState(false);
@@ -75,7 +55,7 @@ export function CategoryWiseRepeatCall() {
               axisLine={false} 
               tickLine={false}
             />
-            <RechartsTooltip content={<CustomBarTooltip />} />
+            <RechartsTooltip content={<BarChartTooltip />} />
             <Bar dataKey="repeatCalls" fill="#8b5cf6" radius={[6, 6, 0, 0]} name="Repeat Calls" />
             <Bar dataKey="totalCalls" fill="#3b82f6" radius={[6, 6, 0, 0]} name="Total Calls" />
           </BarChart>
