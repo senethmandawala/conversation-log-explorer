@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
+import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 const mockData = [
   { agent: "Agent A", handled: 45, resolved: 38 },
@@ -11,27 +12,6 @@ const mockData = [
   { agent: "Agent E", handled: 32, resolved: 26 },
   { agent: "Agent F", handled: 28, resolved: 22 },
 ];
-
-const CustomBarTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-card border border-border rounded-lg p-2 shadow-lg space-y-1">
-        {payload.map((item: any, index: number) => (
-          <div key={index} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-sm flex-shrink-0" 
-              style={{ backgroundColor: item.fill }}
-            />
-            <span className="text-sm font-medium text-foreground">
-              {item.name}: <span className="font-semibold">{item.value}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 export function AgentRepeatCallHandling() {
   const [loading, setLoading] = useState(false);
@@ -80,7 +60,7 @@ export function AgentRepeatCallHandling() {
               axisLine={false} 
               tickLine={false}
             />
-            <RechartsTooltip content={<CustomBarTooltip />} />
+            <RechartsTooltip content={<BarChartTooltip />} />
             <Bar dataKey="handled" fill="#f59e0b" radius={[6, 6, 0, 0]} name="Handled" />
             <Bar dataKey="resolved" fill="#10b981" radius={[6, 6, 0, 0]} name="Resolved" />
           </BarChart>

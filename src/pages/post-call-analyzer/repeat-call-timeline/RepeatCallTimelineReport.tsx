@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Info, RefreshCw, Calendar, List } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
+import { LineChartTooltip } from "@/components/ui/custom-chart-tooltip";
 import { ReasonWiseRepeatCall } from "./ReasonWiseRepeatCall.tsx";
 import { CategoryWiseRepeatCall } from "./CategoryWiseRepeatCall.tsx";
 import { AgentRepeatCallHandling } from "./AgentRepeatCallHandling.tsx";
@@ -17,27 +18,6 @@ const generateTimelineData = () => {
     repeatCalls: Math.floor(Math.random() * 20) + 15,
     uniqueCustomers: Math.floor(Math.random() * 40) + 50,
   }));
-};
-
-const CustomLineTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-card border border-border rounded-lg p-2 shadow-lg space-y-1">
-        {payload.map((item: any, index: number) => (
-          <div key={index} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-sm flex-shrink-0" 
-              style={{ backgroundColor: item.stroke }}
-            />
-            <span className="text-sm font-medium text-foreground">
-              {item.name}: <span className="font-semibold">{item.value}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
 };
 
 export default function RepeatCallTimelineReport() {
@@ -144,7 +124,7 @@ export default function RepeatCallTimelineReport() {
                   axisLine={false} 
                   tickLine={false}
                 />
-                <RechartsTooltip content={<CustomLineTooltip />} />
+                <RechartsTooltip content={<LineChartTooltip />} />
                 <Legend />
                 <Line 
                   type="monotone" 

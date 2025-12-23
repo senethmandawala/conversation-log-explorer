@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Info, RefreshCw, Calendar, List, Phone, MessageCircle, Users, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Label, Treemap } from "recharts";
+import { PieChartTooltip, TreemapTooltip } from "@/components/ui/custom-chart-tooltip";
 
 // Mock data for channels
 const generateChannelData = () => [
@@ -13,46 +14,6 @@ const generateChannelData = () => [
 ];
 
 const channelDataInitial = generateChannelData();
-
-const CustomPieTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0];
-    return (
-      <div className="bg-card border border-border rounded-lg p-2 shadow-lg">
-        <div className="flex items-center gap-2">
-          <div 
-            className="w-3 h-3 rounded-sm flex-shrink-0" 
-            style={{ backgroundColor: data.payload.color }}
-          />
-          <span className="text-sm font-medium text-foreground">
-            {data.name}: <span className="font-semibold">{data.value}</span>
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
-const CustomTreemapTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-card border border-border rounded-lg p-2 shadow-lg">
-        <div className="flex items-center gap-2">
-          <div 
-            className="w-3 h-3 rounded-sm flex-shrink-0" 
-            style={{ backgroundColor: data.fill }}
-          />
-          <span className="text-sm font-medium text-foreground">
-            {data.name}: <span className="font-semibold">{data.value}</span>
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
 
 const CustomTreemapContent = (props: any) => {
   const { x, y, width, height, name, fill } = props;
@@ -245,7 +206,7 @@ export default function ChannelWiseCategoryReport() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <RechartsTooltip content={<CustomPieTooltip />} />
+                    <RechartsTooltip content={<PieChartTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
 
@@ -321,7 +282,7 @@ export default function ChannelWiseCategoryReport() {
                         content={<CustomTreemapContent />}
                         onClick={(data) => handleCategoryClick(data.name)}
                       >
-                        <RechartsTooltip content={<CustomTreemapTooltip />} />
+                        <RechartsTooltip content={<TreemapTooltip />} />
                       </Treemap>
                     </ResponsiveContainer>
                   </div>

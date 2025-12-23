@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 interface AgentsSentimentTopAgentsProps {
   selectedSentiment: string;
@@ -97,11 +98,7 @@ export const AgentsSentimentTopAgents = ({
               width={100}
             />
             <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))', 
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px'
-              }}
+              content={<BarChartTooltip />}
               cursor={{ fill: 'hsl(var(--muted))' }}
             />
             <Bar 

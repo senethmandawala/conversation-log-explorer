@@ -1,5 +1,6 @@
 import React from "react";
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
+import { TreemapTooltip } from "@/components/ui/custom-chart-tooltip";
 
 interface CategoryProps {
   onCategorySelect: (category: { name: string; color: string }) => void;
@@ -25,26 +26,6 @@ const categoryData = [
   { name: "General Inquiry", value: 90 },
   { name: "Others", value: 60 },
 ];
-
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-card border border-border rounded-lg p-2 shadow-lg">
-        <div className="flex items-center gap-2">
-          <div 
-            className="w-3 h-3 rounded-sm flex-shrink-0" 
-            style={{ backgroundColor: data.fill }}
-          />
-          <span className="text-sm font-medium text-foreground">
-            {data.name}: <span className="font-semibold">{data.value}</span>
-          </span>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
 
 const CustomTreemapContent = (props: any) => {
   const { x, y, width, height, name, fill } = props;
@@ -113,7 +94,7 @@ export function Category({ onCategorySelect, onTotalCallsChange }: CategoryProps
             content={<CustomTreemapContent />}
             onClick={handleClick}
           >
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<TreemapTooltip />} />
           </Treemap>
         </ResponsiveContainer>
       </div>
