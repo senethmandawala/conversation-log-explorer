@@ -38,6 +38,47 @@ const chartConfig = {
   agentNegative: { label: "Agent Negative", color: "hsl(270, 70%, 55%)" },
 };
 
+const CustomPieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div className="bg-card border border-border rounded-lg p-2 shadow-lg">
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-3 h-3 rounded-sm flex-shrink-0" 
+            style={{ backgroundColor: data.payload.fill }}
+          />
+          <span className="text-sm font-medium text-foreground">
+            {data.name}: <span className="font-semibold">{data.value}</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomBarTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-card border border-border rounded-lg p-2 shadow-lg space-y-1">
+        {payload.map((item: any, index: number) => (
+          <div key={index} className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-sm flex-shrink-0" 
+              style={{ backgroundColor: item.fill }}
+            />
+            <span className="text-sm font-medium text-foreground">
+              {item.name}: <span className="font-semibold">{item.value}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function SentimentAnalysisReport() {
   const navigate = useNavigate();
   const { setShowModuleTabs } = useModule();
@@ -70,7 +111,7 @@ export default function SentimentAnalysisReport() {
                     </CardTitle>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button className="text-muted-foreground/50 hover:text-muted-foreground">
+                        <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                           <Info className="h-4 w-4" />
                         </button>
                       </TooltipTrigger>
@@ -122,7 +163,7 @@ export default function SentimentAnalysisReport() {
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                           ))}
                         </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartTooltip content={<CustomPieTooltip />} />
                       </PieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -160,7 +201,7 @@ export default function SentimentAnalysisReport() {
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                           ))}
                         </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartTooltip content={<CustomPieTooltip />} />
                       </PieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -188,7 +229,7 @@ export default function SentimentAnalysisReport() {
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                       <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartTooltip content={<CustomBarTooltip />} />
                       <Legend />
                       <Bar dataKey="userPositive" name="User Positive" fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="userNegative" name="User Negative" fill="hsl(0, 84%, 60%)" radius={[4, 4, 0, 0]} />

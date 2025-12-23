@@ -81,7 +81,7 @@ export default function FrequentCallersReport() {
                     </CardTitle>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button className="text-muted-foreground/50 hover:text-muted-foreground">
+                        <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                           <Info className="h-4 w-4" />
                         </button>
                       </TooltipTrigger>

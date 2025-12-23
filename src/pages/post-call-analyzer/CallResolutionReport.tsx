@@ -30,6 +30,46 @@ const chartConfig = {
   time: { label: "Avg Resolution Time (min)", color: "hsl(226, 70%, 55%)" },
 };
 
+const CustomPieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div className="bg-card border border-border rounded-lg p-2 shadow-lg">
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-3 h-3 rounded-sm flex-shrink-0" 
+            style={{ backgroundColor: data.payload.fill }}
+          />
+          <span className="text-sm font-medium text-foreground">
+            {data.name}: <span className="font-semibold">{data.value}</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomAreaTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div className="bg-card border border-border rounded-lg p-2 shadow-lg">
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-3 h-3 rounded-sm flex-shrink-0" 
+            style={{ backgroundColor: "hsl(226, 70%, 55%)" }}
+          />
+          <span className="text-sm font-medium text-foreground">
+            {data.payload.date}: <span className="font-semibold">{data.value} min</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const statsCards = [
   { title: "Avg Resolution Time", value: "5.6 min", icon: Clock, color: "text-blue-500", bgColor: "bg-blue-500/10" },
   { title: "First Call Resolution", value: "72%", icon: CheckCircle, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
@@ -68,7 +108,7 @@ export default function CallResolutionReport() {
                     </CardTitle>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button className="text-muted-foreground/50 hover:text-muted-foreground">
+                        <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                           <Info className="h-4 w-4" />
                         </button>
                       </TooltipTrigger>
@@ -139,7 +179,7 @@ export default function CallResolutionReport() {
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                           ))}
                         </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartTooltip content={<CustomPieTooltip />} />
                       </PieChart>
                     </ResponsiveContainer>
                   </ChartContainer>
@@ -172,7 +212,7 @@ export default function CallResolutionReport() {
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                         <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartTooltip content={<CustomAreaTooltip />} />
                         <Area
                           type="monotone"
                           dataKey="time"

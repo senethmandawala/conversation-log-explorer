@@ -4,7 +4,14 @@ import { ArrowLeft, Filter, Calendar, BarChart3, FileText, Lightbulb, Headphones
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ReportSection } from "./ReportSection";
-import { CaseClassificationReport } from "./CaseClassificationReport";
+import { CaseClassificationReport } from "@/pages/post-call-analyzer/case-classification/CaseClassificationReport";
+import SentimentAnalysisReport from "@/pages/post-call-analyzer/sentiment-analysis/SentimentAnalysisReport";
+import CallResolutionReport from "@/pages/post-call-analyzer/call-resolution/CallResolutionReport";
+import FrequentCallersReport from "@/pages/post-call-analyzer/frequent-callers/FrequentCallersReport";
+import CallDurationReport from "@/pages/post-call-analyzer/call-duration/CallDurationReport";
+import TrafficTrendsReport from "@/pages/post-call-analyzer/traffic-trends/TrafficTrendsReport";
+import RepeatCallTimelineReport from "@/pages/post-call-analyzer/repeat-call-timeline/RepeatCallTimelineReport";
+import ChannelWiseCategoryReport from "@/pages/post-call-analyzer/channel-category/ChannelWiseCategoryReport";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Instance } from "@/pages/PostCallAnalyzer";
 import { 
@@ -342,8 +349,8 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
   const reports = [
     { 
       id: "performance", 
-      title: "Overall Performance", 
-      description: "14 December 2025",
+      title: "Overall Performance Chart", 
+      description: "Weekly performance trends and metrics",
       hasChart: true,
       chartType: "line" as const,
       chartData: performanceData
@@ -365,16 +372,16 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
       chartData: caseClassificationData
     },
     { 
-      id: "sentiment-analysis", 
-      title: "Sentiment Analysis", 
-      description: "Customer sentiment breakdown",
-      chartType: "pie" as const,
-      chartData: sentimentData
+      id: "repeat-call-timeline", 
+      title: "7 Day Repeat Call Timeline", 
+      description: "Track repeat callers over the past 7 days",
+      chartType: "line" as const,
+      chartData: performanceData
     },
     { 
-      id: "agent-performance", 
-      title: "Agent Performance", 
-      description: "Individual agent metrics",
+      id: "channel-category", 
+      title: "Channel Wise Category Distribution", 
+      description: "Call distribution across different channels",
       chartType: "bar" as const,
       chartData: agentPerformanceData
     },
@@ -413,11 +420,56 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
           >
             {report.id === "case-classification" ? (
               <CaseClassificationReport {...report} />
+            ) : report.id === "repeat-call-timeline" ? (
+              <RepeatCallTimelineReport />
+            ) : report.id === "channel-category" ? (
+              <ChannelWiseCategoryReport />
             ) : (
               <ReportSection {...report} />
             )}
           </motion.div>
         ))}
+
+        {/* Additional Report Components */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.8 }}
+        >
+          <SentimentAnalysisReport />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.9 }}
+        >
+          <CallResolutionReport />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 1.0 }}
+        >
+          <FrequentCallersReport />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 1.1 }}
+        >
+          <CallDurationReport />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 1.2 }}
+        >
+          <TrafficTrendsReport />
+        </motion.div>
       </div>
     </div>
   );

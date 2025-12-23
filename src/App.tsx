@@ -21,16 +21,16 @@ import ContentUploader from "./pages/post-call-analyzer/ContentUploader";
 import Reports from "./pages/post-call-analyzer/Reports";
 import Configuration from "./pages/post-call-analyzer/Configuration";
 import PostCallDashboard from "./pages/post-call-analyzer/Dashboard";
-import AgentInsights from "./pages/post-call-analyzer/AgentInsights";
-import CrossUpsellReport from "./pages/post-call-analyzer/CrossUpsellReport";
-import BadPracticeReport from "./pages/post-call-analyzer/BadPracticeReport";
-import CaseClassificationReport from "./pages/post-call-analyzer/CaseClassificationReport";
-import SentimentAnalysisReport from "./pages/post-call-analyzer/SentimentAnalysisReport";
-import CallResolutionReport from "./pages/post-call-analyzer/CallResolutionReport";
-import FrequentCallersReport from "./pages/post-call-analyzer/FrequentCallersReport";
-import CallDurationReport from "./pages/post-call-analyzer/CallDurationReport";
-import TrafficTrendsReport from "./pages/post-call-analyzer/TrafficTrendsReport";
-import TrainingNeedsReport from "./pages/post-call-analyzer/TrainingNeedsReport";
+import AgentInsights from "./pages/post-call-analyzer/agent-insights/AgentInsights";
+import CrossUpsellReport from "./pages/post-call-analyzer/cross-upsell/CrossUpsellReport";
+import BadPracticeReport from "./pages/post-call-analyzer/bad-practice/BadPracticeReport";
+// import CaseClassificationReport from "./pages/post-call-analyzer/case-classification/CaseClassificationReport";
+import SentimentAnalysisReport from "./pages/post-call-analyzer/sentiment-analysis/SentimentAnalysisReport";
+import CallResolutionReport from "./pages/post-call-analyzer/call-resolution/CallResolutionReport";
+import FrequentCallersReport from "./pages/post-call-analyzer/frequent-callers/FrequentCallersReport";
+import CallDurationReport from "./pages/post-call-analyzer/call-duration/CallDurationReport";
+import TrafficTrendsReport from "./pages/post-call-analyzer/traffic-trends/TrafficTrendsReport";
+import TrainingNeedsReport from "./pages/post-call-analyzer/training-needs/TrainingNeedsReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,7 +62,7 @@ const App = () => (
             <Route path="/post-call-analyzer/reports" element={<Reports />} />
             <Route path="/post-call-analyzer/reports/cross-upsell" element={<CrossUpsellReport />} />
             <Route path="/post-call-analyzer/reports/bad-practice" element={<BadPracticeReport />} />
-            <Route path="/post-call-analyzer/reports/case-classification" element={<CaseClassificationReport />} />
+            {/* <Route path="/post-call-analyzer/reports/case-classification" element={<CaseClassificationReport />} /> */}
             <Route path="/post-call-analyzer/reports/sentiment-analysis" element={<SentimentAnalysisReport />} />
             <Route path="/post-call-analyzer/reports/call-resolution" element={<CallResolutionReport />} />
             <Route path="/post-call-analyzer/reports/frequent-callers" element={<FrequentCallersReport />} />

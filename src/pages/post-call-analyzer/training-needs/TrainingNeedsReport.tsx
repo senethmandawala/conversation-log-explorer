@@ -117,7 +117,6 @@ export default function TrainingNeedsReport() {
           </CardHeader>
 
           <CardContent className="pt-6">
-            {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {statsCards.map((stat, idx) => (
                 <Card key={idx} className="border-border/50">
@@ -137,7 +136,6 @@ export default function TrainingNeedsReport() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Skill Gaps Bar Chart */}
               <Card className="border-border/50">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base font-medium">Skill Gap Analysis</CardTitle>
@@ -161,7 +159,6 @@ export default function TrainingNeedsReport() {
                 </CardContent>
               </Card>
 
-              {/* Team Performance Radar */}
               <Card className="border-border/50">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base font-medium">Team Performance Overview</CardTitle>
@@ -188,7 +185,6 @@ export default function TrainingNeedsReport() {
               </Card>
             </div>
 
-            {/* Agents Needing Training Table */}
             <Card className="border-border/50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-medium">Agents Requiring Training</CardTitle>
