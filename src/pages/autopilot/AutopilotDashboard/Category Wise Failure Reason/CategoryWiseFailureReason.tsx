@@ -99,7 +99,8 @@ const failureReasonDetailsMap: Record<string, FailureReasonDetail[]> = {
 const COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6"];
 
 const CustomTreemapContent = ({ x, y, width, height, index, name, value }: any) => {
-  if (width < 50 || height < 30) return null;
+  // Guard against undefined props from Recharts
+  if (!name || width < 50 || height < 30) return null;
   
   return (
     <g>
