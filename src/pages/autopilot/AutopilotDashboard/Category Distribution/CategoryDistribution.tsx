@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  Treemap,
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
-  Legend,
   Tooltip,
+  Legend,
 } from "recharts";
 import { Info, X } from "lucide-react";
 import {
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { PieChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 interface ChartDataItem {
   name: string;
@@ -69,33 +69,93 @@ const subcategoryDataMap: Record<string, ChartDataItem[]> = {
   ],
 };
 
+const CustomTreemapContent = (props: any) => {
+  const { x, y, width, height, name, fill } = props;
+  
+  // Skip rendering if there's no valid name (this filters out the root node)
+  if (!name) {
+    return null;
+  }
+
+  // Calculate dynamic font size based on cell dimensions
+  const maxFontSize = 14;
+  const minFontSize = 8;
+  const padding = 8;
+  
+  // Calculate font size that fits within the cell
+  const availableWidth = width - padding * 2;
+  const availableHeight = height - padding * 2;
+  
+  // Estimate characters per line based on available width (approx 0.6 ratio for font width)
+  const charWidth = 0.6;
+  const estimatedFontSizeByWidth = availableWidth / (name.length * charWidth);
+  const estimatedFontSizeByHeight = availableHeight * 0.6;
+  
+  // Use the smaller of the two to ensure it fits
+  let fontSize = Math.min(estimatedFontSizeByWidth, estimatedFontSizeByHeight, maxFontSize);
+  fontSize = Math.max(fontSize, minFontSize);
+  
+  // Only show text if there's enough space
+  const showText = width > 40 && height > 20 && fontSize >= minFontSize;
+  
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill={fill}
+        stroke="white"
+        strokeWidth={2}
+        style={{ cursor: "pointer" }}
+        className="hover:opacity-80 transition-opacity"
+      />
+      {showText && (
+        <text
+          x={x + width / 2}
+          y={y + height / 2}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill="white"
+          fontSize={fontSize}
+          fontWeight={600}
+          style={{ pointerEvents: "none" }}
+        >
+          {name}
+        </text>
+      )}
+    </g>
+  );
+};
+
 export function CategoryDistribution() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-  const getColorForIndex = (index: number): string => {
-    return categoryData[index % categoryData.length].color;
-  };
-
-  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, value }: any) => {
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill="white"
-        textAnchor="middle"
-        dominantBaseline="central"
-        className="text-xs font-medium"
-        style={{ fontSize: '10px', fontWeight: 600 }}
-      >
-        {value}
-      </text>
-    );
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      const total = categoryData.reduce((sum, item) => sum + item.value, 0);
+      const percentage = ((data.value / total) * 100).toFixed(0);
+      
+      return (
+        <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+          <div 
+            className="text-sm font-semibold px-3 py-2" 
+            style={{ backgroundColor: data.color, color: "white" }}
+          >
+            {data.name}
+          </div>
+          <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
+            <div className="text-muted-foreground">Count: <span className="font-semibold text-foreground">{data.value}</span></div>
+            <div className="text-muted-foreground">Percentage: <span className="font-semibold text-foreground">{percentage}%</span></div>
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   const handleCategoryClick = (category: string) => {
@@ -103,7 +163,13 @@ export function CategoryDistribution() {
   };
 
   const handleCloseSubcategory = () => {
-    setSelectedCategory(null);
+    // Start closing animation
+    setIsClosing(true);
+    // Clear selected category after animation completes
+    setTimeout(() => {
+      setSelectedCategory(null);
+      setIsClosing(false);
+    }, 300);
   };
 
   const subcategoryData = selectedCategory ? subcategoryDataMap[selectedCategory] : [];
@@ -111,7 +177,12 @@ export function CategoryDistribution() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Main Category Distribution */}
-      <Card className={`w-full ${!selectedCategory ? 'md:col-span-2' : ''}`}>
+      <motion.div
+        className={`w-full ${(!selectedCategory && !isClosing) ? 'md:col-span-2' : ''}`}
+        layout
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="w-full h-full">
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-lg font-semibold">Category Distribution</CardTitle>
@@ -132,28 +203,20 @@ export function CategoryDistribution() {
             <Skeleton className="h-[300px] w-full" />
           ) : (
             <>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
+              <div className="h-[300px] bg-white rounded-md p-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <Treemap
+                    data={categoryData.map(item => ({ ...item, fill: item.color }))}
                     dataKey="value"
-                    label={renderCustomLabel}
-                    labelLine={false}
+                    stroke="white"
+                    fill="#8b5cf6"
+                    content={<CustomTreemapContent />}
                     onClick={(entry) => handleCategoryClick(entry.name)}
-                    cursor="pointer"
                   >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<PieChartTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
+                    <Tooltip content={<CustomTooltip />} />
+                  </Treemap>
+                </ResponsiveContainer>
+              </div>
               
               {/* Custom Legend */}
               <div className="flex flex-wrap justify-center mt-3 gap-2">
@@ -165,7 +228,7 @@ export function CategoryDistribution() {
                   >
                     <span 
                       className="w-3 h-3 rounded-full mr-1" 
-                      style={{ backgroundColor: getColorForIndex(index) }}
+                      style={{ backgroundColor: category.color }}
                     />
                     <span className="text-sm text-muted-foreground">{category.name}</span>
                   </div>
@@ -175,10 +238,11 @@ export function CategoryDistribution() {
           )}
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Subcategory Distribution Slide */}
       <AnimatePresence>
-        {selectedCategory && (
+        {selectedCategory && !isClosing && (
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -212,31 +276,53 @@ export function CategoryDistribution() {
               
               <CardContent>
                 {subcategoryData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={subcategoryData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        paddingAngle={2}
-                        dataKey="value"
-                        label={renderCustomLabel}
-                        labelLine={false}
-                      >
-                        {subcategoryData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<PieChartTooltip />} />
-                      <Legend 
-                        verticalAlign="bottom" 
-                        height={36}
-                        formatter={(value) => <span className="text-sm text-foreground">{value}</span>}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <PieChart>
+                        <Pie
+                          data={subcategoryData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={2}
+                          dataKey="value"
+                          label={({ cx, cy, midAngle, innerRadius, outerRadius, value }) => {
+                            const RADIAN = Math.PI / 180;
+                            const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                            const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                            const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                            return (
+                              <text
+                                x={x}
+                                y={y}
+                                fill="white"
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                className="text-xs font-medium"
+                                style={{ fontSize: '10px', fontWeight: 600 }}
+                              >
+                                {value}
+                              </text>
+                            );
+                          }}
+                          labelLine={false}
+                        >
+                          {subcategoryData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36}
+                          wrapperStyle={{ paddingTop: '20px' }}
+                          formatter={(value) => <span className="text-sm text-foreground">{value}</span>}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </>
                 ) : (
                   <div className="h-[300px] flex items-center justify-center">
                     <p className="text-muted-foreground">No data available</p>

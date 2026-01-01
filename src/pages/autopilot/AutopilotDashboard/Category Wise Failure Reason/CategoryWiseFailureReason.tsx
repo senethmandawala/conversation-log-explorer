@@ -174,6 +174,7 @@ const TreemapTooltip = ({ active, payload }: any) => {
 export function CategoryWiseFailureReason() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const handleTreemapClick = (data: any) => {
     if (data && data.name) {
@@ -182,7 +183,13 @@ export function CategoryWiseFailureReason() {
   };
 
   const handleCloseDetails = () => {
-    setSelectedCategory(null);
+    // Start closing animation
+    setIsClosing(true);
+    // Clear selected category after animation completes
+    setTimeout(() => {
+      setSelectedCategory(null);
+      setIsClosing(false);
+    }, 300);
   };
 
   const detailsData = selectedCategory ? failureReasonDetailsMap[selectedCategory] || [] : [];
@@ -190,7 +197,12 @@ export function CategoryWiseFailureReason() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Treemap Card */}
-      <Card className={`w-full ${!selectedCategory ? 'md:col-span-2' : ''}`}>
+      <motion.div
+        className={`w-full ${(!selectedCategory && !isClosing) ? 'md:col-span-2' : ''}`}
+        layout
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="w-full h-full">
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-lg font-semibold">Category-wise Failure Reasons</CardTitle>
@@ -225,10 +237,11 @@ export function CategoryWiseFailureReason() {
           )}
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Details Card */}
       <AnimatePresence>
-        {selectedCategory && (
+        {selectedCategory && !isClosing && (
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}

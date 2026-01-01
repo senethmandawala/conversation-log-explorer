@@ -12,6 +12,7 @@ import { FrequentCallers } from "./Frequent Callers/FrequentCallers";
 import { IntentTransitionAnalysis } from "./Intent Transition Analysis/IntentTransitionAnalysis";
 import { AutopilotSankeyChart } from "./Sankey Chart/AutopilotSankeyChart";
 import { CategoryWiseFailureReason } from "./Category Wise Failure Reason/CategoryWiseFailureReason";
+import { CategoryWiseFailureReasonAttempt } from "./Category Wise Failure Reason Attempt/CategoryWiseFailureReasonAttempt";
 import { CategoryWiseVDN } from "./Category Wise VDN/CategoryWiseVDN";
 import { WeeklyTrendsAndPatterns } from "./Weekly Trends/WeeklyTrendsAndPatterns";
 import {
@@ -209,11 +210,20 @@ export default function AutopilotDashboard() {
         <CategoryWiseFailureReason />
       </motion.div>
 
-      {/* Frequent Callers */}
+      {/* Category-wise Failure Reason Attempt */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <CategoryWiseFailureReasonAttempt />
+      </motion.div>
+
+      {/* Frequent Callers */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.55 }}
       >
         <FrequentCallers />
       </motion.div>
@@ -222,7 +232,7 @@ export default function AutopilotDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.55 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
       >
         <CallDurationDistribution />
       </motion.div>
@@ -231,7 +241,7 @@ export default function AutopilotDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
+        transition={{ duration: 0.5, delay: 0.65 }}
       >
         <IntentTransitionAnalysis />
       </motion.div>
@@ -240,7 +250,7 @@ export default function AutopilotDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.65 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
       >
         <CategoryWiseVDN />
       </motion.div>
@@ -249,7 +259,7 @@ export default function AutopilotDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
+        transition={{ duration: 0.5, delay: 0.75 }}
       >
         <WeeklyTrendsAndPatterns />
       </motion.div>

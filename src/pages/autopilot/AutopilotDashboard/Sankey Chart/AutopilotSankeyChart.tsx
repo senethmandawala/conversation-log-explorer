@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import {
@@ -9,7 +9,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sankey,
-  Tooltip,
   Layer,
   Rectangle,
   ResponsiveContainer,
@@ -98,7 +97,11 @@ interface CustomNodeProps {
   payload: SankeyNode;
 }
 
-const CustomNode = ({ x, y, width, height, index, payload }: CustomNodeProps) => {
+const CustomNode = ({ x, y, width, height, index, payload, onMouseEnter, onMouseLeave, onMouseDown }: CustomNodeProps & {
+  onMouseEnter?: (e: React.MouseEvent, index: number, payload: SankeyNode) => void;
+  onMouseLeave?: () => void;
+  onMouseDown?: (e: React.MouseEvent, index: number, payload: SankeyNode) => void;
+}) => {
   return (
     <Layer key={`CustomNode-${index}`}>
       <Rectangle
@@ -110,16 +113,22 @@ const CustomNode = ({ x, y, width, height, index, payload }: CustomNodeProps) =>
         fillOpacity="0.9"
         rx={4}
         ry={4}
+        className="cursor-move hover:fill-opacity-100 transition-all"
+        onMouseDown={(e) => onMouseDown?.(e, index, payload)}
+        onMouseEnter={(e) => onMouseEnter?.(e, index, payload)}
+        onMouseLeave={onMouseLeave}
       />
+      {/* External label only */}
       <text
         textAnchor="middle"
         x={x + width / 2}
-        y={y + height / 2}
-        fontSize="11"
-        fill="#fff"
-        fontWeight="500"
+        y={y - 8}
+        fontSize="12"
+        fill="#374151"
+        fontWeight="600"
+        pointerEvents="none"
       >
-        {payload.name.length > 12 ? `${payload.name.slice(0, 12)}...` : payload.name}
+        {payload.name}
       </text>
     </Layer>
   );
@@ -145,7 +154,37 @@ const CustomLink = ({
   targetControlX,
   linkWidth,
   index,
-}: CustomLinkProps) => {
+  source,
+  target,
+  value,
+}: CustomLinkProps & { source?: number; target?: number; value?: number }) => {
+  const showTooltip = (e: React.MouseEvent) => {
+    const content = (
+      <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+        <div 
+          className="text-sm font-semibold px-3 py-2" 
+          style={{ backgroundColor: COLORS[0], color: "white" }}
+        >
+          Call Flow
+        </div>
+        <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
+          <div className="text-muted-foreground">
+            From: <span className="font-semibold text-foreground">{sankeyData.nodes[source || 0].name}</span>
+          </div>
+          <div className="text-muted-foreground">
+            To: <span className="font-semibold text-foreground">{sankeyData.nodes[target || 0].name}</span>
+          </div>
+          <div className="text-muted-foreground">
+            Count: <span className="font-semibold text-foreground">{value}</span>
+          </div>
+        </div>
+      </div>
+    );
+    
+    const event = e as any;
+    event.target?.dispatchEvent(new CustomEvent('show-tooltip', { detail: content }));
+  };
+
   return (
     <Layer key={`CustomLink-${index}`}>
       <path
@@ -157,56 +196,146 @@ const CustomLink = ({
         strokeWidth={linkWidth}
         fill="none"
         strokeOpacity="0.3"
+        className="hover:stroke-opacity-50 transition-all cursor-pointer"
+        onMouseEnter={showTooltip}
+        onMouseLeave={() => {
+          const event = new Event('hide-tooltip');
+          document.dispatchEvent(event);
+        }}
       />
     </Layer>
   );
 };
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    
-    if (data.source !== undefined && data.target !== undefined) {
-      // Link tooltip
-      return (
-        <div className="overflow-hidden rounded-md shadow-lg border-0 bg-background/95 backdrop-blur-sm">
-          <div className="px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold">
-            Call Flow
-          </div>
-          <div className="px-3 py-2 text-sm space-y-0.5">
-            <div className="text-muted-foreground">
-              From: <span className="font-semibold text-foreground">{sankeyData.nodes[data.source].name}</span>
-            </div>
-            <div className="text-muted-foreground">
-              To: <span className="font-semibold text-foreground">{sankeyData.nodes[data.target].name}</span>
-            </div>
-            <div className="text-muted-foreground">
-              Count: <span className="font-semibold text-foreground">{data.value}</span>
-            </div>
-          </div>
-        </div>
-      );
-    } else {
-      // Node tooltip
-      return (
-        <div className="overflow-hidden rounded-md shadow-lg border-0 bg-background/95 backdrop-blur-sm">
-          <div className="px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold">
-            {data.name}
-          </div>
-          <div className="px-3 py-2 text-sm">
-            <div className="text-muted-foreground">
-              Total: <span className="font-semibold text-foreground">{data.value || 'N/A'}</span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  }
-  return null;
+// Create a wrapped CustomNode that receives handlers
+const createCustomNode = (handlers: {
+  onMouseEnter: (e: React.MouseEvent, index: number, payload: SankeyNode) => void;
+  onMouseLeave: () => void;
+  onMouseDown: (e: React.MouseEvent, index: number, payload: SankeyNode) => void;
+}) => {
+  return (props: CustomNodeProps) => (
+    <CustomNode
+      {...props}
+      onMouseEnter={handlers.onMouseEnter}
+      onMouseLeave={handlers.onMouseLeave}
+      onMouseDown={handlers.onMouseDown}
+    />
+  );
 };
 
 export function AutopilotSankeyChart() {
   const [isLoading, setIsLoading] = useState(false);
+  const [tooltipData, setTooltipData] = useState<{
+    x: number;
+    y: number;
+    content: React.ReactNode;
+  } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedNode, setDraggedNode] = useState<{ index: number; payload: SankeyNode } | null>(null);
+
+  const handleNodeMouseEnter = (e: React.MouseEvent, index: number, payload: SankeyNode) => {
+    const content = (
+      <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+        <div 
+          className="text-sm font-semibold px-3 py-2" 
+          style={{ backgroundColor: COLORS[index % COLORS.length], color: "white" }}
+        >
+          {payload.name}
+        </div>
+        <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
+          <div className="text-muted-foreground">
+            Total Flow: <span className="font-semibold text-foreground">N/A</span>
+          </div>
+        </div>
+      </div>
+    );
+    
+    setTooltipData({
+      x: e.clientX,
+      y: e.clientY,
+      content
+    });
+  };
+
+  const handleNodeMouseLeave = () => {
+    setTooltipData(null);
+  };
+
+  const handleNodeMouseDown = (e: React.MouseEvent, index: number, payload: SankeyNode) => {
+    setIsDragging(true);
+    setDraggedNode({ index, payload });
+    e.preventDefault();
+  };
+
+  const handleGlobalMouseMove = (e: MouseEvent) => {
+    if (isDragging && draggedNode) {
+      const content = (
+        <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+          <div 
+            className="text-sm font-semibold px-3 py-2" 
+            style={{ backgroundColor: COLORS[draggedNode.index % COLORS.length], color: "white" }}
+          >
+            {draggedNode.payload.name}
+          </div>
+          <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
+            <div className="text-muted-foreground">
+              Position: <span className="font-semibold text-foreground">({e.clientX}, {e.clientY})</span>
+            </div>
+          </div>
+        </div>
+      );
+      
+      setTooltipData({
+        x: e.clientX,
+        y: e.clientY,
+        content
+      });
+    } else if (tooltipData) {
+      setTooltipData(prev => prev ? {
+        ...prev,
+        x: e.clientX,
+        y: e.clientY
+      } : null);
+    }
+  };
+
+  const handleGlobalMouseUp = () => {
+    setIsDragging(false);
+    setDraggedNode(null);
+  };
+
+  const WrappedCustomNode = createCustomNode({
+  onMouseEnter: handleNodeMouseEnter,
+  onMouseLeave: handleNodeMouseLeave,
+  onMouseDown: handleNodeMouseDown,
+});
+
+React.useEffect(() => {
+    const handleShowTooltip = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setTooltipData({
+        x: (customEvent as any).clientX || 0,
+        y: (customEvent as any).clientY || 0,
+        content: customEvent.detail
+      });
+    };
+
+    const handleHideTooltip = () => {
+      setTooltipData(null);
+    };
+
+    document.addEventListener('show-tooltip', handleShowTooltip);
+    document.addEventListener('hide-tooltip', handleHideTooltip);
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+
+    return () => {
+      document.removeEventListener('show-tooltip', handleShowTooltip);
+      document.removeEventListener('hide-tooltip', handleHideTooltip);
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [tooltipData, isDragging, draggedNode, handleGlobalMouseMove, handleGlobalMouseUp]);
 
   return (
     <Card className="w-full">
@@ -230,23 +359,36 @@ export function AutopilotSankeyChart() {
           <Skeleton className="h-[400px] w-full" />
         ) : (
           <div className="overflow-x-auto">
-            <div className="min-w-[600px]">
-              <ResponsiveContainer width="100%" height={400}>
+            <div className="min-w-[800px]">
+              <ResponsiveContainer width="100%" height={450}>
                 <Sankey
                   data={sankeyData}
-                  nodePadding={50}
-                  nodeWidth={10}
-                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                  link={<CustomLink sourceX={0} targetX={0} sourceY={0} targetY={0} sourceControlX={0} targetControlX={0} linkWidth={0} index={0} />}
-                  node={<CustomNode x={0} y={0} width={0} height={0} index={0} payload={{ name: '' }} />}
+                  nodePadding={60}
+                  nodeWidth={12}
+                  margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
+                  link={CustomLink}
+                  node={WrappedCustomNode}
                 >
-                  <Tooltip content={<CustomTooltip />} />
                 </Sankey>
               </ResponsiveContainer>
             </div>
           </div>
         )}
       </CardContent>
+      
+      {/* Custom Tooltip */}
+      {tooltipData && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: tooltipData.x + 10,
+            top: tooltipData.y - 10,
+            transform: 'translate(-50%, -100%)'
+          }}
+        >
+          {tooltipData.content}
+        </div>
+      )}
     </Card>
   );
 }

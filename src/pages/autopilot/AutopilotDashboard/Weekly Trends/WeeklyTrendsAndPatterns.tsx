@@ -1,272 +1,299 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Info, RefreshCw, Calendar, List } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Filter, Info } from "lucide-react";
-import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Cell,
-} from "recharts";
-import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { BarChart, Bar } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface HourlyData {
-  hour: string;
-  day: string;
-  value: number;
-}
-
-// Days of the week
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const HOURS = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-
-// Generate mock heatmap data for general tab
-const generateGeneralHeatmapData = (): HourlyData[] => {
-  const data: HourlyData[] = [];
-  DAYS.forEach((day) => {
-    HOURS.forEach((hour) => {
-      // Simulate higher traffic during business hours
-      const hourNum = parseInt(hour);
-      let baseValue = Math.floor(Math.random() * 30) + 10;
-      if (hourNum >= 9 && hourNum <= 17) {
-        baseValue += Math.floor(Math.random() * 50) + 30;
-      }
-      if (day === "Sat" || day === "Sun") {
-        baseValue = Math.floor(baseValue * 0.5);
-      }
-      data.push({ hour, day, value: baseValue });
-    });
-  });
-  return data;
-};
-
-// Generate mock data for categories tab
-const generateCategoriesHeatmapData = (): HourlyData[] => {
-  const data: HourlyData[] = [];
-  const categories = ["Billing", "Support", "Sales", "General", "Technical"];
-  DAYS.forEach((day) => {
-    categories.forEach((category, index) => {
-      const value = Math.floor(Math.random() * 80) + 20 + (index * 10);
-      data.push({ hour: category, day, value });
-    });
-  });
-  return data;
-};
-
-const generalHeatmapData = generateGeneralHeatmapData();
-const categoriesHeatmapData = generateCategoriesHeatmapData();
-
-// Convert heatmap data to bar chart format for display
-const generalBarData = DAYS.map(day => {
-  const dayData = generalHeatmapData.filter(d => d.day === day);
-  const total = dayData.reduce((sum, d) => sum + d.value, 0);
-  return { day, calls: total };
-});
-
-const categoriesBarData = ["Billing", "Support", "Sales", "General", "Technical"].map(category => {
-  const categoryData = categoriesHeatmapData.filter(d => d.hour === category);
-  const total = categoryData.reduce((sum, d) => sum + d.value, 0);
-  return { category, calls: total };
-});
-
-const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#06b6d4", "#ec4899"];
-
-interface WeeklyTrendsAndPatternsProps {
-  onBack?: () => void;
-}
-
-export function WeeklyTrendsAndPatterns({ onBack }: WeeklyTrendsAndPatternsProps) {
-  const [activeTab, setActiveTab] = useState("general");
-  const [isLoading, setIsLoading] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [dateRange, setDateRange] = useState("this-week");
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="overflow-hidden rounded-md shadow-lg border-0 bg-background/95 backdrop-blur-sm">
-          <div className="px-3 py-2 bg-primary text-primary-foreground text-sm font-semibold">
-            {label}
-          </div>
-          <div className="px-3 py-2 text-sm">
-            <div className="text-muted-foreground">
-              Calls: <span className="font-semibold text-foreground">{payload[0].value}</span>
-            </div>
-          </div>
-        </div>
-      );
+// Generate mock heatmap data for General tab (Date x Hour)
+const generateGeneralHeatmapData = () => {
+  const days = ['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'];
+  const data: any[] = [];
+  
+  days.forEach((day, dayIndex) => {
+    for (let hour = 0; hour < 24; hour++) {
+      const hourStr = hour.toString().padStart(2, '0') + ':00';
+      // Generate random call counts with peak hours (9-17)
+      const isPeakHour = hour >= 9 && hour <= 17;
+      const baseValue = isPeakHour ? 50 : 10;
+      const callCount = Math.floor(Math.random() * baseValue) + (isPeakHour ? 30 : 0);
+      
+      data.push({
+        x: hour,
+        y: dayIndex,
+        value: callCount,
+        hour: hourStr,
+        day: day
+      });
     }
-    return null;
+  });
+  
+  return data;
+};
+
+// Generate mock heatmap data for Categories tab (Category x Hour)
+const generateCategoryHeatmapData = () => {
+  const categories = ['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'];
+  const data: any[] = [];
+  
+  categories.forEach((category, catIndex) => {
+    for (let hour = 0; hour < 24; hour++) {
+      const hourStr = hour.toString().padStart(2, '0') + ':00';
+      const isPeakHour = hour >= 9 && hour <= 17;
+      const baseValue = isPeakHour ? 30 : 5;
+      const callCount = Math.floor(Math.random() * baseValue) + (isPeakHour ? 10 : 0);
+      
+      data.push({
+        x: hour,
+        y: catIndex,
+        value: callCount,
+        hour: hourStr,
+        category: category
+      });
+    }
+  });
+  
+  return data;
+};
+
+const getHeatmapColor = (value: number, maxValue: number, categoryIndex?: number) => {
+  if (value === 0) return 'hsl(var(--muted))';
+  const intensity = value / maxValue;
+  
+  // For categories tab, use different base colors for each category
+  if (categoryIndex !== undefined) {
+    const categoryColors = [
+      { hue: 220, saturation: 70 }, // Blue - Billing Issues
+      { hue: 140, saturation: 70 }, // Green - Technical Support  
+      { hue: 45, saturation: 85 },  // Yellow - Account Management
+      { hue: 0, saturation: 75 },   // Red - Product Inquiry
+      { hue: 280, saturation: 70 }, // Purple - Service Complaint
+      { hue: 25, saturation: 85 },  // Orange - Refund Request
+      { hue: 200, saturation: 70 }  // Cyan - General Query
+    ];
+    
+    const color = categoryColors[categoryIndex % categoryColors.length];
+    const lightness = 85 - (50 * intensity);
+    return `hsl(${color.hue}, ${color.saturation}%, ${lightness}%)`;
+  }
+  
+  // For general tab, use blue gradient
+  const hue = 220;
+  const saturation = 70 + (20 * intensity);
+  const lightness = 85 - (50 * intensity);
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
+
+interface HeatmapCellProps {
+  value: number;
+  maxValue: number;
+  label: string;
+  hour: string;
+  categoryIndex?: number;
+}
+
+const HeatmapCell = ({ value, maxValue, label, hour, categoryIndex }: HeatmapCellProps) => {
+  return (
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger>
+        <div
+          className="w-12 h-10 rounded border border-border/30 cursor-pointer transition-all duration-200 hover:border-primary hover:scale-105 hover:shadow-md hover:z-10"
+          style={{ backgroundColor: getHeatmapColor(value, maxValue, categoryIndex) }}
+        />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="bg-popover border-border">
+        <div className="text-xs space-y-0.5">
+          <p className="font-semibold text-foreground">{label}</p>
+          <p className="text-muted-foreground">{hour}</p>
+          <p className="font-bold text-primary">{value} calls</p>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+export function WeeklyTrendsAndPatterns() {
+  const [activeTab, setActiveTab] = useState("general");
+  const [loading, setLoading] = useState(true);
+  const [generalData, setGeneralData] = useState<any[]>([]);
+  const [categoryData, setCategoryData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setGeneralData(generateGeneralHeatmapData());
+      setCategoryData(generateCategoryHeatmapData());
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleReload = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setGeneralData(generateGeneralHeatmapData());
+      setCategoryData(generateCategoryHeatmapData());
+      setLoading(false);
+    }, 500);
   };
 
+  const maxGeneralValue = Math.max(...generalData.map(d => d.value), 1);
+  const maxCategoryValue = Math.max(...categoryData.map(d => d.value), 1);
+
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            {onBack && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBack}
-                className="h-8 w-8"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            )}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg font-semibold">Weekly Trends & Patterns</CardTitle>
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Analyze call patterns across different days and hours of the week</p>
-                  </TooltipContent>
-                </UITooltip>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Hourly call distribution patterns throughout the week
-              </p>
+    <Card className="h-full border-border/50">
+      <CardHeader className="pb-4 border-b border-border/30">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg font-semibold">Weekly Trends & Patterns</CardTitle>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                    <Info className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Visualize traffic trends across time periods</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
+            <span className="text-sm text-muted-foreground">Jun 19 - Jun 25, 2025</span>
           </div>
           
-          <Button
-            variant={filtersOpen ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFiltersOpen(!filtersOpen)}
-            className="gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-            {dateRange !== "this-week" && (
-              <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
-                1
-              </Badge>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="gap-1.5">
+              <Calendar className="h-4 w-4" />
+              Week
+            </Button>
+          </div>
         </div>
       </CardHeader>
-      
-      <CardContent>
-        {/* Filters Panel */}
-        <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-          <CollapsibleContent>
-            <div className="mb-4 p-4 bg-muted/50 rounded-lg">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date Range</label>
-                  <Select value={dateRange} onValueChange={setDateRange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select date range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="this-week">This Week</SelectItem>
-                      <SelectItem value="last-week">Last Week</SelectItem>
-                      <SelectItem value="last-2-weeks">Last 2 Weeks</SelectItem>
-                      <SelectItem value="this-month">This Month</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-end">
-                  <Button variant="default" size="sm">
-                    Search
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+      <CardContent className="p-6">
 
-        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="general" className="flex items-center gap-1">
-              General
-              <UITooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3 w-3 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Overall call volume trends by day</p>
-                </TooltipContent>
-              </UITooltip>
-            </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-1">
-              Categories
-              <UITooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3 w-3 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Call distribution by category</p>
-                </TooltipContent>
-              </UITooltip>
-            </TabsTrigger>
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="mt-4">
-            {isLoading ? (
-              <Skeleton className="h-[300px] w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={generalBarData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="calls" radius={[4, 4, 0, 0]}>
-                    {generalBarData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div
+                  key="loading-general"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center justify-center h-[400px]"
+                >
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="content-general"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-x-auto"
+                >
+                <div className="inline-block min-w-full">
+                  {/* Hour labels */}
+                  <div className="flex mb-3">
+                    <div className="w-24 flex-shrink-0"></div>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <div key={i} className="w-12 text-[11px] text-center font-medium text-muted-foreground">
+                        {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+                      </div>
                     ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+                  </div>
+                  
+                  {/* Heatmap grid */}
+                  {['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'].map((day, dayIndex) => (
+                    <div key={day} className="flex items-center mb-2 group">
+                      <div className="w-24 text-xs font-semibold text-right pr-3 flex-shrink-0 text-foreground group-hover:text-primary transition-colors">{day}</div>
+                      <div className="flex gap-1">
+                        {Array.from({ length: 24 }, (_, hour) => {
+                          const dataPoint = generalData.find(d => d.y === dayIndex && d.x === hour);
+                          return (
+                            <HeatmapCell
+                              key={hour}
+                              value={dataPoint?.value || 0}
+                              maxValue={maxGeneralValue}
+                              label={day}
+                              hour={`${hour.toString().padStart(2, '0')}:00`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </TabsContent>
 
           <TabsContent value="categories" className="mt-4">
-            {isLoading ? (
-              <Skeleton className="h-[300px] w-full" />
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={categoriesBarData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" />
-                  <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="calls" radius={[4, 4, 0, 0]}>
-                    {categoriesBarData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div
+                  key="loading-categories"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center justify-center h-[400px]"
+                >
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="content-categories"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-x-auto"
+                >
+                <div className="inline-block min-w-full">
+                  {/* Hour labels */}
+                  <div className="flex mb-3">
+                    <div className="w-40 flex-shrink-0"></div>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <div key={i} className="w-12 text-[11px] text-center font-medium text-muted-foreground">
+                        {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+                      </div>
                     ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+                  </div>
+                  
+                  {/* Heatmap grid */}
+                  {['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'].map((category, catIndex) => (
+                    <div key={category} className="flex items-center mb-2 group">
+                      <div className="w-40 text-xs font-semibold text-right pr-3 flex-shrink-0 truncate text-foreground group-hover:text-primary transition-colors" title={category}>{category}</div>
+                      <div className="flex gap-1">
+                        {Array.from({ length: 24 }, (_, hour) => {
+                          const dataPoint = categoryData.find(d => d.y === catIndex && d.x === hour);
+                          return (
+                            <HeatmapCell
+                              key={hour}
+                              value={dataPoint?.value || 0}
+                              maxValue={maxCategoryValue}
+                              label={category}
+                              hour={`${hour.toString().padStart(2, '0')}:00`}
+                              categoryIndex={catIndex}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </TabsContent>
         </Tabs>
       </CardContent>
