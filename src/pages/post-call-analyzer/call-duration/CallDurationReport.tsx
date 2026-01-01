@@ -54,6 +54,32 @@ const CustomTooltip = ({ active, payload }: any) => {
 const CustomTreemapContent = (props: any) => {
   const { x, y, width, height, name, fill } = props;
   
+  // Skip rendering if there's no valid name (this filters out the root node)
+  if (!name) {
+    return null;
+  }
+
+  // Calculate dynamic font size based on cell dimensions
+  const maxFontSize = 14;
+  const minFontSize = 8;
+  const padding = 8;
+  
+  // Calculate font size that fits within the cell
+  const availableWidth = width - padding * 2;
+  const availableHeight = height - padding * 2;
+  
+  // Estimate characters per line based on available width (approx 0.6 ratio for font width)
+  const charWidth = 0.6;
+  const estimatedFontSizeByWidth = availableWidth / (name.length * charWidth);
+  const estimatedFontSizeByHeight = availableHeight * 0.6;
+  
+  // Use the smaller of the two to ensure it fits
+  let fontSize = Math.min(estimatedFontSizeByWidth, estimatedFontSizeByHeight, maxFontSize);
+  fontSize = Math.max(fontSize, minFontSize);
+  
+  // Only show text if there's enough space
+  const showText = width > 40 && height > 20 && fontSize >= minFontSize;
+  
   return (
     <g>
       <rect
@@ -67,15 +93,15 @@ const CustomTreemapContent = (props: any) => {
         style={{ cursor: "pointer" }}
         className="hover:opacity-80 transition-opacity"
       />
-      {width > 60 && height > 30 && (
+      {showText && (
         <text
           x={x + width / 2}
           y={y + height / 2}
           textAnchor="middle"
           dominantBaseline="middle"
           fill="white"
-          fontSize={12}
-          fontWeight={500}
+          fontSize={fontSize}
+          fontWeight={600}
           style={{ pointerEvents: "none" }}
         >
           {name}

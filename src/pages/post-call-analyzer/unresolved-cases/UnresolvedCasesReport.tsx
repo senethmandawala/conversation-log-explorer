@@ -3,15 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { 
   ArrowLeft, 
   Filter, 
   Calendar,
   AlertTriangle,
-  GraduationCap,
-  X,
-  Search,
+  PhoneOff,
   ArrowUpRight,
   ArrowDownRight
 } from "lucide-react";
@@ -36,49 +33,23 @@ import {
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
 // Mock data
-const mockTrainingAreasData = [
-  { training_type: "Product Knowledge", count: 45 },
-  { training_type: "Communication Skills", count: 38 },
-  { training_type: "Technical Support", count: 32 },
-  { training_type: "Problem Solving", count: 28 },
-  { training_type: "Customer Service Excellence", count: 25 },
-  { training_type: "Time Management", count: 22 },
-  { training_type: "Conflict Resolution", count: 18 },
+const mockAgentWiseData = [
+  { agent: "John Smith", category: "Technical Support", total_calls: 145, total_unresolved_calls: 23, unresolved_rate: "15.9%", total_repeat_calls: 12 },
+  { agent: "Sarah Johnson", category: "Billing Issues", total_calls: 132, total_unresolved_calls: 28, unresolved_rate: "21.2%", total_repeat_calls: 15 },
+  { agent: "Mike Davis", category: "Account Management", total_calls: 98, total_unresolved_calls: 18, unresolved_rate: "18.4%", total_repeat_calls: 9 },
+  { agent: "Emily Wilson", category: "Product Inquiry", total_calls: 87, total_unresolved_calls: 15, unresolved_rate: "17.2%", total_repeat_calls: 8 },
+  { agent: "Chris Brown", category: "Service Complaint", total_calls: 76, total_unresolved_calls: 22, unresolved_rate: "28.9%", total_repeat_calls: 14 },
 ];
 
-const mockAgentSkillsGap = [
-  { 
-    agent_name: "John Smith", 
-    skills_gap: "Product Knowledge, Technical Support, Communication Skills" 
-  },
-  { 
-    agent_name: "Sarah Johnson", 
-    skills_gap: "Problem Solving, Time Management" 
-  },
-  { 
-    agent_name: "Mike Davis", 
-    skills_gap: "Customer Service Excellence, Conflict Resolution" 
-  },
-  { 
-    agent_name: "Emily Wilson", 
-    skills_gap: "Product Knowledge, Communication Skills" 
-  },
-  { 
-    agent_name: "Chris Brown", 
-    skills_gap: "Technical Support, Problem Solving, Time Management" 
-  },
-  { 
-    agent_name: "Lisa Anderson", 
-    skills_gap: "Product Knowledge, Customer Service Excellence" 
-  },
-  { 
-    agent_name: "David Martinez", 
-    skills_gap: "Communication Skills, Conflict Resolution" 
-  },
+const mockCategoryWiseData = [
+  { category: "Technical Support", total_calls: 245, total_unresolved_calls: 52, total_repeat_calls: 28 },
+  { category: "Billing Issues", total_calls: 198, total_unresolved_calls: 45, total_repeat_calls: 24 },
+  { category: "Account Management", total_calls: 156, total_unresolved_calls: 38, total_repeat_calls: 19 },
+  { category: "Product Inquiry", total_calls: 134, total_unresolved_calls: 28, total_repeat_calls: 15 },
+  { category: "Service Complaint", total_calls: 112, total_unresolved_calls: 35, total_repeat_calls: 18 },
 ];
 
 const callTypes = [
@@ -87,7 +58,7 @@ const callTypes = [
   { value: "outbound", label: "Outbound" },
 ];
 
-// Compact stat card component matching PCA Dashboard design
+// Compact stat card component
 interface CompactStatCardProps {
   color: string;
   icon: React.ReactNode;
@@ -98,25 +69,24 @@ interface CompactStatCardProps {
 
 const CompactStatCard = ({ color, icon, label, value, trend }: CompactStatCardProps) => {
   const colorConfig: Record<string, { gradient: string; iconBg: string; border: string; glow: string }> = {
+    red: {
+      gradient: "from-red-500/10 via-red-500/5 to-transparent",
+      iconBg: "bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/30",
+      border: "border-red-500/20",
+      glow: "shadow-[0_0_20px_-5px_rgba(239,68,68,0.3)]",
+    },
     amber: {
       gradient: "from-amber-500/10 via-amber-500/5 to-transparent",
       iconBg: "bg-gradient-to-br from-amber-500 to-amber-600 shadow-amber-500/30",
       border: "border-amber-500/20",
       glow: "shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]",
     },
-    purple: {
-      gradient: "from-purple-500/10 via-purple-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-500/30",
-      border: "border-purple-500/20",
-      glow: "shadow-[0_0_20px_-5px_rgba(139,92,246,0.3)]",
-    },
   };
 
-  const config = colorConfig[color] || colorConfig.purple;
+  const config = colorConfig[color] || colorConfig.red;
 
   return (
     <Card className={`relative overflow-hidden bg-card/80 backdrop-blur-xl border ${config.border} ${config.glow} hover:scale-[1.02] transition-all duration-300`}>
-      {/* Background gradient */}
       <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
       
       <div className="relative p-4">
@@ -142,21 +112,18 @@ const CompactStatCard = ({ color, icon, label, value, trend }: CompactStatCardPr
   );
 };
 
-export default function TrainingNeedsAnalysisReport() {
+export default function UnresolvedCasesReport() {
   const navigate = useNavigate();
   const { setShowModuleTabs } = useModule();
   const [loading, setLoading] = useState(false);
   const [panelOpenState, setPanelOpenState] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
   
-  // Filter states
   const [selectedDateRange, setSelectedDateRange] = useState<string>("");
-  const [agentName, setAgentName] = useState("");
   const [selectedCallType, setSelectedCallType] = useState("");
 
-  // Stats
-  const [highPriorityAreas, setHighPriorityAreas] = useState(3);
-  const [agentsRequiringTraining, setAgentsRequiringTraining] = useState(24);
+  const [totalUnresolvedCalls, setTotalUnresolvedCalls] = useState(198);
+  const [totalRepeatCalls, setTotalRepeatCalls] = useState(104);
 
   useEffect(() => {
     setShowModuleTabs(true);
@@ -166,10 +133,9 @@ export default function TrainingNeedsAnalysisReport() {
   useEffect(() => {
     let count = 0;
     if (selectedDateRange) count++;
-    if (agentName) count++;
     if (selectedCallType) count++;
     setNumberOfFilters(count);
-  }, [selectedDateRange, agentName, selectedCallType]);
+  }, [selectedDateRange, selectedCallType]);
 
   const backToReports = () => {
     navigate("/post-call-analyzer/reports");
@@ -179,23 +145,18 @@ export default function TrainingNeedsAnalysisReport() {
     setPanelOpenState(!panelOpenState);
   };
 
-  const clearSelectedAgentName = () => {
-    setAgentName("");
-  };
-
-  const clearSelectedCallType = () => {
-    setSelectedCallType("");
-  };
-
-  const applyAgentName = (value: string) => {
-    setAgentName(value);
-  };
-
   const searchFilterData = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
     }, 1000);
+  };
+
+  const getColorForRate = (rate: string) => {
+    const numRate = parseFloat(rate.replace('%', ''));
+    if (numRate >= 25) return "destructive";
+    if (numRate >= 15) return "default";
+    return "secondary";
   };
 
   return (
@@ -215,10 +176,10 @@ export default function TrainingNeedsAnalysisReport() {
                 </Button>
                 <div>
                   <CardTitle className="text-xl font-semibold">
-                    Training Needs Analysis
+                    Unresolved Cases Analysis
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Identify areas where agents require additional training and development
+                    Monitor and analyze calls requiring escalation or remaining unresolved
                   </p>
                 </div>
               </div>
@@ -254,8 +215,7 @@ export default function TrainingNeedsAnalysisReport() {
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   className="mb-6 p-4 border border-border/50 rounded-lg bg-muted/30"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Date Range Filter */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Date Range</label>
                       <Button variant="outline" className="w-full justify-start gap-2">
@@ -264,21 +224,6 @@ export default function TrainingNeedsAnalysisReport() {
                       </Button>
                     </div>
 
-                    {/* Agent Name Filter */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Search Agent Name</label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search agent..."
-                          className="pl-9"
-                          value={agentName}
-                          onChange={(e) => setAgentName(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Call Type Filter */}
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Call Type</label>
                       <Select value={selectedCallType} onValueChange={setSelectedCallType}>
@@ -295,7 +240,6 @@ export default function TrainingNeedsAnalysisReport() {
                       </Select>
                     </div>
 
-                    {/* Search Button */}
                     <div className="flex items-end">
                       <Button
                         onClick={searchFilterData}
@@ -317,10 +261,10 @@ export default function TrainingNeedsAnalysisReport() {
                 transition={{ delay: 0.1 }}
               >
                 <CompactStatCard
-                  color="amber"
+                  color="red"
                   icon={<AlertTriangle className="h-5 w-5 text-white" />}
-                  label="High Priority Training Areas"
-                  value={highPriorityAreas.toString()}
+                  label="Total Unresolved Calls"
+                  value={totalUnresolvedCalls.toString()}
                 />
               </motion.div>
               <motion.div
@@ -329,10 +273,10 @@ export default function TrainingNeedsAnalysisReport() {
                 transition={{ delay: 0.2 }}
               >
                 <CompactStatCard
-                  color="purple"
-                  icon={<GraduationCap className="h-5 w-5 text-white" />}
-                  label="Agents Requiring Training"
-                  value={agentsRequiringTraining.toString()}
+                  color="amber"
+                  icon={<PhoneOff className="h-5 w-5 text-white" />}
+                  label="Repeat Calls"
+                  value={totalRepeatCalls.toString()}
                 />
               </motion.div>
             </div>
@@ -343,27 +287,51 @@ export default function TrainingNeedsAnalysisReport() {
               </div>
             ) : (
               <>
-                {/* Training Areas Table */}
+                {/* Agent-wise Table */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                   className="mb-6"
                 >
-                  <h5 className="text-lg font-semibold mb-4">Training Areas</h5>
+                  <h5 className="text-lg font-semibold mb-4">Agent-wise Unresolved Cases</h5>
                   <div className="border border-border/50 rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Training Type</TableHead>
-                          <TableHead className="text-right">Count</TableHead>
+                          <TableHead>Agent</TableHead>
+                          <TableHead className="text-center">Category</TableHead>
+                          <TableHead className="text-center">Total Calls</TableHead>
+                          <TableHead className="text-center">Unresolved Calls</TableHead>
+                          <TableHead className="text-center">Unresolved Rate</TableHead>
+                          <TableHead className="text-center">Repeat Calls</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {mockTrainingAreasData.map((area, index) => (
+                        {mockAgentWiseData.map((agent, index) => (
                           <TableRow key={index}>
-                            <TableCell className="font-medium">{area.training_type}</TableCell>
-                            <TableCell className="text-right">{area.count}</TableCell>
+                            <TableCell className="font-medium">{agent.agent}</TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+                                {agent.category}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">{agent.total_calls}</TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">
+                                {agent.total_unresolved_calls}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant={getColorForRate(agent.unresolved_rate)}>
+                                {agent.unresolved_rate}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+                                {agent.total_repeat_calls}
+                              </Badge>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -371,49 +339,47 @@ export default function TrainingNeedsAnalysisReport() {
                   </div>
                 </motion.div>
 
-                {/* Agent Skills Gap Table */}
+                {/* Category-wise Table */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <h5 className="text-lg font-semibold mb-4">Agent Skills Gap</h5>
-                  {mockAgentSkillsGap && mockAgentSkillsGap.length > 0 ? (
-                    <div className="border border-border/50 rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Agent Name</TableHead>
-                            <TableHead>Recommended Trainings</TableHead>
+                  <h5 className="text-lg font-semibold mb-4">Category-wise Unresolved Cases</h5>
+                  <div className="border border-border/50 rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Category</TableHead>
+                          <TableHead className="text-center">Total Calls</TableHead>
+                          <TableHead className="text-center">Unresolved Calls</TableHead>
+                          <TableHead className="text-center">Repeat Calls</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {mockCategoryWiseData.map((category, index) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+                                {category.category}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">{category.total_calls}</TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">
+                                {category.total_unresolved_calls}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+                                {category.total_repeat_calls}
+                              </Badge>
+                            </TableCell>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {mockAgentSkillsGap.map((agent, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium">{agent.agent_name}</TableCell>
-                              <TableCell>
-                                <div className="flex flex-wrap gap-2">
-                                  {agent.skills_gap.split(", ").map((skill, skillIndex) => (
-                                    <Badge
-                                      key={skillIndex}
-                                      variant="outline"
-                                      className="bg-accent/50 text-accent-foreground border-accent"
-                                    >
-                                      {skill}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      No data available
-                    </div>
-                  )}
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </motion.div>
               </>
             )}

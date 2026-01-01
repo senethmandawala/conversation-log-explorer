@@ -4,6 +4,12 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAutopilot } from "@/contexts/AutopilotContext";
+import { HandledCallsAnalysis } from "./Handled Calls Analysis/HandledCallsAnalysis";
+import { CallsHandledByDTMF } from "./autopilot-calls-handled-by-DTMF/CallsHandledByDTMF";
+import { CallDurationDistribution } from "./Call Duration Distribution/CallDurationDistribution";
+import { CategoryDistribution } from "./Category Distribution/CategoryDistribution";
+import { FrequentCallers } from "./Frequent Callers/FrequentCallers";
+import { IntentTransitionAnalysis } from "./Intent Transition Analysis/IntentTransitionAnalysis";
 import {
   Phone,
   PhoneIncoming,
@@ -226,96 +232,41 @@ export default function AutopilotDashboard() {
         />
       </motion.div>
 
-      {/* Handled Calls Chart */}
+      {/* Handled Calls Analysis */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Handled Calls Analysis</h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={handledCallsData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="aiResolved" name="AI Resolved" fill="#10b981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="partiallyResolved" name="Partially Resolved" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="transferred" name="Transferred" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+        <HandledCallsAnalysis />
       </motion.div>
 
-      {/* Category Distribution & Subcategory */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Calls Handled by DTMF */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <CallsHandledByDTMF />
+      </motion.div>
+
+      {/* Category Distribution */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <CategoryDistribution />
+      </motion.div>
+
+      {/* Subcategory Details */}
+      {selectedCategory && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
         >
           <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm h-full">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Category Distribution</h3>
-            <div className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                    dataKey="value"
-                    onClick={(data) => setSelectedCategory(data.name)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap justify-center gap-3 mt-4">
-              {categoryData.map((entry, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 cursor-pointer hover:opacity-80"
-                  onClick={() => setSelectedCategory(entry.name)}
-                >
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                  <span className="text-sm text-muted-foreground">{entry.name}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-
-        {selectedCategory && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm h-full">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-foreground">
                   {selectedCategory} - Subcategories
@@ -344,113 +295,33 @@ export default function AutopilotDashboard() {
           </motion.div>
         )}
 
-        {!selectedCategory && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm h-full">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Call Duration Distribution</h3>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={callDurationData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis dataKey="range" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={60} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </motion.div>
-        )}
-      </div>
+      {/* Call Duration Distribution */}
+      {!selectedCategory && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <CallDurationDistribution />
+        </motion.div>
+      )}
 
       {/* Frequent Callers */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
       >
-        <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Frequent Callers</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">MSISDN</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Calls</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Category</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Sentiment</th>
-                </tr>
-              </thead>
-              <tbody>
-                {frequentCallersData.map((caller, index) => (
-                  <tr key={index} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 text-sm font-mono text-foreground">{caller.msisdn}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{caller.calls}</td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className="text-xs">{caller.category}</Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${
-                          caller.sentiment === "Positive"
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                            : caller.sentiment === "Negative"
-                            ? "bg-red-500/10 text-red-600 border-red-500/20"
-                            : "bg-slate-500/10 text-slate-600 border-slate-500/20"
-                        }`}
-                      >
-                        {caller.sentiment}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <FrequentCallers />
       </motion.div>
 
       {/* Intent Transition Analysis */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
       >
-        <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Intent Transition Analysis</h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={intentTransitionData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                />
-                <Legend />
-                <Area type="monotone" dataKey="billing" name="Billing" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
-                <Area type="monotone" dataKey="support" name="Support" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
-                <Area type="monotone" dataKey="sales" name="Sales" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+        <IntentTransitionAnalysis />
       </motion.div>
     </div>
   );

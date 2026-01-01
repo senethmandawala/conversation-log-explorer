@@ -16,6 +16,7 @@ interface ReportSectionProps {
   note?: string;
   chartType?: ChartType;
   chartData?: any[];
+  hideAccentLine?: boolean;
 }
 
 const COLORS = [
@@ -35,7 +36,7 @@ const chartConfig = {
   escalated: { label: "Escalated", color: "hsl(0, 84%, 60%)" },
 };
 
-export const ReportSection = ({ title, description, hasChart, hasFilter, note, chartType, chartData }: ReportSectionProps) => {
+export const ReportSection = ({ title, description, hasChart, hasFilter, note, chartType, chartData, hideAccentLine }: ReportSectionProps) => {
   const renderChart = () => {
     if (!chartData || chartData.length === 0) return null;
 
@@ -169,7 +170,9 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
       <CardHeader className="pb-2 border-b border-border/30">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
+            {!hideAccentLine && (
+              <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <CardTitle className="text-lg font-semibold">{title}</CardTitle>

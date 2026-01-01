@@ -21,13 +21,15 @@ interface CaseClassificationReportProps {
   description: string;
   hasFilter?: boolean;
   chartData: any[];
+  hideAccentLine?: boolean;
 }
 
 export const CaseClassificationReport = ({ 
   title, 
   description, 
   hasFilter, 
-  chartData 
+  chartData,
+  hideAccentLine 
 }: CaseClassificationReportProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   
@@ -189,7 +191,9 @@ export const CaseClassificationReport = ({
       <CardHeader className="pb-2 border-b border-border/30">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
+            {!hideAccentLine && (
+              <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <CardTitle className="text-lg font-semibold">{title}</CardTitle>
@@ -272,18 +276,16 @@ export const CaseClassificationReport = ({
             >
               <Card className="h-[350px] p-3 border-border/50 bg-background/50">
                 <div className="h-full flex flex-col">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="min-w-0 flex-1">
                       <h5 className="text-sm font-semibold text-foreground">{slide.title}</h5>
                       {slide.breadcrumb.length > 0 && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                          {slide.breadcrumb.map((crumb, i) => (
-                            <span key={i}>
-                              {i > 0 && " / "}
-                              {crumb}
-                            </span>
-                          ))}
-                        </div>
+                        <p 
+                          className="text-xs text-muted-foreground mt-1 truncate"
+                          title={slide.breadcrumb.join(" / ")}
+                        >
+                          {slide.breadcrumb.join(" / ")}
+                        </p>
                       )}
                     </div>
                     {slide.id > 1 && (

@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAutopilot } from "@/contexts/AutopilotContext";
-import AutopilotConfiguration from "./AutopilotConfiguration";
-
+import AutopilotConfiguration from "../AutopilotConfiguration/AutopilotConfiguration";
 export default function AutopilotSettings() {
   const navigate = useNavigate();
   const { selectedInstance } = useAutopilot();

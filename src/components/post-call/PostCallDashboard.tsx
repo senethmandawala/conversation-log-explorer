@@ -12,17 +12,17 @@ import CallDurationReport from "@/pages/post-call-analyzer/call-duration/CallDur
 import TrafficTrendsReport from "@/pages/post-call-analyzer/traffic-trends/TrafficTrendsReport";
 import RepeatCallTimelineReport from "@/pages/post-call-analyzer/repeat-call-timeline/RepeatCallTimelineReport";
 import ChannelWiseCategoryReport from "@/pages/post-call-analyzer/channel-category/ChannelWiseCategoryReport";
+import RedAlertMetricsReport from "@/pages/post-call-analyzer/red-alert/RedAlertMetricsReport";
+import OverallPerformanceChart from "@/pages/post-call-analyzer/overall-performance/OverallPerformanceChart";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Instance } from "@/pages/PostCallAnalyzer";
 import { 
   fetchPostCallStats, 
-  fetchOverallPerformance, 
   fetchRedAlertMetrics,
   fetchCaseClassification,
   fetchSentimentAnalysis,
   fetchAgentPerformance,
-  type PostCallStats, 
-  type OverallPerformanceResponse 
+  type PostCallStats
 } from "@/lib/api";
 
 interface PostCallDashboardProps {
@@ -203,26 +203,6 @@ const transformStatsToCards = (stats: PostCallStats['stats']) => [
   },
 ];
 
-// Helper to transform API performance data to chart format
-const transformPerformanceData = (performance: OverallPerformanceResponse['overallPerformance']) => {
-  const resolvedSeries = performance.series.find(s => s.name === 'Resolved');
-  const failedSeries = performance.series.find(s => s.name === 'Fail Calls');
-  const fulfilledSeries = performance.series.find(s => s.name === 'Fulfilled');
-  
-  if (!resolvedSeries) return [];
-  
-  return resolvedSeries.data.map((point, index) => {
-    const date = new Date(point.x);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-    return {
-      name: dayName,
-      calls: failedSeries?.data[index]?.y || 0,
-      resolved: point.y,
-      fulfilled: fulfilledSeries?.data[index]?.y || 0,
-    };
-  });
-};
-
 // Stat card type definition
 interface StatCardData {
   title: string;
@@ -244,17 +224,7 @@ const defaultStatCards: StatCardData[] = [
   { title: "Avg. Silence Time", value: "—", icon: "volume", color: "bg-orange-100 dark:bg-orange-900/30", iconColor: "text-orange-600 dark:text-orange-400", borderColor: "border-l-orange-500" },
 ];
 
-const defaultPerformanceData = [
-  { name: "Mon", calls: 0, resolved: 0 },
-  { name: "Tue", calls: 0, resolved: 0 },
-  { name: "Wed", calls: 0, resolved: 0 },
-  { name: "Thu", calls: 0, resolved: 0 },
-  { name: "Fri", calls: 0, resolved: 0 },
-  { name: "Sat", calls: 0, resolved: 0 },
-  { name: "Sun", calls: 0, resolved: 0 },
-];
-
-// Default fallback data for reports
+// Default fallback data
 const defaultRedAlertData: { name: string; value: number }[] = [];
 const defaultCaseClassificationData: { name: string; value: number }[] = [];
 const defaultSentimentData: { name: string; value: number }[] = [];
@@ -262,7 +232,6 @@ const defaultAgentPerformanceData: { name: string; value: number }[] = [];
 
 export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) => {
   const [statCards, setStatCards] = useState(defaultStatCards);
-  const [performanceData, setPerformanceData] = useState(defaultPerformanceData);
   const [redAlertData, setRedAlertData] = useState(defaultRedAlertData);
   const [caseClassificationData, setCaseClassificationData] = useState(defaultCaseClassificationData);
   const [sentimentData, setSentimentData] = useState(defaultSentimentData);
@@ -276,14 +245,12 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
         // Fetch all data in parallel
         const [
           statsResponse, 
-          performanceResponse,
           redAlertResponse,
           caseClassificationResponse,
           sentimentResponse,
           agentPerformanceResponse
         ] = await Promise.all([
           fetchPostCallStats(),
-          fetchOverallPerformance(),
           fetchRedAlertMetrics(),
           fetchCaseClassification(),
           fetchSentimentAnalysis(),
@@ -293,14 +260,6 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
         // Transform and set stat cards
         if (statsResponse?.stats) {
           setStatCards(transformStatsToCards(statsResponse.stats));
-        }
-
-        // Transform and set performance data
-        if (performanceResponse?.overallPerformance) {
-          const transformedData = transformPerformanceData(performanceResponse.overallPerformance);
-          if (transformedData.length > 0) {
-            setPerformanceData(transformedData);
-          }
         }
 
         // Transform and set red alert data
@@ -348,14 +307,6 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
 
   const reports = [
     { 
-      id: "performance", 
-      title: "Overall Performance Chart", 
-      description: "Weekly performance trends and metrics",
-      hasChart: true,
-      chartType: "line" as const,
-      chartData: performanceData
-    },
-    { 
       id: "red-alerts", 
       title: "Red Alert Metrics", 
       description: "Highlighting key areas that require immediate attention",
@@ -376,7 +327,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
       title: "7 Day Repeat Call Timeline", 
       description: "Track repeat callers over the past 7 days",
       chartType: "line" as const,
-      chartData: performanceData
+      chartData: agentPerformanceData
     },
     { 
       id: "channel-category", 
@@ -411,15 +362,26 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
 
       {/* Report Sections */}
       <div className="space-y-4">
+        {/* Overall Performance Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+        >
+          <OverallPerformanceChart />
+        </motion.div>
+
         {reports.map((report, index) => (
           <motion.div
             key={report.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
+            transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
           >
             {report.id === "case-classification" ? (
-              <CaseClassificationReport {...report} />
+              <CaseClassificationReport {...report} hideAccentLine={true} />
+            ) : report.id === "red-alerts" ? (
+              <RedAlertMetricsReport />
             ) : report.id === "repeat-call-timeline" ? (
               <RepeatCallTimelineReport />
             ) : report.id === "channel-category" ? (

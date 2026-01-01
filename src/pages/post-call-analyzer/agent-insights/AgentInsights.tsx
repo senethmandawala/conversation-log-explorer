@@ -22,7 +22,7 @@ import {
 import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
-import { CallLogDetails } from "@/components/post-call/CallLogDetails";
+import SingleCallView from "./SingleCallView";
 import {
   Table,
   TableBody,
@@ -59,17 +59,19 @@ interface StatCard {
   label: string;
   value: string;
   icon: React.ElementType;
-  color: string;
+  gradientColor: string;
+  bgColor: string;
+  textColor: string;
   tooltip?: string;
 }
 
 const mockStats: StatCard[] = [
-  { label: "Total Calls", value: "245", icon: Phone, color: "from-blue-500 to-blue-600" },
-  { label: "Avg Handle Time", value: "4:32", icon: Clock, color: "from-purple-500 to-purple-600" },
-  { label: "FCR Rate", value: "92%", icon: Target, color: "from-green-500 to-green-600" },
-  { label: "CSAT Score", value: "4.8", icon: Star, color: "from-amber-500 to-amber-600" },
-  { label: "Kindness Score", value: "85%", icon: Heart, color: "from-pink-500 to-pink-600" },
-  { label: "Dropped Calls", value: "3%", icon: PhoneOff, color: "from-red-500 to-red-600" },
+  { label: "Total Calls", value: "245", icon: Phone, gradientColor: "from-blue-500 to-blue-600", bgColor: "bg-blue-500/10", textColor: "text-blue-500" },
+  { label: "Avg Handle Time", value: "4:32", icon: Clock, gradientColor: "from-purple-500 to-purple-600", bgColor: "bg-purple-500/10", textColor: "text-purple-500" },
+  { label: "FCR Rate", value: "92%", icon: Target, gradientColor: "from-green-500 to-green-600", bgColor: "bg-green-500/10", textColor: "text-green-500" },
+  { label: "CSAT Score", value: "4.8", icon: Star, gradientColor: "from-amber-500 to-amber-600", bgColor: "bg-amber-500/10", textColor: "text-amber-500" },
+  { label: "Kindness Score", value: "85%", icon: Heart, gradientColor: "from-pink-500 to-pink-600", bgColor: "bg-pink-500/10", textColor: "text-pink-500" },
+  { label: "Dropped Calls", value: "3%", icon: PhoneOff, gradientColor: "from-red-500 to-red-600", bgColor: "bg-red-500/10", textColor: "text-red-500" },
 ];
 
 const mockCallLogs: CallLog[] = [
@@ -87,6 +89,45 @@ const categoryData = [
   { name: "Complaints", value: 12, color: "#f59e0b" },
   { name: "General", value: 8, color: "#6b7280" },
 ];
+
+// Custom legend with names only
+const CustomLegend = ({ payload }: any) => {
+  return (
+    <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4">
+      {payload.map((entry: any, index: number) => (
+        <div key={`legend-${index}`} className="flex items-center gap-2">
+          <div 
+            className="w-3 h-3 rounded-full" 
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-sm text-muted-foreground">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Custom label for pie chart
+const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, value, name }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor="middle"
+      dominantBaseline="central"
+      className="text-xs font-semibold"
+      style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+    >
+      {value}
+    </text>
+  );
+};
 
 const SentimentIcon = ({ sentiment }: { sentiment: CallLog["callerSentiment"] }) => {
   switch (sentiment) {
@@ -179,18 +220,18 @@ export default function AgentInsights() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300 h-full">
+                <Card className={`border-0 backdrop-blur-sm hover:shadow-lg transition-all duration-300 h-full ${stat.bgColor}`}>
                   <CardContent className="p-4">
                     {isLoading ? (
                       <Skeleton className="h-16 w-full" />
                     ) : (
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                          <p className="text-xl font-bold">{stat.value}</p>
+                          <p className={`text-xs ${stat.textColor} font-medium mb-1`}>{stat.label}</p>
+                          <p className={`text-2xl font-bold ${stat.textColor}`}>{stat.value}</p>
                         </div>
-                        <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
-                          <stat.icon className="h-4 w-4 text-white" />
+                        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${stat.gradientColor} shadow-lg`}>
+                          <stat.icon className="h-5 w-5 text-white" />
                         </div>
                       </div>
                     )}
@@ -205,20 +246,22 @@ export default function AgentInsights() {
               <CardTitle className="text-base font-medium">Case Category Report</CardTitle>
               <p className="text-sm text-muted-foreground">Distribution of calls by category</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-6">
               {isLoading ? (
-                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[280px] w-full" />
               ) : (
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
                     <Pie
                       data={categoryData}
                       cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
+                      cy="40%"
+                      innerRadius={55}
+                      outerRadius={90}
                       paddingAngle={2}
                       dataKey="value"
+                      label={renderCustomLabel}
+                      labelLine={false}
                     >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -230,8 +273,9 @@ export default function AgentInsights() {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
                       }}
+                      formatter={(value: number) => [`${value} calls`, 'Count']}
                     />
-                    <Legend />
+                    <Legend content={<CustomLegend />} verticalAlign="bottom" />
                   </PieChart>
                 </ResponsiveContainer>
               )}
@@ -339,28 +383,9 @@ export default function AgentInsights() {
         </Card>
       </div>
 
-      <CallLogDetails
-        callLog={selectedCallLog ? {
-          id: selectedCallLog.id,
-          date: selectedCallLog.date,
-          time: selectedCallLog.time,
-          msisdn: selectedCallLog.msisdn,
-          agent: agentName,
-          callDuration: "5:23",
-          category: selectedCallLog.category,
-          subCategory: selectedCallLog.subCategory,
-          userSentiment: selectedCallLog.callerSentiment,
-          agentSentiment: "positive",
-          summary: "Customer called regarding billing inquiry. Agent successfully resolved the issue by explaining the charges and offering a promotional discount. Customer expressed satisfaction with the resolution.",
-          transcription: [
-            { speaker: "Agent", text: "Thank you for calling. How may I assist you today?", timestamp: "00:00" },
-            { speaker: "Customer", text: "Hi, I have a question about my recent bill.", timestamp: "00:05" },
-            { speaker: "Agent", text: "I'd be happy to help you with that. Can you please provide your account number?", timestamp: "00:10" },
-            { speaker: "Customer", text: "Sure, it's 12345678.", timestamp: "00:18" },
-            { speaker: "Agent", text: "Thank you. I can see your account. What specific charge would you like me to explain?", timestamp: "00:25" },
-          ],
-        } : null}
-        open={!!selectedCallLog}
+      <SingleCallView
+        selectedCallLog={selectedCallLog}
+        agentName={agentName}
         onClose={() => setSelectedCallLog(null)}
       />
 

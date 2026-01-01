@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import AutopilotInstanceSelector from "./autopilot/AutopilotInstanceSelector";
+import AutopilotInstanceSelector from "./autopilot/AutopilotInstanceSelector/AutopilotInstanceSelector";
 import { useAutopilot, AutopilotInstance } from "@/contexts/AutopilotContext";
 import { useModule } from "@/contexts/ModuleContext";
 

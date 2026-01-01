@@ -47,6 +47,8 @@ import {
 } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import AgentCallLogs from "./AgentCallLogs";
+import ViolationWiseAnalysis from "./ViolationWiseAnalysis";
 
 interface ViolationBreakdown {
   type: string;
@@ -159,6 +161,10 @@ export default function BadPracticeReport() {
   const [agentName, setAgentName] = useState<string>("");
   const [data, setData] = useState<BadPracticeRecord[]>(mockBadPracticeData);
   
+  // Call logs view state
+  const [showAgentCallLogs, setShowAgentCallLogs] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<{ name: string; id: string } | null>(null);
+  
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
   const totalRecords = data.length;
@@ -188,6 +194,36 @@ export default function BadPracticeReport() {
 
   const activeFiltersCount = [selectedCallType, agentName].filter(Boolean).length;
 
+  const handleViewCallLogs = (agent: string, agentId: string) => {
+    setSelectedAgent({ name: agent, id: agentId });
+    setShowAgentCallLogs(true);
+  };
+
+  const handleBackToReport = () => {
+    setShowAgentCallLogs(false);
+    setSelectedAgent(null);
+  };
+
+  // Show call logs view if selected
+  if (showAgentCallLogs && selectedAgent) {
+    return (
+      <>
+        <div className="p-6">
+          <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+            <CardContent className="pt-6">
+              <AgentCallLogs
+                agentName={selectedAgent.name}
+                agentId={selectedAgent.id}
+                onBack={handleBackToReport}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        <AIHelper />
+      </>
+    );
+  }
+
   return (
     <>
       <div className="p-6 space-y-6">
@@ -196,12 +232,12 @@ export default function BadPracticeReport() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   size="icon" 
                   className="h-9 w-9"
                   onClick={() => navigate("/post-call-analyzer/reports")}
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-9 w-9 shrink-0" />
                 </Button>
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/5 border border-red-500/20 flex items-center justify-center">
                   <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -283,7 +319,7 @@ export default function BadPracticeReport() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end mt-4 gap-2">
+                  {/* <div className="flex justify-end mt-4 gap-2">
                     <Button 
                       variant="ghost" 
                       size="sm"
@@ -294,7 +330,7 @@ export default function BadPracticeReport() {
                     >
                       Clear All
                     </Button>
-                  </div>
+                  </div> */}
                 </motion.div>
               </CollapsibleContent>
             </Collapsible>
@@ -365,7 +401,7 @@ export default function BadPracticeReport() {
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8"
-                                    onClick={() => navigate(`/post-call-analyzer/agent-performance/${record.agentId}`)}
+                                    onClick={() => handleViewCallLogs(record.agent, record.agentId)}
                                   >
                                     <Eye className="h-4 w-4" />
                                   </Button>
@@ -527,6 +563,9 @@ export default function BadPracticeReport() {
                     </div>
                   </motion.div>
                 </div>
+
+                {/* Violation-wise Analysis Section */}
+                <ViolationWiseAnalysis />
               </div>
             )}
           </CardContent>
