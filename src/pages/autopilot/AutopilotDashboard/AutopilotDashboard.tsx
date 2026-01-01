@@ -10,36 +10,16 @@ import { CallDurationDistribution } from "./Call Duration Distribution/CallDurat
 import { CategoryDistribution } from "./Category Distribution/CategoryDistribution";
 import { FrequentCallers } from "./Frequent Callers/FrequentCallers";
 import { IntentTransitionAnalysis } from "./Intent Transition Analysis/IntentTransitionAnalysis";
+import { AutopilotSankeyChart } from "./Sankey Chart/AutopilotSankeyChart";
+import { CategoryWiseFailureReason } from "./Category Wise Failure Reason/CategoryWiseFailureReason";
+import { CategoryWiseVDN } from "./Category Wise VDN/CategoryWiseVDN";
+import { WeeklyTrendsAndPatterns } from "./Weekly Trends/WeeklyTrendsAndPatterns";
 import {
-  Phone,
   PhoneIncoming,
   PhoneOutgoing,
-  PhoneOff,
-  Bot,
-  AlertTriangle,
-  TrendingUp,
-  Users,
-  Clock,
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Legend,
-  AreaChart,
-  Area,
-} from "recharts";
 
 // Enhanced stat card component with modern design
 interface WideStatCardProps {
@@ -128,54 +108,6 @@ const WideStatCard = ({ color, icon, label, value, trend, rightItems }: WideStat
   );
 };
 
-// Category distribution data
-const categoryData = [
-  { name: "Billing Inquiries", value: 35, color: "#8b5cf6" },
-  { name: "Technical Support", value: 25, color: "#3b82f6" },
-  { name: "General Questions", value: 20, color: "#10b981" },
-  { name: "Sales", value: 12, color: "#f59e0b" },
-  { name: "Others", value: 8, color: "#6b7280" },
-];
-
-// Handled calls data
-const handledCallsData = [
-  { date: "Mon", aiResolved: 120, partiallyResolved: 45, transferred: 30 },
-  { date: "Tue", aiResolved: 150, partiallyResolved: 55, transferred: 35 },
-  { date: "Wed", aiResolved: 140, partiallyResolved: 50, transferred: 40 },
-  { date: "Thu", aiResolved: 180, partiallyResolved: 60, transferred: 25 },
-  { date: "Fri", aiResolved: 160, partiallyResolved: 70, transferred: 45 },
-  { date: "Sat", aiResolved: 90, partiallyResolved: 30, transferred: 20 },
-  { date: "Sun", aiResolved: 70, partiallyResolved: 25, transferred: 15 },
-];
-
-// Call duration data
-const callDurationData = [
-  { range: "0-30s", count: 245 },
-  { range: "30s-1m", count: 380 },
-  { range: "1-2m", count: 290 },
-  { range: "2-5m", count: 180 },
-  { range: "5m+", count: 85 },
-];
-
-// Intent transition data
-const intentTransitionData = [
-  { hour: "00:00", billing: 10, support: 15, sales: 5 },
-  { hour: "04:00", billing: 8, support: 12, sales: 3 },
-  { hour: "08:00", billing: 45, support: 60, sales: 25 },
-  { hour: "12:00", billing: 80, support: 95, sales: 40 },
-  { hour: "16:00", billing: 65, support: 80, sales: 35 },
-  { hour: "20:00", billing: 30, support: 40, sales: 15 },
-];
-
-// Frequent callers data
-const frequentCallersData = [
-  { msisdn: "****5678", calls: 12, category: "Billing", sentiment: "Negative" },
-  { msisdn: "****1234", calls: 8, category: "Support", sentiment: "Neutral" },
-  { msisdn: "****9012", calls: 6, category: "Sales", sentiment: "Positive" },
-  { msisdn: "****3456", calls: 5, category: "Billing", sentiment: "Negative" },
-  { msisdn: "****7890", calls: 4, category: "Support", sentiment: "Neutral" },
-];
-
 export default function AutopilotDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -250,6 +182,15 @@ export default function AutopilotDashboard() {
         <CallsHandledByDTMF />
       </motion.div>
 
+      {/* Sankey Chart - Call Flow Analysis */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
+      >
+        <AutopilotSankeyChart />
+      </motion.div>
+
       {/* Category Distribution */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -259,69 +200,58 @@ export default function AutopilotDashboard() {
         <CategoryDistribution />
       </motion.div>
 
-      {/* Subcategory Details */}
-      {selectedCategory && (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm h-full">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  {selectedCategory} - Subcategories
-                </h3>
-                <button
-                  onClick={() => setSelectedCategory(null)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="space-y-3">
-                {["Payment Issues", "Invoice Queries", "Refund Requests", "Plan Changes", "Others"].map((sub, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm text-foreground">{sub}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-foreground">{Math.floor(Math.random() * 200 + 50)}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {Math.floor(Math.random() * 30 + 5)}%
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-        )}
-
-      {/* Call Duration Distribution */}
-      {!selectedCategory && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          <CallDurationDistribution />
-        </motion.div>
-      )}
+      {/* Category-wise Failure Reason */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.45 }}
+      >
+        <CategoryWiseFailureReason />
+      </motion.div>
 
       {/* Frequent Callers */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
       >
         <FrequentCallers />
+      </motion.div>
+
+      {/* Call Duration Distribution */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.55 }}
+      >
+        <CallDurationDistribution />
       </motion.div>
 
       {/* Intent Transition Analysis */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
       >
         <IntentTransitionAnalysis />
+      </motion.div>
+
+      {/* Category-wise VDN Distribution */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.65 }}
+      >
+        <CategoryWiseVDN />
+      </motion.div>
+
+      {/* Weekly Trends and Patterns */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
+      >
+        <WeeklyTrendsAndPatterns />
       </motion.div>
     </div>
   );
