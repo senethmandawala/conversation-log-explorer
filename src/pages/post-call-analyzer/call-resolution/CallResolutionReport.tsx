@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Info, RefreshCw, Calendar, List } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,8 +19,7 @@ interface SelectedCategory {
 }
 
 export default function CallResolutionReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [activeTab, setActiveTab] = useState("resolution-status");
   
   const [selectedCaseType, setSelectedCaseType] = useState("");
@@ -37,11 +35,6 @@ export default function CallResolutionReport() {
 
   const [averageTime, setAverageTime] = useState("8.5 min");
   const [callCount, setCallCount] = useState("1,234");
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
 
   const handleCaseSelect = (caseType: string) => {
     setSelectedCaseType(caseType);
@@ -124,7 +117,7 @@ export default function CallResolutionReport() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                   className="h-10 w-10 rounded-lg"
                 >
                   <ArrowLeft className="h-4 w-4" />

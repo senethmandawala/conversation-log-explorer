@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +20,7 @@ import {
   ChevronDown,
   Eye
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
 import {
@@ -138,8 +137,7 @@ const callTypes = ["Inbound", "Outbound"];
 const sentiments = ["Positive", "Neutral", "Negative"];
 
 export default function AgentPerformance() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab, setSelectedAgentId } = usePostCall();
   const [isLoading, setIsLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   
@@ -153,13 +151,9 @@ export default function AgentPerformance() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   useEffect(() => {
-    setShowModuleTabs(true);
     const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const activeFiltersCount = [
     agentName,
@@ -589,7 +583,10 @@ export default function AgentPerformance() {
                             variant="ghost"
                             size="icon"
                             className="h-9 w-9 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground shadow-none hover:shadow-md"
-                            onClick={() => navigate(`/post-call-analyzer/agent-performance/${agent.id}`)}
+                            onClick={() => {
+                              setSelectedAgentId(agent.id);
+                              setSelectedTab("agent-insights");
+                            }}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>

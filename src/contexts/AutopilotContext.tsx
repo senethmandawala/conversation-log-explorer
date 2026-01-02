@@ -7,18 +7,23 @@ export interface AutopilotInstance {
   channels: string;
 }
 
+export type AutopilotTab = "dashboard" | "conversations" | "reports" | "settings";
+
 interface AutopilotContextType {
   selectedInstance: AutopilotInstance | null;
   setSelectedInstance: (instance: AutopilotInstance | null) => void;
+  selectedTab: AutopilotTab;
+  setSelectedTab: (tab: AutopilotTab) => void;
 }
 
 const AutopilotContext = createContext<AutopilotContextType | undefined>(undefined);
 
 export function AutopilotProvider({ children }: { children: ReactNode }) {
   const [selectedInstance, setSelectedInstance] = useState<AutopilotInstance | null>(null);
+  const [selectedTab, setSelectedTab] = useState<AutopilotTab>("dashboard");
 
   return (
-    <AutopilotContext.Provider value={{ selectedInstance, setSelectedInstance }}>
+    <AutopilotContext.Provider value={{ selectedInstance, setSelectedInstance, selectedTab, setSelectedTab }}>
       {children}
     </AutopilotContext.Provider>
   );

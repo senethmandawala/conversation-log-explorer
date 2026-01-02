@@ -17,27 +17,10 @@ export function MainLayout({ children }: MainLayoutProps) {
   useEffect(() => {
     const path = location.pathname;
     
-    // Show tabs on module sub-routes (dashboard, conversations, etc.)
-    const isPostCallAnalyzerSubRoute = path.startsWith("/post-call-analyzer/");
-    const isAutopilotSubRoute = path.startsWith("/autopilot/") && path !== "/autopilot";
-    const shouldShowTabs = isPostCallAnalyzerSubRoute || isAutopilotSubRoute;
-    
-    setShowModuleTabs(shouldShowTabs);
-
-    if (path.startsWith("/post-call-analyzer")) {
-      const segment = path.split("/post-call-analyzer/")[1];
-      if (segment) {
-        setActiveTab(segment.split("/")[0]);
-      } else {
-        setActiveTab("dashboard");
-      }
-    } else if (path.startsWith("/autopilot")) {
-      const segment = path.split("/autopilot/")[1];
-      if (segment) {
-        setActiveTab(segment.split("/")[0]);
-      } else {
-        setActiveTab("dashboard");
-      }
+    // Both PCA and Autopilot control their own tabs via context
+    // Only reset showModuleTabs for non-module pages
+    if (!path.startsWith("/pca") && !path.startsWith("/autopilot")) {
+      setShowModuleTabs(false);
     }
   }, [location.pathname, setShowModuleTabs]);
 

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +19,7 @@ import {
   ChevronsLeft,
   ChevronsRight
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
 import {
@@ -90,8 +89,7 @@ const mockAcceptedProducts: AcceptedProduct[] = [
 ];
 
 export default function CrossUpsellReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [isLoading, setIsLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedCallType, setSelectedCallType] = useState<string>("");
@@ -101,13 +99,9 @@ export default function CrossUpsellReport() {
   const totalOpportunities = mockAgentPerformance.reduce((sum, a) => sum + a.successful + a.failed, 0);
 
   useEffect(() => {
-    setShowModuleTabs(true);
     const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const activeFiltersCount = [selectedCallType].filter(Boolean).length;
 
@@ -122,7 +116,7 @@ export default function CrossUpsellReport() {
                   variant="ghost" 
                   size="icon" 
                   className="h-9 w-9"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </Button>

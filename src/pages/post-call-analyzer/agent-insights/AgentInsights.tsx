@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +18,7 @@ import {
   Users,
   PhoneOff
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
 import SingleCallView from "./SingleCallView";
@@ -156,24 +155,18 @@ const getStatusBadgeColor = (color: string) => {
 };
 
 export default function AgentInsights() {
-  const { agentId } = useParams<{ agentId: string }>();
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { selectedAgentId, setSelectedTab } = usePostCall();
   const [isLoading, setIsLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null);
 
   const agentName = "John Smith";
-  const agentIdDisplay = agentId || "AGT-001";
+  const agentIdDisplay = selectedAgentId || "AGT-001";
 
   useEffect(() => {
-    setShowModuleTabs(true);
     const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handlePlayAudio = (id: string) => {
     setPlayingId(playingId === id ? null : id);
@@ -189,7 +182,7 @@ export default function AgentInsights() {
                 variant="outline"
                 size="icon"
                 className="h-10 w-10 rounded-xl"
-                onClick={() => navigate("/post-call-analyzer/agent-performance")}
+                onClick={() => setSelectedTab("agent-performance")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>

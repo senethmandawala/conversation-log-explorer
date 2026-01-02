@@ -14,7 +14,6 @@ import {
   Trash2,
   RefreshCw
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion, AnimatePresence } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
@@ -36,20 +35,15 @@ const formatFileSize = (bytes: number): string => {
 };
 
 export default function ContentUploader() {
-  const { setShowModuleTabs } = useModule();
   const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
-    setShowModuleTabs(true);
     const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();

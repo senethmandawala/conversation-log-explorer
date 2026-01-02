@@ -35,7 +35,7 @@ const navigation: NavSection[] = [
   {
     label: "Module",
     items: [
-      { title: "Post Call Analyzer", icon: PhoneCall, href: "/post-call-analyzer" },
+      { title: "Post Call Analyzer", icon: PhoneCall, href: "/pca" },
       { title: "Autopilot", icon: Bot, href: "/autopilot" },
     ],
   },
@@ -55,7 +55,7 @@ export function AppSidebar() {
 
   const handleNavClick = (href: string) => {
     // Clear instance when navigating to module root (instances page)
-    if (href === "/post-call-analyzer") {
+    if (href === "/pca") {
       setPostCallInstance(null);
     } else if (href === "/autopilot") {
       setAutopilotInstance(null);

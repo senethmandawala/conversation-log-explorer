@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Info, RefreshCw, Calendar, List } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from "recharts";
@@ -55,16 +54,9 @@ const getAdjustedColors = (data: { callCount: number }[]) => {
 };
 
 export default function FrequentCallersReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState(mockFrequentCallersData);
   const [colors, setColors] = useState<string[]>([]);
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

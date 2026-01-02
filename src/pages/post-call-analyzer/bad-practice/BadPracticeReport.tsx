@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,7 @@ import {
   BarChart3,
   Lightbulb
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -153,8 +152,7 @@ const mockBadPracticeData: BadPracticeRecord[] = [
 ];
 
 export default function BadPracticeReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [isLoading, setIsLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedCallType, setSelectedCallType] = useState<string>("");
@@ -172,13 +170,9 @@ export default function BadPracticeReport() {
   const paginatedData = data.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   useEffect(() => {
-    setShowModuleTabs(true);
     const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleRowExpand = (id: string) => {
     setData(prev => prev.map(item => 
@@ -235,7 +229,7 @@ export default function BadPracticeReport() {
                   variant="outline" 
                   size="icon" 
                   className="h-9 w-9"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                 >
                   <ArrowLeft className="h-9 w-9 shrink-0" />
                 </Button>

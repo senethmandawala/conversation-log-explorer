@@ -1,9 +1,6 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useAutopilot } from "@/contexts/AutopilotContext";
 import { HandledCallsAnalysis } from "./Handled Calls Analysis/HandledCallsAnalysis";
 import { CallsHandledByDTMF } from "./autopilot-calls-handled-by-DTMF/CallsHandledByDTMF";
 import { CallDurationDistribution } from "./Call Duration Distribution/CallDurationDistribution";
@@ -111,18 +108,6 @@ const WideStatCard = ({ color, icon, label, value, trend, rightItems }: WideStat
 
 export default function AutopilotDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const { selectedInstance } = useAutopilot();
-
-  useEffect(() => {
-    if (!selectedInstance) {
-      navigate("/autopilot");
-    }
-  }, [selectedInstance, navigate]);
-
-  if (!selectedInstance) {
-    return null;
-  }
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">

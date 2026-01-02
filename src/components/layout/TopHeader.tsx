@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function TopHeader() {
   const location = useLocation();
-  const isPostCallAnalyzer = location.pathname === "/post-call-analyzer";
+  const isPostCallAnalyzer = location.pathname === "/pca";
   
   const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
   const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;

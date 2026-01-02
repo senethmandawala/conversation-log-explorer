@@ -25,7 +25,6 @@ import {
   ChevronsRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
 import { CallLogDetails } from "@/components/post-call/CallLogDetails";
@@ -86,7 +85,6 @@ const SentimentIcon = ({ sentiment }: { sentiment: CallRecord["sentiment"] }) =>
 };
 
 export default function CallInsight() {
-  const { setShowModuleTabs } = useModule();
   const [isLoading, setIsLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,14 +95,9 @@ export default function CallInsight() {
   const pageSize = 5;
 
   useEffect(() => {
-    setShowModuleTabs(true);
-    // Simulate loading
     const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredCalls = mockCalls.filter(call => {
     const matchesSearch = call.msisdn.includes(searchQuery) || 

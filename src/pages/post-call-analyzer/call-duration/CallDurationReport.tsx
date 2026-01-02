@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Info, RefreshCw, Calendar, List, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -120,8 +119,7 @@ const mockLongCallsData = [
 ];
 
 export default function CallDurationReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [activeTab, setActiveTab] = useState("duration");
   const [loading, setLoading] = useState(true);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -138,11 +136,6 @@ export default function CallDurationReport() {
     { id: 1, type: "categories", title: "Call Duration by Categories" }
   ]);
   const [visibleStartIndex, setVisibleStartIndex] = useState(0);
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -216,7 +209,7 @@ export default function CallDurationReport() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                   className="h-10 w-10 rounded-lg"
                 >
                   <ArrowLeft className="h-4 w-4" />

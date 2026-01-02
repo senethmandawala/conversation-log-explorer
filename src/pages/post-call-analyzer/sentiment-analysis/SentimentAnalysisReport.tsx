@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Info, RefreshCw, Calendar, List } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,8 +20,7 @@ interface SelectedCategory {
 }
 
 export default function SentimentAnalysisReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [activeTab, setActiveTab] = useState("callers");
   
   const [selectedSentiment, setSelectedSentiment] = useState("");
@@ -35,11 +33,6 @@ export default function SentimentAnalysisReport() {
   const [col1Class, setCol1Class] = useState("col-span-12");
   const [col2Class, setCol2Class] = useState("col-span-6");
   const [col3Class, setCol3Class] = useState("col-span-5");
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
 
   const handleUserSentimentSelect = (sentiment: string) => {
     setSelectedSentiment(sentiment);
@@ -116,7 +109,7 @@ export default function SentimentAnalysisReport() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                   className="h-10 w-10 rounded-lg"
                 >
                   <ArrowLeft className="h-4 w-4" />

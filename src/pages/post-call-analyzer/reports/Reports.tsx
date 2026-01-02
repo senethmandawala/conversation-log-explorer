@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { 
   FileText, 
   TrendingDown,
@@ -16,10 +15,8 @@ import {
   MicOff,
   FileBarChart
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
-import { CaseClassificationReport } from "@/pages/post-call-analyzer/case-classification/CaseClassificationReport";
 
 interface ReportCard {
   id: string;
@@ -116,17 +113,12 @@ const reportCards: ReportCard[] = [
 ];
 
 export default function Reports() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
   const [isHovering, setIsHovering] = useState<string | null>(null);
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
+  const { setSelectedTab, setSelectedReportId } = usePostCall();
 
   const handleReportClick = (reportId: string) => {
-    navigate(`/post-call-analyzer/reports/${reportId}`);
+    setSelectedReportId(reportId);
+    setSelectedTab("report-detail");
   };
 
   return (

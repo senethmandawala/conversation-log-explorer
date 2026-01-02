@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ArrowLeft, Filter, Calendar, PhoneOff, RefreshCw, AlertTriangle, Clock, Hourglass, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import {
   BarChart,
@@ -52,8 +51,7 @@ const metrics = [
 const CHART_COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#14b8a6", "#f97316"];
 
 export default function AgentWiseComparisonReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [loading, setLoading] = useState(false);
   const [panelOpenState, setPanelOpenState] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
@@ -63,11 +61,6 @@ export default function AgentWiseComparisonReport() {
   const [showPerformanceTrend, setShowPerformanceTrend] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<string>("");
   const [selectedAgentId, setSelectedAgentId] = useState<number>(0);
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
 
   useEffect(() => {
     let count = 0;
@@ -129,7 +122,7 @@ export default function AgentWiseComparisonReport() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                   className="h-9 w-9 shrink-0"
                 >
                   <ArrowLeft className="h-4 w-4" />

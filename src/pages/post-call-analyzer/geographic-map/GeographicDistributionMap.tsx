@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ArrowLeft, Filter, Calendar, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 
 // Mock data for map locations
@@ -80,8 +79,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function GeographicDistributionMap() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [loading, setLoading] = useState(false);
   const [panelOpenState, setPanelOpenState] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
@@ -92,16 +90,14 @@ export default function GeographicDistributionMap() {
   const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
-    setShowModuleTabs(true);
     return () => {
-      setShowModuleTabs(true);
       // Cleanup map on unmount
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
     };
-  }, [setShowModuleTabs]);
+  }, []);
 
   useEffect(() => {
     let count = 0;
@@ -312,7 +308,7 @@ export default function GeographicDistributionMap() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                   className="h-9 w-9 shrink-0"
                 >
                   <ArrowLeft className="h-4 w-4" />

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +14,7 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
 import {
@@ -143,8 +142,7 @@ const CompactStatCard = ({ color, icon, label, value, trend }: CompactStatCardPr
 };
 
 export default function TrainingNeedsAnalysisReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [loading, setLoading] = useState(false);
   const [panelOpenState, setPanelOpenState] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
@@ -159,11 +157,6 @@ export default function TrainingNeedsAnalysisReport() {
   const [agentsRequiringTraining, setAgentsRequiringTraining] = useState(24);
 
   useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
-
-  useEffect(() => {
     let count = 0;
     if (selectedDateRange) count++;
     if (agentName) count++;
@@ -172,7 +165,7 @@ export default function TrainingNeedsAnalysisReport() {
   }, [selectedDateRange, agentName, selectedCallType]);
 
   const backToReports = () => {
-    navigate("/post-call-analyzer/reports");
+    setSelectedTab("reports");
   };
 
   const toggleFilters = () => {

@@ -110,7 +110,7 @@ export default function GetStarted() {
       gradient: "bg-gradient-to-br from-blue-500/10 via-transparent to-transparent",
       iconBg: "bg-gradient-to-br from-blue-500 to-blue-600",
       enabled: true,
-      route: "/post-call-analyzer",
+      route: "/pca",
     },
     {
       title: "Autopilot",

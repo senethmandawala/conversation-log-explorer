@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { useModule } from "@/contexts/ModuleContext";
 import { PostCallDashboard } from "@/components/post-call/PostCallDashboard";
 
 // Default instance for dashboard view
@@ -13,13 +11,6 @@ const defaultInstance = {
 };
 
 export default function Dashboard() {
-  const { setShowModuleTabs } = useModule();
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,10 +12,9 @@ import {
   MessageSquare 
 } from "lucide-react";
 import { ConversationTable } from "@/components/conversation/ConversationTable";
-import { ConversationDetailSheet } from "@/components/conversation/ConversationDetailSheet";
+import { AutopilotSingleChatHistoryView } from "./autopilot-single-chat-history-view/AutopilotSingleChatHistoryView";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord } from "@/types/conversation";
-import { useAutopilot } from "@/contexts/AutopilotContext";
 import {
   Collapsible,
   CollapsibleContent,
@@ -30,8 +28,6 @@ import {
 } from "@/components/ui/select";
 
 export default function AutopilotConversations() {
-  const navigate = useNavigate();
-  const { selectedInstance } = useAutopilot();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRecord, setSelectedRecord] = useState<ConversationRecord | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -39,16 +35,6 @@ export default function AutopilotConversations() {
   const [selectedVdnSource, setSelectedVdnSource] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedResolution, setSelectedResolution] = useState<string>("");
-
-  useEffect(() => {
-    if (!selectedInstance) {
-      navigate("/autopilot");
-    }
-  }, [selectedInstance, navigate]);
-
-  if (!selectedInstance) {
-    return null;
-  }
 
   const filteredData = mockConversations.filter((record) => {
     const matchesSearch =
@@ -216,7 +202,7 @@ export default function AutopilotConversations() {
       </Card>
 
       {/* Detail Sheet */}
-      <ConversationDetailSheet
+      <AutopilotSingleChatHistoryView
         record={selectedRecord}
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}

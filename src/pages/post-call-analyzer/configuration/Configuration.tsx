@@ -26,7 +26,6 @@ import {
   Gauge,
   TrendingDown
 } from "lucide-react";
-import { useModule } from "@/contexts/ModuleContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { Reorder } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
@@ -182,7 +181,6 @@ const ALERT_CONFIG: AlertConfig[] = [
 ];
 
 export default function Configuration() {
-  const { setShowModuleTabs } = useModule();
   const [isLoading, setIsLoading] = useState(true);
   const [nameTags, setNameTags] = useState<NameTag[]>(defaultNameTags);
   const [categories, setCategories] = useState<CategoryNode[]>(defaultCategories);
@@ -233,13 +231,9 @@ export default function Configuration() {
   });
 
   useEffect(() => {
-    setShowModuleTabs(true);
     const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const addNameTag = () => {
     if (!newTagName.trim()) {

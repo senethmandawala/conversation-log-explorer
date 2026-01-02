@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +16,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ArrowLeft, Filter, Calendar, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import {
   LineChart,
@@ -53,19 +52,13 @@ const CHART_COLORS = [
 ];
 
 export default function CategoryTrendAnalysis() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [loading, setLoading] = useState(false);
   const [panelOpenState, setPanelOpenState] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
   const [selectedCallType, setSelectedCallType] = useState<string>("");
   const [chartData, setChartData] = useState(mockChartData);
   const [emptyData, setEmptyData] = useState(false);
-
-  useEffect(() => {
-    setShowModuleTabs(true);
-    return () => setShowModuleTabs(true);
-  }, [setShowModuleTabs]);
 
   useEffect(() => {
     let count = 0;
@@ -96,7 +89,7 @@ export default function CategoryTrendAnalysis() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                   className="h-9 w-9 shrink-0"
                 >
                   <ArrowLeft className="h-4 w-4" />

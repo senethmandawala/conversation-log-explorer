@@ -1,462 +1,194 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAutopilot } from "@/contexts/AutopilotContext";
-import {
-  FileText,
-  BarChart3,
+import { 
+  FileText, 
   TrendingUp,
+  BarChart3,
   Clock,
   FileBarChart,
   Coins,
-  ArrowLeft,
-  Filter,
-  ChevronRight,
-  Calendar,
+  ArrowRight,
+  Shield,
+  Mic,
+  Activity,
+  Zap,
+  PieChart,
+  Users,
+  Target,
+  AlertTriangle
 } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  BarChart,
-  Bar,
-  Legend,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { motion } from "framer-motion";
+import { AIHelper } from "@/components/post-call/AIHelper";
 
-interface ReportItem {
-  name: string;
-  desc: string;
-  icon: React.ReactNode;
-  option: string;
+interface ReportCard {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
   color: string;
+  bgGradient: string;
+  available: boolean;
 }
 
-const reports: ReportItem[] = [
+const reportCards: ReportCard[] = [
   {
-    name: "Transaction Summary",
-    desc: "View detailed transaction summaries and patterns",
-    icon: <FileText className="h-5 w-5" />,
-    option: "transaction",
-    color: "purple",
+    id: "transaction",
+    title: "Transaction Summary Report",
+    description: "View detailed transaction summaries and patterns across autopilot interactions",
+    icon: FileText,
+    color: "text-purple-500",
+    bgGradient: "from-purple-500/20 to-purple-600/5",
+    available: true,
   },
   {
-    name: "Document Access Frequency",
-    desc: "Track document access patterns and frequency",
-    icon: <FileBarChart className="h-5 w-5" />,
-    option: "document",
-    color: "blue",
+    id: "channel",
+    title: "Channel Distribution Report",
+    description: "Analyze channel distribution and usage patterns across different communication channels",
+    icon: PieChart,
+    color: "text-blue-500",
+    bgGradient: "from-blue-500/20 to-blue-600/5",
+    available: true,
   },
   {
-    name: "Weekly Traffic Trends",
-    desc: "Analyze weekly traffic patterns and trends",
-    icon: <TrendingUp className="h-5 w-5" />,
-    option: "weekly-trends",
-    color: "green",
+    id: "document",
+    title: "Document Access Frequency",
+    description: "Track document access patterns and frequency in autopilot conversations",
+    icon: FileBarChart,
+    color: "text-green-500",
+    bgGradient: "from-green-500/20 to-green-600/5",
+    available: true,
   },
   {
-    name: "Success/Failure Rate",
-    desc: "Monitor success and failure rates over time",
-    icon: <BarChart3 className="h-5 w-5" />,
-    option: "success-failure",
-    color: "amber",
+    id: "weekly-trends",
+    title: "Weekly Traffic Trends",
+    description: "Analyze weekly traffic patterns and trends in autopilot usage",
+    icon: TrendingUp,
+    color: "text-amber-500",
+    bgGradient: "from-amber-500/20 to-amber-600/5",
+    available: true,
   },
   {
-    name: "Token Usage Report",
-    desc: "Track AI token consumption and costs",
-    icon: <Coins className="h-5 w-5" />,
-    option: "token-usage",
-    color: "pink",
+    id: "success-failure",
+    title: "Success/Failure Rate Analysis",
+    description: "Monitor success and failure rates over time for autopilot interactions",
+    icon: BarChart3,
+    color: "text-pink-500",
+    bgGradient: "from-pink-500/20 to-pink-600/5",
+    available: true,
   },
   {
-    name: "Average Call Duration",
-    desc: "Analyze call duration statistics and trends",
-    icon: <Clock className="h-5 w-5" />,
-    option: "average-call-duration",
-    color: "cyan",
+    id: "token-usage",
+    title: "Token Usage Report",
+    description: "Track AI token consumption and costs across autopilot services",
+    icon: Coins,
+    color: "text-cyan-500",
+    bgGradient: "from-cyan-500/20 to-cyan-600/5",
+    available: true,
   },
-];
-
-const colorClasses: Record<string, string> = {
-  purple: "bg-purple-500/10 text-purple-500 group-hover:bg-purple-500/20",
-  blue: "bg-blue-500/10 text-blue-500 group-hover:bg-blue-500/20",
-  green: "bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500/20",
-  amber: "bg-amber-500/10 text-amber-500 group-hover:bg-amber-500/20",
-  pink: "bg-pink-500/10 text-pink-500 group-hover:bg-pink-500/20",
-  cyan: "bg-cyan-500/10 text-cyan-500 group-hover:bg-cyan-500/20",
-};
-
-// Sample data for reports
-const transactionData = [
-  { date: "Mon", success: 450, failed: 23 },
-  { date: "Tue", success: 520, failed: 30 },
-  { date: "Wed", success: 480, failed: 18 },
-  { date: "Thu", success: 590, failed: 25 },
-  { date: "Fri", success: 620, failed: 35 },
-  { date: "Sat", success: 380, failed: 12 },
-  { date: "Sun", success: 290, failed: 8 },
-];
-
-const tokenUsageData = [
-  { name: "GPT-4", value: 45, color: "#8b5cf6" },
-  { name: "GPT-3.5", value: 35, color: "#3b82f6" },
-  { name: "Whisper", value: 15, color: "#10b981" },
-  { name: "Embeddings", value: 5, color: "#f59e0b" },
-];
-
-const weeklyTrendsData = [
-  { week: "W1", calls: 2400, resolved: 2100, transferred: 300 },
-  { week: "W2", calls: 2800, resolved: 2500, transferred: 300 },
-  { week: "W3", calls: 2600, resolved: 2300, transferred: 300 },
-  { week: "W4", calls: 3200, resolved: 2900, transferred: 300 },
+  {
+    id: "average-call-duration",
+    title: "Average Call Duration",
+    description: "Analyze call duration statistics and trends for autopilot conversations",
+    icon: Clock,
+    color: "text-indigo-500",
+    bgGradient: "from-indigo-500/20 to-indigo-600/5",
+    available: true,
+  },
 ];
 
 export default function AutopilotReports() {
-  const navigate = useNavigate();
-  const { selectedInstance } = useAutopilot();
-  const [activeReport, setActiveReport] = useState<string>("landing");
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectedDateRange, setSelectedDateRange] = useState<string>("");
+  const [isHovering, setIsHovering] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!selectedInstance) {
-      navigate("/autopilot");
-    }
-  }, [selectedInstance, navigate]);
-
-  if (!selectedInstance) {
-    return null;
-  }
-
-  const activeReportData = reports.find((r) => r.option === activeReport);
-  const activeFiltersCount = selectedDateRange ? 1 : 0;
-
-  const renderReportContent = () => {
-    switch (activeReport) {
-      case "transaction":
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-4 bg-emerald-500/10 border-emerald-500/20">
-                <p className="text-sm text-muted-foreground">Total Transactions</p>
-                <p className="text-2xl font-bold text-emerald-600">3,330</p>
-              </Card>
-              <Card className="p-4 bg-purple-500/10 border-purple-500/20">
-                <p className="text-sm text-muted-foreground">Success Rate</p>
-                <p className="text-2xl font-bold text-purple-600">95.4%</p>
-              </Card>
-              <Card className="p-4 bg-red-500/10 border-red-500/20">
-                <p className="text-sm text-muted-foreground">Failed</p>
-                <p className="text-2xl font-bold text-red-600">151</p>
-              </Card>
-            </div>
-            <Card className="p-6 border-border/50 bg-card/80">
-              <h4 className="text-md font-semibold mb-4">Transaction Trends</h4>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={transactionData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="success" name="Success" fill="#10b981" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="failed" name="Failed" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </div>
-        );
-      case "token-usage":
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="p-4 bg-purple-500/10 border-purple-500/20">
-                <p className="text-sm text-muted-foreground">Total Tokens</p>
-                <p className="text-2xl font-bold text-purple-600">1.2M</p>
-              </Card>
-              <Card className="p-4 bg-blue-500/10 border-blue-500/20">
-                <p className="text-sm text-muted-foreground">Estimated Cost</p>
-                <p className="text-2xl font-bold text-blue-600">$45.80</p>
-              </Card>
-              <Card className="p-4 bg-emerald-500/10 border-emerald-500/20">
-                <p className="text-sm text-muted-foreground">Avg per Call</p>
-                <p className="text-2xl font-bold text-emerald-600">850</p>
-              </Card>
-              <Card className="p-4 bg-amber-500/10 border-amber-500/20">
-                <p className="text-sm text-muted-foreground">Peak Usage</p>
-                <p className="text-2xl font-bold text-amber-600">2.1K</p>
-              </Card>
-            </div>
-            <Card className="p-6 border-border/50 bg-card/80">
-              <h4 className="text-md font-semibold mb-4">Token Distribution by Model</h4>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
-                    <Pie
-                      data={tokenUsageData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {tokenUsageData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Legend />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </div>
-        );
-      case "weekly-trends":
-        return (
-          <div className="space-y-6">
-            <Card className="p-6 border-border/50 bg-card/80">
-              <h4 className="text-md font-semibold mb-4">Weekly Call Volume Trends</h4>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={weeklyTrendsData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="calls" name="Total Calls" stroke="#8b5cf6" strokeWidth={2} />
-                    <Line type="monotone" dataKey="resolved" name="Resolved" stroke="#10b981" strokeWidth={2} />
-                    <Line type="monotone" dataKey="transferred" name="Transferred" stroke="#f59e0b" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </div>
-        );
-      default:
-        return (
-          <Card className="p-6 border-border/50 bg-card/80">
-            <p className="text-muted-foreground text-center py-8">
-              Report visualization coming soon...
-            </p>
-          </Card>
-        );
-    }
+  const handleReportClick = (reportId: string) => {
+    // TODO: Handle report click - could open a modal or expand inline
+    console.log(`Opening report: ${reportId}`);
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
-      <AnimatePresence mode="wait">
-        {activeReport === "landing" ? (
-          <motion.div
-            key="landing"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-foreground">Reports</h2>
-                <p className="text-sm text-muted-foreground">
-                  Access detailed analytics and reports for your Autopilot instance
+    <>
+      <div className="p-6 space-y-6">
+        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="pb-4 border-b border-border/30">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold tracking-tight">
+                  Autopilot Reports
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Generate and view detailed autopilot analytics reports
                 </p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {reports.map((report, index) => (
-                  <motion.div
-                    key={report.option}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                  >
-                    <Card
-                      onClick={() => setActiveReport(report.option)}
-                      className="p-5 border-border/50 bg-card/80 cursor-pointer group hover:shadow-lg hover:border-primary/30 transition-all duration-300"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div
-                          className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${colorClasses[report.color]}`}
-                        >
-                          {report.icon}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {report.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1">{report.desc}</p>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-        ) : (
-          <motion.div
-            key={activeReport}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-              {/* Report Header - matching Angular template */}
-              <div className="p-6 border-b border-border/30">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setActiveReport("landing")}
-                      className="h-10 w-10 rounded-lg"
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div>
-                      <h2 className="text-xl font-semibold text-foreground">
-                        {activeReportData?.name}
-                      </h2>
-                      <p className="text-sm text-muted-foreground">
-                        {activeReportData?.desc}
-                      </p>
-                    </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {reportCards.map((report, index) => (
+                <motion.div
+                  key={report.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onMouseEnter={() => setIsHovering(report.id)}
+                  onMouseLeave={() => setIsHovering(null)}
+                  onClick={() => report.available && handleReportClick(report.id)}
+                  className={`
+                    relative group cursor-pointer rounded-xl border border-border/50 
+                    bg-gradient-to-br ${report.bgGradient} backdrop-blur-sm
+                    p-5 transition-all duration-300
+                    ${report.available 
+                      ? "hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1" 
+                      : "opacity-50 cursor-not-allowed"
+                    }
+                  `}
+                >
+                  {/* Icon */}
+                  <div className={`
+                    h-12 w-12 rounded-xl bg-background/80 border border-border/50
+                    flex items-center justify-center mb-4 transition-all duration-300
+                    group-hover:scale-110 group-hover:border-primary/30
+                  `}>
+                    <report.icon className={`h-6 w-6 ${report.color}`} />
                   </div>
-                  <Button
-                    variant={filtersOpen ? "default" : "outline"}
-                    size="icon"
-                    className="relative h-10 w-10 rounded-lg"
-                    onClick={() => setFiltersOpen(!filtersOpen)}
-                  >
-                    <Filter className="h-4 w-4" />
-                    {activeFiltersCount > 0 && (
-                      <Badge 
-                        variant="destructive" 
-                        className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                      >
-                        {activeFiltersCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </div>
-              </div>
 
-              {/* Filters Panel */}
-              <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-                <CollapsibleContent>
+                  {/* Title */}
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {report.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {report.description}
+                  </p>
+
+                  {/* Arrow indicator */}
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="p-4 bg-muted/30 border-b border-border/30"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ 
+                      opacity: isHovering === report.id ? 1 : 0, 
+                      x: isHovering === report.id ? 0 : -10 
+                    }}
+                    className="absolute bottom-5 right-5"
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* Date Range Filter */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-                        <Button variant="outline" className="w-full justify-start gap-2">
-                          <Calendar className="h-4 w-4" />
-                          {selectedDateRange || "Select dates"}
-                        </Button>
-                      </div>
-
-                      {/* VDN Source Filter */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground">VDN Source</label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="All Sources" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Sources</SelectItem>
-                            <SelectItem value="IVR">IVR</SelectItem>
-                            <SelectItem value="Web">Web Chat</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Category Filter */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground">Category</label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="All Categories" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Categories</SelectItem>
-                            <SelectItem value="billing">Billing</SelectItem>
-                            <SelectItem value="support">Support</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end mt-4 gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setSelectedDateRange("")}
-                      >
-                        Clear All
-                      </Button>
-                      <Button size="sm">Apply Filters</Button>
-                    </div>
+                    <ArrowRight className={`h-5 w-5 ${report.color}`} />
                   </motion.div>
-                </CollapsibleContent>
-              </Collapsible>
 
-              {/* Report Content */}
-              <div className="p-6">
-                {renderReportContent()}
-              </div>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                  {/* Not available badge */}
+                  {!report.available && (
+                    <div className="absolute top-3 right-3">
+                      <Shield className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <AIHelper />
+    </>
   );
 }

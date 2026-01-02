@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, VolumeX } from "lucide-react";
 import { motion } from "framer-motion";
-import { useModule } from "@/contexts/ModuleContext";
+import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 
 // Mock data for silence reasons
@@ -27,26 +26,18 @@ const mockSilenceReasons = [
 ];
 
 export default function SilenceReport() {
-  const navigate = useNavigate();
-  const { setShowModuleTabs } = useModule();
+  const { setSelectedTab } = usePostCall();
   const [loading, setLoading] = useState(true);
   const [errorLoading, setErrorLoading] = useState(false);
   const [silenceReasons, setSilenceReasons] = useState<string[]>([]);
 
   useEffect(() => {
-    setShowModuleTabs(true);
-    
-    // Simulate loading
     const timer = setTimeout(() => {
       setSilenceReasons(mockSilenceReasons);
       setLoading(false);
     }, 800);
-
-    return () => {
-      setShowModuleTabs(true);
-      clearTimeout(timer);
-    };
-  }, [setShowModuleTabs]);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
@@ -58,7 +49,7 @@ export default function SilenceReport() {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => navigate("/post-call-analyzer/reports")}
+                  onClick={() => setSelectedTab("reports")}
                   className="h-9 w-9 shrink-0"
                 >
                   <ArrowLeft className="h-4 w-4" />

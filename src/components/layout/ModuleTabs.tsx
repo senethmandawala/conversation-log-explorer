@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import { 
   LayoutGrid, 
   MessageSquare, 
@@ -17,8 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useAutopilot } from "@/contexts/AutopilotContext";
-import { usePostCall } from "@/contexts/PostCallContext";
+import { useAutopilot, AutopilotTab } from "@/contexts/AutopilotContext";
+import { usePostCall, PostCallTab } from "@/contexts/PostCallContext";
 
 interface Tab {
   id: string;
@@ -49,10 +48,9 @@ interface ModuleTabsProps {
 }
 
 export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsProps) {
-  const navigate = useNavigate();
-  const { selectedInstance: autopilotInstance } = useAutopilot();
-  const { selectedInstance: postCallInstance } = usePostCall();
-  const isPostCallAnalyzer = currentPath.startsWith("/post-call-analyzer");
+  const { selectedInstance: autopilotInstance, selectedTab: autopilotSelectedTab, setSelectedTab: setAutopilotTab } = useAutopilot();
+  const { selectedInstance: postCallInstance, selectedTab: postCallSelectedTab, setSelectedTab: setPostCallTab } = usePostCall();
+  const isPostCallAnalyzer = currentPath.startsWith("/pca");
   const isAutopilot = currentPath.startsWith("/autopilot");
   const tabs = isPostCallAnalyzer ? postCallAnalyzerTabs : autopilotTabs;
   const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
@@ -63,14 +61,12 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
     ? postCallInstance?.name 
     : autopilotInstance?.name;
 
-  // Determine active tab from URL
+  // Determine active tab from context (URL doesn't change for either module)
   const getActiveTabFromPath = () => {
     if (isPostCallAnalyzer) {
-      const subPath = currentPath.replace("/post-call-analyzer", "").replace("/", "");
-      return subPath || "dashboard";
+      return postCallSelectedTab;
     } else if (isAutopilot) {
-      const subPath = currentPath.replace("/autopilot", "").replace("/", "");
-      return subPath || "dashboard";
+      return autopilotSelectedTab;
     }
     return activeTab;
   };
@@ -107,9 +103,11 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
                     onClick={() => {
                       onTabChange(tab.id);
                       if (isPostCallAnalyzer) {
-                        navigate(`/post-call-analyzer/${tab.id}`);
+                        // Use context to switch tabs (URL stays the same)
+                        setPostCallTab(tab.id as PostCallTab);
                       } else {
-                        navigate(`/autopilot/${tab.id}`);
+                        // For autopilot, use context to switch tabs (URL stays the same)
+                        setAutopilotTab(tab.id as AutopilotTab);
                       }
                     }}
                     className={cn(
