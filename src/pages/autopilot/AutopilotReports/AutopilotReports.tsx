@@ -10,16 +10,19 @@ import {
   Coins,
   ArrowRight,
   Shield,
-  Mic,
-  Activity,
-  Zap,
   PieChart,
-  Users,
-  Target,
-  AlertTriangle
+  Settings,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
+import ReportTransactionSummary from "./autopilot-transaction-summary/ReportTransactionSummary";
+import ReportChannelWiseUsage from "./autopilot-channel-wise-usage/ReportChannelWiseUsage";
+import ReportDocumentAccessFrequency from "./autopilot-document-access-frequency/ReportDocumentAccessFrequency";
+import ReportAverageCallDuration from "./autopilot-average-call-duration/ReportAverageCallDuration";
+import ReportWeeklyTrends from "./autopilot-weekly-trends/ReportWeeklyTrends";
+import ReportSuccessFailure from "./autopilot-success-failure/ReportSuccessFailure";
+import ReportTokenUsage from "./autopilot-token-usage/ReportTokenUsage";
+import ReportCustomized from "./autopilot-customized-report/ReportCustomized";
 
 interface ReportCard {
   id: string;
@@ -95,15 +98,51 @@ const reportCards: ReportCard[] = [
     bgGradient: "from-indigo-500/20 to-indigo-600/5",
     available: true,
   },
+  {
+    id: "customized",
+    title: "Customized Reports",
+    description: "View and manage your custom autopilot reports",
+    icon: Settings,
+    color: "text-orange-500",
+    bgGradient: "from-orange-500/20 to-orange-600/5",
+    available: true,
+  },
 ];
 
 export default function AutopilotReports() {
   const [isHovering, setIsHovering] = useState<string | null>(null);
+  const [activeReport, setActiveReport] = useState<string | null>(null);
 
   const handleReportClick = (reportId: string) => {
-    // TODO: Handle report click - could open a modal or expand inline
-    console.log(`Opening report: ${reportId}`);
+    setActiveReport(reportId);
   };
+
+  const handleBack = () => {
+    setActiveReport(null);
+  };
+
+  if (activeReport) {
+    switch (activeReport) {
+      case "transaction":
+        return <ReportTransactionSummary onBack={handleBack} />;
+      case "channel":
+        return <ReportChannelWiseUsage onBack={handleBack} />;
+      case "document":
+        return <ReportDocumentAccessFrequency onBack={handleBack} />;
+      case "weekly-trends":
+        return <ReportWeeklyTrends onBack={handleBack} />;
+      case "success-failure":
+        return <ReportSuccessFailure onBack={handleBack} />;
+      case "token-usage":
+        return <ReportTokenUsage onBack={handleBack} />;
+      case "average-call-duration":
+        return <ReportAverageCallDuration onBack={handleBack} />;
+      case "customized":
+        return <ReportCustomized onBack={handleBack} />;
+      default:
+        return null;
+    }
+  }
 
   return (
     <>
