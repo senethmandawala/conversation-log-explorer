@@ -47,6 +47,21 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+// Mock word data for Keywords section
+const mockWordData = [
+  { text: "billing", value: 0.95 },
+  { text: "conversation", value: 0.85 },
+  { text: "support", value: 0.75 },
+  { text: "account", value: 0.70 },
+  { text: "payment", value: 0.65 },
+  { text: "service", value: 0.60 },
+  { text: "customer", value: 0.55 },
+  { text: "issue", value: 0.50 },
+  { text: "resolved", value: 0.45 },
+  { text: "charge", value: 0.40 },
+];
 
 interface CallLogDetailsProps {
   callLog: {
@@ -169,6 +184,7 @@ const getCompletionIcon = (completed: number) => {
 
 export function CallLogDetails({ callLog, open, onClose, isLoading = false }: CallLogDetailsProps) {
   const [activeTab, setActiveTab] = useState("call-info");
+  const [keywordView, setKeywordView] = useState<string>("cloud");
 
   if (!callLog) return null;
 
@@ -253,6 +269,76 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {callLog.summary}
                 </p>
+              </motion.div>
+
+              <Separator className="my-4" />
+
+              {/* Keywords Section */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+                <div className="flex items-center justify-between mb-3">
+                  <h5 className="font-semibold text-sm">Keywords</h5>
+                  <ToggleGroup type="single" value={keywordView} onValueChange={(value) => value && setKeywordView(value)} size="sm">
+                    <ToggleGroupItem value="cloud" className="text-xs px-3 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                      Word Cloud
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="graph" className="text-xs px-3 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                      Word Graph
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+                
+                {keywordView === "cloud" ? (
+                  <div className="flex flex-wrap gap-2 p-4 bg-muted/30 rounded-lg min-h-[120px] items-center justify-center">
+                    {mockWordData.map((word, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 rounded-md transition-all hover:scale-105"
+                        style={{
+                          fontSize: `${12 + word.value * 14}px`,
+                          fontWeight: word.value > 0.7 ? 600 : 400,
+                          color: `hsl(${200 + index * 15}, 70%, ${40 + word.value * 20}%)`,
+                          backgroundColor: `hsla(${200 + index * 15}, 70%, 50%, 0.1)`,
+                        }}
+                      >
+                        {word.text}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-muted/30 rounded-lg p-2">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={mockWordData} layout="vertical" margin={{ left: 20, right: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                        <XAxis 
+                          type="number" 
+                          domain={[0, 1]} 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={10}
+                          tickFormatter={(value) => value.toFixed(1)}
+                          label={{ value: 'Words Count', position: 'bottom', offset: -5, fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        />
+                        <YAxis 
+                          dataKey="text" 
+                          type="category" 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={11} 
+                          width={80}
+                          label={{ value: 'Words', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                          }}
+                          formatter={(value: number) => [value.toFixed(2), "Frequency"]}
+                        />
+                        <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </motion.div>
 
               {/* Transcription */}
