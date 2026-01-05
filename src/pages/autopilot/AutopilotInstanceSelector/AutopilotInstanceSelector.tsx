@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Bot, MessageSquare, Phone, Zap } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Bot, MessageSquare, Phone, Zap, Search } from "lucide-react";
 
 interface AutopilotInstance {
   id: string;
@@ -54,6 +55,14 @@ interface AutopilotInstanceSelectorProps {
 }
 
 export default function AutopilotInstanceSelector({ onSelectInstance }: AutopilotInstanceSelectorProps) {
+  const [search, setSearch] = useState("");
+  
+  const filteredInstances = mockInstances.filter(instance =>
+    instance.name.toLowerCase().includes(search.toLowerCase()) ||
+    instance.description.toLowerCase().includes(search.toLowerCase()) ||
+    instance.channels.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -63,22 +72,45 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
         transition={{ duration: 0.5 }}
       >
         <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-              <Bot className="h-5 w-5 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <Bot className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-foreground">Instances</h1>
+                <p className="text-sm text-muted-foreground">Select an instance to view its analytics and configuration</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">Instances</h1>
-              <p className="text-sm text-muted-foreground">Select an instance to view its analytics and configuration</p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Zap className="h-4 w-4 text-purple-500" />
+              <span>{mockInstances.length} active</span>
             </div>
           </div>
         </Card>
       </motion.div>
 
+      {/* Search Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search instances..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 pr-4 h-11 bg-card border-border/50 focus:border-purple-500 focus:outline-none transition-colors"
+          />
+        </div>
+      </motion.div>
+
       {/* Instance Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <AnimatePresence mode="popLayout">
-          {mockInstances.map((instance, index) => (
+          {filteredInstances.map((instance, index) => (
             <motion.div
               key={instance.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -116,6 +148,17 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
           ))}
         </AnimatePresence>
       </div>
+
+      {filteredInstances.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-12 text-muted-foreground"
+        >
+          <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p>No instances found matching "{search}"</p>
+        </motion.div>
+      )}
     </div>
   );
 }

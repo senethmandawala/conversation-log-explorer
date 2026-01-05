@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ArrowLeft, FileBarChart, Search, RotateCcw, Filter } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 import {
   Table,
   TableBody,
@@ -10,9 +12,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Search, X, FileBarChart } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import {
+  Collapsible,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
+import { DateRangeFilter } from "@/components/conversation/DateRangeFilter";
+import { DateRangeValue } from "@/types/conversation";
 
 interface DocumentAccessData {
   id: string;
@@ -40,7 +48,17 @@ interface ReportDocumentAccessFrequencyProps {
 
 export default function ReportDocumentAccessFrequency({ onBack }: ReportDocumentAccessFrequencyProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [numberOfFilters, setNumberOfFilters] = useState(0);
+  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null);
+
+  useEffect(() => {
+    // Update filter count
+    const filterCount = (dateRange ? 1 : 0) + (searchTerm ? 1 : 0);
+    setNumberOfFilters(filterCount);
+  }, [dateRange, searchTerm]);
+
   const [filteredData, setFilteredData] = useState<DocumentAccessData[]>(mockDocumentData);
 
   const maxAccessCount = Math.max(...mockDocumentData.map((d) => d.accessCount));
@@ -50,8 +68,8 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
     setTimeout(() => {
       const filtered = mockDocumentData.filter(
         (item) =>
-          item.documentName.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-          item.category.toLowerCase().includes(searchKeyword.toLowerCase())
+          item.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredData(filtered);
       setIsLoading(false);
@@ -59,7 +77,7 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
   };
 
   const handleClear = () => {
-    setSearchKeyword("");
+    setSearchTerm("");
     setFilteredData(mockDocumentData);
   };
 
@@ -78,53 +96,83 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="p-6 space-y-6"
+    >
       <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader className="pb-4 border-b border-border/30">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onBack}
+                className="h-10 w-10 rounded-xl"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20 flex items-center justify-center">
+                <FileBarChart className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold tracking-tight">
+                  Document Access Frequency
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Track document access patterns and frequency in autopilot conversations
+                </p>
+              </div>
+            </div>
             <Button
-              variant="ghost"
+              variant={filtersOpen ? "default" : "outline"}
               size="icon"
-              onClick={onBack}
-              className="h-10 w-10 rounded-xl"
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="relative h-9 w-9"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <Filter className="h-4 w-4" />
+              {numberOfFilters > 0 && (
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {numberOfFilters}
+                </Badge>
+              )}
             </Button>
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20 flex items-center justify-center">
-              <FileBarChart className="h-5 w-5 text-green-500" />
-            </div>
-            <div>
-              <CardTitle className="text-xl font-semibold tracking-tight">
-                Document Access Frequency Report
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Track document access patterns and frequency in autopilot conversations
-              </p>
-            </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
-          {/* Search Section */}
-          <div className="flex flex-wrap gap-3 items-center">
-            <div className="flex-1 min-w-[200px]">
-              <Input
-                placeholder="Search by document name..."
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-            </div>
-            <Button onClick={handleSearch} className="gap-2">
-              <Search className="h-4 w-4" />
-              Search
-            </Button>
-            {searchKeyword && (
-              <Button variant="outline" onClick={handleClear} className="gap-2">
-                <X className="h-4 w-4" />
-                Clear
-              </Button>
-            )}
-          </div>
+          {/* Collapsible Filters */}
+          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <CollapsibleContent className="space-y-4">
+              <div className="flex flex-wrap gap-3 items-center p-4 bg-muted/30 rounded-lg border border-border/50">
+                <div className="min-w-[200px]">
+                  <DateRangeFilter
+                    value={dateRange}
+                    onChange={setDateRange}
+                  />
+                </div>
+                <div className="w-[200px]">
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <Button onClick={handleSearch} className="gap-2">
+                  <Search className="h-4 w-4" />
+                  Search
+                </Button>
+                {searchTerm && (
+                  <Button variant="outline" onClick={handleClear} className="gap-2">
+                    <RotateCcw className="h-4 w-4" />
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Table */}
           {isLoading ? (
@@ -177,6 +225,6 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
           )}
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }

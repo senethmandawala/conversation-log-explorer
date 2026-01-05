@@ -10,19 +10,18 @@ import {
   Coins,
   ArrowRight,
   Shield,
-  PieChart,
   Settings,
+  CalendarDays,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import ReportTransactionSummary from "./autopilot-transaction-summary/ReportTransactionSummary";
-import ReportChannelWiseUsage from "./autopilot-channel-wise-usage/ReportChannelWiseUsage";
 import ReportDocumentAccessFrequency from "./autopilot-document-access-frequency/ReportDocumentAccessFrequency";
 import ReportAverageCallDuration from "./autopilot-average-call-duration/ReportAverageCallDuration";
 import ReportWeeklyTrends from "./autopilot-weekly-trends/ReportWeeklyTrends";
 import ReportSuccessFailure from "./autopilot-success-failure/ReportSuccessFailure";
 import ReportTokenUsage from "./autopilot-token-usage/ReportTokenUsage";
-import ReportCustomized from "./autopilot-customized-report/ReportCustomized";
+import ReportCustomized from "./autopilot-custom-reports/CustomReports";
 
 interface ReportCard {
   id: string;
@@ -45,15 +44,6 @@ const reportCards: ReportCard[] = [
     available: true,
   },
   {
-    id: "channel",
-    title: "Channel Distribution Report",
-    description: "Analyze channel distribution and usage patterns across different communication channels",
-    icon: PieChart,
-    color: "text-blue-500",
-    bgGradient: "from-blue-500/20 to-blue-600/5",
-    available: true,
-  },
-  {
     id: "document",
     title: "Document Access Frequency",
     description: "Track document access patterns and frequency in autopilot conversations",
@@ -63,10 +53,19 @@ const reportCards: ReportCard[] = [
     available: true,
   },
   {
+    id: "customized",
+    title: "Customized Reports",
+    description: "View and manage your custom autopilot reports",
+    icon: Settings,
+    color: "text-orange-500",
+    bgGradient: "from-orange-500/20 to-orange-600/5",
+    available: true,
+  },
+  {
     id: "weekly-trends",
     title: "Weekly Traffic Trends",
     description: "Analyze weekly traffic patterns and trends in autopilot usage",
-    icon: TrendingUp,
+    icon: CalendarDays,
     color: "text-amber-500",
     bgGradient: "from-amber-500/20 to-amber-600/5",
     available: true,
@@ -98,15 +97,6 @@ const reportCards: ReportCard[] = [
     bgGradient: "from-indigo-500/20 to-indigo-600/5",
     available: true,
   },
-  {
-    id: "customized",
-    title: "Customized Reports",
-    description: "View and manage your custom autopilot reports",
-    icon: Settings,
-    color: "text-orange-500",
-    bgGradient: "from-orange-500/20 to-orange-600/5",
-    available: true,
-  },
 ];
 
 export default function AutopilotReports() {
@@ -125,10 +115,10 @@ export default function AutopilotReports() {
     switch (activeReport) {
       case "transaction":
         return <ReportTransactionSummary onBack={handleBack} />;
-      case "channel":
-        return <ReportChannelWiseUsage onBack={handleBack} />;
       case "document":
         return <ReportDocumentAccessFrequency onBack={handleBack} />;
+      case "customized":
+        return <ReportCustomized onBack={handleBack} />;
       case "weekly-trends":
         return <ReportWeeklyTrends onBack={handleBack} />;
       case "success-failure":
@@ -137,8 +127,6 @@ export default function AutopilotReports() {
         return <ReportTokenUsage onBack={handleBack} />;
       case "average-call-duration":
         return <ReportAverageCallDuration onBack={handleBack} />;
-      case "customized":
-        return <ReportCustomized onBack={handleBack} />;
       default:
         return null;
     }

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { useAutopilot } from "@/contexts/AutopilotContext";
+import { useModule } from "@/contexts/ModuleContext";
 
 interface NavItem {
   title: string;
@@ -48,7 +49,7 @@ const navigation: NavSection[] = [
 ];
 
 export function AppSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const { sidebarCollapsed, setSidebarCollapsed } = useModule();
   const location = useLocation();
   const { setSelectedInstance: setPostCallInstance } = usePostCall();
   const { setSelectedInstance: setAutopilotInstance } = useAutopilot();
@@ -65,7 +66,7 @@ export function AppSidebar() {
   return (
     <motion.aside
       initial={false}
-      animate={{ width: collapsed ? 72 : 256 }}
+      animate={{ width: sidebarCollapsed ? 72 : 256 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="h-screen bg-card border-r border-border/50 flex flex-col relative"
     >
@@ -73,7 +74,7 @@ export function AppSidebar() {
       <div className="h-16 flex items-center px-4 border-b border-border/30">
         <motion.div
           initial={false}
-          animate={{ opacity: collapsed ? 0 : 1 }}
+          animate={{ opacity: sidebarCollapsed ? 0 : 1 }}
           className="flex items-center gap-2"
         >
           <span className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
@@ -81,7 +82,7 @@ export function AppSidebar() {
           </span>
           <span className="text-2xl font-bold text-foreground">AI</span>
         </motion.div>
-        {collapsed && (
+        {sidebarCollapsed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -97,7 +98,7 @@ export function AppSidebar() {
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         {navigation.map((section) => (
           <div key={section.label} className="mb-6">
-            {!collapsed && (
+            {!sidebarCollapsed && (
               <motion.h3
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -125,7 +126,7 @@ export function AppSidebar() {
                         "h-5 w-5 flex-shrink-0",
                         isActive && "text-primary"
                       )} />
-                      {!collapsed && (
+                      {!sidebarCollapsed && (
                         <motion.span
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -145,7 +146,7 @@ export function AppSidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-border/30">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {!collapsed && (
+          {!sidebarCollapsed && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -155,20 +156,6 @@ export function AppSidebar() {
           )}
         </div>
       </div>
-
-      {/* Collapse Toggle */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 h-6 w-6 rounded-full border-border/60 bg-background shadow-md hover:bg-primary/5 hover:border-primary/50"
-      >
-        {collapsed ? (
-          <ChevronRight className="h-3 w-3" />
-        ) : (
-          <ChevronLeft className="h-3 w-3" />
-        )}
-      </Button>
     </motion.aside>
   );
 }

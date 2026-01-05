@@ -86,10 +86,12 @@ const PostCallAnalyzer = () => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <InstanceSelector
-              instances={mockInstances}
-              onSelectInstance={handleSelectInstance}
-            />
+            <div className="p-4 md:p-6 max-w-7xl mx-auto">
+              <InstanceSelector
+                instances={mockInstances}
+                onSelectInstance={handleSelectInstance}
+              />
+            </div>
           </motion.div>
         </AnimatePresence>
         <AIHelper />

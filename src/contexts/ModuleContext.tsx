@@ -3,15 +3,23 @@ import { createContext, useContext, useState, ReactNode } from "react";
 interface ModuleContextType {
   showModuleTabs: boolean;
   setShowModuleTabs: (show: boolean) => void;
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
 }
 
 const ModuleContext = createContext<ModuleContextType | undefined>(undefined);
 
 export function ModuleProvider({ children }: { children: ReactNode }) {
   const [showModuleTabs, setShowModuleTabs] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <ModuleContext.Provider value={{ showModuleTabs, setShowModuleTabs }}>
+    <ModuleContext.Provider value={{ 
+      showModuleTabs, 
+      setShowModuleTabs,
+      sidebarCollapsed,
+      setSidebarCollapsed
+    }}>
       {children}
     </ModuleContext.Provider>
   );
