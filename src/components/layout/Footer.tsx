@@ -16,10 +16,6 @@ export function Footer() {
         
         {/* Right side - Links */}
         <div className="flex flex-wrap items-center gap-4 text-xs justify-end">
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Docs</a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Help</a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Terms & Conditions</a>
           <span className="text-muted-foreground">Global Wavenet - 2024</span>
         </div>
       </div>
