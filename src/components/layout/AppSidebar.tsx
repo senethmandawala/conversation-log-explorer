@@ -72,24 +72,17 @@ export function AppSidebar() {
     >
       {/* Logo */}
       <div className="h-16 flex items-center px-4 border-b border-border/30">
-        <motion.div
-          initial={false}
-          animate={{ opacity: sidebarCollapsed ? 0 : 1 }}
-          className="flex items-center gap-2"
-        >
-          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-            sense
-          </span>
-          <span className="text-2xl font-bold text-foreground">AI</span>
-        </motion.div>
-        {sidebarCollapsed && (
+        {!sidebarCollapsed && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mx-auto"
+            initial={false}
+            animate={{ opacity: sidebarCollapsed ? 0 : 1 }}
+            className="flex items-center gap-2"
           >
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-            </span>
+            <img 
+              src="/src/assets/images/sense-ai-logo-transparent.svg" 
+              alt="Sense AI Logo" 
+              className="h-8 w-auto"
+            />
           </motion.div>
         )}
       </div>
@@ -144,15 +137,21 @@ export function AppSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border/30">
+      <div className="p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {!sidebarCollapsed && (
-            <motion.span
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              className="flex items-center gap-2 -mt-1"
             >
-              Powered By <span className="font-semibold text-foreground">wavenet</span>
-            </motion.span>
+              <span>Powered By</span>
+              <img 
+                src="/src/assets/images/wn_logo_2019_vector_final.svg" 
+                alt="Wavenet Logo" 
+                className="h-4 w-auto -mt-0.5"
+              />
+            </motion.div>
           )}
         </div>
       </div>

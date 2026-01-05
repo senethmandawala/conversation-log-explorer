@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { TopHeader } from "./TopHeader";
 import { ModuleTabs } from "./ModuleTabs";
+import { Footer } from "./Footer";
 import { useModule } from "@/contexts/ModuleContext";
 
 interface MainLayoutProps {
@@ -43,6 +44,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         <main className="flex-1 overflow-y-auto bg-muted/30">
           {children}
         </main>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   );

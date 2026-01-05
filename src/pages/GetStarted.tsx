@@ -139,19 +139,26 @@ export default function GetStarted() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-blue-600 p-8 md:p-10 mb-8"
+        className="relative overflow-hidden rounded-2xl p-8 md:p-10 mb-8"
+        style={{
+          backgroundImage: 'url("/src/assets/images/sense-ai-banner.webp")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
       >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
+        {/* Light overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20" />
         
         <div className="relative flex items-center gap-4">
-          <div className="hidden md:flex h-16 w-16 rounded-2xl bg-white/20 backdrop-blur-sm items-center justify-center">
+          <div className="hidden md:flex h-16 w-16 rounded-2xl bg-white/30 backdrop-blur-sm items-center justify-center">
             <Sparkles className="h-8 w-8 text-white" />
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
               Welcome to Sense AI
             </h1>
-            <p className="text-white/80 text-sm md:text-base max-w-2xl">
+            <p className="text-white text-sm md:text-base max-w-2xl">
               Transform your customer experience with AI-powered analytics, automation, and real-time assistance. 
               Choose a module below to get started.
             </p>
