@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { PostCallDashboard } from "@/components/post-call/PostCallDashboard";
+import { PostCallDashboardAntd } from "@/components/post-call/antd/PostCallDashboardAntd";
 
 // Default instance for dashboard view
 const defaultInstance = {
@@ -18,7 +18,7 @@ export default function Dashboard() {
       transition={{ duration: 0.3 }}
       className="min-h-full"
     >
-      <PostCallDashboard
+      <PostCallDashboardAntd
         instance={defaultInstance}
         onBack={() => {}}
       />
