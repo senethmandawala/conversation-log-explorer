@@ -22,7 +22,8 @@ import {
   Phone,
   User,
   Timer,
-  Tag
+  Tag,
+  Volume2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -218,19 +219,91 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
 
             {/* Call Info Tab */}
             <TabsContent value="call-info" className="space-y-1 mt-0">
-              <DetailItem icon={<Calendar className="h-5 w-5 text-primary" />} label="Date" value={callLog.date} delay={0.1} />
-              <DetailItem icon={<Clock className="h-5 w-5 text-primary" />} label="Time" value={callLog.time} delay={0.15} />
-              <Separator className="my-4" />
-              <DetailItem icon={<Phone className="h-5 w-5 text-primary" />} label="MSISDN" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{callLog.msisdn}</code>} delay={0.2} />
-              <DetailItem icon={<User className="h-5 w-5 text-primary" />} label="Agent" value={callLog.agent} delay={0.25} />
-              <Separator className="my-4" />
-              <DetailItem icon={<Timer className="h-5 w-5 text-primary" />} label="Call Duration" value={callLog.callDuration} delay={0.3} />
-              <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Category" value={callLog.category} delay={0.35} />
-              <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Sub Category" value={callLog.subCategory} delay={0.4} />
+              {/* Header Layout - Date/Time and MSISDN/Agent */}
+              <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-4 mb-3 mt-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</p>
+                    <p className="text-sm font-medium text-foreground">{callLog.date}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
+                    <p className="text-sm font-medium text-foreground">{callLog.time}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">MSISDN</p>
+                    <p className="text-sm font-medium text-foreground">
+                      <code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{callLog.msisdn}</code>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Agent</p>
+                    <p className="text-sm font-medium text-foreground">{callLog.agent}</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Additional Details in 2x2 Grid */}
+              <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="grid grid-cols-2 gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Timer className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Call Duration</p>
+                    <p className="text-sm font-medium text-foreground">{callLog.callDuration}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Tag className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Category</p>
+                    <p className="text-sm font-medium text-foreground">{callLog.category}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Tag className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Sub Category</p>
+                    <p className="text-sm font-medium text-foreground">{callLog.subCategory}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</p>
+                    <p className="text-sm font-medium text-foreground">Completed</p>
+                  </div>
+                </div>
+              </motion.div>
               <Separator className="my-4" />
 
               {/* Sentiment Analysis */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="rounded-xl bg-muted/30 p-4">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="rounded-xl bg-muted/30 p-4">
                 <h5 className="font-semibold mb-3 text-sm">Sentiment Analysis</h5>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -252,7 +325,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
 
               {/* Audio Player */}
               {callLog.audioUrl && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mt-4">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mt-4">
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Audio Recording</label>
                   <audio controls className="w-full">
                     <source src={callLog.audioUrl} type="audio/wav" />
@@ -261,105 +334,124 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
                 </motion.div>
               )}
 
-              <Separator className="my-4" />
-
-              {/* Call Summary */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
-                <h5 className="font-semibold mb-2 text-sm">Call Summary</h5>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {callLog.summary}
-                </p>
+              {/* Word Analysis Card with Inline Toggle */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
+                <Card className="border-border/50">
+                  <CardContent className="p-0">
+                    <div className="d-flex align-items-center justify-content-between mb-2 p-4 pb-0">
+                      <h5 className="mb-0 font-bold">Keywords</h5>
+                      <div>
+                        <ToggleGroup type="single" value={keywordView} onValueChange={setKeywordView}>
+                          <ToggleGroupItem value="cloud" className="text-xs px-3 py-1">
+                            Word Cloud
+                          </ToggleGroupItem>
+                          <ToggleGroupItem value="graph" className="text-xs px-3 py-1">
+                            Word Graph
+                          </ToggleGroupItem>
+                        </ToggleGroup>
+                      </div>
+                    </div>
+                    <div className="p-4 pt-0">
+                      {keywordView === "cloud" ? (
+                        <div className="flex flex-wrap gap-2 min-h-[200px] items-center justify-center">
+                          {mockWordData.map((word, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 rounded-md transition-all hover:scale-110 cursor-pointer"
+                              style={{
+                                fontSize: `${10 + (word.value / 100) * 16}px`,
+                                fontWeight: word.value > 70 ? 600 : 400,
+                                color: `hsl(${200 + index * 15}, 70%, ${35 + (word.value / 100) * 25}%)`,
+                                transform: `rotate(${index % 3 === 0 ? -5 : index % 3 === 1 ? 0 : 5}deg)`,
+                              }}
+                            >
+                              {word.text}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div>
+                          <ResponsiveContainer width="100%" height={200}>
+                            <BarChart data={mockWordData.slice(0, 6)} layout="vertical" margin={{ left: 0, right: 10, top: 0, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                              <XAxis 
+                                type="number" 
+                                domain={[0, 100]} 
+                                stroke="hsl(var(--muted-foreground))" 
+                                fontSize={10}
+                                tickFormatter={(value) => value.toFixed(1)}
+                              />
+                              <YAxis 
+                                dataKey="text" 
+                                type="category" 
+                                stroke="hsl(var(--muted-foreground))" 
+                                fontSize={10} 
+                                width={70}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: "hsl(var(--card))",
+                                  border: "1px solid hsl(var(--border))",
+                                  borderRadius: "8px",
+                                  fontSize: "12px",
+                                }}
+                                formatter={(value: number) => [value, "Count"]}
+                              />
+                              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                          <p className="text-xs text-muted-foreground text-center mt-1">Words Count</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
 
-              <Separator className="my-4" />
+              {/* Call Summary Card */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+                <Card className="border-border/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Call Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {callLog.summary}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-              {/* Transcription */}
+              {/* Conversation Transcript Card */}
               {callLog.transcription && callLog.transcription.length > 0 && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-                  <h5 className="font-semibold mb-3 text-sm">Conversation Transcript</h5>
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {callLog.transcription.map((item, index) => (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-lg ${
-                          item.speaker === "Agent"
-                            ? "bg-primary/10 ml-4"
-                            : "bg-muted mr-4"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold">{item.speaker}</span>
-                          <span className="text-xs text-muted-foreground">{item.timestamp}</span>
-                        </div>
-                        <p className="text-sm">{item.text}</p>
+                  <Card className="border-border/50">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Conversation Transcript</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {callLog.transcription.map((item, index) => (
+                          <div
+                            key={index}
+                            className={`p-3 rounded-lg ${
+                              item.speaker === "Agent"
+                                ? "bg-primary/10 ml-4"
+                                : "bg-muted mr-4"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-semibold">{item.speaker}</span>
+                              <span className="text-xs text-muted-foreground">{item.timestamp}</span>
+                            </div>
+                            <p className="text-sm">{item.text}</p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </CardContent>
+                  </Card>
                 </motion.div>
               )}
-
-              <Separator className="my-4" />
-
-              {/* Keywords Section - Word Cloud & Word Graph side by side */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Word Cloud */}
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <h5 className="font-semibold text-sm mb-3">Word Cloud</h5>
-                    <div className="flex flex-wrap gap-2 min-h-[180px] items-center justify-center">
-                      {mockWordData.map((word, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 rounded-md transition-all hover:scale-110 cursor-pointer"
-                          style={{
-                            fontSize: `${10 + (word.value / 100) * 16}px`,
-                            fontWeight: word.value > 70 ? 600 : 400,
-                            color: `hsl(${200 + index * 15}, 70%, ${35 + (word.value / 100) * 25}%)`,
-                            transform: `rotate(${index % 3 === 0 ? -5 : index % 3 === 1 ? 0 : 5}deg)`,
-                          }}
-                        >
-                          {word.text}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Word Graph */}
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <h5 className="font-semibold text-sm mb-3">Word Graph</h5>
-                    <ResponsiveContainer width="100%" height={180}>
-                      <BarChart data={mockWordData.slice(0, 6)} layout="vertical" margin={{ left: 0, right: 10, top: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                        <XAxis 
-                          type="number" 
-                          domain={[0, 100]} 
-                          stroke="hsl(var(--muted-foreground))" 
-                          fontSize={10}
-                          tickFormatter={(value) => value.toFixed(1)}
-                        />
-                        <YAxis 
-                          dataKey="text" 
-                          type="category" 
-                          stroke="hsl(var(--muted-foreground))" 
-                          fontSize={10} 
-                          width={70}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                            fontSize: "12px",
-                          }}
-                          formatter={(value: number) => [value, "Count"]}
-                        />
-                        <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                    <p className="text-xs text-muted-foreground text-center mt-1">Words Count</p>
-                  </div>
-                </div>
-              </motion.div>
             </TabsContent>
 
         {/* Evaluation Tab */}
