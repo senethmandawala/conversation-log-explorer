@@ -79,7 +79,7 @@ export function AppSidebar() {
             className="flex items-center gap-2"
           >
             <img 
-              src="/images/sense-ai-logo-transparent.svg" 
+              src="/src/assets/images/sense-ai-logo-transparent.svg" 
               alt="Sense AI Logo" 
               className="h-8 w-auto"
             />
@@ -147,7 +147,7 @@ export function AppSidebar() {
             >
               <span>Powered By</span>
               <img 
-                src="/images/wn_logo_2019_vector_final.svg" 
+                src="/src/assets/images/wn_logo_2019_vector_final.svg" 
                 alt="Wavenet Logo" 
                 className="h-4 w-auto -mt-0.5"
               />

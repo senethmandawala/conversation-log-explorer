@@ -3,12 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ModuleProvider } from "./contexts/ModuleContext";
 import { AutopilotProvider } from "./contexts/AutopilotContext";
 import { PostCallProvider } from "./contexts/PostCallContext";
-import { AntdThemeProvider } from "./components/post-call/antd/AntdThemeProvider";
 import Index from "./pages/Index";
 import GetStarted from "./pages/GetStarted";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
@@ -18,35 +16,31 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-    <QueryClientProvider client={queryClient}>
-      <AntdThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <ModuleProvider>
-            <AutopilotProvider>
-            <PostCallProvider>
-            <MainLayout>
-              <Routes>
-                <Route path="/" element={<GetStarted />} />
-                <Route path="/get-started" element={<GetStarted />} />
-                <Route path="/pca" element={<PostCallAnalyzer />} />
-                <Route path="/autopilot" element={<Autopilot />} />
-                <Route path="/user-management" element={<Index />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </MainLayout>
-            </PostCallProvider>
-            </AutopilotProvider>
-            </ModuleProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AntdThemeProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <ModuleProvider>
+        <AutopilotProvider>
+        <PostCallProvider>
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<GetStarted />} />
+            <Route path="/get-started" element={<GetStarted />} />
+            <Route path="/pca" element={<PostCallAnalyzer />} />
+            <Route path="/autopilot" element={<Autopilot />} />
+            <Route path="/user-management" element={<Index />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </MainLayout>
+        </PostCallProvider>
+        </AutopilotProvider>
+        </ModuleProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
 );
 
 export default App;

@@ -141,7 +141,7 @@ export default function GetStarted() {
         transition={{ duration: 0.5 }}
         className="relative overflow-hidden rounded-2xl p-8 md:p-10 mb-8"
         style={{
-          backgroundImage: 'url("/images/sense-ai-banner.webp")',
+          backgroundImage: 'url("/src/assets/images/sense-ai-banner.webp")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
