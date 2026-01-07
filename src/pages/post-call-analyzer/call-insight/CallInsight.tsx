@@ -1,54 +1,41 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { 
-  PhoneCall, 
-  Download, 
-  Filter, 
-  Search, 
-  ChevronDown,
-  ChevronUp,
-  Calendar,
-  Clock,
-  User,
-  Phone,
-  MessageSquare,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  Card, 
+  Table, 
+  Input, 
+  Select, 
+  DatePicker, 
+  Button, 
+  Tag, 
+  Space, 
+  Row, 
+  Col, 
+  Typography, 
+  Skeleton,
+  Badge,
+  Tooltip,
+  ConfigProvider
+} from "antd";
+import { 
+  SearchOutlined, 
+  FilterOutlined, 
+  DownloadOutlined,
+  EyeOutlined,
+  PhoneOutlined,
+  UserOutlined,
+  ClockCircleOutlined,
+  RiseOutlined,
+  FallOutlined,
+  MinusOutlined,
+  ClearOutlined
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { motion } from "framer-motion";
 import { CallLogDetails } from "@/components/post-call/CallLogDetails";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Skeleton } from "@/components/ui/skeleton";
+import type { ColumnsType } from "antd/es/table";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 interface CallRecord {
   id: string;
@@ -71,31 +58,49 @@ const mockCalls: CallRecord[] = [
   { id: "6", msisdn: "+1234567895", agentName: "Sarah Johnson", category: "Billing", sentiment: "neutral", duration: "6:45", date: "2024-01-15", time: "14:00", status: "completed" },
   { id: "7", msisdn: "+1234567896", agentName: "Mike Wilson", category: "Technical Support", sentiment: "positive", duration: "9:20", date: "2024-01-15", time: "14:45", status: "failed" },
   { id: "8", msisdn: "+1234567897", agentName: "Emily Davis", category: "Sales", sentiment: "positive", duration: "7:00", date: "2024-01-15", time: "15:30", status: "completed" },
+  { id: "9", msisdn: "+1234567898", agentName: "John Smith", category: "Billing", sentiment: "neutral", duration: "4:50", date: "2024-01-16", time: "09:00", status: "completed" },
+  { id: "10", msisdn: "+1234567899", agentName: "Sarah Johnson", category: "Technical Support", sentiment: "negative", duration: "18:20", date: "2024-01-16", time: "10:30", status: "completed" },
 ];
 
 const SentimentIcon = ({ sentiment }: { sentiment: CallRecord["sentiment"] }) => {
   switch (sentiment) {
     case "positive":
-      return <TrendingUp className="h-4 w-4 text-green-500" />;
+      return <RiseOutlined style={{ color: '#10b981', fontSize: 14 }} />;
     case "negative":
-      return <TrendingDown className="h-4 w-4 text-red-500" />;
+      return <FallOutlined style={{ color: '#ef4444', fontSize: 14 }} />;
     default:
-      return <Minus className="h-4 w-4 text-yellow-500" />;
+      return <MinusOutlined style={{ color: '#f59e0b', fontSize: 14 }} />;
+  }
+};
+
+const getSentimentColor = (sentiment: CallRecord["sentiment"]) => {
+  switch (sentiment) {
+    case "positive": return { bg: '#10b98115', border: '#10b981', text: '#10b981' };
+    case "negative": return { bg: '#ef444415', border: '#ef4444', text: '#ef4444' };
+    default: return { bg: '#f59e0b15', border: '#f59e0b', text: '#f59e0b' };
+  }
+};
+
+const getStatusConfig = (status: CallRecord["status"]) => {
+  switch (status) {
+    case "completed": return { color: 'success' as const, text: 'Completed' };
+    case "pending": return { color: 'processing' as const, text: 'Pending' };
+    case "failed": return { color: 'error' as const, text: 'Failed' };
   }
 };
 
 export default function CallInsight() {
   const [isLoading, setIsLoading] = useState(true);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSentiment, setSelectedSentiment] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
+  const [selectedSentiment, setSelectedSentiment] = useState<string | undefined>(undefined);
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
+  const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
   const [selectedCall, setSelectedCall] = useState<CallRecord | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
+    const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -104,327 +109,383 @@ export default function CallInsight() {
                          call.agentName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || call.category === selectedCategory;
     const matchesSentiment = !selectedSentiment || call.sentiment === selectedSentiment;
-    return matchesSearch && matchesCategory && matchesSentiment;
+    const matchesStatus = !selectedStatus || call.status === selectedStatus;
+    const matchesAgent = !selectedAgent || call.agentName === selectedAgent;
+    return matchesSearch && matchesCategory && matchesSentiment && matchesStatus && matchesAgent;
   });
 
-  const activeFiltersCount = [selectedCategory, selectedSentiment].filter(Boolean).length;
+  const activeFiltersCount = [selectedCategory, selectedSentiment, selectedStatus, selectedAgent].filter(Boolean).length;
 
-  // Pagination
-  const totalRecords = filteredCalls.length;
-  const totalPages = Math.ceil(totalRecords / pageSize);
-  const paginatedCalls = filteredCalls.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory(undefined);
+    setSelectedSentiment(undefined);
+    setSelectedStatus(undefined);
+    setSelectedAgent(undefined);
+  };
+
+  const uniqueAgents = [...new Set(mockCalls.map(c => c.agentName))];
+  const uniqueCategories = [...new Set(mockCalls.map(c => c.category))];
+
+  const columns: ColumnsType<CallRecord> = [
+    {
+      title: 'MSISDN',
+      dataIndex: 'msisdn',
+      key: 'msisdn',
+      render: (text: string) => (
+        <Text code style={{ fontSize: 13 }}>{text}</Text>
+      ),
+    },
+    {
+      title: 'Agent',
+      dataIndex: 'agentName',
+      key: 'agentName',
+      render: (text: string) => (
+        <Space>
+          <div 
+            style={{ 
+              width: 32, 
+              height: 32, 
+              borderRadius: '50%', 
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <UserOutlined style={{ color: 'white', fontSize: 14 }} />
+          </div>
+          <Text strong>{text}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      render: (text: string) => (
+        <Tag 
+          style={{ 
+            borderRadius: 6, 
+            padding: '2px 10px',
+            background: '#f1f5f9',
+            border: '1px solid #e2e8f0',
+            color: '#475569'
+          }}
+        >
+          {text}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Sentiment',
+      dataIndex: 'sentiment',
+      key: 'sentiment',
+      render: (sentiment: CallRecord["sentiment"]) => {
+        const colors = getSentimentColor(sentiment);
+        return (
+          <Tag
+            style={{
+              borderRadius: 6,
+              padding: '2px 10px',
+              background: colors.bg,
+              border: `1px solid ${colors.border}`,
+              color: colors.text,
+              textTransform: 'capitalize'
+            }}
+            icon={<SentimentIcon sentiment={sentiment} />}
+          >
+            {sentiment}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Duration',
+      dataIndex: 'duration',
+      key: 'duration',
+      render: (text: string) => (
+        <Space size={4}>
+          <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
+          <Text type="secondary">{text}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Date & Time',
+      key: 'datetime',
+      render: (_, record) => (
+        <div>
+          <Text style={{ display: 'block' }}>{record.date}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: CallRecord["status"]) => {
+        const config = getStatusConfig(status);
+        return <Badge status={config.color} text={config.text} />;
+      },
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 60,
+      render: (_, record) => (
+        <Tooltip title="View Details">
+          <Button 
+            type="text" 
+            icon={<EyeOutlined />}
+            onClick={() => setSelectedCall(record)}
+            style={{ 
+              borderRadius: 8,
+              transition: 'all 0.2s'
+            }}
+            className="hover:bg-primary/10 hover:text-primary"
+          />
+        </Tooltip>
+      ),
+    },
+  ];
 
   return (
-    <>
-      <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center justify-between">
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+          Select: {
+            borderRadius: 8,
+          },
+          Input: {
+            borderRadius: 8,
+          },
+          Button: {
+            borderRadius: 8,
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card
+            styles={{
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-                  <PhoneCall className="h-5 w-5 text-primary" />
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                  }}
+                >
+                  <PhoneOutlined style={{ color: 'white', fontSize: 20 }} />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-semibold tracking-tight">
-                    Call Insights
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-0.5">
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Call Insights</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
                     Analyze and explore individual call recordings and transcripts
-                  </p>
+                  </Text>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Export CSV
-                </Button>
-                <Button 
-                  variant={filtersOpen ? "default" : "outline"} 
-                  size="sm" 
-                  className="gap-2 relative"
-                  onClick={() => setFiltersOpen(!filtersOpen)}
-                >
-                  <Filter className="h-4 w-4" />
-                  Filters
-                  {activeFiltersCount > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
+            }
+            extra={
+              <Space>
+                <Button icon={<DownloadOutlined />}>Export CSV</Button>
+                <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
+                  <Button 
+                    type={filtersVisible ? "primary" : "default"}
+                    icon={<FilterOutlined />}
+                    onClick={() => setFiltersVisible(!filtersVisible)}
+                  >
+                    Filters
+                  </Button>
+                </Badge>
+              </Space>
+            }
+          >
             {/* Filters Panel */}
-            <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-              <CollapsibleContent>
+            <AnimatePresence>
+              {filtersVisible && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
+                  animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mb-4 p-4 bg-muted/30 rounded-lg border border-border/50"
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Search */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Search MSISDN / Agent</label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          placeholder="Search..." 
-                          className="pl-9"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Category Filter */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Category</label>
-                      <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value === "all" ? "" : value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Categories" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="Billing">Billing</SelectItem>
-                          <SelectItem value="Technical Support">Technical Support</SelectItem>
-                          <SelectItem value="Sales">Sales</SelectItem>
-                          <SelectItem value="Complaints">Complaints</SelectItem>
-                          <SelectItem value="General Inquiry">General Inquiry</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Sentiment Filter */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Sentiment</label>
-                      <Select value={selectedSentiment} onValueChange={(value) => setSelectedSentiment(value === "all" ? "" : value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Sentiments" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Sentiments</SelectItem>
-                          <SelectItem value="positive">Positive</SelectItem>
-                          <SelectItem value="neutral">Neutral</SelectItem>
-                          <SelectItem value="negative">Negative</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Date Range - Placeholder */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-                      <Button variant="outline" className="w-full justify-start gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Select dates
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end mt-4 gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setSelectedCategory("");
-                        setSelectedSentiment("");
-                      }}
-                    >
-                      Clear All
-                    </Button>
-                    <Button size="sm">Apply Filters</Button>
-                  </div>
+                  <Card
+                    size="small"
+                    style={{ 
+                      marginBottom: 20, 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12
+                    }}
+                    styles={{ body: { padding: 16 } }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Search MSISDN / Agent
+                          </Text>
+                          <Input
+                            placeholder="Search..."
+                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            allowClear
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Agent
+                          </Text>
+                          <Select
+                            placeholder="All Agents"
+                            value={selectedAgent}
+                            onChange={setSelectedAgent}
+                            allowClear
+                            style={{ width: '100%' }}
+                            options={uniqueAgents.map(a => ({ label: a, value: a }))}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Category
+                          </Text>
+                          <Select
+                            placeholder="All Categories"
+                            value={selectedCategory}
+                            onChange={setSelectedCategory}
+                            allowClear
+                            style={{ width: '100%' }}
+                            options={uniqueCategories.map(c => ({ label: c, value: c }))}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Sentiment
+                          </Text>
+                          <Select
+                            placeholder="All Sentiments"
+                            value={selectedSentiment}
+                            onChange={setSelectedSentiment}
+                            allowClear
+                            style={{ width: '100%' }}
+                            options={[
+                              { label: 'Positive', value: 'positive' },
+                              { label: 'Neutral', value: 'neutral' },
+                              { label: 'Negative', value: 'negative' },
+                            ]}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Status
+                          </Text>
+                          <Select
+                            placeholder="All Statuses"
+                            value={selectedStatus}
+                            onChange={setSelectedStatus}
+                            allowClear
+                            style={{ width: '100%' }}
+                            options={[
+                              { label: 'Completed', value: 'completed' },
+                              { label: 'Pending', value: 'pending' },
+                              { label: 'Failed', value: 'failed' },
+                            ]}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Date Range
+                          </Text>
+                          <RangePicker style={{ width: '100%' }} />
+                        </div>
+                      </Col>
+                      <Col xs={24} lg={12} className="flex items-end justify-end">
+                        <Space>
+                          <Button 
+                            icon={<ClearOutlined />} 
+                            onClick={clearAllFilters}
+                          >
+                            Clear All
+                          </Button>
+                          <Button type="primary">Apply Filters</Button>
+                        </Space>
+                      </Col>
+                    </Row>
+                  </Card>
                 </motion.div>
-              </CollapsibleContent>
-            </Collapsible>
+              )}
+            </AnimatePresence>
 
             {/* Data Table */}
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full" />
+                  <Skeleton.Input key={i} active block style={{ height: 52 }} />
                 ))}
               </div>
             ) : (
-              <div className="rounded-lg border border-border/50 overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30 hover:bg-muted/30">
-                      <TableHead className="font-semibold">MSISDN</TableHead>
-                      <TableHead className="font-semibold">Agent</TableHead>
-                      <TableHead className="font-semibold">Category</TableHead>
-                      <TableHead className="font-semibold">Sentiment</TableHead>
-                      <TableHead className="font-semibold">Duration</TableHead>
-                      <TableHead className="font-semibold">Date & Time</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedCalls.map((call, index) => (
-                      <motion.tr
-                        key={call.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.03, duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                        className={cn(
-                          "group border-b border-border/30 transition-all duration-200",
-                          "hover:bg-primary/[0.03] hover:shadow-[inset_3px_0_0_0_hsl(var(--primary))]"
-                        )}
-                      >
-                        <TableCell className="font-mono text-sm">{call.msisdn}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                              <User className="h-4 w-4 text-primary" />
-                            </div>
-                            {call.agentName}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="font-normal">
-                            {call.category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <SentimentIcon sentiment={call.sentiment} />
-                            <span className="capitalize">{call.sentiment}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {call.duration}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {call.date} {call.time}
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={
-                              call.status === "completed" ? "default" : 
-                              call.status === "pending" ? "secondary" : "destructive"
-                            }
-                            className="capitalize"
-                          >
-                            {call.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={cn(
-                                "h-9 w-9 rounded-lg transition-all duration-200",
-                                "opacity-0 group-hover:opacity-100",
-                                "hover:bg-primary hover:text-primary-foreground",
-                                "shadow-none hover:shadow-md"
-                              )}
-                              onClick={() => setSelectedCall(call)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
-                        </TableCell>
-                      </motion.tr>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <Table
+                columns={columns}
+                dataSource={filteredCalls}
+                rowKey="id"
+                pagination={{
+                  total: filteredCalls.length,
+                  pageSize: 8,
+                  showTotal: (total, range) => (
+                    <Text type="secondary">
+                      Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
+                    </Text>
+                  ),
+                  showSizeChanger: true,
+                  pageSizeOptions: ['5', '8', '10', '20'],
+                }}
+                style={{ borderRadius: 12, overflow: 'hidden' }}
+                rowClassName={() => 
+                  'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#6366f1]'
+                }
+              />
             )}
-
-            {/* Pagination */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center justify-between mt-4 pt-4 border-t border-border/30"
-            >
-              <p className="text-sm text-muted-foreground">
-                Showing <span className="font-medium text-foreground">{paginatedCalls.length}</span> of{" "}
-                <span className="font-medium text-foreground">{totalRecords}</span> results
-              </p>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="h-9 w-9 p-0 rounded-lg"
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="h-9 w-9 p-0 rounded-lg"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex items-center gap-1 mx-2">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={cn(
-                          "h-9 w-9 p-0 rounded-lg transition-all duration-200",
-                          currentPage === pageNum && "shadow-md"
-                        )}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="h-9 w-9 p-0 rounded-lg"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="h-9 w-9 p-0 rounded-lg"
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Call Log Details Sheet */}
@@ -454,6 +515,6 @@ export default function CallInsight() {
       />
 
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }
