@@ -1,80 +1,96 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 import { 
-  Users, 
-  Download, 
-  Filter,
-  TrendingUp,
-  TrendingDown,
-  Star,
-  Phone,
-  Clock,
-  Target,
-  Award,
-  BarChart3,
-  Search,
-  X,
-  Calendar,
-  ChevronDown,
-  Eye
-} from "lucide-react";
-import { usePostCall } from "@/contexts/PostCallContext";
+  Card, 
+  Table, 
+  Input, 
+  Select, 
+  DatePicker, 
+  Button, 
+  Tag, 
+  Space, 
+  Row, 
+  Col, 
+  Typography, 
+  Skeleton,
+  Progress,
+  Tooltip,
+  ConfigProvider,
+  Badge
+} from "antd";
+import { 
+  SearchOutlined, 
+  FilterOutlined, 
+  DownloadOutlined,
+  EyeOutlined,
+  TeamOutlined,
+  UserOutlined,
+  PhoneOutlined,
+  ClockCircleOutlined,
+  TrophyOutlined,
+  StarOutlined,
+  RiseOutlined,
+  FallOutlined,
+  ClearOutlined,
+  AimOutlined
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { motion } from "framer-motion";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { DateRange } from "react-day-picker";
+import { usePostCall } from "@/contexts/PostCallContext";
+import type { ColumnsType } from "antd/es/table";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 interface AgentMetric {
   id: string;
+  agentId: string;
   name: string;
   avatar: string;
+  department: string;
   totalCalls: number;
   avgHandleTime: string;
   fcr: number;
   csat: number;
   sentiment: number;
   trend: "up" | "down" | "stable";
-  rank: number;
+  performance: "excellent" | "good" | "average" | "poor";
+  status: "active" | "inactive";
 }
 
 const mockAgents: AgentMetric[] = [
-  { id: "1", name: "John Smith", avatar: "JS", totalCalls: 245, avgHandleTime: "4:32", fcr: 92, csat: 4.8, sentiment: 85, trend: "up", rank: 1 },
-  { id: "2", name: "Sarah Johnson", avatar: "SJ", totalCalls: 230, avgHandleTime: "5:15", fcr: 88, csat: 4.6, sentiment: 78, trend: "up", rank: 2 },
-  { id: "3", name: "Mike Wilson", avatar: "MW", totalCalls: 198, avgHandleTime: "4:45", fcr: 85, csat: 4.5, sentiment: 72, trend: "stable", rank: 3 },
-  { id: "4", name: "Emily Davis", avatar: "ED", totalCalls: 210, avgHandleTime: "6:10", fcr: 78, csat: 4.2, sentiment: 65, trend: "down", rank: 4 },
-  { id: "5", name: "David Brown", avatar: "DB", totalCalls: 175, avgHandleTime: "5:30", fcr: 82, csat: 4.4, sentiment: 70, trend: "up", rank: 5 },
+  { id: "1", agentId: "AGT-001", name: "John Smith", avatar: "JS", department: "Customer Support", totalCalls: 245, avgHandleTime: "4:32", fcr: 92, csat: 4.8, sentiment: 85, trend: "up", performance: "excellent", status: "active" },
+  { id: "2", agentId: "AGT-002", name: "Sarah Johnson", avatar: "SJ", department: "Technical Support", totalCalls: 230, avgHandleTime: "5:15", fcr: 88, csat: 4.6, sentiment: 78, trend: "up", performance: "good", status: "active" },
+  { id: "3", agentId: "AGT-003", name: "Mike Wilson", avatar: "MW", department: "Sales", totalCalls: 198, avgHandleTime: "4:45", fcr: 85, csat: 4.5, sentiment: 72, trend: "stable", performance: "good", status: "active" },
+  { id: "4", agentId: "AGT-004", name: "Emily Davis", avatar: "ED", department: "Customer Support", totalCalls: 210, avgHandleTime: "6:10", fcr: 78, csat: 4.2, sentiment: 65, trend: "down", performance: "average", status: "active" },
+  { id: "5", agentId: "AGT-005", name: "David Brown", avatar: "DB", department: "Billing", totalCalls: 175, avgHandleTime: "5:30", fcr: 82, csat: 4.4, sentiment: 70, trend: "up", performance: "good", status: "active" },
+  { id: "6", agentId: "AGT-006", name: "Lisa Chen", avatar: "LC", department: "Technical Support", totalCalls: 221, avgHandleTime: "5:45", fcr: 80, csat: 4.1, sentiment: 68, trend: "stable", performance: "average", status: "active" },
+  { id: "7", agentId: "AGT-007", name: "Robert Taylor", avatar: "RT", department: "Customer Support", totalCalls: 134, avgHandleTime: "4:55", fcr: 75, csat: 3.7, sentiment: 55, trend: "down", performance: "poor", status: "inactive" },
+  { id: "8", agentId: "AGT-008", name: "Jennifer Lee", avatar: "JL", department: "Sales", totalCalls: 278, avgHandleTime: "3:30", fcr: 89, csat: 4.4, sentiment: 76, trend: "up", performance: "good", status: "active" },
 ];
+
+const getPerformanceConfig = (performance: AgentMetric["performance"]) => {
+  switch (performance) {
+    case "excellent": return { color: '#10b981', bg: '#10b98115', label: 'Excellent' };
+    case "good": return { color: '#3b82f6', bg: '#3b82f615', label: 'Good' };
+    case "average": return { color: '#f59e0b', bg: '#f59e0b15', label: 'Average' };
+    case "poor": return { color: '#ef4444', bg: '#ef444415', label: 'Poor' };
+  }
+};
+
+const getTrendIcon = (trend: AgentMetric["trend"]) => {
+  switch (trend) {
+    case "up": return <RiseOutlined style={{ color: '#10b981', fontSize: 14 }} />;
+    case "down": return <FallOutlined style={{ color: '#ef4444', fontSize: 14 }} />;
+    default: return <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>;
+  }
+};
+
+const getProgressColor = (value: number) => {
+  if (value >= 90) return '#10b981';
+  if (value >= 80) return '#3b82f6';
+  if (value >= 70) return '#f59e0b';
+  return '#ef4444';
+};
 
 interface PerformingAgent {
   name: string;
@@ -82,525 +98,610 @@ interface PerformingAgent {
 }
 
 const topPerformingAgents: PerformingAgent[] = [
-  { name: "John Smith", score: 9.2 },
-  { name: "Sarah Johnson", score: 8.8 },
-  { name: "Mike Wilson", score: 8.5 },
-  { name: "David Brown", score: 8.2 },
+  { name: "John Smith", score: 92 },
+  { name: "Sarah Johnson", score: 88 },
+  { name: "Mike Wilson", score: 85 },
+  { name: "David Brown", score: 82 },
 ];
 
 const agentsNeedAttention: PerformingAgent[] = [
-  { name: "Emily Davis", score: 6.5 },
-  { name: "Robert Taylor", score: 6.2 },
-  { name: "Lisa Anderson", score: 5.8 },
-  { name: "James Martinez", score: 5.5 },
+  { name: "Emily Davis", score: 65 },
+  { name: "Robert Taylor", score: 62 },
+  { name: "Lisa Anderson", score: 58 },
+  { name: "James Martinez", score: 55 },
 ];
 
-interface StatCardProps {
-  title: string;
-  value: string;
-  change: string;
-  trend: "up" | "down";
-  icon: React.ElementType;
-  color: string;
-}
-
-const StatCard = ({ title, value, change, trend, icon: Icon, color }: StatCardProps) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="relative overflow-hidden"
-  >
-    <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-            <div className={`flex items-center gap-1 mt-1 text-sm ${trend === "up" ? "text-green-500" : "text-red-500"}`}>
-              {trend === "up" ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-              {change}
-            </div>
-          </div>
-          <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>
-            <Icon className="h-5 w-5 text-white" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </motion.div>
-);
-
-const groups = ["Sales Team", "Support Team", "Technical Team", "Billing Team"];
-const categories = ["Billing", "Technical Support", "Sales", "Complaints", "General Inquiry"];
-const caseStates = ["Open", "Closed", "Pending", "Escalated"];
-const callTypes = ["Inbound", "Outbound"];
-const sentiments = ["Positive", "Neutral", "Negative"];
-
 export default function AgentPerformance() {
-  const { setSelectedTab, setSelectedAgentId } = usePostCall();
+  const { setSelectedAgentId, setSelectedTab } = usePostCall();
   const [isLoading, setIsLoading] = useState(true);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  
-  // Filter states
-  const [agentName, setAgentName] = useState("");
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedCaseState, setSelectedCaseState] = useState("");
-  const [selectedCallType, setSelectedCallType] = useState("");
-  const [selectedSentiment, setSelectedSentiment] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState<string | undefined>(undefined);
+  const [selectedPerformance, setSelectedPerformance] = useState<string | undefined>(undefined);
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
+    const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
-  const activeFiltersCount = [
-    agentName,
-    selectedGroups.length > 0,
-    selectedCategory,
-    selectedCaseState,
-    selectedCallType,
-    selectedSentiment,
-    dateRange?.from,
-  ].filter(Boolean).length;
+  const filteredAgents = mockAgents.filter(agent => {
+    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         agent.agentId.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDepartment = !selectedDepartment || agent.department === selectedDepartment;
+    const matchesPerformance = !selectedPerformance || agent.performance === selectedPerformance;
+    const matchesStatus = !selectedStatus || agent.status === selectedStatus;
+    return matchesSearch && matchesDepartment && matchesPerformance && matchesStatus;
+  });
+
+  const activeFiltersCount = [selectedDepartment, selectedPerformance, selectedStatus].filter(Boolean).length;
 
   const clearAllFilters = () => {
-    setAgentName("");
-    setSelectedGroups([]);
-    setSelectedCategory("");
-    setSelectedCaseState("");
-    setSelectedCallType("");
-    setSelectedSentiment("");
-    setDateRange(undefined);
+    setSearchQuery("");
+    setSelectedDepartment(undefined);
+    setSelectedPerformance(undefined);
+    setSelectedStatus(undefined);
   };
 
-  const handleSearch = () => {
-    // Implement search logic here
-    console.log("Searching with filters:", {
-      agentName,
-      selectedGroups,
-      selectedCategory,
-      selectedCaseState,
-      selectedCallType,
-      selectedSentiment,
-      dateRange,
-    });
+  const uniqueDepartments = [...new Set(mockAgents.map(a => a.department))];
+
+  const handleViewAgent = (agent: AgentMetric) => {
+    setSelectedAgentId(agent.agentId);
+    setSelectedTab("agent-insights");
   };
+
+  // Summary stats
+  const totalAgents = mockAgents.length;
+  const activeAgents = mockAgents.filter(a => a.status === 'active').length;
+  const avgFCR = Math.round(mockAgents.reduce((sum, a) => sum + a.fcr, 0) / mockAgents.length);
+  const avgCSAT = (mockAgents.reduce((sum, a) => sum + a.csat, 0) / mockAgents.length).toFixed(1);
+
+  const columns: ColumnsType<AgentMetric> = [
+    {
+      title: 'Agent',
+      key: 'agent',
+      render: (_, record) => (
+        <Space>
+          <div 
+            style={{ 
+              width: 40, 
+              height: 40, 
+              borderRadius: '50%', 
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{record.avatar}</span>
+          </div>
+          <div>
+            <Text strong>{record.name}</Text>
+            <br />
+            <Text type="secondary" style={{ fontSize: 12 }}>{record.agentId}</Text>
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: 'Department',
+      dataIndex: 'department',
+      key: 'department',
+      render: (text: string) => (
+        <Tag 
+          style={{ 
+            borderRadius: 6, 
+            padding: '2px 10px',
+            background: '#f1f5f9',
+            border: '1px solid #e2e8f0',
+            color: '#475569'
+          }}
+        >
+          {text}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Total Calls',
+      dataIndex: 'totalCalls',
+      key: 'totalCalls',
+      sorter: (a, b) => a.totalCalls - b.totalCalls,
+      render: (value: number) => (
+        <Space size={4}>
+          <PhoneOutlined style={{ color: '#6366f1', fontSize: 12 }} />
+          <Text strong>{value}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Avg Handle Time',
+      dataIndex: 'avgHandleTime',
+      key: 'avgHandleTime',
+      render: (text: string) => (
+        <Space size={4}>
+          <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
+          <Text type="secondary">{text}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'FCR Rate',
+      dataIndex: 'fcr',
+      key: 'fcr',
+      sorter: (a, b) => a.fcr - b.fcr,
+      render: (value: number) => (
+        <div style={{ minWidth: 100 }}>
+          <div className="flex items-center justify-between mb-1">
+            <Text strong style={{ fontSize: 13 }}>{value}%</Text>
+          </div>
+          <Progress 
+            percent={value} 
+            showInfo={false} 
+            size="small"
+            strokeColor={getProgressColor(value)}
+            trailColor="#e2e8f0"
+          />
+        </div>
+      ),
+    },
+    {
+      title: 'CSAT',
+      dataIndex: 'csat',
+      key: 'csat',
+      sorter: (a, b) => a.csat - b.csat,
+      render: (value: number) => (
+        <Space size={4}>
+          <StarOutlined style={{ color: '#f59e0b', fontSize: 14 }} />
+          <Text strong>{value}</Text>
+          <Text type="secondary" style={{ fontSize: 11 }}>/5</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Performance',
+      dataIndex: 'performance',
+      key: 'performance',
+      filters: [
+        { text: 'Excellent', value: 'excellent' },
+        { text: 'Good', value: 'good' },
+        { text: 'Average', value: 'average' },
+        { text: 'Poor', value: 'poor' },
+      ],
+      onFilter: (value, record) => record.performance === value,
+      render: (performance: AgentMetric["performance"]) => {
+        const config = getPerformanceConfig(performance);
+        return (
+          <Tag
+            style={{
+              borderRadius: 6,
+              padding: '2px 10px',
+              background: config.bg,
+              border: `1px solid ${config.color}`,
+              color: config.color,
+            }}
+          >
+            {config.label}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Trend',
+      dataIndex: 'trend',
+      key: 'trend',
+      align: 'center',
+      render: (trend: AgentMetric["trend"]) => (
+        <Tooltip title={trend === 'up' ? 'Improving' : trend === 'down' ? 'Declining' : 'Stable'}>
+          {getTrendIcon(trend)}
+        </Tooltip>
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: AgentMetric["status"]) => (
+        <Badge 
+          status={status === 'active' ? 'success' : 'default'} 
+          text={status === 'active' ? 'Active' : 'Inactive'} 
+        />
+      ),
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 60,
+      render: (_, record) => (
+        <Tooltip title="View Details">
+          <Button 
+            type="text" 
+            icon={<EyeOutlined />}
+            onClick={() => handleViewAgent(record)}
+            style={{ borderRadius: 8 }}
+            className="hover:bg-primary/10 hover:text-primary"
+          />
+        </Tooltip>
+      ),
+    },
+  ];
 
   return (
-    <>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-semibold tracking-tight">
-                    Agent Performance Summary
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Monitor and evaluate agent performance metrics
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
-                <Button 
-                  variant={filtersOpen ? "default" : "outline"} 
-                  size="sm" 
-                  className="gap-2 relative"
-                  onClick={() => setFiltersOpen(!filtersOpen)}
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+          Select: {
+            borderRadius: 8,
+          },
+          Input: {
+            borderRadius: 8,
+          },
+          Button: {
+            borderRadius: 8,
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-4">
+        {/* Summary Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Row gutter={16}>
+            {[
+              { title: 'Total Agents', value: totalAgents, icon: <TeamOutlined />, color: '#6366f1' },
+              { title: 'Active Agents', value: activeAgents, icon: <UserOutlined />, color: '#10b981' },
+              { title: 'Avg FCR Rate', value: `${avgFCR}%`, icon: <AimOutlined />, color: '#f59e0b' },
+              { title: 'Avg CSAT Score', value: avgCSAT, icon: <StarOutlined />, color: '#3b82f6' },
+            ].map((stat, index) => (
+              <Col xs={12} lg={6} key={stat.title}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
-                  <Filter className="h-4 w-4" />
-                  Filters
-                  {activeFiltersCount > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-
-          {/* Filters Panel */}
-          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-            <CollapsibleContent>
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="p-4 border-t border-border/30 bg-muted/20"
-              >
-                <div className="flex flex-wrap items-center gap-4">
-                  {/* Agent Name */}
-                  <div className="relative">
-                    <Input
-                      placeholder="Agent Name"
-                      value={agentName}
-                      onChange={(e) => setAgentName(e.target.value)}
-                      className="h-10 w-44 pr-8"
-                    />
-                    {agentName && (
-                      <button
-                        onClick={() => setAgentName("")}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Group */}
-                  <Select value={selectedGroups[0] || ""} onValueChange={(val) => setSelectedGroups(val ? [val] : [])}>
-                    <SelectTrigger className="h-10 w-40">
-                      <SelectValue placeholder="Group" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {groups.map((group) => (
-                        <SelectItem key={group} value={group}>{group}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Category */}
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="h-10 w-44">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Case Status */}
-                  <Select value={selectedCaseState} onValueChange={setSelectedCaseState}>
-                    <SelectTrigger className="h-10 w-40">
-                      <SelectValue placeholder="Case Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {caseStates.map((state) => (
-                        <SelectItem key={state} value={state}>{state}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Call Type */}
-                  <Select value={selectedCallType} onValueChange={setSelectedCallType}>
-                    <SelectTrigger className="h-10 w-36">
-                      <SelectValue placeholder="Call Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {callTypes.map((type) => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* User Sentiment */}
-                  <Select value={selectedSentiment} onValueChange={setSelectedSentiment}>
-                    <SelectTrigger className="h-10 w-40">
-                      <SelectValue placeholder="Sentiment" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sentiments.map((sentiment) => (
-                        <SelectItem key={sentiment} value={sentiment}>{sentiment}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Date Range */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="h-10 w-48 justify-start text-left font-normal">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {dateRange?.from ? (
-                          dateRange.to ? (
-                            <span className="truncate">
-                              {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
-                            </span>
-                          ) : (
-                            format(dateRange.from, "MMM d, yyyy")
-                          )
-                        ) : (
-                          <span className="text-muted-foreground">Date Range</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        initialFocus
-                        mode="range"
-                        defaultMonth={dateRange?.from}
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        numberOfMonths={1}
-                      />
-                    </PopoverContent>
-                  </Popover>
-
-                  {/* Search & Clear Buttons */}
-                  <Button className="h-10" onClick={handleSearch}>
-                    <Search className="h-4 w-4 mr-1" />
-                    Search
-                  </Button>
-                  {activeFiltersCount > 0 && (
-                    <Button variant="outline" className="h-10" onClick={clearAllFilters}>
-                      Clear
-                    </Button>
-                  )}
-                </div>
-              </motion.div>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            title="Total Agents"
-            value="24"
-            change="+2 this month"
-            trend="up"
-            icon={Users}
-            color="from-blue-500 to-blue-600"
-          />
-          <StatCard
-            title="Avg FCR Rate"
-            value="85%"
-            change="+3.2%"
-            trend="up"
-            icon={Target}
-            color="from-green-500 to-green-600"
-          />
-          <StatCard
-            title="Avg Handle Time"
-            value="5:12"
-            change="-0:30"
-            trend="up"
-            icon={Clock}
-            color="from-purple-500 to-purple-600"
-          />
-          <StatCard
-            title="Avg CSAT"
-            value="4.5"
-            change="+0.3"
-            trend="up"
-            icon={Star}
-            color="from-amber-500 to-amber-600"
-          />
-        </div>
-
-        {/* Agent Performance Cards Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Best Performing Agents */}
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <div className="flex flex-col">
-                <CardTitle className="text-base font-medium">Best Performing Agents</CardTitle>
-                <span className="text-sm text-muted-foreground">
-                  Top agents based on overall performance score
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-[120px] w-full" />
-              ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                  {topPerformingAgents.map((agent, index) => (
-                    <motion.div
-                      key={agent.name}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="bg-green-500/10 border border-green-500/20 px-3 py-2 rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold truncate mr-2">{agent.name}</span>
-                        <span className="font-bold text-sm text-green-500" title="Agent Performance">
-                          {agent.score * 10}%
-                        </span>
+                  <Card 
+                    size="small" 
+                    style={{ 
+                      borderRadius: 12,
+                      border: '1px solid #e2e8f0',
+                      marginBottom: 16
+                    }}
+                    styles={{ body: { padding: 16 } }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>{stat.title}</Text>
+                        <div style={{ fontSize: 24, fontWeight: 700, color: stat.color }}>
+                          {isLoading ? <Skeleton.Input active size="small" style={{ width: 60 }} /> : stat.value}
+                        </div>
                       </div>
-                    </motion.div>
-                  ))}
+                      <div 
+                        style={{ 
+                          width: 48, 
+                          height: 48, 
+                          borderRadius: 12, 
+                          background: `${stat.color}15`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 20,
+                          color: stat.color
+                        }}
+                      >
+                        {stat.icon}
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              </Col>
+            ))}
+          </Row>
+        </motion.div>
+
+        {/* Performance Cards Row */}
+        <Row gutter={16}>
+          {/* Best Performing Agents */}
+          <Col xs={24} lg={12}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card
+                size="small"
+                style={{ borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 16 }}
+                styles={{ body: { padding: 16 } }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <TrophyOutlined style={{ color: '#10b981', fontSize: 18 }} />
+                  <Text strong>Best Performing Agents</Text>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                {isLoading ? (
+                  <Skeleton active paragraph={{ rows: 2 }} />
+                ) : (
+                  <Row gutter={[8, 8]}>
+                    {topPerformingAgents.map((agent, index) => (
+                      <Col xs={12} key={agent.name}>
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          style={{
+                            background: '#10b98115',
+                            border: '1px solid #10b98130',
+                            borderRadius: 8,
+                            padding: '8px 12px'
+                          }}
+                        >
+                          <div className="flex justify-between items-center">
+                            <Text style={{ fontSize: 13 }} className="truncate mr-2">{agent.name}</Text>
+                            <Text strong style={{ color: '#10b981', fontSize: 13 }}>{agent.score}%</Text>
+                          </div>
+                        </motion.div>
+                      </Col>
+                    ))}
+                  </Row>
+                )}
+              </Card>
+            </motion.div>
+          </Col>
 
           {/* Agents Requiring Attention */}
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <div className="flex flex-col">
-                <CardTitle className="text-base font-medium">Agents Requiring Attention</CardTitle>
-                <span className="text-sm text-muted-foreground">
-                  Agents who may need additional support or training
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-[120px] w-full" />
-              ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                  {agentsNeedAttention.map((agent, index) => (
-                    <motion.div
-                      key={agent.name}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold truncate mr-2">{agent.name}</span>
-                        <span className="font-bold text-sm text-amber-500" title="Agent Performance">
-                          {agent.score * 10}%
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
+          <Col xs={24} lg={12}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card
+                size="small"
+                style={{ borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 16 }}
+                styles={{ body: { padding: 16 } }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <FallOutlined style={{ color: '#f59e0b', fontSize: 18 }} />
+                  <Text strong>Agents Requiring Attention</Text>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                {isLoading ? (
+                  <Skeleton active paragraph={{ rows: 2 }} />
+                ) : (
+                  <Row gutter={[8, 8]}>
+                    {agentsNeedAttention.map((agent, index) => (
+                      <Col xs={12} key={agent.name}>
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          style={{
+                            background: '#f59e0b15',
+                            border: '1px solid #f59e0b30',
+                            borderRadius: 8,
+                            padding: '8px 12px'
+                          }}
+                        >
+                          <div className="flex justify-between items-center">
+                            <Text style={{ fontSize: 13 }} className="truncate mr-2">{agent.name}</Text>
+                            <Text strong style={{ color: '#f59e0b', fontSize: 13 }}>{agent.score}%</Text>
+                          </div>
+                        </motion.div>
+                      </Col>
+                    ))}
+                  </Row>
+                )}
+              </Card>
+            </motion.div>
+          </Col>
+        </Row>
 
-        {/* Agent Leaderboard */}
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-primary" />
-              <CardTitle className="text-base font-medium">Agent Leaderboard</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
+        {/* Main Table Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+        >
+          <Card
+            styles={{
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center gap-3">
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                  }}
+                >
+                  <TeamOutlined style={{ color: 'white', fontSize: 20 }} />
+                </div>
+                <div>
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Agent Performance Summary</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
+                    Monitor and evaluate agent performance metrics
+                  </Text>
+                </div>
+              </div>
+            }
+            extra={
+              <Space>
+                <Button icon={<DownloadOutlined />}>Export</Button>
+                <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
+                  <Button 
+                    type={filtersVisible ? "primary" : "default"}
+                    icon={<FilterOutlined />}
+                    onClick={() => setFiltersVisible(!filtersVisible)}
+                  >
+                    Filters
+                  </Button>
+                </Badge>
+              </Space>
+            }
+          >
+            {/* Filters Panel */}
+            <AnimatePresence>
+              {filtersVisible && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <Card
+                    size="small"
+                    style={{ 
+                      marginBottom: 20, 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12
+                    }}
+                    styles={{ body: { padding: 16 } }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Search Agent
+                          </Text>
+                          <Input
+                            placeholder="Name or ID..."
+                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            allowClear
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Department
+                          </Text>
+                          <Select
+                            placeholder="All Departments"
+                            value={selectedDepartment}
+                            onChange={setSelectedDepartment}
+                            allowClear
+                            style={{ width: '100%' }}
+                            options={uniqueDepartments.map(d => ({ label: d, value: d }))}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Performance
+                          </Text>
+                          <Select
+                            placeholder="All Levels"
+                            value={selectedPerformance}
+                            onChange={setSelectedPerformance}
+                            allowClear
+                            style={{ width: '100%' }}
+                            options={[
+                              { label: 'Excellent', value: 'excellent' },
+                              { label: 'Good', value: 'good' },
+                              { label: 'Average', value: 'average' },
+                              { label: 'Poor', value: 'poor' },
+                            ]}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Status
+                          </Text>
+                          <Select
+                            placeholder="All Statuses"
+                            value={selectedStatus}
+                            onChange={setSelectedStatus}
+                            allowClear
+                            style={{ width: '100%' }}
+                            options={[
+                              { label: 'Active', value: 'active' },
+                              { label: 'Inactive', value: 'inactive' },
+                            ]}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                            Date Range
+                          </Text>
+                          <RangePicker style={{ width: '100%' }} />
+                        </div>
+                      </Col>
+                      <Col xs={24} lg={18} className="flex items-end justify-end">
+                        <Space>
+                          <Button 
+                            icon={<ClearOutlined />} 
+                            onClick={clearAllFilters}
+                          >
+                            Clear All
+                          </Button>
+                          <Button type="primary">Apply Filters</Button>
+                        </Space>
+                      </Col>
+                    </Row>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Data Table */}
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full" />
+                  <Skeleton.Input key={i} active block style={{ height: 52 }} />
                 ))}
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30">
-                    <TableHead className="font-semibold w-16">Rank</TableHead>
-                    <TableHead className="font-semibold">Agent</TableHead>
-                    <TableHead className="font-semibold">Total Calls</TableHead>
-                    <TableHead className="font-semibold">Avg Handle Time</TableHead>
-                    <TableHead className="font-semibold">FCR</TableHead>
-                    <TableHead className="font-semibold">CSAT</TableHead>
-                    <TableHead className="font-semibold">Sentiment Score</TableHead>
-                    <TableHead className="font-semibold">Trend</TableHead>
-                    <TableHead className="font-semibold w-16"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockAgents.map((agent, index) => (
-                    <motion.tr
-                      key={agent.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="group border-b border-border/30 hover:bg-muted/20 cursor-pointer"
-                    >
-                      <TableCell>
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                          agent.rank === 1 ? "bg-yellow-500/20 text-yellow-500" :
-                          agent.rank === 2 ? "bg-gray-400/20 text-gray-400" :
-                          agent.rank === 3 ? "bg-amber-600/20 text-amber-600" :
-                          "bg-muted text-muted-foreground"
-                        }`}>
-                          {agent.rank}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center font-semibold text-sm text-primary">
-                            {agent.avatar}
-                          </div>
-                          <span className="font-medium">{agent.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{agent.totalCalls}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          {agent.avgHandleTime}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress value={agent.fcr} className="w-16 h-2" />
-                          <span className="text-sm">{agent.fcr}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                          {agent.csat}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress 
-                            value={agent.sentiment} 
-                            className="w-16 h-2"
-                          />
-                          <span className="text-sm">{agent.sentiment}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {agent.trend === "up" ? (
-                          <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">
-                            <TrendingUp className="h-3 w-3 mr-1" /> Up
-                          </Badge>
-                        ) : agent.trend === "down" ? (
-                          <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/30">
-                            <TrendingDown className="h-3 w-3 mr-1" /> Down
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-muted">Stable</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground shadow-none hover:shadow-md"
-                            onClick={() => {
-                              setSelectedAgentId(agent.id);
-                              setSelectedTab("agent-insights");
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </motion.div>
-                      </TableCell>
-                    </motion.tr>
-                  ))}
-                </TableBody>
-              </Table>
+              <Table
+                columns={columns}
+                dataSource={filteredAgents}
+                rowKey="id"
+                pagination={{
+                  total: filteredAgents.length,
+                  pageSize: 8,
+                  showTotal: (total, range) => (
+                    <Text type="secondary">
+                      Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> agents
+                    </Text>
+                  ),
+                  showSizeChanger: true,
+                  pageSizeOptions: ['5', '8', '10', '20'],
+                }}
+                style={{ borderRadius: 12, overflow: 'hidden' }}
+                rowClassName={() => 
+                  'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#10b981]'
+                }
+              />
             )}
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
+
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }
