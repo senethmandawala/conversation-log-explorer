@@ -1,24 +1,33 @@
 import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
-  Upload, 
-  CloudUpload,
-  FileAudio,
-  X,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Play,
-  Trash2,
-  RefreshCw
-} from "lucide-react";
+  Card, 
+  Button, 
+  Tag, 
+  Space, 
+  Row, 
+  Col, 
+  Typography,
+  Skeleton,
+  ConfigProvider,
+  Upload,
+  Progress,
+  message
+} from "antd";
+import { 
+  UploadOutlined,
+  CloudUploadOutlined,
+  AudioOutlined,
+  CloseOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  LoadingOutlined,
+  PlayCircleOutlined,
+  DeleteOutlined,
+  ReloadOutlined
+} from "@ant-design/icons";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion, AnimatePresence } from "framer-motion";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+import { StatCard } from "@/components/ui/stat-card";
 
 interface UploadedFile {
   id: string;
@@ -27,6 +36,8 @@ interface UploadedFile {
   status: "pending" | "uploading" | "analyzing" | "completed" | "failed";
   progress: number;
 }
+
+const { Title, Text } = Typography;
 
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return bytes + " B";
@@ -63,7 +74,7 @@ export default function ContentUploader() {
     const wavFiles = droppedFiles.filter(file => file.name.endsWith(".wav"));
     
     if (wavFiles.length !== droppedFiles.length) {
-      toast.error("Only .wav files are supported");
+      message.error("Only .wav files are supported");
     }
 
     const newFiles: UploadedFile[] = wavFiles.map((file, index) => ({
@@ -100,7 +111,7 @@ export default function ContentUploader() {
 
   const simulateUpload = () => {
     if (files.length === 0) {
-      toast.error("Please add files to upload");
+      message.error("Please add files to upload");
       return;
     }
 
@@ -132,7 +143,7 @@ export default function ContentUploader() {
             // Check if all files are done
             setTimeout(() => {
               setIsAnalyzing(false);
-              toast.success("Analysis completed successfully!");
+              message.success("Analysis completed successfully!");
             }, 500);
           }, 2000 + index * 500);
         } else {
@@ -149,53 +160,81 @@ export default function ContentUploader() {
   const getStatusIcon = (status: UploadedFile["status"]) => {
     switch (status) {
       case "uploading":
-        return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
+        return <LoadingOutlined className="text-primary" spin />;
       case "analyzing":
-        return <RefreshCw className="h-4 w-4 animate-spin text-amber-500" />;
+        return <ReloadOutlined className="text-amber-500" spin />;
       case "completed":
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return <CheckCircleOutlined className="text-green-500" />;
       case "failed":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <ExclamationCircleOutlined className="text-red-500" />;
       default:
-        return <FileAudio className="h-4 w-4 text-muted-foreground" />;
+        return <AudioOutlined className="text-muted-foreground" />;
     }
   };
 
   const getStatusBadge = (status: UploadedFile["status"]) => {
     switch (status) {
       case "uploading":
-        return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">Uploading</Badge>;
+        return <Tag color="blue">Uploading</Tag>;
       case "analyzing":
-        return <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/30">Analyzing</Badge>;
+        return <Tag color="orange">Analyzing</Tag>;
       case "completed":
-        return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">Completed</Badge>;
+        return <Tag color="green">Completed</Tag>;
       case "failed":
-        return <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/30">Failed</Badge>;
+        return <Tag color="red">Failed</Tag>;
       default:
-        return <Badge variant="outline">Pending</Badge>;
+        return <Tag>Pending</Tag>;
     }
   };
 
   return (
     <>
-      <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-                <Upload className="h-5 w-5 text-primary" />
+      <ConfigProvider
+        theme={{
+          components: {
+            Card: {
+              headerBg: 'transparent',
+            },
+            Button: {
+              borderRadius: 8,
+            },
+            Upload: {
+              borderRadius: 8,
+            },
+          },
+        }}
+      >
+        <div className="p-6 space-y-6">
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            styles={{
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center gap-3">
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <UploadOutlined style={{ color: '#3b82f6', fontSize: 20 }} />
+                </div>
+                <div>
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Content Uploader</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
+                    Upload audio files for analysis and processing
+                  </Text>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  Content Uploader
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Upload audio files for analysis and processing
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
+            }
+          >
             {isLoading ? (
               <Skeleton className="h-64 w-full" />
             ) : (
@@ -232,7 +271,7 @@ export default function ContentUploader() {
                         ${isDragging ? "bg-primary/20" : "bg-muted"}
                       `}
                     >
-                      <CloudUpload className={`h-12 w-12 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                      <CloudUploadOutlined className={`text-6xl ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
                     </motion.div>
                     
                     <div>
@@ -263,8 +302,7 @@ export default function ContentUploader() {
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium">Files ({files.length})</h3>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          type="text"
                           onClick={() => setFiles([])}
                           disabled={isAnalyzing}
                         >
@@ -294,7 +332,7 @@ export default function ContentUploader() {
                                 <span className="text-xs text-muted-foreground">{file.size}</span>
                                 {(file.status === "uploading" || file.status === "analyzing") && (
                                   <div className="flex-1 max-w-48">
-                                    <Progress value={file.progress} className="h-1.5" />
+                                    <Progress percent={file.progress} size="small" />
                                   </div>
                                 )}
                               </div>
@@ -305,19 +343,19 @@ export default function ContentUploader() {
                               
                               {file.status === "pending" && (
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
+                                  type="text"
+                                  icon={<CloseOutlined />}
                                   onClick={() => removeFile(file.id)}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
+                                  style={{ height: 32, width: 32 }}
+                                />
                               )}
 
                               {file.status === "completed" && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <Play className="h-4 w-4" />
-                                </Button>
+                                <Button 
+                                  type="text" 
+                                  icon={<PlayCircleOutlined />}
+                                  style={{ height: 32, width: 32 }}
+                                />
                               )}
                             </div>
                           </motion.div>
@@ -327,19 +365,19 @@ export default function ContentUploader() {
                       {/* Upload Button */}
                       <div className="flex justify-end pt-4">
                         <Button
-                          size="lg"
-                          className="gap-2"
+                          type="primary"
+                          size="large"
                           onClick={simulateUpload}
                           disabled={isAnalyzing || files.every(f => f.status === "completed")}
                         >
                           {isAnalyzing ? (
                             <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <LoadingOutlined spin />
                               Processing...
                             </>
                           ) : (
                             <>
-                              <Upload className="h-4 w-4" />
+                              <UploadOutlined />
                               Upload & Analyze
                             </>
                           )}
@@ -350,9 +388,9 @@ export default function ContentUploader() {
                 </AnimatePresence>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      </ConfigProvider>
       <AIHelper />
     </>
   );

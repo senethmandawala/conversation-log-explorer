@@ -480,7 +480,7 @@ export default function ConversationHistory() {
                                 pageNum = totalPages - 4 + i;
                               } else {
                                 pageNum = currentPage - 2 + i;
-                              }
+                            }
                               
                               return (
                                 <Button

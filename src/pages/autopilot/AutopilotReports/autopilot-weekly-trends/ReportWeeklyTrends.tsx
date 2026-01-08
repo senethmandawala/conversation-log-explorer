@@ -1,22 +1,34 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, CalendarDays, Filter, Info } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
-import { DateRangeFilter } from "@/components/conversation/DateRangeFilter";
-import { DateRangeValue } from "@/types/conversation";
+import { 
+  Card, 
+  Typography, 
+  ConfigProvider,
+  Button, 
+  Badge,
+  Space,
+  Skeleton,
+  DatePicker,
+  Tabs,
+  Tooltip
+} from "antd";
+import { 
+  ArrowLeftOutlined, 
+  CalendarOutlined, 
+  FilterOutlined, 
+  InfoCircleOutlined
+} from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+const { TabPane } = Tabs;
+
+interface DateRangeValue {
+  type: string;
+  from: Date | null;
+  to: Date | null;
+  displayValue: string;
+}
 
 // Generate mock heatmap data for General tab (Date x Hour)
 const generateGeneralHeatmapData = () => {
@@ -107,21 +119,37 @@ interface HeatmapCellProps {
 
 const HeatmapCell = ({ value, maxValue, label, hour, categoryIndex }: HeatmapCellProps) => {
   return (
-    <UITooltip delayDuration={0}>
-      <TooltipTrigger>
-        <div
-          className="w-12 h-10 rounded border border-border/30 cursor-pointer transition-all duration-200 hover:border-primary hover:scale-105 hover:shadow-md hover:z-10"
-          style={{ backgroundColor: getHeatmapColor(value, maxValue, categoryIndex) }}
-        />
-      </TooltipTrigger>
-      <TooltipContent side="top" className="bg-popover border-border">
-        <div className="text-xs space-y-0.5">
-          <p className="font-semibold text-foreground">{label}</p>
-          <p className="text-muted-foreground">{hour}</p>
-          <p className="font-bold text-primary">{value} calls</p>
-        </div>
-      </TooltipContent>
-    </UITooltip>
+    <Tooltip title={
+      <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
+        <div style={{ fontWeight: 600, marginBottom: '2px' }}>{label}</div>
+        <div style={{ color: '#6b7280', marginBottom: '2px' }}>{hour}</div>
+        <div style={{ fontWeight: 'bold', color: '#3b82f6' }}>{value} calls</div>
+      </div>
+    }>
+      <div
+        style={{
+          width: '48px',
+          height: '40px',
+          borderRadius: '6px',
+          border: '1px solid #e5e7eb',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          backgroundColor: getHeatmapColor(value, maxValue, categoryIndex)
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = '#3b82f6';
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)';
+          e.currentTarget.style.zIndex = '10';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = '#e5e7eb';
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.zIndex = '1';
+        }}
+      />
+    </Tooltip>
   );
 };
 
@@ -137,7 +165,7 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
   const [loading, setLoading] = useState(true);
   const [generalData, setGeneralData] = useState<any[]>([]);
   const [categoryData, setCategoryData] = useState<any[]>([]);
-  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null);
+  const [dateRange, setDateRange] = useState<[any, any] | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -158,216 +186,323 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
   const maxCategoryValue = Math.max(...categoryData.map(d => d.value), 1);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 space-y-6"
+    <ConfigProvider
+      theme={{
+        components: {
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
     >
-      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="pb-4 border-b border-border/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBack}
-                className="h-10 w-10 rounded-xl"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/5 border border-amber-500/20 flex items-center justify-center">
-                <CalendarDays className="h-5 w-5 text-amber-500" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  Weekly Traffic Trends
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Analyze weekly traffic patterns and trends
-                </p>
-              </div>
-            </div>
-            <Button
-              variant={filtersOpen ? "default" : "outline"}
-              size="icon"
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className="relative h-9 w-9"
-            >
-              <Filter className="h-4 w-4" />
-              {numberOfFilters > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                  {numberOfFilters}
-                </Badge>
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-6">
-          {/* Collapsible Filters */}
-          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-            <CollapsibleContent className="space-y-4">
-              <div className="flex flex-wrap gap-3 items-center p-4 bg-muted/30 rounded-lg border border-border/50">
-                <div className="min-w-[200px]">
-                  <DateRangeFilter 
-                    value={dateRange} 
-                    onChange={setDateRange} 
+      <div className="p-6 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card
+            style={{ 
+              borderRadius: 12, 
+              border: '1px solid #e2e8f0'
+            }}
+            styles={{ 
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={onBack}
+                    style={{ 
+                      borderRadius: 8,
+                      height: 40,
+                      width: 40
+                    }}
                   />
+                  <div 
+                    style={{ 
+                      width: 40, 
+                      height: 40, 
+                      borderRadius: 8, 
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <CalendarOutlined style={{ color: 'white', fontSize: 20 }} />
+                  </div>
+                  <div>
+                    <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Weekly Traffic Trends</Title>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                      Analyze weekly traffic patterns and trends
+                    </Text>
+                  </div>
                 </div>
+                <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
+                  <Button 
+                    type={filtersOpen ? "primary" : "default"}
+                    icon={<FilterOutlined />}
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                    style={{ borderRadius: 8 }}
+                  />
+                </Badge>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="general" className="flex items-center gap-2">
-                General
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Overall traffic trends for the week</p>
-                  </TooltipContent>
-                </UITooltip>
-              </TabsTrigger>
-              <TabsTrigger value="categories" className="flex items-center gap-2">
-                Categories
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Traffic breakdown by category</p>
-                  </TooltipContent>
-                </UITooltip>
-              </TabsTrigger>
-            </TabsList>
-
-            {/* General Tab */}
-            <TabsContent value="general" className="mt-6">
-              <AnimatePresence mode="wait">
-                {loading ? (
+            }
+          >
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              {/* Collapsible Filters */}
+              <AnimatePresence>
+                {filtersOpen && (
                   <motion.div
-                    key="loading-general"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="flex items-center justify-center h-[400px]"
+                    style={{ overflow: 'hidden' }}
                   >
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="content-general"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-x-auto"
-                  >
-                    <div className="inline-block min-w-full">
-                      {/* Hour labels */}
-                      <div className="flex mb-3">
-                        <div className="w-24 flex-shrink-0"></div>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <div key={i} className="w-12 text-[11px] text-center font-medium text-muted-foreground">
-                            {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {/* Heatmap grid */}
-                      {['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'].map((day, dayIndex) => (
-                        <div key={day} className="flex items-center mb-2 group">
-                          <div className="w-24 text-xs font-semibold text-right pr-3 flex-shrink-0 text-foreground group-hover:text-primary transition-colors">{day}</div>
-                          <div className="flex gap-1">
-                            {Array.from({ length: 24 }, (_, hour) => {
-                              const dataPoint = generalData.find(d => d.y === dayIndex && d.x === hour);
-                              return (
-                                <HeatmapCell
-                                  key={hour}
-                                  value={dataPoint?.value || 0}
-                                  maxValue={maxGeneralValue}
-                                  label={day}
-                                  hour={`${hour.toString().padStart(2, '0')}:00`}
-                                />
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <Card
+                      size="small"
+                      style={{ 
+                        background: '#f8fafc', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12
+                      }}
+                      styles={{ body: { padding: 16 } }}
+                    >
+                      <RangePicker 
+                        style={{ minWidth: 200 }}
+                        value={dateRange}
+                        onChange={(dates) => setDateRange(dates)}
+                      />
+                    </Card>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </TabsContent>
 
-            {/* Categories Tab */}
-            <TabsContent value="categories" className="mt-6">
-              <AnimatePresence mode="wait">
-                {loading ? (
-                  <motion.div
-                    key="loading-categories"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center justify-center h-[400px]"
-                  >
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="content-categories"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-x-auto"
-                  >
-                    <div className="inline-block min-w-full">
-                      {/* Hour labels */}
-                      <div className="flex mb-3">
-                        <div className="w-40 flex-shrink-0"></div>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <div key={i} className="w-12 text-[11px] text-center font-medium text-muted-foreground">
-                            {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+              {/* Tabs */}
+              <Tabs
+                activeKey={activeTab}
+                onChange={setActiveTab}
+                style={{ width: '100%' }}
+                size="large"
+              >
+                <TabPane 
+                  tab={
+                    <Space>
+                      <span>General</span>
+                      <Tooltip title="Overall traffic trends for the week">
+                        <InfoCircleOutlined style={{ fontSize: 14, color: '#6b7280' }} />
+                      </Tooltip>
+                    </Space>
+                  } 
+                  key="general"
+                >
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.div
+                        key="loading-general"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          height: '400px' 
+                        }}
+                      >
+                        <div style={{ 
+                          width: '32px', 
+                          height: '32px', 
+                          border: '3px solid #f3f4f6', 
+                          borderTop: '3px solid #3b82f6', 
+                          borderRadius: '50%', 
+                          animation: 'spin 1s linear infinite' 
+                        }} />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="content-general"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ overflowX: 'auto' }}
+                      >
+                        <div style={{ display: 'inline-block', minWidth: '100%' }}>
+                          {/* Hour labels */}
+                          <div style={{ display: 'flex', marginBottom: '12px' }}>
+                            <div style={{ width: '96px', flexShrink: 0 }}></div>
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <div key={i} style={{ 
+                                width: '48px', 
+                                fontSize: '11px', 
+                                textAlign: 'center', 
+                                fontWeight: 500, 
+                                color: '#6b7280' 
+                              }}>
+                                {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                      
-                      {/* Heatmap grid */}
-                      {['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'].map((category, catIndex) => (
-                        <div key={category} className="flex items-center mb-2 group">
-                          <div className="w-40 text-xs font-semibold text-right pr-3 flex-shrink-0 truncate text-foreground group-hover:text-primary transition-colors" title={category}>{category}</div>
-                          <div className="flex gap-1">
-                            {Array.from({ length: 24 }, (_, hour) => {
-                              const dataPoint = categoryData.find(d => d.y === catIndex && d.x === hour);
-                              return (
-                                <HeatmapCell
-                                  key={hour}
-                                  value={dataPoint?.value || 0}
-                                  maxValue={maxCategoryValue}
-                                  label={category}
-                                  hour={`${hour.toString().padStart(2, '0')}:00`}
-                                  categoryIndex={catIndex}
-                                />
-                              );
-                            })}
-                          </div>
+                          
+                          {/* Heatmap grid */}
+                          {['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'].map((day, dayIndex) => (
+                            <div key={day} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                              <div style={{ 
+                                width: '96px', 
+                                fontSize: '12px', 
+                                fontWeight: 600, 
+                                textAlign: 'right', 
+                                paddingRight: '12px', 
+                                flexShrink: 0,
+                                color: '#1f2937',
+                                transition: 'color 0.2s'
+                              }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#1f2937'}
+                              >
+                                {day}
+                              </div>
+                              <div style={{ display: 'flex', gap: '4px' }}>
+                                {Array.from({ length: 24 }, (_, hour) => {
+                                  const dataPoint = generalData.find(d => d.y === dayIndex && d.x === hour);
+                                  return (
+                                    <HeatmapCell
+                                      key={hour}
+                                      value={dataPoint?.value || 0}
+                                      maxValue={maxGeneralValue}
+                                      label={day}
+                                      hour={`${hour.toString().padStart(2, '0')}:00`}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </TabPane>
+
+                <TabPane 
+                  tab={
+                    <Space>
+                      <span>Categories</span>
+                      <Tooltip title="Traffic breakdown by category">
+                        <InfoCircleOutlined style={{ fontSize: 14, color: '#6b7280' }} />
+                      </Tooltip>
+                    </Space>
+                  } 
+                  key="categories"
+                >
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.div
+                        key="loading-categories"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          height: '400px' 
+                        }}
+                      >
+                        <div style={{ 
+                          width: '32px', 
+                          height: '32px', 
+                          border: '3px solid #f3f4f6', 
+                          borderTop: '3px solid #3b82f6', 
+                          borderRadius: '50%', 
+                          animation: 'spin 1s linear infinite' 
+                        }} />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="content-categories"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ overflowX: 'auto' }}
+                      >
+                        <div style={{ display: 'inline-block', minWidth: '100%' }}>
+                          {/* Hour labels */}
+                          <div style={{ display: 'flex', marginBottom: '12px' }}>
+                            <div style={{ width: '160px', flexShrink: 0 }}></div>
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <div key={i} style={{ 
+                                width: '48px', 
+                                fontSize: '11px', 
+                                textAlign: 'center', 
+                                fontWeight: 500, 
+                                color: '#6b7280' 
+                              }}>
+                                {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Heatmap grid */}
+                          {['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'].map((category, catIndex) => (
+                            <div key={category} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                              <div 
+                                style={{ 
+                                  width: '160px', 
+                                  fontSize: '12px', 
+                                  fontWeight: 600, 
+                                  textAlign: 'right', 
+                                  paddingRight: '12px', 
+                                  flexShrink: 0,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  color: '#1f2937',
+                                  transition: 'color 0.2s'
+                                }}
+                                title={category}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#1f2937'}
+                              >
+                                {category}
+                              </div>
+                              <div style={{ display: 'flex', gap: '4px' }}>
+                                {Array.from({ length: 24 }, (_, hour) => {
+                                  const dataPoint = categoryData.find(d => d.y === catIndex && d.x === hour);
+                                  return (
+                                    <HeatmapCell
+                                      key={hour}
+                                      value={dataPoint?.value || 0}
+                                      maxValue={maxCategoryValue}
+                                      label={category}
+                                      hour={`${hour.toString().padStart(2, '0')}:00`}
+                                      categoryIndex={catIndex}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </TabPane>
+              </Tabs>
+            </Space>
+          </Card>
+        </motion.div>
+      </div>
+    </ConfigProvider>
   );
 }

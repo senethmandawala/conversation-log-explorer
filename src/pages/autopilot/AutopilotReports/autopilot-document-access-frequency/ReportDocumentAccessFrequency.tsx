@@ -1,26 +1,34 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileBarChart, Search, RotateCcw, Filter } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
-import { DateRangeFilter } from "@/components/conversation/DateRangeFilter";
-import { DateRangeValue } from "@/types/conversation";
+import { 
+  Card, 
+  Typography, 
+  ConfigProvider,
+  Button, 
+  Input, 
+  Table, 
+  Badge,
+  Space,
+  Skeleton,
+  DatePicker,
+  Progress
+} from "antd";
+import { 
+  ArrowLeftOutlined, 
+  BarChartOutlined, 
+  SearchOutlined, 
+  ReloadOutlined, 
+  FilterOutlined
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
+import type { ColumnsType } from "antd/es/table";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+
+interface DateRangeValue {
+  startDate: string | null;
+  endDate: string | null;
+}
 
 interface DocumentAccessData {
   id: string;
@@ -51,7 +59,7 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
   const [searchTerm, setSearchTerm] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
-  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null);
+  const [dateRange, setDateRange] = useState<[any, any] | null>(null);
 
   useEffect(() => {
     // Update filter count
@@ -82,149 +90,256 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
   };
 
   const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      "Accounts": "bg-blue-500/20 text-blue-600",
-      "Loans": "bg-green-500/20 text-green-600",
-      "Cards": "bg-purple-500/20 text-purple-600",
-      "Digital Banking": "bg-cyan-500/20 text-cyan-600",
-      "Transactions": "bg-amber-500/20 text-amber-600",
-      "General": "bg-gray-500/20 text-gray-600",
-      "Compliance": "bg-red-500/20 text-red-600",
-      "Support": "bg-pink-500/20 text-pink-600",
+    const colors: Record<string, { color: string; backgroundColor: string; borderColor: string }> = {
+      "Accounts": { color: '#3b82f6', backgroundColor: '#dbeafe', borderColor: '#3b82f6' },
+      "Loans": { color: '#22c55e', backgroundColor: '#dcfce7', borderColor: '#22c55e' },
+      "Cards": { color: '#8b5cf6', backgroundColor: '#f3e8ff', borderColor: '#8b5cf6' },
+      "Digital Banking": { color: '#06b6d4', backgroundColor: '#cffafe', borderColor: '#06b6d4' },
+      "Transactions": { color: '#f59e0b', backgroundColor: '#fef3c7', borderColor: '#f59e0b' },
+      "General": { color: '#6b7280', backgroundColor: '#f3f4f6', borderColor: '#6b7280' },
+      "Compliance": { color: '#ef4444', backgroundColor: '#fee2e2', borderColor: '#ef4444' },
+      "Support": { color: '#ec4899', backgroundColor: '#fce7f3', borderColor: '#ec4899' },
     };
-    return colors[category] || "bg-gray-500/20 text-gray-600";
+    return colors[category] || { color: '#6b7280', backgroundColor: '#f3f4f6', borderColor: '#6b7280' };
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 space-y-6"
-    >
-      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="pb-4 border-b border-border/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBack}
-                className="h-10 w-10 rounded-xl"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20 flex items-center justify-center">
-                <FileBarChart className="h-5 w-5 text-green-500" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  Document Access Frequency
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Track document access patterns and frequency in autopilot conversations
-                </p>
-              </div>
-            </div>
-            <Button
-              variant={filtersOpen ? "default" : "outline"}
-              size="icon"
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className="relative h-9 w-9"
-            >
-              <Filter className="h-4 w-4" />
-              {numberOfFilters > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                  {numberOfFilters}
-                </Badge>
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-6">
-          {/* Collapsible Filters */}
-          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-            <CollapsibleContent className="space-y-4">
-              <div className="flex flex-wrap gap-3 items-center p-4 bg-muted/30 rounded-lg border border-border/50">
-                <div className="min-w-[200px]">
-                  <DateRangeFilter
-                    value={dateRange}
-                    onChange={setDateRange}
-                  />
-                </div>
-                <div className="w-[200px]">
-                  <Input
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="h-8 text-sm"
-                  />
-                </div>
-                <Button onClick={handleSearch} className="gap-2">
-                  <Search className="h-4 w-4" />
-                  Search
-                </Button>
-                {searchTerm && (
-                  <Button variant="outline" onClick={handleClear} className="gap-2">
-                    <RotateCcw className="h-4 w-4" />
-                    Clear
-                  </Button>
-                )}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+  // Table columns definition
+  const columns: ColumnsType<DocumentAccessData> = [
+    {
+      title: 'Document Name',
+      dataIndex: 'documentName',
+      key: 'documentName',
+      render: (text: string) => (
+        <Text strong style={{ fontFamily: 'Geist, sans-serif' }}>{text}</Text>
+      ),
+    },
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      render: (category: string) => {
+        const categoryConfig = getCategoryColor(category);
+        return (
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: 500,
+              color: categoryConfig.color,
+              backgroundColor: categoryConfig.backgroundColor,
+              border: `1px solid ${categoryConfig.borderColor}`,
+            }}
+          >
+            {category}
+          </span>
+        );
+      },
+    },
+    {
+      title: 'Access Count',
+      dataIndex: 'accessCount',
+      key: 'accessCount',
+      render: (count: number) => (
+        <Text strong style={{ fontFamily: 'Geist, sans-serif' }}>
+          {count.toLocaleString()}
+        </Text>
+      ),
+    },
+    {
+      title: 'Frequency',
+      key: 'frequency',
+      width: 200,
+      render: (_, record) => (
+        <Progress
+          percent={(record.accessCount / maxAccessCount) * 100}
+          showInfo={false}
+          strokeColor={{
+            '0%': '#22c55e',
+            '100%': '#16a34a',
+          }}
+          style={{ margin: 0 }}
+        />
+      ),
+    },
+    {
+      title: 'Last Accessed',
+      dataIndex: 'lastAccessed',
+      key: 'lastAccessed',
+      render: (text: string) => (
+        <Text type="secondary" style={{ fontSize: 12, fontFamily: 'Geist, sans-serif' }}>
+          {text}
+        </Text>
+      ),
+    },
+  ];
 
-          {/* Table */}
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : filteredData.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <FileBarChart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No matching data found</p>
-            </div>
-          ) : (
-            <div className="rounded-lg border border-border/50 overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30">
-                    <TableHead>Document Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Access Count</TableHead>
-                    <TableHead className="w-[200px]">Frequency</TableHead>
-                    <TableHead>Last Accessed</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((row) => (
-                    <TableRow key={row.id} className="hover:bg-muted/20">
-                      <TableCell className="font-medium">{row.documentName}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(row.category)}`}>
-                          {row.category}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-semibold">{row.accessCount.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <Progress
-                          value={(row.accessCount / maxAccessCount) * 100}
-                          className="h-2"
+  return (
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card
+            style={{ 
+              borderRadius: 12, 
+              border: '1px solid #e2e8f0',
+            }}
+            styles={{ 
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={onBack}
+                    style={{ 
+                      borderRadius: 8,
+                      height: 40,
+                      width: 40
+                    }}
+                  />
+                  <div 
+                    style={{ 
+                      width: 40, 
+                      height: 40, 
+                      borderRadius: 8, 
+                      background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <BarChartOutlined style={{ color: 'white', fontSize: 20 }} />
+                  </div>
+                  <div>
+                    <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Document Access Frequency</Title>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                      Track document access patterns and frequency in autopilot conversations
+                    </Text>
+                  </div>
+                </div>
+                <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
+                  <Button 
+                    type={filtersOpen ? "primary" : "default"}
+                    icon={<FilterOutlined />}
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                    style={{ borderRadius: 8 }}
+                  />
+                </Badge>
+              </div>
+            }
+          >
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              {/* Collapsible Filters */}
+              <AnimatePresence>
+                {filtersOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <Card
+                      size="small"
+                      style={{ 
+                        background: '#f8fafc', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12
+                      }}
+                      styles={{ body: { padding: 16 } }}
+                    >
+                      <Space wrap size="middle" style={{ width: '100%' }}>
+                        <RangePicker 
+                          style={{ minWidth: 200 }}
+                          value={dateRange}
+                          onChange={(dates) => setDateRange(dates)}
                         />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {row.lastAccessed}
-                      </TableCell>
-                    </TableRow>
+                        <Input
+                          placeholder="Search..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                          allowClear
+                          style={{ width: 200 }}
+                        />
+                        <Button onClick={handleSearch} icon={<SearchOutlined />}>
+                          Search
+                        </Button>
+                        {searchTerm && (
+                          <Button 
+                            onClick={handleClear} 
+                            icon={<ReloadOutlined />}
+                          >
+                            Clear
+                          </Button>
+                        )}
+                      </Space>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Table */}
+              {isLoading ? (
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton.Input key={i} active block style={{ height: 48 }} />
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+                </Space>
+              ) : filteredData.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                  <BarChartOutlined style={{ fontSize: 48, color: '#94a3b8', marginBottom: 16 }} />
+                  <Text type="secondary">No matching data found</Text>
+                </div>
+              ) : (
+                <Table
+                  columns={columns}
+                  dataSource={filteredData}
+                  rowKey="id"
+                  scroll={{ x: 'max-content' }}
+                  pagination={{
+                    total: filteredData.length,
+                    pageSize: 10,
+                    showTotal: (total, range) => (
+                      <Text type="secondary">
+                        Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
+                      </Text>
+                    ),
+                    showSizeChanger: true,
+                    pageSizeOptions: ['5', '10', '20'],
+                  }}
+                  style={{ borderRadius: 12, overflow: 'hidden' }}
+                  rowClassName={() => 
+                    'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#22c55e]'
+                  }
+                />
+              )}
+            </Space>
+          </Card>
+        </motion.div>
+      </div>
+    </ConfigProvider>
   );
 }

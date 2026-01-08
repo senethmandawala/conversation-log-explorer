@@ -1,8 +1,22 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Bot, MessageSquare, Phone, Zap, Search } from "lucide-react";
+import { 
+  Card, 
+  Typography, 
+  ConfigProvider,
+  Input,
+  Space,
+  Tag
+} from "antd";
+import { 
+  RobotOutlined, 
+  MessageOutlined, 
+  PhoneOutlined, 
+  ThunderboltOutlined,
+  SearchOutlined
+} from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 interface AutopilotInstance {
   id: string;
@@ -64,54 +78,85 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-          <div className="d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Bot className="h-5 w-5 text-white" />
+    <ConfigProvider
+      theme={{
+        components: {
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
+    >
+      <div className="space-y-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card
+            style={{ 
+              borderRadius: 12, 
+              border: '1px solid #e2e8f0',
+              padding: '24px'
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div 
+                  style={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: 8, 
+                    background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <RobotOutlined style={{ color: 'white', fontSize: 20 }} />
+                </div>
+                <div>
+                  <Title level={3} style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Instances</Title>
+                  <Text type="secondary" style={{ fontSize: '14px' }}>Select an instance to view its analytics and configuration</Text>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">Instances</h1>
-                <p className="text-sm text-muted-foreground">Select an instance to view its analytics and configuration</p>
+              <div className="flex items-center gap-2">
+                <ThunderboltOutlined style={{ color: '#a855f7', fontSize: 16 }} />
+                <Text type="secondary" style={{ fontSize: '14px' }}>{mockInstances.length} active</Text>
               </div>
             </div>
-            <div className="d-flex align-items-center gap-2 text-sm text-muted-foreground">
-              <Zap className="h-4 w-4 text-purple-500" />
-              <span>{mockInstances.length} active</span>
-            </div>
+          </Card>
+        </motion.div>
+
+        {/* Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <div style={{ maxWidth: '448px' }}>
+            <Input
+              placeholder="Search instances..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+              style={{ 
+                height: 44,
+                borderRadius: 8,
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0'
+              }}
+            />
           </div>
-        </Card>
-      </motion.div>
+        </motion.div>
 
-      {/* Search Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <div className="relative max-w-md">
-          <Input
-            placeholder="Search instances..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-4 h-11 bg-card border-border/50 focus:border-purple-500 focus:outline-none transition-colors"
-          />
-        </div>
-      </motion.div>
-
-      {/* Instance Grid */}
-      <div className="row g-4">
-        <AnimatePresence mode="popLayout">
-          {filteredInstances.map((instance, index) => (
-            <div key={instance.id} className="col-12 col-md-6 col-lg-4">
+        {/* Instance Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 16 }}>
+          <AnimatePresence mode="popLayout">
+            {filteredInstances.map((instance, index) => (
               <motion.div
+                key={instance.id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -119,46 +164,95 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
                 whileHover={{ y: -4 }}
               >
                 <Card
+                  style={{ 
+                    borderRadius: 12, 
+                    border: '1px solid #e2e8f0',
+                    cursor: 'pointer',
+                    height: '100%',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#a855f7';
+                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(168, 85, 247, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                   onClick={() => onSelectInstance(instance)}
-                  className="p-5 border-border/50 bg-card/80 backdrop-blur-sm cursor-pointer group hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-500/30 transition-all duration-300 h-full"
+                  bodyStyle={{ padding: '20px' }}
                 >
                   {/* Icon */}
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 d-flex align-items-center justify-content-center mb-4 group-hover:from-purple-500/30 group-hover:to-purple-600/30 transition-colors">
-                    <Bot className="h-6 w-6 text-purple-500" />
+                  <div 
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 8,
+                      background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 16,
+                      transition: 'background 0.3s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)'}
+                  >
+                    <RobotOutlined style={{ color: '#a855f7', fontSize: 24 }} />
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-semibold text-lg text-foreground group-hover:text-purple-600 transition-colors mb-2">
+                  <Title 
+                    level={4} 
+                    style={{ 
+                      margin: 0, 
+                      marginBottom: 8,
+                      color: '#1f2937',
+                      transition: 'color 0.3s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#a855f7'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#1f2937'}
+                  >
                     {instance.name}
-                  </h3>
+                  </Title>
 
                   {/* Description */}
-                  <p className="text-base text-muted-foreground mb-4 line-clamp-2">
+                  <Text 
+                    type="secondary" 
+                    style={{ 
+                      fontSize: '14px',
+                      marginBottom: 16,
+                      display: 'block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
                     {instance.description}
-                  </p>
+                  </Text>
 
                   {/* Channels */}
-                  <div className="d-flex align-items-center gap-2 text-sm text-muted-foreground">
-                    <Zap className="h-4 w-4" />
-                    <span>{instance.channels}</span>
+                  <div className="flex items-center gap-2">
+                    <ThunderboltOutlined style={{ color: '#94a3b8', fontSize: 14 }} />
+                    <Text type="secondary" style={{ fontSize: '14px' }}>{instance.channels}</Text>
                   </div>
                 </Card>
               </motion.div>
-            </div>
-          ))}
-        </AnimatePresence>
-      </div>
+            ))}
+          </AnimatePresence>
+        </div>
 
-      {filteredInstances.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-12 text-muted-foreground"
-        >
-          <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>No instances found matching "{search}"</p>
-        </motion.div>
-      )}
-    </div>
+        {filteredInstances.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ textAlign: 'center', padding: '48px 0' }}
+          >
+            <RobotOutlined style={{ fontSize: 48, color: '#94a3b8', marginBottom: 12 }} />
+            <Text type="secondary">No instances found matching "{search}"</Text>
+          </motion.div>
+        )}
+      </div>
+    </ConfigProvider>
   );
 }

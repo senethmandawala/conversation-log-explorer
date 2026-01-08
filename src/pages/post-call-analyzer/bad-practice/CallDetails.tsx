@@ -1,7 +1,21 @@
 import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { 
+  Card, 
+  Tag, 
+  Typography,
+  Skeleton,
+  Table,
+  ConfigProvider
+} from "antd";
+import { 
+  ExclamationCircleOutlined,
+  UserOutlined,
+  ClockCircleOutlined
+} from "@ant-design/icons";
 import { motion } from "framer-motion";
+import type { ColumnsType } from "antd/es/table";
+
+const { Title, Text } = Typography;
 
 interface TranscriptEntry {
   speaker: string;
@@ -134,6 +148,38 @@ const mockTranscript: TranscriptEntry[] = [
   },
 ];
 
+  // Table columns for metadata comparison
+  const metadataColumns: ColumnsType<MetadataComparison> = [
+    {
+      title: 'Data Field',
+      dataIndex: 'field',
+      key: 'field',
+      render: (text: string) => <Text style={{ fontSize: 14 }}>{text}</Text>,
+    },
+    {
+      title: 'Metadata Value',
+      dataIndex: 'metadataValue',
+      key: 'metadataValue',
+      render: (text: string) => <Text style={{ fontSize: 14 }}>{text}</Text>,
+    },
+    {
+      title: 'Conversation Value',
+      dataIndex: 'conversationValue',
+      key: 'conversationValue',
+      render: (text: string, record: MetadataComparison) => (
+        <Text 
+          style={{ 
+            fontSize: 14, 
+            color: record.hasMismatch ? '#dc2626' : 'inherit',
+            fontWeight: record.hasMismatch ? 600 : 'normal'
+          }}
+        >
+          {text}
+        </Text>
+      ),
+    },
+  ];
+
 export default function CallDetails({ callId }: CallDetailsProps) {
   const [loading, setLoading] = useState(true);
   const [violationTypes, setViolationTypes] = useState<string[]>([]);
@@ -173,7 +219,10 @@ export default function CallDetails({ callId }: CallDetailsProps) {
       parts.push(
         <strong
           key={`term-${idx}`}
-          className={term.isImportant ? "text-red-600 font-bold" : "font-semibold"}
+          style={{ 
+            color: term.isImportant ? '#dc2626' : 'inherit',
+            fontWeight: term.isImportant ? 700 : 600
+          }}
         >
           {term.text}
         </strong>
@@ -191,100 +240,130 @@ export default function CallDetails({ callId }: CallDetailsProps) {
     return <>{parts}</>;
   };
 
-  if (loading) {
+if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+        <Skeleton.Input active style={{ width: 200 }} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Violation Types */}
-      {violationTypes.length > 0 && (
-        <Card className="bg-muted/30">
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground mb-2">Violation Types</div>
-            <div className="flex flex-wrap gap-2">
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Violation Types */}
+        {violationTypes.length > 0 && (
+          <Card
+            style={{ 
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: 8
+            }}
+            styles={{ body: { padding: 16 } }}
+          >
+            <Text type="secondary" style={{ fontSize: 12, marginBottom: 8 }}>Violation Types</Text>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {violationTypes.map((type, index) => (
-                <Badge
-                  key={index}
-                  variant="outline"
-                  className="bg-accent/50 text-accent-foreground border-accent"
-                >
+                <Tag key={index} color="red" style={{ borderRadius: 6 }}>
                   {type}
-                </Badge>
+                </Tag>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </Card>
+        )}
 
-      {/* Metadata Comparison */}
-      {metadataComparison.length > 0 && (
-        <div>
-          <h5 className="text-lg font-semibold mb-3">Metadata Comparison</h5>
-          <div className="border border-border/50 rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-muted/30">
-                <tr>
-                  <th className="text-left p-3 font-semibold text-sm">Data Field</th>
-                  <th className="text-left p-3 font-semibold text-sm">Metadata Value</th>
-                  <th className="text-left p-3 font-semibold text-sm">Conversation Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {metadataComparison.map((item, index) => (
-                  <tr key={index} className="border-t border-border/30">
-                    <td className="p-3 text-sm">{item.field}</td>
-                    <td className="p-3 text-sm">{item.metadataValue}</td>
-                    <td className={`p-3 text-sm ${item.hasMismatch ? "text-red-600 font-medium" : ""}`}>
-                      {item.conversationValue}
-                    </td>
-                  </tr>
+        {/* Metadata Comparison */}
+        {metadataComparison.length > 0 && (
+          <div>
+            <Title level={5} style={{ marginBottom: 12 }}>Metadata Comparison</Title>
+            <Card
+              style={{ border: '1px solid #e2e8f0', borderRadius: 8 }}
+              styles={{ body: { padding: 0 } }}
+            >
+              <Table
+                columns={metadataColumns}
+                dataSource={metadataComparison}
+                pagination={false}
+                size="small"
+                rowKey="field"
+              />
+            </Card>
+          </div>
+        )}
+
+        {/* Call Transcript */}
+        {transcript.length > 0 && (
+          <div>
+            <Title level={5} style={{ marginBottom: 12 }}>Call Transcript</Title>
+            <Card
+              style={{ 
+                border: '1px solid #e2e8f0',
+                borderRadius: 8,
+                maxHeight: 500,
+                overflow: 'auto'
+              }}
+              styles={{ body: { padding: 16 } }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {transcript.map((entry, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    style={{
+                      padding: 12,
+                      borderRadius: 8,
+                      borderLeft: `4px solid ${entry.speaker.toLowerCase() === "agent" ? "#3b82f6" : "#10b981"}`,
+                      backgroundColor: entry.speaker.toLowerCase() === "agent" ? "#dbeafe" : "#d1fae5",
+                      boxShadow: entry.isHighlighted ? "0 0 0 2px rgba(245, 158, 11, 0.3)" : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {entry.speaker.toLowerCase() === "agent" ? (
+                          <UserOutlined style={{ color: '#3b82f6', fontSize: 14 }} />
+                        ) : (
+                          <ExclamationCircleOutlined style={{ color: '#10b981', fontSize: 14 }} />
+                        )}
+                        <Text strong style={{ fontSize: 14 }}>{entry.speaker}</Text>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
+                        <Text type="secondary" style={{ fontSize: 12 }}>{entry.timestamp}</Text>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 14 }}>
+                      {highlightText(entry)}
+                    </div>
+                  </motion.div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </Card>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Call Transcript */}
-      {transcript.length > 0 && (
-        <div>
-          <h5 className="text-lg font-semibold mb-3">Call Transcript</h5>
-          <div className="space-y-3 max-h-[500px] overflow-y-auto border border-border/50 rounded-lg p-4">
-            {transcript.map((entry, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`p-3 rounded-lg ${
-                  entry.speaker.toLowerCase() === "agent"
-                    ? "bg-blue-500/10 border-l-4 border-blue-500"
-                    : "bg-green-500/10 border-l-4 border-green-500"
-                } ${entry.isHighlighted ? "ring-2 ring-amber-500/50" : ""}`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-sm">{entry.speaker}</span>
-                  <span className="text-xs text-muted-foreground">{entry.timestamp}</span>
-                </div>
-                <div className="text-sm">
-                  {highlightText(entry)}
-                </div>
-              </motion.div>
-            ))}
+        {transcript.length === 0 && metadataComparison.length === 0 && violationTypes.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <Text type="secondary">No call details available</Text>
           </div>
-        </div>
-      )}
-
-      {transcript.length === 0 && metadataComparison.length === 0 && violationTypes.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          No call details available
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ConfigProvider>
   );
 }

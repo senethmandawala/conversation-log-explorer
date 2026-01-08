@@ -1,15 +1,27 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Upload, Trash2, Info, Download } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
+import { 
+  Button, 
+  Card, 
+  Switch, 
+  Typography, 
+  Space, 
+  Upload, 
   Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Spin,
+  Divider,
+  type UploadProps
+} from "antd";
+import { 
+  UploadOutlined, 
+  DeleteOutlined, 
+  InfoCircleOutlined, 
+  DownloadOutlined 
+} from "@ant-design/icons";
+import { motion } from "framer-motion";
+import type { UploadChangeParam } from "antd/es/upload";
+
+const { Text, Title } = Typography;
+const { Dragger } = Upload;
 
 export default function ImportCategories() {
   const [contentLoading, setContentLoading] = useState(false);
@@ -18,8 +30,8 @@ export default function ImportCategories() {
   const [replaceExisting, setReplaceExisting] = useState(false);
   const MaximumFileSize = "20";
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
+  const handleFileChange = (info: UploadChangeParam) => {
+    if (info.fileList && info.fileList.length > 0) {
       setFileAccepted(true);
     }
   };
@@ -38,53 +50,60 @@ export default function ImportCategories() {
   };
 
   if (contentLoading) {
-    return <Skeleton className="h-96 w-full" />;
+    return <Spin size="large" className="flex justify-center items-center h-96" />;
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <Text className="text-sm text-gray-600 block" style={{ fontFamily: 'Geist, sans-serif' }}>
         Import categories from a CSV file. You can download a sample file to see the required format.
-      </p>
+      </Text>
 
-      <Card className="border">
-        <CardContent className="p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Download sample file</span>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Download className="h-4 w-4" />
-              Download
-            </Button>
-          </div>
-        </CardContent>
+      <Card 
+        className="border border-gray-200"
+        styles={{ body: { padding: '12px', borderLeft: 'none' } }}
+      >
+        <div className="flex items-center justify-between">
+          <Text className="text-sm text-gray-700" style={{ fontFamily: 'Geist, sans-serif' }}>Download sample file</Text>
+          <Button 
+            type="default" 
+            size="small" 
+            icon={<DownloadOutlined />}
+            className="flex items-center gap-2"
+          >
+            Download
+          </Button>
+        </div>
       </Card>
 
       <div className="space-y-4">
         {!fileAccepted ? (
           <div>
-            <label
-              htmlFor="file-upload"
-              className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors"
+            <Dragger
+              name="file"
+              accept=".csv"
+              beforeUpload={() => false}
+              onChange={handleFileChange}
+              className="rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+              style={{ 
+                height: '192px',
+                fontFamily: 'Geist, sans-serif',
+                border: '2px dashed #d1d5db',
+                borderLeft: 'none'
+              }}
             >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="h-10 w-10 mb-3 text-muted-foreground" />
-                <p className="mb-2 text-sm text-muted-foreground text-center">
-                  <span className="font-semibold">Drag & drop files here</span>
-                  <br />
-                  or
-                  <br />
-                  <span className="font-bold border-b">Choose files</span>
-                </p>
-              </div>
-              <input
-                id="file-upload"
-                type="file"
-                className="hidden"
-                accept=".csv"
-                onChange={handleFileChange}
-              />
-            </label>
-            <div className="flex justify-between flex-wrap mt-2 text-xs text-muted-foreground">
+              <p className="ant-upload-drag-icon">
+                <UploadOutlined className="text-4xl text-gray-400 mb-3" />
+              </p>
+              <p className="ant-upload-text text-sm text-gray-600 text-center mb-2">
+                <span className="font-semibold">Drag & drop files here</span>
+                <br />
+                or
+                <br />
+                <span className="font-bold border-b border-blue-500 text-blue-500">Choose files</span>
+              </p>
+            </Dragger>
+            <div className="flex justify-between flex-wrap mt-2 text-xs text-gray-500">
               <span>Supported file types: *.csv</span>
               <span>File size max: {MaximumFileSize} MB</span>
             </div>
@@ -92,56 +111,49 @@ export default function ImportCategories() {
         ) : (
           <div className="space-y-4">
             <div>
-              <Label className="text-sm font-medium mb-2 block">Upload File</Label>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
-                <span className="text-sm break-all">File_name_goes_here.csv</span>
+              <Text className="text-sm font-medium mb-2 block text-gray-900" style={{ fontFamily: 'Geist, sans-serif' }}>Upload File</Text>
+              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <Text className="text-sm break-all text-gray-700" style={{ fontFamily: 'Geist, sans-serif' }}>File_name_goes_here.csv</Text>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  type="text"
+                  size="small"
+                  className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
                   onClick={removeFile}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <DeleteOutlined className="text-sm" />
                 </Button>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <Switch
-                id="replace-existing"
                 checked={replaceExisting}
-                onCheckedChange={setReplaceExisting}
+                onChange={setReplaceExisting}
               />
-              <Label htmlFor="replace-existing" className="text-sm cursor-pointer">
+              <Text 
+                className="text-sm cursor-pointer text-gray-700" 
+                style={{ fontFamily: 'Geist, sans-serif' }}
+              >
                 Replace existing category list
-              </Label>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>If enabled, existing categories will be replaced. Otherwise, they will be merged.</p>
-                </TooltipContent>
+              </Text>
+              <Tooltip title="If enabled, existing categories will be replaced. Otherwise, they will be merged.">
+                <InfoCircleOutlined className="text-sm text-gray-400" />
               </Tooltip>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Info className="h-4 w-4" />
-                <span>File size maximum: {MaximumFileSize} MB</span>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <InfoCircleOutlined className="text-sm" />
+                <Text style={{ fontFamily: 'Geist, sans-serif' }}>File size maximum: {MaximumFileSize} MB</Text>
               </div>
-              <Button onClick={handleUpload} disabled={isUploading} className="gap-2">
-                {isUploading ? (
-                  <>
-                    <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4" />
-                    Upload
-                  </>
-                )}
+              <Button 
+                type="primary" 
+                onClick={handleUpload} 
+                loading={isUploading}
+                icon={<UploadOutlined />}
+                className="flex items-center gap-2"
+              >
+                {isUploading ? 'Uploading...' : 'Upload'}
               </Button>
             </div>
           </div>

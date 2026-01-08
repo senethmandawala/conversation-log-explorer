@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info } from "lucide-react";
+import { Info, ArrowRight, GitBranch, Shuffle } from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -16,6 +16,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Card as AntCard, 
+  Typography, 
+  Space, 
+  Tooltip as AntTooltip,
+  Table as AntTable,
+  Tag as AntTag
+} from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+
+// Get colors from environment configuration
+const COLORS = (window as any).env_vars?.colors || [
+  '#FB6767', '#5766BC', '#62B766', '#FBA322', '#E83B76', 
+  '#3EA1F0', '#98C861', '#FB6C3E', '#24B1F1', '#D0DD52'
+];
 
 interface IntentTransition {
   combination: string[];
@@ -44,75 +61,123 @@ export function IntentTransitionAnalysis() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-lg font-semibold">Intent Transition Analysis</CardTitle>
-          <UITooltip>
-            <TooltipTrigger asChild>
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Shows how callers transition between different intents during a single call</p>
-            </TooltipContent>
-          </UITooltip>
+    <AntCard
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <GitBranch style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    Intent Transition Analysis
+                  </Title>
+                  <AntTooltip title="Shows how callers transition between different intents during a single call">
+                    <div style={{ marginTop: '-4px' }}>
+                      <InfoCircleOutlined 
+                        style={{ fontSize: 14, color: '#64748b' }}
+                      />
+                    </div>
+                  </AntTooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Analysis of intent transitions during calls
+                </Text>
+              </div>
+            </Space>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">Analysis of intent transitions during calls</p>
-      </CardHeader>
-      
-      <CardContent>
+        
+        {/* Chart Content */}
+        <div style={{ marginTop: 10 }}>
         {/* Total Calls Section */}
-        <div className="mb-4">
-          <div className="inline-flex items-center gap-2 bg-muted/50 rounded-lg px-4 py-2">
-            <span className="text-sm text-muted-foreground">Total Multi-Category Calls</span>
-            <Badge variant="secondary" className="text-lg font-bold">
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'hsl(var(--muted) / 0.5)', borderRadius: 8, padding: '8px 16px' }}>
+            <span style={{ fontSize: 14, color: 'hsl(var(--muted-foreground))' }}>Total Multi-Category Calls</span>
+            <AntTag color="default" style={{ fontSize: 14, fontWeight: 'bold', padding: '2px 8px' }}>
               {totalMultiCategoryCalls.toLocaleString()}
-            </Badge>
+            </AntTag>
           </div>
         </div>
 
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : intentTransitions.length > 0 ? (
-          <div className="max-h-[400px] overflow-auto rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold">Intent Change</TableHead>
-                  <TableHead className="font-semibold text-center w-[120px]">Call Count</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {intentTransitions.map((item, index) => (
-                  <TableRow key={index} className="hover:bg-muted/30">
-                    <TableCell className="py-3">
-                      <div className="flex flex-wrap items-center gap-1">
-                        {item.combination.map((intent, i) => (
-                          <span key={i} className="flex items-center">
-                            <Badge variant="outline" className="text-xs">
-                              {intent}
-                            </Badge>
-                            {i < item.combination.length - 1 && (
-                              <span className="mx-1 text-muted-foreground">→</span>
-                            )}
-                          </span>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center font-medium">
-                      {item.count.toLocaleString()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div style={{ maxHeight: 400, overflow: 'auto', borderRadius: 8, border: '1px solid hsl(var(--border))' }}>
+            <AntTable
+              dataSource={intentTransitions.map((item, index) => ({ ...item, key: index }))}
+              columns={[
+                {
+                  title: 'Intent Change',
+                  dataIndex: 'combination',
+                  key: 'combination',
+                  render: (combination: string[]) => (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+                      {combination.map((intent, i) => (
+                        <span key={i} style={{ display: 'flex', alignItems: 'center' }}>
+                          <AntTag 
+                            color={COLORS[i % COLORS.length]} 
+                            style={{ fontSize: 11, margin: 0 }}
+                          >
+                            {intent}
+                          </AntTag>
+                          {i < combination.length - 1 && (
+                            <span style={{ margin: '0 4px', color: 'hsl(var(--muted-foreground))' }}>→</span>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  ),
+                },
+                {
+                  title: 'Call Count',
+                  dataIndex: 'count',
+                  key: 'count',
+                  width: 120,
+                  align: 'center',
+                  render: (count: number) => (
+                    <Text strong style={{ fontSize: 14 }}>
+                      {count.toLocaleString()}
+                    </Text>
+                  ),
+                },
+              ]}
+              pagination={false}
+              size="small"
+              style={{ width: '100%' }}
+              rowClassName={(record, index) => 
+                index % 2 === 0 ? 'bg-gray-50/50' : ''
+              }
+            />
           </div>
         ) : (
-          <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">No data available</p>
+          <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: 'hsl(var(--muted-foreground))' }}>No data available</p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </Space>
+  </AntCard>
   );
 }

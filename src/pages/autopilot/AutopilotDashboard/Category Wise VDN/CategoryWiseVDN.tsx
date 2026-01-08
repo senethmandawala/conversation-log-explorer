@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, RefreshCw, Calendar, List, X } from "lucide-react";
+import { Info, RefreshCw, Calendar, List, X, Phone } from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -20,47 +20,62 @@ import {
   Cell,
   Tooltip,
 } from "recharts";
+import { 
+  Card as AntCard, 
+  Typography, 
+  Space, 
+  Tooltip as AntTooltip
+} from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+
+// Get colors from environment configuration
+const COLORS = (window as any).env_vars?.colors || [
+  '#FB6767', '#5766BC', '#62B766', '#FBA322', '#E83B76', 
+  '#3EA1F0', '#98C861', '#FB6C3E', '#24B1F1', '#D0DD52'
+];
 
 // Mock VDN category data for treemap
 const vdnCategoryData = [
-  { name: "Billing", value: 355, fill: "#4285F4" },
-  { name: "Support", value: 385, fill: "#34A853" },
-  { name: "Sales", value: 249, fill: "#FBBC04" },
-  { name: "General", value: 190, fill: "#EA4335" },
-  { name: "Technical", value: 313, fill: "#9C27B0" },
+  { name: "Billing", value: 355, fill: COLORS[0] },
+  { name: "Support", value: 385, fill: COLORS[1] },
+  { name: "Sales", value: 249, fill: COLORS[2] },
+  { name: "General", value: 190, fill: COLORS[3] },
+  { name: "Technical", value: 313, fill: COLORS[4] },
 ];
 
 // Mock top VDN data for each category
 const topVDNData = {
   "Billing": [
-    { name: "VDN 1", value: 145, fill: "#8b5cf6" },
-    { name: "VDN 2", value: 98, fill: "#3b82f6" },
-    { name: "VDN 3", value: 67, fill: "#10b981" },
-    { name: "VDN 4", value: 45, fill: "#f59e0b" },
+    { name: "VDN 1", value: 145, fill: COLORS[5] },
+    { name: "VDN 2", value: 98, fill: COLORS[6] },
+    { name: "VDN 3", value: 67, fill: COLORS[7] },
+    { name: "VDN 4", value: 45, fill: COLORS[8] },
   ],
   "Support": [
-    { name: "VDN 1", value: 128, fill: "#8b5cf6" },
-    { name: "VDN 2", value: 112, fill: "#3b82f6" },
-    { name: "VDN 3", value: 89, fill: "#10b981" },
-    { name: "VDN 4", value: 56, fill: "#f59e0b" },
+    { name: "VDN 1", value: 128, fill: COLORS[5] },
+    { name: "VDN 2", value: 112, fill: COLORS[6] },
+    { name: "VDN 3", value: 89, fill: COLORS[7] },
+    { name: "VDN 4", value: 56, fill: COLORS[8] },
   ],
   "Sales": [
-    { name: "VDN 1", value: 87, fill: "#8b5cf6" },
-    { name: "VDN 2", value: 76, fill: "#3b82f6" },
-    { name: "VDN 3", value: 54, fill: "#10b981" },
-    { name: "VDN 4", value: 32, fill: "#f59e0b" },
+    { name: "VDN 1", value: 87, fill: COLORS[5] },
+    { name: "VDN 2", value: 76, fill: COLORS[6] },
+    { name: "VDN 3", value: 54, fill: COLORS[7] },
+    { name: "VDN 4", value: 32, fill: COLORS[8] },
   ],
   "General": [
-    { name: "VDN 1", value: 65, fill: "#8b5cf6" },
-    { name: "VDN 2", value: 54, fill: "#3b82f6" },
-    { name: "VDN 3", value: 43, fill: "#10b981" },
-    { name: "VDN 4", value: 28, fill: "#f59e0b" },
+    { name: "VDN 1", value: 65, fill: COLORS[5] },
+    { name: "VDN 2", value: 54, fill: COLORS[6] },
+    { name: "VDN 3", value: 43, fill: COLORS[7] },
+    { name: "VDN 4", value: 28, fill: COLORS[8] },
   ],
   "Technical": [
-    { name: "VDN 1", value: 112, fill: "#8b5cf6" },
-    { name: "VDN 2", value: 89, fill: "#3b82f6" },
-    { name: "VDN 3", value: 67, fill: "#10b981" },
-    { name: "VDN 4", value: 45, fill: "#f59e0b" },
+    { name: "VDN 1", value: 112, fill: COLORS[5] },
+    { name: "VDN 2", value: 89, fill: COLORS[6] },
+    { name: "VDN 3", value: 67, fill: COLORS[7] },
+    { name: "VDN 4", value: 45, fill: COLORS[8] },
   ],
 };
 
@@ -108,7 +123,7 @@ const CustomTreemapContent = (props: any) => {
           dominantBaseline="middle"
           fill="white"
           fontSize={fontSize}
-          fontWeight={600}
+          fontWeight="normal"
           style={{ pointerEvents: "none" }}
         >
           {name}
@@ -208,25 +223,56 @@ export function CategoryWiseVDN() {
         layout
         transition={{ duration: 0.3 }}
       >
-        <Card className="w-full h-full">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg font-semibold">Category-wise VDN Distribution</CardTitle>
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Distribution of calls across different VDN channels by category</p>
-                  </TooltipContent>
-                </UITooltip>
+        <AntCard
+          style={{
+            borderRadius: 12,
+            border: '1px solid #e8e8e8',
+            background: '#ffffff',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            padding: '16px 16px 16px 16px'
+          }}
+        >
+          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ marginTop: -12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Space align="center" size="middle">
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 8,
+                      background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white'
+                    }}
+                  >
+                    <Phone style={{ fontSize: 20 }} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                        Category-wise VDN Distribution
+                      </Title>
+                      <AntTooltip title="Distribution of calls across different VDN channels by category">
+                        <div style={{ marginTop: '-4px' }}>
+                          <InfoCircleOutlined 
+                            style={{ fontSize: 14, color: '#64748b' }}
+                          />
+                        </div>
+                      </AntTooltip>
+                    </div>
+                    <Text type="secondary" style={{ fontSize: 14 }}>
+                      Click on a category to see top VDNs
+                    </Text>
+                  </div>
+                </Space>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">Click on a category to see top VDNs</p>
-          </CardHeader>
-          
-          <CardContent>
+            
+            {/* Chart Content */}
+            <div style={{ marginTop: 10 }}>
             {isLoading ? (
               <div className="flex items-center justify-center h-[400px]">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -246,8 +292,9 @@ export function CategoryWiseVDN() {
                 </ResponsiveContainer>
               </div>
             )}
-          </CardContent>
-        </Card>
+        </div>
+      </Space>
+    </AntCard>
       </motion.div>
 
       {/* Top VDN Bar Chart */}
@@ -298,7 +345,7 @@ export function CategoryWiseVDN() {
                       <Bar 
                         dataKey="value" 
                         radius={[8, 8, 0, 0]}
-                        label={{ position: 'top', fill: '#4285F4', fontSize: 12, fontWeight: 600 }}
+                        label={{ position: 'inside', fill: 'white', fontSize: 11, fontWeight: 600 }}
                       >
                         {topVDNChartData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />

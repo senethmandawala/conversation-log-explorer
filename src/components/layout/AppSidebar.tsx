@@ -66,12 +66,12 @@ export function AppSidebar() {
   return (
     <motion.aside
       initial={false}
-      animate={{ width: sidebarCollapsed ? 72 : 256 }}
+      animate={{ width: sidebarCollapsed ? 60 : 200 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="h-screen bg-card border-r border-border/50 flex flex-col relative"
     >
       {/* Logo */}
-      <div className="h-16 flex items-center px-4 border-b border-border/30">
+      <div className="h-12 flex items-center px-3 border-b border-border/30">
         {!sidebarCollapsed && (
           <motion.div
             initial={false}
@@ -81,21 +81,21 @@ export function AppSidebar() {
             <img 
               src="/src/assets/images/sense-ai-logo-transparent.svg" 
               alt="Sense AI Logo" 
-              className="h-8 w-auto"
+              className="h-6 w-auto"
             />
           </motion.div>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3">
+      <nav className="flex-1 overflow-y-auto py-3 px-2">
         {navigation.map((section) => (
-          <div key={section.label} className="mb-6">
+          <div key={section.label} className="mb-4">
             {!sidebarCollapsed && (
               <motion.h3
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="px-3 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                className="px-2 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: 'Geist, sans-serif' }}
               >
                 {section.label}
               </motion.h3>
@@ -109,14 +109,15 @@ export function AppSidebar() {
                       to={item.href}
                       onClick={() => handleNavClick(item.href)}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                        "flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                         isActive
                           ? "bg-primary/10 text-primary shadow-sm"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
+                      style={{ fontFamily: 'Geist, sans-serif' }}
                     >
                       <item.icon className={cn(
-                        "h-5 w-5 flex-shrink-0",
+                        "h-4 w-4 flex-shrink-0",
                         isActive && "text-primary"
                       )} />
                       {!sidebarCollapsed && (
@@ -137,8 +138,8 @@ export function AppSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="p-3">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground" style={{ fontFamily: 'Geist, sans-serif' }}>
           {!sidebarCollapsed && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -149,7 +150,7 @@ export function AppSidebar() {
               <img 
                 src="/src/assets/images/wn_logo_2019_vector_final.svg" 
                 alt="Wavenet Logo" 
-                className="h-4 w-auto -mt-0.5"
+                className="h-3 w-auto"
               />
             </motion.div>
           )}

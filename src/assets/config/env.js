@@ -145,7 +145,7 @@ window.env_vars = {
         { def: 'calldisposition', label: 'Call Disposition', visible: true, checkboxVisible: true },
         { def: 'callDuration', label: 'Call Duration', visible: true, checkboxVisible: true },
         { def: 'userSentiment', label: 'User Sentiment', visible: true, checkboxVisible: true },
-        { def: 'agent', label: 'agent', visible: true, checkboxVisible: true },
+        { def: 'agent', label: 'Agent', visible: true, checkboxVisible: true },
         { def: 'agentSentiment', label: 'Agent Sentiment', visible: true, checkboxVisible: true },
         { def: 'caseStatus', label: 'Case Status', visible: true, checkboxVisible: true },
         { def: 'subcategory',label: 'Sub Category Level 1', visible: true, checkboxVisible: true },

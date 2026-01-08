@@ -1,18 +1,21 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { 
-  FileText, 
-  TrendingUp,
-  BarChart3,
-  Clock,
-  FileBarChart,
-  Coins,
-  ArrowRight,
-  Shield,
-  Settings,
-  CalendarDays,
-} from "lucide-react";
+  Card, 
+  Typography, 
+  ConfigProvider,
+  Badge
+} from "antd";
+import { 
+  FileTextOutlined, 
+  BarChartOutlined,
+  ClockCircleOutlined,
+  DollarOutlined,
+  ArrowRightOutlined,
+  SafetyOutlined,
+  SettingOutlined,
+  CalendarOutlined,
+  WarningOutlined
+} from "@ant-design/icons";
 import { motion } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import ReportTransactionSummary from "./autopilot-transaction-summary/ReportTransactionSummary";
@@ -27,9 +30,9 @@ interface ReportCard {
   id: string;
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: React.ReactNode;
   color: string;
-  bgGradient: string;
+  bgColor: string;
   available: boolean;
 }
 
@@ -38,66 +41,68 @@ const reportCards: ReportCard[] = [
     id: "transaction",
     title: "Transaction Summary Report",
     description: "View detailed transaction summaries and patterns across autopilot interactions",
-    icon: FileText,
-    color: "text-purple-500",
-    bgGradient: "from-purple-500/20 to-purple-600/5",
+    icon: <FileTextOutlined style={{ fontSize: 24 }} />,
+    color: "#8b5cf6",
+    bgColor: "rgba(139, 92, 246, 0.1)",
     available: true,
   },
   {
     id: "document",
     title: "Document Access Frequency",
     description: "Track document access patterns and frequency in autopilot conversations",
-    icon: FileBarChart,
-    color: "text-green-500",
-    bgGradient: "from-green-500/20 to-green-600/5",
+    icon: <BarChartOutlined style={{ fontSize: 24 }} />,
+    color: "#22c55e",
+    bgColor: "rgba(34, 197, 94, 0.1)",
     available: true,
   },
   {
     id: "customized",
     title: "Customized Reports",
     description: "View and manage your custom autopilot reports",
-    icon: Settings,
-    color: "text-orange-500",
-    bgGradient: "from-orange-500/20 to-orange-600/5",
+    icon: <SettingOutlined style={{ fontSize: 24 }} />,
+    color: "#f59e0b",
+    bgColor: "rgba(245, 158, 11, 0.1)",
     available: true,
   },
   {
     id: "weekly-trends",
     title: "Weekly Traffic Trends",
     description: "Analyze weekly traffic patterns and trends in autopilot usage",
-    icon: CalendarDays,
-    color: "text-amber-500",
-    bgGradient: "from-amber-500/20 to-amber-600/5",
+    icon: <CalendarOutlined style={{ fontSize: 24 }} />,
+    color: "#f97316",
+    bgColor: "rgba(249, 115, 22, 0.1)",
     available: true,
   },
   {
     id: "success-failure",
     title: "Success/Failure Rate Analysis",
     description: "Monitor success and failure rates over time for autopilot interactions",
-    icon: BarChart3,
-    color: "text-pink-500",
-    bgGradient: "from-pink-500/20 to-pink-600/5",
+    icon: <BarChartOutlined style={{ fontSize: 24 }} />,
+    color: "#ec4899",
+    bgColor: "rgba(236, 72, 153, 0.1)",
     available: true,
   },
   {
     id: "token-usage",
     title: "Token Usage Report",
     description: "Track AI token consumption and costs across autopilot services",
-    icon: Coins,
-    color: "text-cyan-500",
-    bgGradient: "from-cyan-500/20 to-cyan-600/5",
+    icon: <DollarOutlined style={{ fontSize: 24 }} />,
+    color: "#06b6d4",
+    bgColor: "rgba(6, 182, 212, 0.1)",
     available: true,
   },
   {
     id: "average-call-duration",
     title: "Average Call Duration",
     description: "Analyze call duration statistics and trends for autopilot conversations",
-    icon: Clock,
-    color: "text-indigo-500",
-    bgGradient: "from-indigo-500/20 to-indigo-600/5",
+    icon: <ClockCircleOutlined style={{ fontSize: 24 }} />,
+    color: "#6366f1",
+    bgColor: "rgba(99, 102, 241, 0.1)",
     available: true,
   },
 ];
+
+const { Title, Text } = Typography;
 
 export default function AutopilotReports() {
   const [isHovering, setIsHovering] = useState<string | null>(null);
@@ -133,25 +138,56 @@ export default function AutopilotReports() {
   }
 
   return (
-    <>
+    <ConfigProvider
+      theme={{
+        components: {
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
+    >
       <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-                <FileText className="h-5 w-5 text-primary" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card
+            style={{ 
+              borderRadius: 12, 
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+            }}
+            styles={{ 
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center gap-3">
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                  }}
+                >
+                  <FileTextOutlined style={{ color: 'white', fontSize: 20 }} />
+                </div>
+                <div>
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Autopilot Reports</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
+                    Generate and view detailed autopilot analytics reports
+                  </Text>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  Autopilot Reports
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Generate and view detailed autopilot analytics reports
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
+            }
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {reportCards.map((report, index) => (
                 <motion.div
@@ -162,34 +198,68 @@ export default function AutopilotReports() {
                   onMouseEnter={() => setIsHovering(report.id)}
                   onMouseLeave={() => setIsHovering(null)}
                   onClick={() => report.available && handleReportClick(report.id)}
-                  className={`
-                    relative group cursor-pointer rounded-xl border border-border/50 
-                    bg-gradient-to-br ${report.bgGradient} backdrop-blur-sm
-                    p-5 transition-all duration-300
-                    ${report.available 
-                      ? "hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1" 
-                      : "opacity-50 cursor-not-allowed"
-                    }
-                  `}
+                  style={{
+                    position: 'relative',
+                    cursor: report.available ? 'pointer' : 'not-allowed',
+                    opacity: report.available ? 1 : 0.5,
+                    borderRadius: 12,
+                    border: '1px solid #e2e8f0',
+                    background: `linear-gradient(135deg, ${report.bgColor} 0%, transparent 100%)`,
+                    padding: 20,
+                    transition: 'all 0.3s ease',
+                    transform: isHovering === report.id && report.available ? 'translateY(-4px)' : 'translateY(0)',
+                    boxShadow: isHovering === report.id && report.available 
+                      ? `0 12px 24px -8px ${report.color}30` 
+                      : '0 1px 3px rgba(0, 0, 0, 0.05)',
+                    borderColor: isHovering === report.id && report.available ? `${report.color}50` : '#e2e8f0',
+                  }}
                 >
                   {/* Icon */}
-                  <div className={`
-                    h-12 w-12 rounded-xl bg-background/80 border border-border/50
-                    flex items-center justify-center mb-4 transition-all duration-300
-                    group-hover:scale-110 group-hover:border-primary/30
-                  `}>
-                    <report.icon className={`h-6 w-6 ${report.color}`} />
+                  <div 
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 12,
+                      background: 'white',
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 16,
+                      transition: 'all 0.3s ease',
+                      transform: isHovering === report.id ? 'scale(1.1)' : 'scale(1)',
+                      borderColor: isHovering === report.id ? `${report.color}30` : '#e2e8f0',
+                    }}
+                  >
+                    <span style={{ color: report.color }}>{report.icon}</span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  <Title 
+                    level={5} 
+                    style={{ 
+                      margin: '0 0 8px 0', 
+                      fontWeight: 600,
+                      transition: 'color 0.3s ease',
+                      color: isHovering === report.id ? report.color : '#1e293b',
+                    }}
+                  >
                     {report.title}
-                  </h3>
+                  </Title>
 
                   {/* Description */}
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <Text 
+                    type="secondary" 
+                    style={{ 
+                      fontSize: 13,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
                     {report.description}
-                  </p>
+                  </Text>
 
                   {/* Arrow indicator */}
                   <motion.div
@@ -198,24 +268,28 @@ export default function AutopilotReports() {
                       opacity: isHovering === report.id ? 1 : 0, 
                       x: isHovering === report.id ? 0 : -10 
                     }}
-                    className="absolute bottom-5 right-5"
+                    style={{
+                      position: 'absolute',
+                      bottom: 20,
+                      right: 20,
+                    }}
                   >
-                    <ArrowRight className={`h-5 w-5 ${report.color}`} />
+                    <ArrowRightOutlined style={{ color: report.color, fontSize: 18 }} />
                   </motion.div>
 
                   {/* Not available badge */}
                   {!report.available && (
-                    <div className="absolute top-3 right-3">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
+                    <div style={{ position: 'absolute', top: 12, right: 12 }}>
+                      <SafetyOutlined style={{ color: '#94a3b8', fontSize: 16 }} />
                     </div>
                   )}
                 </motion.div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }

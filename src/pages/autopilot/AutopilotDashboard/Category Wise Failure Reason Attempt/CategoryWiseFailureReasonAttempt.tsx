@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, X } from "lucide-react";
+import { Info, X, AlertTriangle } from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -23,6 +23,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Card as AntCard, 
+  Typography, 
+  Space, 
+  Tooltip as AntTooltip,
+  Table as AntTable,
+  Tag as AntTag
+} from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+
+// Get colors from environment configuration
+const COLORS = (window as any).env_vars?.colors || [
+  '#FB6767', '#5766BC', '#62B766', '#FBA322', '#E83B76', 
+  '#3EA1F0', '#98C861', '#FB6C3E', '#24B1F1', '#D0DD52'
+];
 
 interface TreemapDataItem {
   name: string;
@@ -40,14 +57,14 @@ interface AttemptDetail {
 
 // Mock treemap data for category-wise failure reasons
 const treemapData: TreemapDataItem[] = [
-  { name: "API Timeout", value: 145, color: "#ef4444" },
-  { name: "Intent Recognition", value: 112, color: "#f97316" },
-  { name: "Backend Error", value: 98, color: "#eab308" },
-  { name: "User Abandonment", value: 87, color: "#84cc16" },
-  { name: "System Overload", value: 76, color: "#22c55e" },
-  { name: "Network Issues", value: 65, color: "#06b6d4" },
-  { name: "Auth Failure", value: 54, color: "#3b82f6" },
-  { name: "Data Validation", value: 43, color: "#8b5cf6" },
+  { name: "API Timeout", value: 145, color: COLORS[0] },
+  { name: "Intent Recognition", value: 112, color: COLORS[1] },
+  { name: "Backend Error", value: 98, color: COLORS[2] },
+  { name: "User Abandonment", value: 87, color: COLORS[3] },
+  { name: "System Overload", value: 76, color: COLORS[4] },
+  { name: "Network Issues", value: 65, color: COLORS[5] },
+  { name: "Auth Failure", value: 54, color: COLORS[6] },
+  { name: "Data Validation", value: 43, color: COLORS[7] },
 ];
 
 // Mock attempt details data for each category
@@ -102,7 +119,6 @@ const attemptDetailsMap: Record<string, AttemptDetail[]> = {
   ],
 };
 
-const COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6"];
 
 const CustomTreemapContent = ({ x, y, width, height, index, name, value }: any) => {
   // Guard against undefined props from Recharts
@@ -129,7 +145,7 @@ const CustomTreemapContent = ({ x, y, width, height, index, name, value }: any) 
             textAnchor="middle"
             fill="#fff"
             fontSize={12}
-            fontWeight="600"
+            fontWeight="normal"
           >
             {name.length > 15 ? `${name.slice(0, 15)}...` : name}
           </text>
@@ -139,7 +155,7 @@ const CustomTreemapContent = ({ x, y, width, height, index, name, value }: any) 
             textAnchor="middle"
             fill="#fff"
             fontSize={14}
-            fontWeight="700"
+            fontWeight="normal"
           >
             {value}
           </text>
@@ -208,23 +224,56 @@ export function CategoryWiseFailureReasonAttempt() {
         layout
         transition={{ duration: 0.3 }}
       >
-        <Card className="w-full h-full">
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-lg font-semibold">Category-wise Failure Reason Attempts</CardTitle>
-            <UITooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Distribution of failure reasons by category with attempt analysis. Click on a category to see detailed breakdown.</p>
-              </TooltipContent>
-            </UITooltip>
-          </div>
-          <p className="text-sm text-muted-foreground">Analysis of call failure attempts by category</p>
-        </CardHeader>
-        
-        <CardContent>
+        <AntCard
+          style={{
+            borderRadius: 12,
+            border: '1px solid #e8e8e8',
+            background: '#ffffff',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            padding: '16px 16px 16px 16px'
+          }}
+        >
+          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ marginTop: -12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Space align="center" size="middle">
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 8,
+                      background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white'
+                    }}
+                  >
+                    <AlertTriangle style={{ fontSize: 20 }} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                        Category-wise Failure Reason Attempts
+                      </Title>
+                      <AntTooltip title="Distribution of failure reasons by category with attempt analysis. Click on a category to see detailed breakdown.">
+                        <div style={{ marginTop: '-4px' }}>
+                          <InfoCircleOutlined 
+                            style={{ fontSize: 14, color: '#64748b' }}
+                          />
+                        </div>
+                      </AntTooltip>
+                    </div>
+                    <Text type="secondary" style={{ fontSize: 14 }}>
+                      Analysis of call failure attempts by category
+                    </Text>
+                  </div>
+                </Space>
+              </div>
+            </div>
+            
+            {/* Chart Content */}
+            <div style={{ marginTop: 30 }}>
           {isLoading ? (
             <Skeleton className="h-[300px] w-full" />
           ) : (
@@ -241,8 +290,9 @@ export function CategoryWiseFailureReasonAttempt() {
               </Treemap>
             </ResponsiveContainer>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </Space>
+    </AntCard>
       </motion.div>
 
       {/* Details Card */}
@@ -281,89 +331,107 @@ export function CategoryWiseFailureReasonAttempt() {
               
               <CardContent>
                 {detailsData.length > 0 ? (
-                  <div className="table-scroll-wrapper">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-full">Reason</TableHead>
-                          <TableHead className="text-center w-[200px]">
-                            <div className="flex items-center justify-center gap-1">
+                  <div className="overflow-x-auto">
+                    <AntTable
+                      dataSource={detailsData.map((item, index) => ({ ...item, key: index }))}
+                      columns={[
+                        {
+                          title: 'Reason',
+                          dataIndex: 'reason',
+                          key: 'reason',
+                          width: 200,
+                          render: (text: string) => (
+                            <Text strong style={{ fontSize: 13 }}>{text}</Text>
+                          ),
+                        },
+                        {
+                          title: (
+                            <Space>
                               First Attempt
-                              <UITooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Number of successful calls on first attempt</p>
-                                </TooltipContent>
-                              </UITooltip>
-                            </div>
-                          </TableHead>
-                          <TableHead className="text-center w-[200px]">
-                            <div className="flex items-center justify-center gap-1">
+                              <AntTooltip title="Number of successful calls on first attempt">
+                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                              </AntTooltip>
+                            </Space>
+                          ),
+                          dataIndex: 'firstAttempt',
+                          key: 'firstAttempt',
+                          width: 150,
+                          align: 'center',
+                          render: (value: number) => (
+                            <AntTag color="success" style={{ fontWeight: 500 }}>
+                              {value}
+                            </AntTag>
+                          ),
+                        },
+                        {
+                          title: (
+                            <Space>
                               Second Attempt
-                              <UITooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Number of successful calls on second attempt</p>
-                                </TooltipContent>
-                              </UITooltip>
-                            </div>
-                          </TableHead>
-                          <TableHead className="text-center w-[200px]">
-                            <div className="flex items-center justify-center gap-1">
+                              <AntTooltip title="Number of successful calls on second attempt">
+                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                              </AntTooltip>
+                            </Space>
+                          ),
+                          dataIndex: 'secondAttempt',
+                          key: 'secondAttempt',
+                          width: 150,
+                          align: 'center',
+                          render: (value: number) => (
+                            <AntTag color="warning" style={{ fontWeight: 500 }}>
+                              {value}
+                            </AntTag>
+                          ),
+                        },
+                        {
+                          title: (
+                            <Space>
                               Third Attempt
-                              <UITooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Number of successful calls on third attempt</p>
-                                </TooltipContent>
-                              </UITooltip>
-                            </div>
-                          </TableHead>
-                          <TableHead className="text-center w-[200px]">
-                            <div className="flex items-center justify-center gap-1">
+                              <AntTooltip title="Number of successful calls on third attempt">
+                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                              </AntTooltip>
+                            </Space>
+                          ),
+                          dataIndex: 'thirdAttempt',
+                          key: 'thirdAttempt',
+                          width: 150,
+                          align: 'center',
+                          render: (value: number) => (
+                            <AntTag color="default" style={{ fontWeight: 500 }}>
+                              {value}
+                            </AntTag>
+                          ),
+                        },
+                        {
+                          title: (
+                            <Space>
                               Failed
-                              <UITooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Number of failed calls after all attempts</p>
-                                </TooltipContent>
-                              </UITooltip>
-                            </div>
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {detailsData.map((row, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="w-full">{row.reason}</TableCell>
-                            <TableCell className="text-center w-[200px]">
-                              <Badge variant="default" className="bg-primary text-primary-foreground">
-                                {row.firstAttempt}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-center w-[200px]">
-                              <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200">
-                                {row.secondAttempt}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-center w-[200px]">
-                              <Badge variant="outline" className="border-purple-200 text-purple-700">
-                                {row.thirdAttempt}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-center w-[200px]">{row.failed}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                              <AntTooltip title="Number of failed calls after all attempts">
+                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                              </AntTooltip>
+                            </Space>
+                          ),
+                          dataIndex: 'failed',
+                          key: 'failed',
+                          width: 150,
+                          align: 'center',
+                          render: (value: number) => (
+                            <AntTag color="error" style={{ fontWeight: 500 }}>
+                              {value}
+                            </AntTag>
+                          ),
+                        },
+                      ]}
+                      pagination={false}
+                      size="small"
+                      scroll={{ x: 800 }}
+                      style={{
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                      }}
+                      rowClassName={(record, index) => 
+                        index % 2 === 0 ? 'bg-gray-50/50' : ''
+                      }
+                    />
                   </div>
                 ) : (
                   <div className="h-[280px] flex items-center justify-center">

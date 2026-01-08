@@ -1,19 +1,27 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { FolderTree, List, ChevronRight, ChevronDown, Edit2, Trash2, Plus } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreVertical, Info } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
+import { 
+  Button, 
+  Typography, 
+  Space, 
+  Dropdown, 
   Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Row,
+  Col
+} from "antd";
+import { 
+  FolderOutlined, 
+  UnorderedListOutlined, 
+  CaretRightOutlined, 
+  CaretDownOutlined, 
+  EditOutlined, 
+  DeleteOutlined, 
+  PlusOutlined, 
+  MoreOutlined,
+  InfoCircleOutlined
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
+
+const { Text } = Typography;
 
 export interface CategoryNode {
   name: string;
@@ -59,83 +67,88 @@ export default function CategoryStructure({
     const nodeLevel = node.index.split('.').length;
     const canAddChild = nodeLevel <= categoriesLimit;
 
+    const dropdownItems = [
+      {
+        key: 'add-child',
+        label: 'Add Child Category',
+        icon: <PlusOutlined />,
+        disabled: !canAddChild,
+        onClick: () => onAddChild(node)
+      },
+      {
+        key: 'edit',
+        label: 'Edit',
+        icon: <EditOutlined />,
+        onClick: () => onEdit(node)
+      },
+      {
+        key: 'delete',
+        label: 'Delete',
+        icon: <DeleteOutlined />,
+        onClick: () => onDelete(node),
+        danger: true
+      }
+    ];
+
     return (
       <div className="space-y-1">
-        <div className="grid grid-cols-12 gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
+        <Row 
+          gutter={[8, 8]} 
+          align="middle" 
+          className="p-2 rounded-lg hover:bg-gray-50 transition-colors group"
+          style={{ marginLeft: `${depth * 20}px` }}
+        >
           {/* Category Name Column */}
-          <div className="col-span-8 sm:col-span-9 xl:col-span-5 flex items-center gap-2" style={{ paddingLeft: `${depth * 20}px` }}>
-            {hasChildren(node) ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => toggleNode(node.index)}
-              >
-                {isExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-            ) : (
-              <div className="w-6" />
-            )}
-            {hasChildren(node) ? (
-              isExpanded ? (
-                <FolderTree className="h-4 w-4 text-primary" />
+          <Col xs={24} sm={16} xl={12}>
+            <Space size="small">
+              {hasChildren(node) ? (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={isExpanded ? <CaretDownOutlined /> : <CaretRightOutlined />}
+                  onClick={() => toggleNode(node.index)}
+                  style={{ 
+                    width: 24, 
+                    height: 24, 
+                    padding: 0,
+                    color: '#6b7280'
+                  }}
+                />
               ) : (
-                <FolderTree className="h-4 w-4 text-primary" />
-              )
-            ) : (
-              <List className="h-4 w-4 text-muted-foreground" />
-            )}
-            <span className="text-sm">{node.name}</span>
-          </div>
+                <div style={{ width: 24 }} />
+              )}
+              {hasChildren(node) ? (
+                <FolderOutlined style={{ color: '#3b82f6', fontSize: 16 }} />
+              ) : (
+                <UnorderedListOutlined style={{ color: '#6b7280', fontSize: 16 }} />
+              )}
+              <Text style={{ fontSize: '14px', fontFamily: 'Geist, sans-serif' }}>{node.name}</Text>
+            </Space>
+          </Col>
 
           {/* Description Column - Hidden on smaller screens */}
-          <div className="hidden xl:block xl:col-span-5 self-center">
-            <span className="text-sm text-muted-foreground">{node.description}</span>
-          </div>
+          <Col xs={0} xl={10} className="hidden xl:block">
+            <Text type="secondary" style={{ fontSize: '12px', fontFamily: 'Geist, sans-serif', textAlign: 'left', lineHeight: '1.2' }}>
+              {node.description}
+            </Text>
+          </Col>
 
-          {/* Actions Column */}
-          <div className="col-span-4 sm:col-span-3 xl:col-span-2 flex items-center justify-end gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6 xl:hidden">
-                  <Info className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{node.description}</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => onAddChild(node)}
-                  disabled={!canAddChild}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Child Category
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onEdit(node)}>
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDelete(node)} className="text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+          {/* Actions Column - Three dots - Always visible */}
+          <Col xs={24} sm={8} xl={2} className="flex justify-end">
+            <Dropdown
+              menu={{ items: dropdownItems }}
+              trigger={['click']}
+              placement="bottomRight"
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<MoreOutlined />}
+                style={{ color: '#6b7280' }}
+              />
+            </Dropdown>
+          </Col>
+        </Row>
 
         <AnimatePresence>
           {isExpanded && hasChildren(node) && (
@@ -156,13 +169,17 @@ export default function CategoryStructure({
   };
 
   return (
-    <div className="space-y-1 max-h-96 overflow-y-auto">
+    <div className="space-y-1" style={{ maxHeight: '24rem', overflowY: 'auto' }}>
       {/* Header Row */}
-      <div className="grid grid-cols-12 gap-2 mb-2 px-2 text-sm font-medium text-muted-foreground">
-        <div className="col-span-8 sm:col-span-9 xl:col-span-5">Category Name</div>
-        <div className="hidden xl:block xl:col-span-5">Description</div>
-        <div className="col-span-4 sm:col-span-3 xl:col-span-2 text-end">Action</div>
-      </div>
+      <Row 
+        gutter={[8, 8]} 
+        className="mb-2 px-2"
+        style={{ fontSize: '14px', fontWeight: 500, color: '#6b7280', fontFamily: 'Geist, sans-serif' }}
+      >
+        <Col xs={24} sm={16} xl={12}>Category Name</Col>
+        <Col xs={0} xl={10} className="hidden xl:block">Description</Col>
+        <Col xs={24} sm={8} xl={2}>Action</Col>
+      </Row>
 
       {categoryData.map((node) => (
         <CategoryItem key={node.index} node={node} />

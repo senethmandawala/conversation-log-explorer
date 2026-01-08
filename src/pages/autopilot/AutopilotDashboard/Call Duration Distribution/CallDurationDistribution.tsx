@@ -2,13 +2,12 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Info, RefreshCw, Calendar, List } from "lucide-react";
+import { Info, RefreshCw, Calendar, List, Clock } from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,23 +23,42 @@ import {
   Cell,
   Tooltip,
 } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Card as AntCard, 
+  Typography, 
+  Space, 
+  Tooltip as AntTooltip,
+  Table as AntTable,
+  Tag as AntTag,
+  Tabs as AntTabs
+} from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+
+// Get colors from environment configuration
+const COLORS = (window as any).env_vars?.colors || [
+  '#FB6767', '#5766BC', '#62B766', '#FBA322', '#E83B76', 
+  '#3EA1F0', '#98C861', '#FB6C3E', '#24B1F1', '#D0DD52'
+];
 
 // Mock duration category data
 const durationCategoryData = [
-  { name: "Billing Issues", value: 145, fill: "#4285F4" },
-  { name: "Technical Support", value: 128, fill: "#34A853" },
-  { name: "Account Management", value: 98, fill: "#FBBC04" },
-  { name: "Product Inquiry", value: 87, fill: "#EA4335" },
-  { name: "Service Complaint", value: 76, fill: "#9C27B0" },
+  { name: "Billing Issues", value: 145, fill: COLORS[0] },
+  { name: "Technical Support", value: 128, fill: COLORS[1] },
+  { name: "Account Management", value: 98, fill: COLORS[2] },
+  { name: "Product Inquiry", value: 87, fill: COLORS[3] },
+  { name: "Service Complaint", value: 76, fill: COLORS[4] },
 ];
 
 // Mock long calls data
 const longCallsData = [
-  { name: "Billing Issues", value: 45, fill: "#4285F4" },
-  { name: "Technical Support", value: 38, fill: "#34A853" },
-  { name: "Account Management", value: 28, fill: "#FBBC04" },
-  { name: "Product Inquiry", value: 22, fill: "#EA4335" },
-  { name: "Service Complaint", value: 18, fill: "#9C27B0" },
+  { name: "Billing Issues", value: 45, fill: COLORS[0] },
+  { name: "Technical Support", value: 38, fill: COLORS[1] },
+  { name: "Account Management", value: 28, fill: COLORS[2] },
+  { name: "Product Inquiry", value: 22, fill: COLORS[3] },
+  { name: "Service Complaint", value: 18, fill: COLORS[4] },
 ];
 
 // Mock long call logs
@@ -96,7 +114,7 @@ const CustomTreemapContent = (props: any) => {
           dominantBaseline="middle"
           fill="white"
           fontSize={fontSize}
-          fontWeight={600}
+          fontWeight="normal"
           style={{ pointerEvents: "none" }}
         >
           {name}
@@ -197,141 +215,185 @@ export function CallDurationDistribution() {
   };
 
   return (
-    <Card className="border-border/50">
-      <CardHeader className="pb-4 border-b border-border/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  Call Duration Analysis
-                </CardTitle>
-                <UITooltip>
-                  <TooltipTrigger asChild>
-                    <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Analyze call duration patterns and identify long calls</p>
-                  </TooltipContent>
-                </UITooltip>
+    <AntCard
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <Clock style={{ fontSize: 20 }} />
               </div>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Duration distribution and long call analysis
-              </p>
-            </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    Call Duration Analysis
+                  </Title>
+                  <AntTooltip title="Analyze call duration patterns and identify long calls">
+                    <div style={{ marginTop: '-4px' }}>
+                      <InfoCircleOutlined 
+                        style={{ fontSize: 14, color: '#64748b' }}
+                      />
+                    </div>
+                  </AntTooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Duration distribution and long call analysis
+                </Text>
+              </div>
+            </Space>
+            
           </div>
-          
         </div>
-      </CardHeader>
-
-      <CardContent className="pt-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="duration">Call Duration</TabsTrigger>
-            <TabsTrigger value="long-calls">Long Calls</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="duration" className="mt-6">
-            <div className="mb-4">
-              <Card className="border-border/50 bg-gradient-to-br from-blue-500/10 to-purple-500/10">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Average Call Time</p>
-                      <div className="flex items-baseline gap-2">
-                        <h2 className="text-3xl font-bold">{averageCallTime}</h2>
-                        <span className="text-sm text-muted-foreground">from {totalCallCount} Calls</span>
+        
+        {/* Chart Content */}
+        <div style={{ marginTop: 3 }}>
+        <AntTabs
+          activeKey={activeTab}
+          onChange={(value) => setActiveTab(value)}
+          style={{ width: '100%' }}
+          size="large"
+          items={[
+            {
+              key: "duration",
+              label: "Call Duration",
+              children: (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <Card
+                      style={{
+                        borderRadius: 12,
+                        border: '1px solid #e8e8e8',
+                        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                        padding: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Call Time</p>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageCallTime}</h2>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCallCount} Calls</span>
+                          </div>
+                        </div>
                       </div>
+                    </Card>
+                  </div>
+
+                  {loading ? (
+                    <div className="flex items-center justify-center h-[400px]">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {loading ? (
-              <div className="flex items-center justify-center h-[400px]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <Card className="border-border/50 h-[450px]">
-                <CardContent className="p-4">
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <Treemap
-                        data={durationCategoryData}
-                        dataKey="value"
-                        stroke="white"
-                        content={<CustomTreemapContent />}
-                      >
-                        <RechartsTooltip content={<CustomTooltip />} />
-                      </Treemap>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="long-calls" className="mt-6">
-            <div className="mb-4">
-              <Card className="border-border/50 bg-gradient-to-br from-orange-500/10 to-red-500/10">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Long Calls</p>
-                      <div className="flex items-baseline gap-2">
-                        <h2 className="text-3xl font-bold text-primary">{totalLongCalls}</h2>
-                        <span className="text-sm text-muted-foreground">from {totalCalls} Calls</span>
+                  ) : (
+                    <Card className="border-border/50 h-[450px]">
+                      <CardContent className="p-4">
+                        <div className="h-[400px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <Treemap
+                              data={durationCategoryData}
+                              dataKey="value"
+                              stroke="white"
+                              content={<CustomTreemapContent />}
+                            >
+                              <RechartsTooltip content={<CustomTooltip />} />
+                            </Treemap>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )
+            },
+            {
+              key: "long-calls",
+              label: "Long Calls",
+              children: (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <Card
+                      style={{
+                        borderRadius: 12,
+                        border: '1px solid #e8e8e8',
+                        background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                        padding: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Long Calls</p>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{totalLongCalls}</h2>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCalls} Calls</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
 
-            {loading ? (
-              <div className="flex items-center justify-center h-[400px]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <Card className="border-border/50 h-[450px]">
-                <CardContent className="p-4">
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={longCallsData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                          dataKey="name" 
-                          tick={{ fontSize: 12 }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
-                        />
-                        <YAxis tick={{ fontSize: 12 }} />
-                        <Tooltip content={<LongCallsTooltip />} cursor={{ fill: 'transparent' }} />
-                        <Bar 
-                          dataKey="value" 
-                          radius={[8, 8, 0, 0]}
-                          label={{ position: 'top', fill: '#4285F4', fontSize: 12, fontWeight: 600 }}
-                        >
-                          {longCallsData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+                  {loading ? (
+                    <div className="flex items-center justify-center h-[400px]">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <Card className="border-border/50 h-[450px]">
+                      <CardContent className="p-4">
+                        <div className="h-[400px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={longCallsData}
+                              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis 
+                                dataKey="name" 
+                                tick={{ fontSize: 12 }}
+                                angle={-45}
+                                textAnchor="end"
+                                height={80}
+                              />
+                              <YAxis tick={{ fontSize: 12 }} />
+                              <Tooltip content={<LongCallsTooltip />} cursor={{ fill: 'transparent' }} />
+                              <Bar 
+                                dataKey="value" 
+                                radius={[8, 8, 0, 0]}
+                                label={{ position: 'inside', fill: 'white', fontSize: 11, fontWeight: 600 }}
+                              >
+                                {longCallsData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )
+            }
+          ]}
+        />
+        </div>
+      </Space>
+    </AntCard>
   );
 }

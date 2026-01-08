@@ -1,4 +1,4 @@
-import { CallLogDetails } from "@/components/post-call/CallLogDetails";
+import { CallLogDetails } from "@/pages/post-call-analyzer/call-insight/CallLogDetails";
 
 interface CallLog {
   id: string;

@@ -1,28 +1,31 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Card, 
+  Typography, 
+  Space, 
+  Skeleton,
+  Tooltip
+} from "antd";
+import { 
+  PieChartOutlined,
+  InfoCircleOutlined
+} from "@ant-design/icons";
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
-  Legend,
-  Tooltip,
+  Tooltip as RechartsTooltip,
+  Legend
 } from "recharts";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Info } from "lucide-react";
-import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+const { Title, Text } = Typography;
 
 interface ChartDataItem {
   name: string;
   value: number;
   color: string;
 }
-
-// Mock data for main chart
 const mainChartData: ChartDataItem[] = [
   { name: "Payment Options", value: 145, color: "#22c55e" },
   { name: "Account Balance", value: 98, color: "#3b82f6" },
@@ -42,16 +45,33 @@ export function CallsHandledByDTMF() {
       const percentage = ((data.value / total) * 100).toFixed(0);
       
       return (
-        <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+        <div 
+          style={{ 
+            minWidth: 120, 
+            borderRadius: 6,
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+            border: 'none',
+            overflow: 'hidden'
+          }}
+        >
           <div 
-            className="text-sm font-semibold px-3 py-2" 
-            style={{ backgroundColor: data.color, color: "white" }}
+            style={{ 
+              fontSize: 14, 
+              fontWeight: 600, 
+              padding: '8px 12px', 
+              backgroundColor: data.color, 
+              color: 'white' 
+            }}
           >
             {data.name}
           </div>
-          <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
-            <div className="text-muted-foreground">Count: <span className="font-semibold text-foreground">{data.value}</span></div>
-            <div className="text-muted-foreground">Percentage: <span className="font-semibold text-foreground">{percentage}%</span></div>
+          <div style={{ padding: '8px 12px', backgroundColor: '#f5f5f5' }}>
+            <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
+              Count: <span style={{ fontWeight: 600, color: '#333' }}>{data.value}</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#666' }}>
+              Percentage: <span style={{ fontWeight: 600, color: '#333' }}>{percentage}%</span>
+            </div>
           </div>
         </div>
       );
@@ -81,24 +101,56 @@ export function CallsHandledByDTMF() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-lg font-semibold">Calls Handled by DTMF</CardTitle>
-          <UITooltip>
-            <TooltipTrigger asChild>
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Distribution of calls handled through DTMF input</p>
-            </TooltipContent>
-          </UITooltip>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <PieChartOutlined style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    Calls Handled by DTMF
+                  </Title>
+                  <Tooltip title="Distribution of calls handled through DTMF input">
+                    <div style={{ marginTop: '-4px' }}>
+                      <InfoCircleOutlined 
+                        style={{ fontSize: 14, color: '#64748b' }}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Distribution of calls handled through DTMF input
+                </Text>
+              </div>
+            </Space>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">Distribution of calls handled through DTMF input</p>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="relative">
+        
+        {/* Chart Content */}
+        <div style={{ marginTop: 30 }}>
           {isLoading ? (
             <Skeleton className="h-[300px] w-full" />
           ) : (
@@ -119,7 +171,7 @@ export function CallsHandledByDTMF() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip title={<CustomTooltip />} />
                 <Legend 
                   verticalAlign="bottom" 
                   height={36}
@@ -129,7 +181,7 @@ export function CallsHandledByDTMF() {
             </ResponsiveContainer>
           )}
         </div>
-      </CardContent>
+      </Space>
     </Card>
   );
 }

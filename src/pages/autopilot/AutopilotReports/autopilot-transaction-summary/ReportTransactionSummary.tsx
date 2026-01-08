@@ -1,25 +1,34 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Search, X, FileText, Loader2, Filter } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
-import { DateRangeFilter } from "@/components/conversation/DateRangeFilter";
-import { DateRangeValue } from "@/types/conversation";
+import { 
+  Card, 
+  Typography, 
+  ConfigProvider,
+  Button, 
+  Input, 
+  Table, 
+  Badge,
+  Space,
+  Skeleton,
+  DatePicker
+} from "antd";
+import { 
+  ArrowLeftOutlined, 
+  SearchOutlined, 
+  CloseOutlined, 
+  FileTextOutlined, 
+  LoadingOutlined, 
+  FilterOutlined
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
+import type { ColumnsType } from "antd/es/table";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+
+interface DateRangeValue {
+  startDate: string | null;
+  endDate: string | null;
+}
 
 interface TransactionData {
   id: string;
@@ -53,7 +62,7 @@ export default function ReportTransactionSummary({ onBack }: ReportTransactionSu
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
-  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null);
+  const [dateRange, setDateRange] = useState<[any, any] | null>(null);
 
   useEffect(() => {
     // Update filter count
@@ -84,147 +93,258 @@ export default function ReportTransactionSummary({ onBack }: ReportTransactionSu
 
   const totalTransactions = filteredData.length;
 
+  // Table columns definition
+  const columns: ColumnsType<TransactionData> = [
+    {
+      title: 'Date & Time',
+      key: 'dateTime',
+      render: (_, record) => (
+        <div>
+          <Text style={{ display: 'block' }}>{record.date}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Customer ID',
+      dataIndex: 'customerId',
+      key: 'customerId',
+      render: (text: string) => (
+        <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text}</Text>
+      ),
+    },
+    {
+      title: 'Customer Name',
+      dataIndex: 'customerName',
+      key: 'customerName',
+    },
+    {
+      title: 'Transaction Type',
+      dataIndex: 'transactionType',
+      key: 'transactionType',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => {
+        const getStatusColor = (status: string) => {
+          switch (status) {
+            case 'Completed':
+              return { color: '#22c55e', backgroundColor: '#dcfce7', borderColor: '#22c55e' };
+            case 'Pending':
+              return { color: '#f59e0b', backgroundColor: '#fef3c7', borderColor: '#f59e0b' };
+            case 'Failed':
+              return { color: '#ef4444', backgroundColor: '#fee2e2', borderColor: '#ef4444' };
+            default:
+              return { color: '#6b7280', backgroundColor: '#f3f4f6', borderColor: '#d1d5db' };
+          }
+        };
+        
+        const statusConfig = getStatusColor(status);
+        
+        return (
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: 500,
+              color: statusConfig.color,
+              backgroundColor: statusConfig.backgroundColor,
+              border: `1px solid ${statusConfig.borderColor}`,
+            }}
+          >
+            {status}
+          </span>
+        );
+      },
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (text: string) => (
+        <Text strong>{text}</Text>
+      ),
+    },
+  ];
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 space-y-6"
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
     >
-      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="pb-4 border-b border-border/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBack}
-                className="h-10 w-10 rounded-xl"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20 flex items-center justify-center">
-                <FileText className="h-5 w-5 text-purple-500" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  Transaction Summary Report
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  View detailed transaction summaries and patterns across autopilot interactions
-                </p>
-              </div>
-            </div>
-            <Button
-              variant={filtersOpen ? "default" : "outline"}
-              size="icon"
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className="relative h-9 w-9"
-            >
-              <Filter className="h-4 w-4" />
-              {numberOfFilters > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                  {numberOfFilters}
+      <div className="p-6 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card
+            style={{ 
+              borderRadius: 12, 
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+            }}
+            styles={{ 
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={onBack}
+                    style={{ 
+                      borderRadius: 8,
+                      height: 40,
+                      width: 40
+                    }}
+                  />
+                  <div 
+                    style={{ 
+                      width: 40, 
+                      height: 40, 
+                      borderRadius: 8, 
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                    }}
+                  >
+                    <FileTextOutlined style={{ color: 'white', fontSize: 20 }} />
+                  </div>
+                  <div>
+                    <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Transaction Summary Report</Title>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                      View detailed transaction summaries and patterns across autopilot interactions
+                    </Text>
+                  </div>
+                </div>
+                <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
+                  <Button 
+                    type={filtersOpen ? "primary" : "default"}
+                    icon={<FilterOutlined />}
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                    style={{ borderRadius: 8 }}
+                  />
                 </Badge>
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-3 space-y-3">
-          {/* Collapsible Filters */}
-          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-            <CollapsibleContent className="space-y-4">
-              <div className="flex flex-wrap gap-3 items-center p-4 bg-muted/30 rounded-lg border border-border/50">
-                <div className="min-w-[200px]">
-                  <DateRangeFilter
-                    value={dateRange}
-                    onChange={setDateRange}
-                  />
-                </div>
-                <div className="w-[200px]">
-                  <Input
-                    placeholder="Search..."
-                    value={searchKeyword}
-                    onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="h-8 text-sm"
-                  />
-                </div>
-                <Button onClick={handleSearch} className="gap-2">
-                  <Search className="h-4 w-4" />
-                  Search
-                </Button>
-                {searchKeyword && (
-                  <Button variant="outline" onClick={handleClear} className="gap-2">
-                    <X className="h-4 w-4" />
-                    Clear
-                  </Button>
-                )}
               </div>
-            </CollapsibleContent>
-          </Collapsible>
+            }
+          >
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              {/* Collapsible Filters */}
+              <AnimatePresence>
+                {filtersOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <Card
+                      size="small"
+                      style={{ 
+                        background: '#f8fafc', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12
+                      }}
+                      styles={{ body: { padding: 16 } }}
+                    >
+                      <Space wrap size="middle" style={{ width: '100%' }}>
+                        <RangePicker 
+                          style={{ minWidth: 200 }}
+                          value={dateRange}
+                          onChange={(dates) => setDateRange(dates)}
+                        />
+                        <Input
+                          placeholder="Search..."
+                          value={searchKeyword}
+                          onChange={(e) => setSearchKeyword(e.target.value)}
+                          prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                          allowClear
+                          style={{ width: 200 }}
+                        />
+                        <Button onClick={handleSearch} icon={<SearchOutlined />}>
+                          Search
+                        </Button>
+                        {searchKeyword && (
+                          <Button 
+                            onClick={handleClear} 
+                            icon={<CloseOutlined />}
+                          >
+                            Clear
+                          </Button>
+                        )}
+                      </Space>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-          {/* Total Count */}
-          <div className="text-sm text-muted-foreground mb-3">
-            Total Transactions: <span className="font-semibold text-foreground">{totalTransactions}</span>
-          </div>
+              {/* Total Count */}
+              <div>
+                <Text type="secondary">
+                  Total Transactions: <Text strong>{totalTransactions}</Text>
+                </Text>
+              </div>
 
-          {/* Table */}
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : filteredData.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No matching data found</p>
-            </div>
-          ) : (
-            <div className="rounded-lg border border-border/50 overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30">
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Customer ID</TableHead>
-                    <TableHead>Customer Name</TableHead>
-                    <TableHead>Transaction Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((row) => (
-                    <TableRow key={row.id} className="hover:bg-muted/20">
-                      <TableCell>
-                        <div>{row.date}</div>
-                        <div className="text-xs text-muted-foreground">{row.time}</div>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">{row.customerId}</TableCell>
-                      <TableCell>{row.customerName}</TableCell>
-                      <TableCell>{row.transactionType}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            row.status === "Completed"
-                              ? "bg-green-500/20 text-green-600"
-                              : row.status === "Pending"
-                              ? "bg-amber-500/20 text-amber-600"
-                              : "bg-red-500/20 text-red-600"
-                          }`}
-                        >
-                          {row.status}
-                        </span>
-                      </TableCell>
-                      <TableCell>{row.amount}</TableCell>
-                    </TableRow>
+              {/* Table */}
+              {isLoading ? (
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton.Input key={i} active block style={{ height: 48 }} />
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+                </Space>
+              ) : filteredData.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                  <FileTextOutlined style={{ fontSize: 48, color: '#94a3b8', marginBottom: 16 }} />
+                  <Text type="secondary">No matching data found</Text>
+                </div>
+              ) : (
+                <Table
+                  columns={columns}
+                  dataSource={filteredData}
+                  rowKey="id"
+                  scroll={{ x: 'max-content' }}
+                  pagination={{
+                    total: filteredData.length,
+                    pageSize: 10,
+                    showTotal: (total, range) => (
+                      <Text type="secondary">
+                        Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
+                      </Text>
+                    ),
+                    showSizeChanger: true,
+                    pageSizeOptions: ['5', '10', '20'],
+                  }}
+                  style={{ borderRadius: 12, overflow: 'hidden' }}
+                  rowClassName={() => 
+                    'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#8b5cf6]'
+                  }
+                />
+              )}
+            </Space>
+          </Card>
+        </motion.div>
+      </div>
+    </ConfigProvider>
   );
 }

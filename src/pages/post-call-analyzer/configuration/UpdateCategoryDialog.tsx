@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { 
+  Button, 
+  Modal,
+  Input, 
+  Typography,
+  Form,
+  message
+} from "antd";
 import { CategoryNode } from "./CategoryStructure";
+
+const { Text } = Typography;
+const { TextArea } = Input;
 
 interface UpdateCategoryDialogProps {
   open: boolean;
@@ -33,19 +33,24 @@ export default function UpdateCategoryDialog({
 }: UpdateCategoryDialogProps) {
   const [categoryName, setCategoryName] = useState("");
   const [description, setDescription] = useState("");
+  const [form] = Form.useForm();
   const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
 
   useEffect(() => {
     if (open && updatingCurrent && selectedNode) {
-      setCategoryName(selectedNode.name);
-      setDescription(selectedNode.description);
+      form.setFieldsValue({
+        categoryName: selectedNode.name,
+        description: selectedNode.description
+      });
     } else if (open && !updatingCurrent) {
-      setCategoryName("");
-      setDescription("");
+      form.resetFields();
     }
-  }, [open, updatingCurrent, selectedNode]);
+  }, [open, updatingCurrent, selectedNode, form]);
 
   const validateForm = () => {
+    const values = form.getFieldsValue();
+    const categoryName = values.categoryName || "";
+    const description = values.description || "";
     const newErrors: { name?: string; description?: string } = {};
 
     if (!categoryName.trim()) {
@@ -73,11 +78,13 @@ export default function UpdateCategoryDialog({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (validateForm()) {
-      onSubmit({ name: categoryName, description });
+      const values = form.getFieldsValue();
+      onSubmit({ name: values.categoryName, description: values.description });
       onOpenChange(false);
+      form.resetFields();
+      setErrors({});
     }
   };
 
@@ -88,63 +95,64 @@ export default function UpdateCategoryDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{getTitle()}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            {isUpdatingChild && selectedNode && (
-              <p className="text-sm text-muted-foreground">
-                Parent Category: <span className="font-medium">{selectedNode.name}</span>
-              </p>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="category-name">Category Name</Label>
-              <Input
-                id="category-name"
-                placeholder="Enter category name"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                className={errors.name ? "border-destructive" : ""}
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Enter category description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className={errors.description ? "border-destructive" : ""}
-                rows={4}
-              />
-              {errors.description && (
-                <p className="text-sm text-destructive">{errors.description}</p>
-              )}
-            </div>
+    <Modal 
+      open={open} 
+      onCancel={() => onOpenChange(false)}
+      title={getTitle()}
+      width={500}
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button type="primary" onClick={handleSubmit}>
+            {updatingCurrent ? "Update" : "Add"}
+          </Button>
+        </div>
+      }
+    >
+      <Form 
+        form={form}
+        layout="vertical"
+        className="space-y-4 py-4"
+      >
+        {isUpdatingChild && selectedNode && (
+          <div className="mb-4">
+            <Text className="text-sm text-gray-600" style={{ fontFamily: 'Geist, sans-serif' }}>
+              Parent Category: <span className="font-medium text-gray-900">{selectedNode.name}</span>
+            </Text>
           </div>
+        )}
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">
-              {updatingCurrent ? "Update" : "Add"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <Form.Item
+          label="Category Name"
+          name="categoryName"
+          validateStatus={errors.name ? "error" : ""}
+          help={errors.name}
+          rules={[{ required: true, message: "Category name is required" }]}
+        >
+          <Input 
+            placeholder="Enter category name"
+            className="font-geist"
+            style={{ fontFamily: 'Geist, sans-serif' }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Description"
+          name="description"
+          validateStatus={errors.description ? "error" : ""}
+          help={errors.description}
+          rules={[{ required: true, message: "Description is required" }]}
+        >
+          <TextArea
+            placeholder="Enter category description"
+            rows={4}
+            className="font-geist"
+            style={{ fontFamily: 'Geist, sans-serif' }}
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 }

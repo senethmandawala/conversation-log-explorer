@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { Info, X } from "lucide-react";
+import { Info, X, PieChartIcon } from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -18,6 +18,22 @@ import {
 } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Card as AntCard, 
+  Typography, 
+  Space, 
+  Tooltip as AntTooltip,
+  Button as AntButton
+} from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+
+// Get colors from environment configuration
+const COLORS = (window as any).env_vars?.colors || [
+  '#FB6767', '#5766BC', '#62B766', '#FBA322', '#E83B76', 
+  '#3EA1F0', '#98C861', '#FB6C3E', '#24B1F1', '#D0DD52'
+];
 
 interface ChartDataItem {
   name: string;
@@ -27,45 +43,45 @@ interface ChartDataItem {
 
 // Mock data for main chart
 const categoryData: ChartDataItem[] = [
-  { name: "Billing Inquiries", value: 35, color: "#8b5cf6" },
-  { name: "Technical Support", value: 25, color: "#3b82f6" },
-  { name: "General Questions", value: 20, color: "#10b981" },
-  { name: "Sales", value: 12, color: "#f59e0b" },
-  { name: "Others", value: 8, color: "#6b7280" },
+  { name: "Billing Inquiries", value: 35, color: COLORS[0] },
+  { name: "Technical Support", value: 25, color: COLORS[1] },
+  { name: "General Questions", value: 20, color: COLORS[2] },
+  { name: "Sales", value: 12, color: COLORS[3] },
+  { name: "Others", value: 8, color: COLORS[4] },
 ];
 
 // Subcategory data for each category
 const subcategoryDataMap: Record<string, ChartDataItem[]> = {
   "Billing Inquiries": [
-    { name: "Payment Issues", value: 120, color: "#8b5cf6" },
-    { name: "Invoice Queries", value: 85, color: "#a78bfa" },
-    { name: "Refund Requests", value: 65, color: "#c4b5fd" },
-    { name: "Plan Changes", value: 45, color: "#ddd6fe" },
-    { name: "Billing Disputes", value: 30, color: "#ede9fe" },
+    { name: "Payment Issues", value: 120, color: COLORS[0] },
+    { name: "Invoice Queries", value: 85, color: COLORS[0] },
+    { name: "Refund Requests", value: 65, color: COLORS[0] },
+    { name: "Plan Changes", value: 45, color: COLORS[0] },
+    { name: "Billing Disputes", value: 30, color: COLORS[0] },
   ],
   "Technical Support": [
-    { name: "Login Issues", value: 95, color: "#3b82f6" },
-    { name: "App Crashes", value: 72, color: "#60a5fa" },
-    { name: "Connectivity", value: 58, color: "#93c5fd" },
-    { name: "Feature Help", value: 42, color: "#bfdbfe" },
-    { name: "Device Setup", value: 28, color: "#dbeafe" },
+    { name: "Login Issues", value: 95, color: COLORS[1] },
+    { name: "App Crashes", value: 72, color: COLORS[1] },
+    { name: "Connectivity", value: 58, color: COLORS[1] },
+    { name: "Feature Help", value: 42, color: COLORS[1] },
+    { name: "Device Setup", value: 28, color: COLORS[1] },
   ],
   "General Questions": [
-    { name: "Account Info", value: 78, color: "#10b981" },
-    { name: "Service Hours", value: 55, color: "#34d399" },
-    { name: "Policy Questions", value: 42, color: "#6ee7b7" },
-    { name: "Location Info", value: 32, color: "#a7f3d0" },
+    { name: "Account Info", value: 78, color: COLORS[2] },
+    { name: "Service Hours", value: 55, color: COLORS[2] },
+    { name: "Policy Questions", value: 42, color: COLORS[2] },
+    { name: "Location Info", value: 32, color: COLORS[2] },
   ],
   "Sales": [
-    { name: "New Plans", value: 45, color: "#f59e0b" },
-    { name: "Upgrades", value: 38, color: "#fbbf24" },
-    { name: "Promotions", value: 28, color: "#fcd34d" },
-    { name: "Add-ons", value: 18, color: "#fde68a" },
+    { name: "New Plans", value: 45, color: COLORS[3] },
+    { name: "Upgrades", value: 38, color: COLORS[3] },
+    { name: "Promotions", value: 28, color: COLORS[3] },
+    { name: "Add-ons", value: 18, color: COLORS[3] },
   ],
   "Others": [
-    { name: "Feedback", value: 35, color: "#6b7280" },
-    { name: "Complaints", value: 28, color: "#9ca3af" },
-    { name: "Suggestions", value: 20, color: "#d1d5db" },
+    { name: "Feedback", value: 35, color: COLORS[4] },
+    { name: "Complaints", value: 28, color: COLORS[4] },
+    { name: "Suggestions", value: 20, color: COLORS[4] },
   ],
 };
 
@@ -119,7 +135,7 @@ const CustomTreemapContent = (props: any) => {
           dominantBaseline="middle"
           fill="white"
           fontSize={fontSize}
-          fontWeight={600}
+          fontWeight="normal"
           style={{ pointerEvents: "none" }}
         >
           {name}
@@ -182,62 +198,96 @@ export function CategoryDistribution() {
         layout
         transition={{ duration: 0.3 }}
       >
-        <Card className="w-full h-full">
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-lg font-semibold">Category Distribution</CardTitle>
-            <UITooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Distribution of calls across different categories. Click on a segment to view subcategories.</p>
-              </TooltipContent>
-            </UITooltip>
-          </div>
-          <p className="text-sm text-muted-foreground">Distribution of interactions by category</p>
-        </CardHeader>
-        
-        <CardContent>
-          {isLoading ? (
-            <Skeleton className="h-[300px] w-full" />
-          ) : (
-            <>
-              <div className="h-[300px] bg-white rounded-md p-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <Treemap
-                    data={categoryData.map(item => ({ ...item, fill: item.color }))}
-                    dataKey="value"
-                    stroke="white"
-                    fill="#8b5cf6"
-                    content={<CustomTreemapContent />}
-                    onClick={(entry) => handleCategoryClick(entry.name)}
+        <AntCard
+          style={{
+            borderRadius: 12,
+            border: '1px solid #e8e8e8',
+            background: '#ffffff',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            padding: '16px 16px 16px 16px'
+          }}
+        >
+          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ marginTop: -12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Space align="center" size="middle">
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 8,
+                      background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white'
+                    }}
                   >
-                    <Tooltip content={<CustomTooltip />} />
-                  </Treemap>
-                </ResponsiveContainer>
-              </div>
-              
-              {/* Custom Legend */}
-              <div className="flex flex-wrap justify-center mt-3 gap-2">
-                {categoryData.map((category, index) => (
-                  <div 
-                    key={category.name} 
-                    className="flex items-center cursor-pointer hover:opacity-80"
-                    onClick={() => handleCategoryClick(category.name)}
-                  >
-                    <span 
-                      className="w-3 h-3 rounded-full mr-1" 
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <span className="text-sm text-muted-foreground">{category.name}</span>
+                    <PieChartIcon style={{ fontSize: 20 }} />
                   </div>
-                ))}
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                        Category Distribution
+                      </Title>
+                      <AntTooltip title="Distribution of calls across different categories. Click on a segment to view subcategories.">
+                        <div style={{ marginTop: '-4px' }}>
+                          <InfoCircleOutlined 
+                            style={{ fontSize: 14, color: '#64748b' }}
+                          />
+                        </div>
+                      </AntTooltip>
+                    </div>
+                    <Text type="secondary" style={{ fontSize: 14 }}>
+                      Distribution of interactions by category
+                    </Text>
+                  </div>
+                </Space>
               </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            </div>
+            
+            {/* Chart Content */}
+            <div style={{ marginTop: 30 }}>
+              {isLoading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : (
+                <>
+                  <div className="h-[300px] bg-white rounded-md p-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <Treemap
+                        data={categoryData.map(item => ({ ...item, fill: item.color }))}
+                        dataKey="value"
+                        stroke="white"
+                        fill="#8b5cf6"
+                        content={<CustomTreemapContent />}
+                        onClick={(entry) => handleCategoryClick(entry.name)}
+                      >
+                        <Tooltip content={<CustomTooltip />} />
+                      </Treemap>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Custom Legend */}
+                  <div className="flex flex-wrap justify-center mt-3 gap-2">
+                    {categoryData.map((category, index) => (
+                      <div 
+                        key={category.name} 
+                        className="flex items-center cursor-pointer hover:opacity-80"
+                        onClick={() => handleCategoryClick(category.name)}
+                      >
+                        <span 
+                          className="w-3 h-3 rounded-full mr-1" 
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="text-sm text-muted-foreground">{category.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </Space>
+        </AntCard>
       </motion.div>
 
       {/* Subcategory Distribution Slide */}
@@ -277,7 +327,7 @@ export function CategoryDistribution() {
               <CardContent>
                 {subcategoryData.length > 0 ? (
                   <>
-                    <ResponsiveContainer width="100%" height={280}>
+                    <ResponsiveContainer width="100%" height={250}>
                       <PieChart>
                         <Pie
                           data={subcategoryData}
@@ -314,14 +364,23 @@ export function CategoryDistribution() {
                           ))}
                         </Pie>
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend 
-                          verticalAlign="bottom" 
-                          height={36}
-                          wrapperStyle={{ paddingTop: '20px' }}
-                          formatter={(value) => <span className="text-sm text-foreground">{value}</span>}
-                        />
                       </PieChart>
                     </ResponsiveContainer>
+                    {/* Custom Legend at the bottom */}
+                    <div className="flex flex-wrap justify-center mt-6 gap-4">
+                      {subcategoryData.map((category, index) => (
+                        <div 
+                          key={category.name} 
+                          className="flex items-center"
+                        >
+                          <span 
+                            className="w-3 h-3 rounded-full mr-2" 
+                            style={{ backgroundColor: category.color }}
+                          />
+                          <span className="text-sm text-muted-foreground">{category.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </>
                 ) : (
                   <div className="h-[300px] flex items-center justify-center">

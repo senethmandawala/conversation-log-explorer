@@ -1,31 +1,35 @@
 import { useState, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
+import { 
+  Card, 
+  Typography, 
+  Button, 
+  Tooltip, 
+  Space,
+  Skeleton,
+  Table,
+  Tag
+} from "antd";
+import { 
+  PieChartOutlined,
+  InfoCircleOutlined,
+  LeftOutlined,
+  RightOutlined,
+  CloseOutlined
+} from "@ant-design/icons";
+import { 
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
-  Legend,
-  Tooltip,
+  Tooltip as RechartsTooltip,
+  Legend
 } from "recharts";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, X, Info } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import useEmblaCarousel from "embla-carousel-react";
 import { motion, AnimatePresence } from "framer-motion";
+import useEmblaCarousel from "embla-carousel-react";
+
+const { Title, Text } = Typography;
+
+const { Column } = Table;
 
 interface SlideData {
   id: number;
@@ -233,16 +237,33 @@ export function HandledCallsAnalysis() {
       const percentage = ((data.value / total) * 100).toFixed(0);
       
       return (
-        <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+        <div 
+          style={{ 
+            minWidth: 120, 
+            borderRadius: 6,
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+            border: 'none',
+            overflow: 'hidden'
+          }}
+        >
           <div 
-            className="text-sm font-semibold px-3 py-2" 
-            style={{ backgroundColor: data.color, color: "white" }}
+            style={{ 
+              fontSize: 14, 
+              fontWeight: 600, 
+              padding: '8px 12px', 
+              backgroundColor: data.color, 
+              color: 'white' 
+            }}
           >
             {data.name}
           </div>
-          <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
-            <div className="text-muted-foreground">Count: <span className="font-semibold text-foreground">{data.value}</span></div>
-            <div className="text-muted-foreground">Percentage: <span className="font-semibold text-foreground">{percentage}%</span></div>
+          <div style={{ padding: '8px 12px', backgroundColor: '#f5f5f5' }}>
+            <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
+              Count: <span style={{ fontWeight: 600, color: '#333' }}>{data.value}</span>
+            </div>
+            <div style={{ fontSize: 12, color: '#666' }}>
+              Percentage: <span style={{ fontWeight: 600, color: '#333' }}>{percentage}%</span>
+            </div>
           </div>
         </div>
       );
@@ -295,7 +316,7 @@ export function HandledCallsAnalysis() {
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Pie>
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip title={<CustomTooltip />} />
         {showLegend && (
           <Legend 
             verticalAlign="bottom" 
@@ -307,30 +328,35 @@ export function HandledCallsAnalysis() {
     </ResponsiveContainer>
   );
 
-  const renderTable = (data: TableDataItem[], onRowClick?: (label: string) => void) => (
-    <div className="max-h-[280px] overflow-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="font-semibold">Reason</TableHead>
-            <TableHead className="font-semibold text-right">Count</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((item, index) => (
-            <TableRow 
-              key={index} 
-              className={onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}
-              onClick={() => onRowClick?.(item.label)}
-            >
-              <TableCell>{item.label}</TableCell>
-              <TableCell className="text-right font-medium">{item.count}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
+  const renderTable = (data: TableDataItem[], onRowClick?: (label: string) => void) => {
+    console.log('renderTable called with data:', data);
+    console.log('renderTable data length:', data?.length);
+    
+    return (
+      <div style={{ border: '1px solid #d9d9d9', borderRadius: 8, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ backgroundColor: '#fafafa' }}>
+              <th style={{ fontWeight: 600, padding: '12px', textAlign: 'left', borderBottom: '1px solid #d9d9d9' }}>Reason</th>
+              <th style={{ fontWeight: 600, padding: '12px', textAlign: 'right', borderBottom: '1px solid #d9d9d9' }}>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item, index) => (
+              <tr 
+                key={index} 
+                style={{ cursor: onRowClick ? 'pointer' : 'default', borderBottom: '1px solid #f0f0f0' }}
+                onClick={() => onRowClick?.(item.label)}
+              >
+                <td style={{ padding: '12px' }}>{item.label}</td>
+                <td style={{ padding: '12px', textAlign: 'right', fontWeight: 500 }}>{item.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   const renderSlideContent = (slide: SlideData) => {
     if (isLoading) {
@@ -352,7 +378,10 @@ export function HandledCallsAnalysis() {
       }
       
       case 3: {
+        console.log('Slide 3 - selectedType:', selectedType);
+        console.log('Slide 3 - available keys:', Object.keys(slide3DataMap));
         const data = slide3DataMap[selectedType];
+        console.log('Slide 3 - found data:', data);
         if (!data) return null;
         return renderTable(data, handlePrioritySelected);
       }
@@ -366,24 +395,56 @@ export function HandledCallsAnalysis() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-lg font-semibold">Handled Calls Analysis</CardTitle>
-          <UITooltip>
-            <TooltipTrigger asChild>
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Click on chart segments to drill down into details</p>
-            </TooltipContent>
-          </UITooltip>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <PieChartOutlined style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    Handled Calls Analysis
+                  </Title>
+                  <Tooltip title="Click on chart segments to drill down into details">
+                    <div style={{ marginTop: '-4px' }}>
+                      <InfoCircleOutlined 
+                        style={{ fontSize: 14, color: '#64748b' }}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Distribution of handled calls by status
+                </Text>
+              </div>
+            </Space>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">Distribution of handled calls by status</p>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="relative">
+        
+        {/* Chart Content */}
+        <div style={{ marginTop: 30 }}>
           {/* Carousel */}
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
@@ -410,13 +471,11 @@ export function HandledCallsAnalysis() {
                         </div>
                         {slide.id > 1 && (
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
+                            type="text"
+                            icon={<CloseOutlined />}
                             onClick={() => closeSlide(slide.id)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                            style={{ height: 32, width: 32 }}
+                          />
                         )}
                       </div>
                       
@@ -433,27 +492,23 @@ export function HandledCallsAnalysis() {
           {slides.length > 1 && (
             <div className="flex justify-between mt-4">
               <Button
-                variant="outline"
-                size="sm"
+                type="default"
+                icon={<LeftOutlined />}
                 onClick={scrollPrev}
-                className="gap-1"
               >
-                <ChevronLeft className="h-4 w-4" />
                 Prev
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                type="default"
+                icon={<RightOutlined />}
                 onClick={scrollNext}
-                className="gap-1"
               >
                 Next
-                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           )}
         </div>
-      </CardContent>
+      </Space>
     </Card>
   );
 }

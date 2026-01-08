@@ -1,9 +1,20 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Filter } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Card, 
+  Typography, 
+  ConfigProvider,
+  Button, 
+  Badge,
+  Space,
+  Skeleton,
+  DatePicker
+} from "antd";
+import { 
+  ArrowLeftOutlined, 
+  ClockCircleOutlined, 
+  FilterOutlined
+} from "@ant-design/icons";
 import {
   LineChart,
   Line,
@@ -14,14 +25,16 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { CustomChartTooltip } from "@/components/ui/custom-chart-tooltip";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
-import { DateRangeFilter } from "@/components/conversation/DateRangeFilter";
-import { DateRangeValue } from "@/types/conversation";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+
+interface DateRangeValue {
+  type: string;
+  from: Date | null;
+  to: Date | null;
+  displayValue: string;
+}
 
 interface CallDurationData {
   date: string;
@@ -52,7 +65,7 @@ export default function ReportAverageCallDuration({ onBack }: ReportAverageCallD
   const [isLoading, setIsLoading] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [numberOfFilters, setNumberOfFilters] = useState(0);
-  const [dateRange, setDateRange] = useState<DateRangeValue | null>(null);
+  const [dateRange, setDateRange] = useState<[any, any] | null>(null);
 
   useEffect(() => {
     // Update filter count
@@ -67,127 +80,207 @@ export default function ReportAverageCallDuration({ onBack }: ReportAverageCallD
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 space-y-6"
-    >
-      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="pb-4 border-b border-border/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBack}
-                className="h-10 w-10 rounded-xl"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-600/5 border border-indigo-500/20 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-indigo-500" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-semibold tracking-tight">
-                  Average Call Duration Report
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Analyze category-wise average call duration over time
-                </p>
-              </div>
-            </div>
-            <Button
-              variant={filtersOpen ? "default" : "outline"}
-              size="icon"
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className="relative h-9 w-9"
-            >
-              <Filter className="h-4 w-4" />
-              {numberOfFilters > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                  {numberOfFilters}
-                </Badge>
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-6">
-          {/* Collapsible Filters */}
-          <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-            <CollapsibleContent className="space-y-4">
-              <div className="flex flex-wrap gap-3 items-center p-4 bg-muted/30 rounded-lg border border-border/50">
-                <div className="min-w-[200px]">
-                  <DateRangeFilter 
-                    value={dateRange} 
-                    onChange={setDateRange} 
-                  />
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+  // Custom tooltip for the chart
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{ 
+          backgroundColor: 'white', 
+          padding: '12px', 
+          border: '1px solid #e2e8f0', 
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+        }}>
+          <p style={{ margin: 0, fontWeight: 600, marginBottom: '8px' }}>{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ 
+              margin: 0, 
+              color: entry.color,
+              fontSize: '12px'
+            }}>
+              {entry.name}: {formatDuration(entry.value)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
 
-          {/* Chart */}
-          {isLoading ? (
-            <Skeleton className="h-[400px] w-full" />
-          ) : (
-            <div className="h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={mockDurationData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
-                  <XAxis dataKey="date" className="text-xs" />
-                  <YAxis
-                    className="text-xs"
-                    tickFormatter={(value) => `${value}s`}
-                    label={{ value: 'Average Duration (seconds)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+  return (
+    <ConfigProvider
+      theme={{
+        components: {
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card
+            style={{ 
+              borderRadius: 12, 
+              border: '1px solid #e2e8f0'
+            }}
+            styles={{ 
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={onBack}
+                    style={{ 
+                      borderRadius: 8,
+                      height: 40,
+                      width: 40
+                    }}
                   />
-                  <Tooltip
-                    content={<CustomChartTooltip />}
-                    formatter={(value: number) => [formatDuration(value), '']}
+                  <div 
+                    style={{ 
+                      width: 40, 
+                      height: 40, 
+                      borderRadius: 8, 
+                      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <ClockCircleOutlined style={{ color: 'white', fontSize: 20 }} />
+                  </div>
+                  <div>
+                    <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Average Call Duration Report</Title>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                      Analyze category-wise average call duration over time
+                    </Text>
+                  </div>
+                </div>
+                <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
+                  <Button 
+                    type={filtersOpen ? "primary" : "default"}
+                    icon={<FilterOutlined />}
+                    onClick={() => setFiltersOpen(!filtersOpen)}
+                    style={{ borderRadius: 8 }}
                   />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="balanceInquiry"
-                    stroke={COLORS[0]}
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name="Balance Inquiry"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="fundTransfer"
-                    stroke={COLORS[1]}
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name="Fund Transfer"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="billPayment"
-                    stroke={COLORS[2]}
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name="Bill Payment"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="cardServices"
-                    stroke={COLORS[3]}
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    name="Card Services"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+                </Badge>
+              </div>
+            }
+          >
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              {/* Collapsible Filters */}
+              <AnimatePresence>
+                {filtersOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <Card
+                      size="small"
+                      style={{ 
+                        background: '#f8fafc', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12
+                      }}
+                      styles={{ body: { padding: 16 } }}
+                    >
+                      <RangePicker 
+                        style={{ minWidth: 200 }}
+                        value={dateRange}
+                        onChange={(dates) => setDateRange(dates)}
+                      />
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Chart */}
+              {isLoading ? (
+                <Skeleton.Input active block style={{ height: 400 }} />
+              ) : (
+                <div style={{ height: 400, width: '100%' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={mockDurationData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 12 }}
+                        stroke="#6b7280"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12 }}
+                        stroke="#6b7280"
+                        tickFormatter={(value) => `${value}s`}
+                        label={{ 
+                          value: 'Average Duration (seconds)', 
+                          angle: -90, 
+                          position: 'insideLeft', 
+                          style: { textAnchor: 'middle', fontSize: 12, fill: '#6b7280' } 
+                        }}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: '20px' }}
+                        iconType="circle"
+                        formatter={(value, entry) => (
+                          <span style={{ color: '#000' }}>{value}</span>
+                        )}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="balanceInquiry"
+                        stroke={COLORS[0]}
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: COLORS[0] }}
+                        name="Balance Inquiry"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="fundTransfer"
+                        stroke={COLORS[1]}
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: COLORS[1] }}
+                        name="Fund Transfer"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="billPayment"
+                        stroke={COLORS[2]}
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: COLORS[2] }}
+                        name="Bill Payment"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="cardServices"
+                        stroke={COLORS[3]}
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: COLORS[3] }}
+                        name="Card Services"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </Space>
+          </Card>
+        </motion.div>
+      </div>
+    </ConfigProvider>
   );
 }

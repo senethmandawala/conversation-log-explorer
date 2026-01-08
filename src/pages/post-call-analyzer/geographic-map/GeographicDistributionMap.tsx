@@ -1,21 +1,29 @@
 import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import { ArrowLeft, Filter, Calendar, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+import { 
+  Card, 
+  Table, 
+  Button, 
+  Select, 
+  DatePicker, 
+  Tag, 
+  Space, 
+  Row, 
+  Col, 
+  Typography,
+  Skeleton,
+  ConfigProvider
+} from "antd";
+import { 
+  ArrowLeftOutlined,
+  FilterOutlined,
+  CalendarOutlined,
+  GlobalOutlined,
+  SearchOutlined
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
+import { StatCard } from "@/components/ui/stat-card";
 
 // Mock data for map locations
 const mockMapData = [
@@ -71,9 +79,19 @@ const mockMapData = [
   }
 ];
 
-const categoryColors: Record<string, string> = {
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+
+const callTypes = [
+  { value: "all", label: "All Call Types" },
+  { value: "home", label: "Home" },
+  { value: "mobile", label: "Mobile" },
+  { value: "unknown", label: "Unknown" },
+];
+
+const categoryColors = {
   "Billing": "#FF5733",
-  "Technical": "#33A8FF",
+  "Technical": "#33A8FF", 
   "Customer Service": "#4CAF50",
   "Network": "#FFC300"
 };
@@ -81,13 +99,18 @@ const categoryColors: Record<string, string> = {
 export default function GeographicDistributionMap() {
   const { setSelectedTab } = usePostCall();
   const [loading, setLoading] = useState(false);
-  const [panelOpenState, setPanelOpenState] = useState(false);
-  const [numberOfFilters, setNumberOfFilters] = useState(0);
-  const [selectedCallType, setSelectedCallType] = useState<string>("");
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [selectedCallType, setSelectedCallType] = useState<string | undefined>(undefined);
   const [errorLoading, setErrorLoading] = useState(false);
   const [emptyData, setEmptyData] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+
+  const activeFiltersCount = [selectedCallType].filter(Boolean).length;
+
+  const clearAllFilters = () => {
+    setSelectedCallType(undefined);
+  };
 
   useEffect(() => {
     return () => {
@@ -99,11 +122,6 @@ export default function GeographicDistributionMap() {
     };
   }, []);
 
-  useEffect(() => {
-    let count = 0;
-    if (selectedCallType) count++;
-    setNumberOfFilters(count);
-  }, [selectedCallType]);
 
   useEffect(() => {
     // Load Leaflet and D3 from CDN
@@ -268,10 +286,6 @@ export default function GeographicDistributionMap() {
     });
   };
 
-  const toggleFilters = () => {
-    setPanelOpenState(!panelOpenState);
-  };
-
   const searchFilterData = () => {
     setLoading(true);
     setTimeout(() => {
@@ -285,110 +299,150 @@ export default function GeographicDistributionMap() {
   };
 
   return (
-    <>
-      <style>{`
-        .pie-chart-marker {
-          background: transparent !important;
-          border: none !important;
-        }
-        .leaflet-popup-content-wrapper {
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .leaflet-popup-tip {
-          background: white;
-        }
-      `}</style>
-      
-      <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+          Select: {
+            borderRadius: 8,
+          },
+          Button: {
+            borderRadius: 8,
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            styles={{
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center gap-3">
+                <Button 
+                  type="text" 
+                  icon={<ArrowLeftOutlined />} 
                   onClick={() => setSelectedTab("reports")}
-                  className="h-9 w-9 shrink-0"
+                  style={{ marginRight: 8 }}
+                />
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                  }}
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
+                  <GlobalOutlined style={{ color: 'white', fontSize: 20 }} />
+                </div>
                 <div>
-                  <CardTitle className="text-xl font-semibold">
-                    Geographic Distribution Map
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Geographic Distribution Map</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
                     Visualize call volume and issue distribution across different geographic locations
-                  </p>
+                  </Text>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={panelOpenState ? "default" : "outline"}
-                  size="icon"
-                  onClick={toggleFilters}
-                  className="relative h-9 w-9"
+            }
+            extra={
+              <Space>
+                <Button 
+                  type={filtersVisible ? "primary" : "default"}
+                  icon={<FilterOutlined />}
+                  onClick={() => setFiltersVisible(!filtersVisible)}
                 >
-                  <Filter className="h-4 w-4" />
-                  {numberOfFilters > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
-                      {numberOfFilters}
-                    </span>
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <Tag color="red" style={{ marginLeft: 8, borderRadius: 10 }}>{activeFiltersCount}</Tag>
                   )}
                 </Button>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-6">
-            <Collapsible open={panelOpenState} onOpenChange={setPanelOpenState}>
-              <CollapsibleContent>
+              </Space>
+            }
+          >
+            {/* Filters Panel */}
+            <AnimatePresence>
+              {filtersVisible && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ 
-                    opacity: panelOpenState ? 1 : 0, 
-                    height: panelOpenState ? "auto" : 0 
-                  }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="mb-6 p-4 border border-border/50 rounded-lg bg-muted/30"
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-                      <Button variant="outline" className="w-full justify-start gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Select dates
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Call Type</label>
-                      <Select value={selectedCallType} onValueChange={setSelectedCallType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Call Types" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Call Types</SelectItem>
-                          <SelectItem value="home">Home</SelectItem>
-                          <SelectItem value="mobile">Mobile</SelectItem>
-                          <SelectItem value="unknown">Unknown</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button
-                        onClick={searchFilterData}
-                        className="w-full rounded-full"
-                      >
-                        Search
-                      </Button>
-                    </div>
-                  </div>
+                  <Card
+                    size="small"
+                    style={{ 
+                      marginBottom: 20, 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12
+                    }}
+                    styles={{ body: { padding: 16 } }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={12} lg={8}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
+                          <RangePicker style={{ width: '100%' }} />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={8}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Select
+                            placeholder="All Call Types"
+                            style={{ width: '100%' }}
+                            allowClear
+                            value={selectedCallType}
+                            onChange={setSelectedCallType}
+                            options={callTypes}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={8} className="flex items-end">
+                        <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                          <Button onClick={clearAllFilters}>Clear</Button>
+                          <Button type="primary" onClick={searchFilterData}>Search</Button>
+                        </Space>
+                      </Col>
+                    </Row>
+                  </Card>
                 </motion.div>
-              </CollapsibleContent>
-            </Collapsible>
+              )}
+            </AnimatePresence>
+
+            <style>{`
+              .pie-chart-marker {
+                background: transparent !important;
+                border: none !important;
+              }
+              .leaflet-popup-content-wrapper {
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+              }
+              .leaflet-popup-tip {
+                background: white;
+              }
+            `}</style>
 
             {/* Map Container */}
             <div className="mt-6">
@@ -406,7 +460,7 @@ export default function GeographicDistributionMap() {
               ) : emptyData ? (
                 <div className="flex items-center justify-center h-[600px] border border-border/50 rounded-lg bg-muted/20">
                   <div className="text-center text-muted-foreground">
-                    <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <GlobalOutlined className="h-12 w-12 mx-auto mb-4 opacity-50" style={{ fontSize: 48, color: '#94a3b8' }} />
                     <p className="text-lg font-medium mb-2">No data available</p>
                     <p className="text-sm">There is no geographic data available for the selected filters.</p>
                   </div>
@@ -447,11 +501,11 @@ export default function GeographicDistributionMap() {
                 </div>
               </motion.div>
             )}
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }
 

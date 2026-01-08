@@ -1,18 +1,23 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info } from "lucide-react";
-import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Card, 
+  Typography, 
+  Space, 
+  Skeleton,
+  Tooltip
+} from "antd";
+import { 
+  ShareAltOutlined,
+  InfoCircleOutlined
+} from "@ant-design/icons";
 import {
   Sankey,
   Layer,
   Rectangle,
   ResponsiveContainer,
 } from "recharts";
+
+const { Title, Text } = Typography;
 
 interface SankeyNode {
   name: string;
@@ -28,8 +33,6 @@ interface SankeyData {
   nodes: SankeyNode[];
   links: SankeyLink[];
 }
-
-// Mock Sankey data for call flow visualization
 const sankeyData: SankeyData = {
   nodes: [
     // Source nodes (Level 0)
@@ -111,14 +114,18 @@ const CustomNode = ({ x, y, width, height, index, payload, onMouseEnter, onMouse
         height={height}
         fill={COLORS[index % COLORS.length]}
         fillOpacity="0.9"
-        rx={4}
-        ry={4}
-        className="cursor-move hover:fill-opacity-100 transition-all"
+        rx={6}
+        ry={6}
+        className="cursor-move hover:fill-opacity-100 transition-all duration-200"
+        style={{
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+          transition: 'all 0.2s ease-in-out'
+        }}
         onMouseDown={(e) => onMouseDown?.(e, index, payload)}
         onMouseEnter={(e) => onMouseEnter?.(e, index, payload)}
         onMouseLeave={onMouseLeave}
       />
-      {/* External label only */}
+      {/* External label with Bootstrap styling */}
       <text
         textAnchor="middle"
         x={x + width / 2}
@@ -127,6 +134,11 @@ const CustomNode = ({ x, y, width, height, index, payload, onMouseEnter, onMouse
         fill="#374151"
         fontWeight="600"
         pointerEvents="none"
+        className="text-xs font-semibold"
+        style={{
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+        }}
       >
         {payload.name}
       </text>
@@ -157,32 +169,53 @@ const CustomLink = ({
   source,
   target,
   value,
-}: CustomLinkProps & { source?: number; target?: number; value?: number }) => {
+  setTooltipData,
+}: CustomLinkProps & { source?: number; target?: number; value?: number; setTooltipData: (data: { x: number; y: number; content: React.ReactNode } | null) => void }) => {
   const showTooltip = (e: React.MouseEvent) => {
     const content = (
-      <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+      <div 
+        style={{ 
+          minWidth: 140, 
+          borderRadius: 8,
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
+          border: '1px solid rgba(0, 0, 0, 0.05)',
+          overflow: 'hidden',
+          backdropFilter: 'blur(8px)'
+        }}
+        className="bg-white"
+      >
         <div 
-          className="text-sm font-semibold px-3 py-2" 
-          style={{ backgroundColor: COLORS[0], color: "white" }}
+          style={{ 
+            fontSize: 14, 
+            fontWeight: 600, 
+            padding: '10px 14px', 
+            backgroundColor: COLORS[0], 
+            color: 'white',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
+          className="font-semibold"
         >
           Call Flow
         </div>
-        <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
-          <div className="text-muted-foreground">
-            From: <span className="font-semibold text-foreground">{sankeyData.nodes[source || 0].name}</span>
+        <div style={{ padding: '10px 14px', backgroundColor: '#ffffff' }}>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }} className="text-muted">
+            From: <span style={{ fontWeight: 600, color: '#111827', marginLeft: 4 }} className="text-dark font-semibold">{sankeyData.nodes[source || 0].name}</span>
           </div>
-          <div className="text-muted-foreground">
-            To: <span className="font-semibold text-foreground">{sankeyData.nodes[target || 0].name}</span>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }} className="text-muted">
+            To: <span style={{ fontWeight: 600, color: '#111827', marginLeft: 4 }} className="text-dark font-semibold">{sankeyData.nodes[target || 0].name}</span>
           </div>
-          <div className="text-muted-foreground">
-            Count: <span className="font-semibold text-foreground">{value}</span>
+          <div style={{ fontSize: 12, color: '#6b7280' }} className="text-muted">
+            Count: <span style={{ fontWeight: 600, color: '#111827', marginLeft: 4 }} className="text-dark font-semibold">{value}</span>
           </div>
         </div>
       </div>
     );
     
-    const event = e as any;
-    event.target?.dispatchEvent(new CustomEvent('show-tooltip', { detail: content }));
+    setTooltipData({
+      x: e.clientX,
+      y: e.clientY,
+      content
+    });
   };
 
   return (
@@ -223,6 +256,16 @@ const createCustomNode = (handlers: {
   );
 };
 
+// Create a wrapped CustomLink that receives setTooltipData
+const createCustomLink = (setTooltipData: (data: { x: number; y: number; content: React.ReactNode } | null) => void) => {
+  return (props: CustomLinkProps & { source?: number; target?: number; value?: number }) => (
+    <CustomLink
+      {...props}
+      setTooltipData={setTooltipData}
+    />
+  );
+};
+
 export function AutopilotSankeyChart() {
   const [isLoading, setIsLoading] = useState(false);
   const [tooltipData, setTooltipData] = useState<{
@@ -235,16 +278,29 @@ export function AutopilotSankeyChart() {
 
   const handleNodeMouseEnter = (e: React.MouseEvent, index: number, payload: SankeyNode) => {
     const content = (
-      <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+      <div 
+        style={{ 
+          minWidth: 120, 
+          borderRadius: 6,
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+          border: 'none',
+          overflow: 'hidden'
+        }}
+      >
         <div 
-          className="text-sm font-semibold px-3 py-2" 
-          style={{ backgroundColor: COLORS[index % COLORS.length], color: "white" }}
+          style={{ 
+            fontSize: 14, 
+            fontWeight: 600, 
+            padding: '8px 12px', 
+            backgroundColor: COLORS[index % COLORS.length], 
+            color: 'white' 
+          }}
         >
           {payload.name}
         </div>
-        <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
-          <div className="text-muted-foreground">
-            Total Flow: <span className="font-semibold text-foreground">N/A</span>
+        <div style={{ padding: '8px 12px', backgroundColor: '#f5f5f5' }}>
+          <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
+            Total Flow: <span style={{ fontWeight: 600, color: '#333' }}>N/A</span>
           </div>
         </div>
       </div>
@@ -270,16 +326,29 @@ export function AutopilotSankeyChart() {
   const handleGlobalMouseMove = (e: MouseEvent) => {
     if (isDragging && draggedNode) {
       const content = (
-        <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+        <div 
+          style={{ 
+            minWidth: 120, 
+            borderRadius: 6,
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+            border: 'none',
+            overflow: 'hidden'
+          }}
+        >
           <div 
-            className="text-sm font-semibold px-3 py-2" 
-            style={{ backgroundColor: COLORS[draggedNode.index % COLORS.length], color: "white" }}
+            style={{ 
+              fontSize: 14, 
+              fontWeight: 600, 
+              padding: '8px 12px', 
+              backgroundColor: COLORS[draggedNode.index % COLORS.length], 
+              color: 'white' 
+            }}
           >
             {draggedNode.payload.name}
           </div>
-          <div className="bg-muted px-3 py-2 text-sm space-y-0.5">
-            <div className="text-muted-foreground">
-              Position: <span className="font-semibold text-foreground">({e.clientX}, {e.clientY})</span>
+          <div style={{ padding: '8px 12px', backgroundColor: '#f5f5f5' }}>
+            <div style={{ fontSize: 12, color: '#666' }}>
+              Position: <span style={{ fontWeight: 600, color: '#333' }}>({e.clientX}, {e.clientY})</span>
             </div>
           </div>
         </div>
@@ -305,10 +374,12 @@ export function AutopilotSankeyChart() {
   };
 
   const WrappedCustomNode = createCustomNode({
-  onMouseEnter: handleNodeMouseEnter,
-  onMouseLeave: handleNodeMouseLeave,
-  onMouseDown: handleNodeMouseDown,
-});
+    onMouseEnter: handleNodeMouseEnter,
+    onMouseLeave: handleNodeMouseLeave,
+    onMouseDown: handleNodeMouseDown,
+  });
+
+  const WrappedCustomLink = createCustomLink(setTooltipData);
 
 React.useEffect(() => {
     const handleShowTooltip = (e: Event) => {
@@ -338,57 +409,93 @@ React.useEffect(() => {
   }, [tooltipData, isDragging, draggedNode, handleGlobalMouseMove, handleGlobalMouseUp]);
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-lg font-semibold">Call Flow Analysis</CardTitle>
-          <UITooltip>
-            <TooltipTrigger asChild>
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Visualizes the flow of calls through different stages of the autopilot system</p>
-            </TooltipContent>
-          </UITooltip>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <ShareAltOutlined style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    Call Flow Analysis
+                  </Title>
+                  <Tooltip title="Visualizes the flow of calls through different stages of the autopilot system">
+                    <div style={{ marginTop: '-4px' }}>
+                      <InfoCircleOutlined 
+                        style={{ fontSize: 14, color: '#64748b' }}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Flow of calls through the autopilot system
+                </Text>
+              </div>
+            </Space>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">Flow of calls through the autopilot system</p>
-      </CardHeader>
-      
-      <CardContent>
-        {isLoading ? (
-          <Skeleton className="h-[400px] w-full" />
-        ) : (
-          <div className="overflow-x-auto">
-            <div className="min-w-[800px]">
-              <ResponsiveContainer width="100%" height={450}>
-                <Sankey
-                  data={sankeyData}
-                  nodePadding={60}
-                  nodeWidth={12}
-                  margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
-                  link={CustomLink}
-                  node={WrappedCustomNode}
-                >
-                </Sankey>
-              </ResponsiveContainer>
+
+        {/* Chart Content */}
+        <div style={{ marginTop: 30 }}>
+          {isLoading ? (
+            <Skeleton className="h-[400px] w-full" />
+          ) : (
+            <div className="overflow-x-auto">
+              <div style={{ minWidth: '900px', height: '450px' }}>
+                <ResponsiveContainer width="100%" height={450}>
+                  <Sankey
+                    data={sankeyData}
+                    nodePadding={60}
+                    nodeWidth={12}
+                    margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
+                    link={WrappedCustomLink}
+                    node={WrappedCustomNode}
+                  >
+                  </Sankey>
+                </ResponsiveContainer>
+              </div>
             </div>
+          )}
+        </div>
+
+        {/* Custom Tooltip */}
+        {tooltipData && (
+          <div
+            style={{
+              position: 'fixed',
+              zIndex: 50,
+              pointerEvents: 'none',
+              left: tooltipData.x + 10,
+              top: tooltipData.y - 10,
+              transform: 'translate(-50%, -100%)',
+            }}
+          >
+            {tooltipData.content}
           </div>
         )}
-      </CardContent>
-      
-      {/* Custom Tooltip */}
-      {tooltipData && (
-        <div
-          className="fixed z-50 pointer-events-none"
-          style={{
-            left: tooltipData.x + 10,
-            top: tooltipData.y - 10,
-            transform: 'translate(-50%, -100%)'
-          }}
-        >
-          {tooltipData.content}
-        </div>
-      )}
+      </Space>
     </Card>
   );
 }

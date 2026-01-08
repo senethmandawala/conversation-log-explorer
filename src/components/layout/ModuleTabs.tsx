@@ -83,8 +83,17 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
       <div className="flex items-center justify-between">
         {/* Module Title - Left */}
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
-            <ModuleIcon className="h-5 w-5 text-primary" />
+          <div 
+            style={{ 
+              padding: '10px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <ModuleIcon style={{ color: '#3b82f6', fontSize: 20 }} />
           </div>
           <div>
             <h1 className="text-lg font-semibold text-foreground tracking-tight">{moduleTitle}</h1>

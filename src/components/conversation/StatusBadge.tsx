@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
-type BadgeVariant = "success" | "warning" | "destructive" | "info" | "default";
+type BadgeVariant = "success" | "warning" | "destructive" | "info" | "default" | "primary";
 
 interface StatusBadgeProps {
   label: string;
@@ -14,6 +14,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   destructive: "bg-destructive/15 text-destructive border-destructive/30",
   info: "bg-info/15 text-info border-info/30",
   default: "bg-muted text-muted-foreground border-border/50",
+  primary: "bg-blue-100 text-blue-700 border-blue-300",
 };
 
 export function StatusBadge({ label, variant = "default" }: StatusBadgeProps) {
@@ -30,6 +31,7 @@ export function StatusBadge({ label, variant = "default" }: StatusBadgeProps) {
         variant === "warning" && "bg-warning",
         variant === "destructive" && "bg-destructive",
         variant === "info" && "bg-info",
+        variant === "primary" && "bg-blue-500",
         variant === "default" && "bg-muted-foreground"
       )} />
       {label}

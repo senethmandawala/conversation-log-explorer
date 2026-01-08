@@ -35,7 +35,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import "@/components/ui/status-badge.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { CallLogDetails } from "@/components/post-call/CallLogDetails";
+import { CallLogDetails } from "./CallLogDetails";
 import { useColumnConfig } from "@/hooks/useColumnConfig";
 import { ColumnToggle } from "@/components/ui/column-toggle";
 import type { ColumnsType } from "antd/es/table";
@@ -166,23 +166,9 @@ export default function CallInsight() {
             title: col.label,
             dataIndex: 'agentName',
             key: 'agent',
+            align: 'center' as const,
             render: (text: string) => (
-              <Space>
-                <div 
-                  style={{ 
-                    width: 32, 
-                    height: 32, 
-                    borderRadius: '50%', 
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <UserOutlined style={{ color: 'white', fontSize: 14 }} />
-                </div>
-                <Text strong>{text}</Text>
-              </Space>
+              <Text strong style={{ fontFamily: 'Geist, sans-serif' }}>{text}</Text>
             ),
           };
           
@@ -314,6 +300,35 @@ export default function CallInsight() {
             },
           };
           
+        case 'actions':
+          return {
+            title: (
+              <ColumnToggle 
+                columns={columnConfig} 
+                onToggle={toggleColumnVisibility} 
+                onReset={resetToDefault}
+              />
+            ),
+            key: 'actions',
+            width: 60,
+            fixed: 'right' as const,
+            align: 'center' as const,
+            render: (_, record) => (
+              <Tooltip title="View Details">
+                <Button 
+                  type="text" 
+                  icon={<EyeOutlined />}
+                  onClick={() => setSelectedCall(record)}
+                  style={{ 
+                    borderRadius: 8,
+                    transition: 'all 0.2s'
+                  }}
+                  className="hover:bg-primary/10 hover:text-primary"
+                />
+              </Tooltip>
+            ),
+          };
+          
         default:
           return {
             title: col.label,
@@ -323,34 +338,6 @@ export default function CallInsight() {
             render: (text: any) => <Text>{text || 'N/A'}</Text>,
           };
       }
-    });
-    
-    // Add actions column at the end
-    baseColumns.push({
-      title: (
-        <ColumnToggle 
-          columns={columnConfig} 
-          onToggle={toggleColumnVisibility} 
-          onReset={resetToDefault}
-        />
-      ),
-      key: 'actions',
-      width: 60,
-      fixed: 'right' as const,
-      render: (_, record) => (
-        <Tooltip title="View Details">
-          <Button 
-            type="text" 
-            icon={<EyeOutlined />}
-            onClick={() => setSelectedCall(record)}
-            style={{ 
-              borderRadius: 8,
-              transition: 'all 0.2s'
-            }}
-            className="hover:bg-primary/10 hover:text-primary"
-          />
-        </Tooltip>
-      ),
     });
     
     return baseColumns;

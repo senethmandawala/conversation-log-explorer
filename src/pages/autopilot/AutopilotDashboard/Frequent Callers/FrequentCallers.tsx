@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, X } from "lucide-react";
+import { Info, X, Users } from "lucide-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -22,6 +22,21 @@ import {
   Legend,
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Card as AntCard, 
+  Typography, 
+  Space, 
+  Tooltip as AntTooltip
+} from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
+
+// Get colors from environment configuration
+const COLORS = (window as any).env_vars?.colors || [
+  '#FB6767', '#5766BC', '#62B766', '#FBA322', '#E83B76', 
+  '#3EA1F0', '#98C861', '#FB6C3E', '#24B1F1', '#D0DD52'
+];
 
 interface CallerData {
   name: string;
@@ -37,45 +52,44 @@ interface CategoryData {
 
 // Mock frequent callers data
 const callersData: CallerData[] = [
-  { name: "****5678", value: 12, color: "#3b82f6" },
-  { name: "****1234", value: 8, color: "#3b82f6" },
-  { name: "****9012", value: 6, color: "#3b82f6" },
-  { name: "****3456", value: 5, color: "#3b82f6" },
-  { name: "****7890", value: 4, color: "#3b82f6" },
+  { name: "****5678", value: 12, color: COLORS[0] },
+  { name: "****1234", value: 8, color: COLORS[0] },
+  { name: "****9012", value: 6, color: COLORS[0] },
+  { name: "****3456", value: 5, color: COLORS[0] },
+  { name: "****7890", value: 4, color: COLORS[0] },
 ];
 
 // Mock category breakdown data for each caller
 const categoryBreakdownMap: Record<string, CategoryData[]> = {
   "****5678": [
-    { name: "Payment Issues", value: 5, color: "#ef4444" },
-    { name: "Account Inquiry", value: 3, color: "#f97316" },
-    { name: "Technical Support", value: 2, color: "#eab308" },
-    { name: "General Info", value: 2, color: "#84cc16" },
+    { name: "Payment Issues", value: 5, color: COLORS[1] },
+    { name: "Account Inquiry", value: 3, color: COLORS[2] },
+    { name: "Technical Support", value: 2, color: COLORS[3] },
+    { name: "General Info", value: 2, color: COLORS[4] },
   ],
   "****1234": [
-    { name: "Account Inquiry", value: 4, color: "#f97316" },
-    { name: "Payment Issues", value: 2, color: "#ef4444" },
-    { name: "Technical Support", value: 1, color: "#eab308" },
-    { name: "General Info", value: 1, color: "#84cc16" },
+    { name: "Account Inquiry", value: 4, color: COLORS[2] },
+    { name: "Payment Issues", value: 2, color: COLORS[1] },
+    { name: "Technical Support", value: 1, color: COLORS[3] },
+    { name: "General Info", value: 1, color: COLORS[4] },
   ],
   "****9012": [
-    { name: "Technical Support", value: 3, color: "#eab308" },
-    { name: "Account Inquiry", value: 2, color: "#f97316" },
-    { name: "Payment Issues", value: 1, color: "#ef4444" },
+    { name: "Technical Support", value: 3, color: COLORS[3] },
+    { name: "Account Inquiry", value: 2, color: COLORS[2] },
+    { name: "Payment Issues", value: 1, color: COLORS[1] },
   ],
   "****3456": [
-    { name: "Account Inquiry", value: 3, color: "#f97316" },
-    { name: "General Info", value: 1, color: "#84cc16" },
-    { name: "Payment Issues", value: 1, color: "#ef4444" },
+    { name: "Account Inquiry", value: 3, color: COLORS[2] },
+    { name: "General Info", value: 1, color: COLORS[4] },
+    { name: "Payment Issues", value: 1, color: COLORS[1] },
   ],
   "****7890": [
-    { name: "General Info", value: 2, color: "#84cc16" },
-    { name: "Account Inquiry", value: 1, color: "#f97316" },
-    { name: "Technical Support", value: 1, color: "#eab308" },
+    { name: "General Info", value: 2, color: COLORS[4] },
+    { name: "Account Inquiry", value: 1, color: COLORS[2] },
+    { name: "Technical Support", value: 1, color: COLORS[3] },
   ],
 };
 
-const COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6"];
 
 const BarTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -185,23 +199,56 @@ export function FrequentCallers() {
         layout
         transition={{ duration: 0.3 }}
       >
-        <Card className="w-full h-full">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg font-semibold">Frequent Callers</CardTitle>
-              <UITooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Analysis of most frequent callers. Click on any bar to view detailed category breakdown.</p>
-                </TooltipContent>
-              </UITooltip>
+        <AntCard
+          style={{
+            borderRadius: 12,
+            border: '1px solid #e8e8e8',
+            background: '#ffffff',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            padding: '16px 16px 16px 16px'
+          }}
+        >
+          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ marginTop: -12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Space align="center" size="middle">
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 8,
+                      background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white'
+                    }}
+                  >
+                    <Users style={{ fontSize: 20 }} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                        Frequent Callers
+                      </Title>
+                      <AntTooltip title="Analysis of most frequent callers. Click on any bar to view detailed category breakdown.">
+                        <div style={{ marginTop: '-4px' }}>
+                          <InfoCircleOutlined 
+                            style={{ fontSize: 14, color: '#64748b' }}
+                          />
+                        </div>
+                      </AntTooltip>
+                    </div>
+                    <Text type="secondary" style={{ fontSize: 14 }}>
+                      Top callers by call volume
+                    </Text>
+                  </div>
+                </Space>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">Top callers by call volume</p>
-          </CardHeader>
-          
-          <CardContent>
+            
+            {/* Chart Content */}
+            <div style={{ marginTop: 30 }}>
             {isLoading ? (
               <Skeleton className="h-[300px] w-full" />
             ) : (
@@ -222,10 +269,10 @@ export function FrequentCallers() {
                     radius={[8, 8, 0, 0]}
                     onClick={handleBarClick}
                     style={{ cursor: 'pointer' }}
-                    label={{ position: 'top', fill: '#3b82f6', fontSize: 12, fontWeight: 600 }}
+                    label={{ position: 'inside', fill: 'white', fontSize: 11, fontWeight: 600 }}
                   >
                     {callersData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill="#3b82f6" />
+                      <Cell key={`cell-${index}`} fill={COLORS[0]} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -234,8 +281,9 @@ export function FrequentCallers() {
             <p className="text-center text-sm text-muted-foreground mt-2">
               <span className="font-medium">Phone numbers are masked for privacy</span>
             </p>
-          </CardContent>
-        </Card>
+        </div>
+      </Space>
+    </AntCard>
       </motion.div>
 
       {/* Category Breakdown Donut Chart */}

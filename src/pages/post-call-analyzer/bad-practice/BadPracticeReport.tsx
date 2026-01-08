@@ -1,51 +1,45 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { 
-  ArrowLeft,
-  Download,
-  Filter,
-  Search,
-  Calendar,
-  AlertTriangle,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Eye,
-  BarChart3,
-  Lightbulb
-} from "lucide-react";
+  Card, 
+  Table, 
+  Input, 
+  Select, 
+  DatePicker, 
+  Button, 
+  Tag, 
+  Space, 
+  Row, 
+  Col, 
+  Typography,
+  Progress,
+  Skeleton,
+  ConfigProvider,
+  Pagination
+} from "antd";
+import { 
+  ArrowLeftOutlined,
+  DownloadOutlined,
+  FilterOutlined,
+  SearchOutlined,
+  CalendarOutlined,
+  WarningOutlined,
+  UpOutlined,
+  DownOutlined,
+  LeftOutlined,
+  RightOutlined,
+  DoubleLeftOutlined,
+  DoubleRightOutlined,
+  EyeOutlined,
+  BarChartOutlined,
+  BulbOutlined
+} from "@ant-design/icons";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import type { ColumnsType } from "antd/es/table";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 import AgentCallLogs from "./AgentCallLogs";
 import ViolationWiseAnalysis from "./ViolationWiseAnalysis";
 
@@ -151,6 +145,12 @@ const mockBadPracticeData: BadPracticeRecord[] = [
   },
 ];
 
+const callTypes = [
+  { value: "all", label: "All Call Types" },
+  { value: "inbound", label: "Inbound" },
+  { value: "outbound", label: "Outbound" },
+];
+
 export default function BadPracticeReport() {
   const { setSelectedTab } = usePostCall();
   const [isLoading, setIsLoading] = useState(true);
@@ -181,9 +181,9 @@ export default function BadPracticeReport() {
   };
 
   const getScoreColor = (scoreValue: number) => {
-    if (scoreValue >= 70) return "bg-red-500/10 text-red-500 border-red-500/30";
-    if (scoreValue >= 50) return "bg-amber-500/10 text-amber-600 border-amber-500/30";
-    return "bg-green-500/10 text-green-500 border-green-500/30";
+    if (scoreValue >= 70) return "red";
+    if (scoreValue >= 50) return "orange";
+    return "green";
   };
 
   const activeFiltersCount = [selectedCallType, agentName].filter(Boolean).length;
@@ -198,374 +198,435 @@ export default function BadPracticeReport() {
     setSelectedAgent(null);
   };
 
+  // Table columns definition
+  const columns: ColumnsType<BadPracticeRecord> = [
+    {
+      title: 'Agent',
+      dataIndex: 'agent',
+      key: 'agent',
+      render: (text: string) => <Text strong>{text}</Text>,
+    },
+    {
+      title: 'Total Calls',
+      dataIndex: 'totalCalls',
+      key: 'totalCalls',
+      align: 'center' as const,
+    },
+    {
+      title: 'Most Violation Type',
+      dataIndex: 'violationType',
+      key: 'violationType',
+      render: (text: string) => (
+        <Tag color="purple" style={{ borderRadius: 6 }}>{text}</Tag>
+      ),
+    },
+    {
+      title: 'Total Violations',
+      dataIndex: 'totalViolations',
+      key: 'totalViolations',
+      align: 'center' as const,
+    },
+    {
+      title: 'Bad Practice Score',
+      dataIndex: 'score',
+      key: 'score',
+      align: 'center' as const,
+      render: (score: string, record: BadPracticeRecord) => (
+        <Tag color={getScoreColor(record.scoreValue)} style={{ borderRadius: 12, fontWeight: 600 }}>
+          {score}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      align: 'center' as const,
+      render: (_, record: BadPracticeRecord) => (
+        <Space>
+          <Button
+            type="text"
+            icon={record.expanded ? <UpOutlined /> : <DownOutlined />}
+            onClick={() => toggleRowExpand(record.id)}
+          />
+          <Button
+            type="text"
+            icon={<EyeOutlined />}
+            onClick={() => handleViewCallLogs(record.agent, record.agentId)}
+          />
+        </Space>
+      ),
+    },
+  ];
+
   // Show call logs view if selected
   if (showAgentCallLogs && selectedAgent) {
     return (
-      <>
+      <ConfigProvider
+        theme={{
+          components: {
+            Card: {
+              headerBg: 'transparent',
+            },
+          },
+        }}
+      >
         <div className="p-6">
-          <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardContent className="pt-6">
-              <AgentCallLogs
-                agentName={selectedAgent.name}
-                agentId={selectedAgent.id}
-                onBack={handleBackToReport}
-              />
-            </CardContent>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            styles={{ body: { padding: 24 } }}
+          >
+            <AgentCallLogs
+              agentName={selectedAgent.name}
+              agentId={selectedAgent.id}
+              onBack={handleBackToReport}
+            />
           </Card>
         </div>
         <AIHelper />
-      </>
+      </ConfigProvider>
     );
   }
 
   return (
-    <>
-      <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center justify-between">
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+          Select: {
+            borderRadius: 8,
+          },
+          Input: {
+            borderRadius: 8,
+          },
+          Button: {
+            borderRadius: 8,
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            styles={{
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
               <div className="flex items-center gap-3">
                 <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-9 w-9"
+                  type="text" 
+                  icon={<ArrowLeftOutlined />} 
                   onClick={() => setSelectedTab("reports")}
+                  style={{ marginRight: 8 }}
+                />
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
+                  }}
                 >
-                  <ArrowLeft className="h-9 w-9 shrink-0" />
-                </Button>
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/5 border border-red-500/20 flex items-center justify-center">
-                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                  <WarningOutlined style={{ color: 'white', fontSize: 20 }} />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-semibold tracking-tight">
-                    Bad Practice Analysis
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-0.5">
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Bad Practice Analysis</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
                     Identify and analyze agent behaviors that deviate from best practices
-                  </p>
+                  </Text>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+            }
+            extra={
+              <Space>
                 <Button 
-                  variant={filtersOpen ? "default" : "outline"} 
-                  size="sm" 
-                  className="gap-2 relative"
+                  type={filtersOpen ? "primary" : "default"}
+                  icon={<FilterOutlined />}
                   onClick={() => setFiltersOpen(!filtersOpen)}
                 >
-                  <Filter className="h-4 w-4" />
                   Filters
                   {activeFiltersCount > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                      {activeFiltersCount}
-                    </Badge>
+                    <Tag color="red" style={{ marginLeft: 8, borderRadius: 10 }}>{activeFiltersCount}</Tag>
                   )}
                 </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-              <CollapsibleContent>
+              </Space>
+            }
+          >
+            {/* Filters Panel */}
+            <AnimatePresence>
+              {filtersOpen && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
+                  animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mb-6 p-4 bg-muted/30 rounded-lg border border-border/50"
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-                      <Button variant="outline" className="w-full justify-start gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Select dates
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Agent Name</label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          placeholder="Search agent..." 
-                          className="pl-9"
-                          value={agentName}
-                          onChange={(e) => setAgentName(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Call Type</label>
-                      <Select value={selectedCallType} onValueChange={(value) => setSelectedCallType(value === "all" ? "" : value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Call Types" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Call Types</SelectItem>
-                          <SelectItem value="inbound">Inbound</SelectItem>
-                          <SelectItem value="outbound">Outbound</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button className="w-full">Search</Button>
-                    </div>
-                  </div>
-
-                  {/* <div className="flex justify-end mt-4 gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedCallType("");
-                        setAgentName("");
-                      }}
-                    >
-                      Clear All
-                    </Button>
-                  </div> */}
+                  <Card
+                    size="small"
+                    style={{ 
+                      marginBottom: 20, 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12
+                    }}
+                    styles={{ body: { padding: 16 } }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
+                          <RangePicker style={{ width: '100%' }} />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Agent Name</Text>
+                          <Input
+                            placeholder="Search agent..."
+                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            value={agentName}
+                            onChange={(e) => setAgentName(e.target.value)}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Select
+                            placeholder="All Call Types"
+                            style={{ width: '100%' }}
+                            allowClear
+                            value={selectedCallType ? selectedCallType : undefined}
+                            onChange={(value) => setSelectedCallType(value === "" ? "" : value)}
+                            options={[
+                              { value: "", label: "All Call Types" },
+                              { value: "inbound", label: "Inbound" },
+                              { value: "outbound", label: "Outbound" },
+                            ]}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6} className="flex items-end">
+                        <Button type="primary" style={{ width: '100%' }}>Search</Button>
+                      </Col>
+                    </Row>
+                  </Card>
                 </motion.div>
-              </CollapsibleContent>
-            </Collapsible>
+              )}
+            </AnimatePresence>
 
             {isLoading ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
+                  <Skeleton.Input key={i} active block style={{ height: 52 }} />
                 ))}
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Agent Wise Analysis</h3>
-                  <div className="rounded-lg border border-border/50 overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-muted/30 hover:bg-muted/30">
-                          <TableHead className="font-semibold">Agent</TableHead>
-                          <TableHead className="font-semibold text-center">Total Calls</TableHead>
-                          <TableHead className="font-semibold">Most Violation Type</TableHead>
-                          <TableHead className="font-semibold text-center">Total Violations</TableHead>
-                          <TableHead className="font-semibold text-center">Bad Practice Score</TableHead>
-                          <TableHead className="font-semibold text-center">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedData.map((record, index) => (
-                          <>
-                            <motion.tr
-                              key={record.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.03 }}
-                              className={cn(
-                                "border-b border-border/30 hover:bg-muted/20",
-                                record.expanded && "bg-muted/10"
-                              )}
-                            >
-                              <TableCell className="font-medium">{record.agent}</TableCell>
-                              <TableCell className="text-center">{record.totalCalls}</TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="bg-purple-500/10 text-purple-600 border-purple-500/30">
-                                  {record.violationType}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-center">{record.totalViolations}</TableCell>
-                              <TableCell className="text-center">
-                                <Badge variant="outline" className={getScoreColor(record.scoreValue)}>
-                                  {record.score}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <div className="flex items-center justify-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => toggleRowExpand(record.id)}
-                                  >
-                                    {record.expanded ? (
-                                      <ChevronUp className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronDown className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => handleViewCallLogs(record.agent, record.agentId)}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </motion.tr>
-                            
-                            <AnimatePresence>
-                              {record.expanded && (
-                                <motion.tr
-                                  key={`${record.id}-expanded`}
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                >
-                                  <TableCell colSpan={6} className="p-0">
-                                    <div className="p-4 bg-muted/20 border-t border-border/30">
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                          <div className="flex items-center gap-2 mb-4">
-                                            <BarChart3 className="h-4 w-4 text-amber-500" />
-                                            <h4 className="font-semibold text-sm">Violation Breakdown</h4>
-                                          </div>
-                                          <div className="space-y-3">
-                                            {record.violationBreakdown.map((violation, vIndex) => (
-                                              <div key={vIndex} className={cn(violation.isSubType && "ml-4")}>
-                                                <div className="flex justify-between items-center mb-1">
-                                                  <span className={cn(
-                                                    "text-sm",
-                                                    violation.isSubType ? "text-muted-foreground" : "font-medium"
-                                                  )}>
-                                                    {violation.isSubType ? `└ ${violation.type}` : violation.type}
-                                                  </span>
-                                                  <span className={cn(
-                                                    "text-sm",
-                                                    violation.isSubType && "text-muted-foreground"
-                                                  )}>
-                                                    {violation.count} ({violation.percentage}%)
-                                                  </span>
-                                                </div>
-                                                <Progress 
-                                                  value={violation.percentage} 
-                                                  className={cn(
-                                                    violation.isSubType ? "h-1" : "h-1.5"
-                                                  )}
-                                                />
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </div>
-
-                                        <div>
-                                          <div className="flex items-center gap-2 mb-4">
-                                            <Lightbulb className="h-4 w-4 text-primary" />
-                                            <h4 className="font-semibold text-sm">Agent Recommendations</h4>
-                                          </div>
-                                          <div className="space-y-2">
-                                            {record.violationBreakdown
-                                              .filter(v => v.suggestions && v.suggestions.length > 0)
-                                              .flatMap(v => v.suggestions || [])
-                                              .map((suggestion, sIndex) => (
-                                                <div key={sIndex} className="flex gap-2 text-sm">
-                                                  <span className="text-muted-foreground">•</span>
-                                                  <span>{suggestion.text}</span>
-                                                </div>
-                                              ))
-                                            }
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </TableCell>
-                                </motion.tr>
-                              )}
-                            </AnimatePresence>
-                          </>
-                        ))}
-                      </TableBody>
-                    </Table>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Title level={5} style={{ marginBottom: 16 }}>Agent Wise Analysis</Title>
+                  <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                  {/* Table Header */}
+                  <div style={{ display: 'flex', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569' }}>Agent</div>
+                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Total Calls</div>
+                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569' }}>Most Violation Type</div>
+                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Total Violations</div>
+                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Bad Practice Score</div>
+                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Actions</div>
                   </div>
-
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center justify-between mt-4 pt-4 border-t border-border/30"
-                  >
-                    <p className="text-sm text-muted-foreground">
-                      Showing <span className="font-medium text-foreground">{paginatedData.length}</span> of{" "}
-                      <span className="font-medium text-foreground">{totalRecords}</span> results
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(1)}
-                        disabled={currentPage === 1}
-                        className="h-9 w-9 p-0 rounded-lg"
+                  
+                  {/* Table Body with Expanded Rows */}
+                  {paginatedData.map((record, index) => (
+                    <div key={record.id}>
+                      {/* Main Row */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                        style={{ 
+                          display: 'flex',
+                          borderBottom: '1px solid #e2e8f0',
+                          backgroundColor: record.expanded ? '#fafafa' : 'transparent'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = record.expanded ? '#fafafa' : '#f8fafc'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = record.expanded ? '#fafafa' : 'transparent'}
                       >
-                        <ChevronsLeft className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="h-9 w-9 p-0 rounded-lg"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      
-                      <div className="flex items-center gap-1 mx-2">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          let pageNum;
-                          if (totalPages <= 5) {
-                            pageNum = i + 1;
-                          } else if (currentPage <= 3) {
-                            pageNum = i + 1;
-                          } else if (currentPage >= totalPages - 2) {
-                            pageNum = totalPages - 4 + i;
-                          } else {
-                            pageNum = currentPage - 2 + i;
-                          }
-                          
-                          return (
+                        <div style={{ flex: 1, padding: '12px 16px' }}>
+                          <Text strong>{record.agent}</Text>
+                        </div>
+                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                          {record.totalCalls}
+                        </div>
+                        <div style={{ flex: 1, padding: '12px 16px' }}>
+                          <Tag color="purple" style={{ borderRadius: 6 }}>{record.violationType}</Tag>
+                        </div>
+                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                          {record.totalViolations}
+                        </div>
+                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                          <Tag color={getScoreColor(record.scoreValue)} style={{ borderRadius: 12, fontWeight: 600 }}>
+                            {record.score}
+                          </Tag>
+                        </div>
+                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                          <Space>
                             <Button
-                              key={pageNum}
-                              variant={currentPage === pageNum ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => setCurrentPage(pageNum)}
-                              className={cn(
-                                "h-9 w-9 p-0 rounded-lg transition-all duration-200",
-                                currentPage === pageNum && "shadow-md"
-                              )}
-                            >
-                              {pageNum}
-                            </Button>
-                          );
-                        })}
-                      </div>
+                              type="text"
+                              icon={record.expanded ? <UpOutlined /> : <DownOutlined />}
+                              onClick={() => toggleRowExpand(record.id)}
+                            />
+                            <Button
+                              type="text"
+                              icon={<EyeOutlined />}
+                              onClick={() => handleViewCallLogs(record.agent, record.agentId)}
+                            />
+                          </Space>
+                        </div>
+                      </motion.div>
+                      
+                      {/* Expanded Content */}
+                      <AnimatePresence>
+                        {record.expanded && (
+                          <motion.div
+                            key={`${record.id}-expanded`}
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            style={{ 
+                              borderBottom: '1px solid #e2e8f0',
+                              backgroundColor: '#fafafa'
+                            }}
+                          >
+                            <div style={{ padding: '16px 24px', display: 'flex', gap: '24px' }}>
+                                <div style={{ flex: 1 }}>
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <BarChartOutlined style={{ color: '#f59e0b' }} />
+                                    <Text strong style={{ fontSize: 14 }}>Violation Breakdown</Text>
+                                  </div>
+                                  <div className="space-y-3">
+                                    {record.violationBreakdown.map((violation, vIndex) => (
+                                      <div key={vIndex} style={{ marginLeft: violation.isSubType ? 16 : 0 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                          <Text 
+                                            style={{ 
+                                              fontSize: 14,
+                                              fontWeight: violation.isSubType ? 'normal' : 500,
+                                              color: violation.isSubType ? '#94a3b8' : '#1e293b'
+                                            }}
+                                          >
+                                            {violation.isSubType ? `└ ${violation.type}` : violation.type}
+                                          </Text>
+                                          <Text 
+                                            style={{ 
+                                              fontSize: 14,
+                                              color: violation.isSubType ? '#94a3b8' : '#1e293b'
+                                            }}
+                                          >
+                                            {violation.count} ({violation.percentage}%)
+                                          </Text>
+                                        </div>
+                                        <Progress 
+                                          percent={violation.percentage} 
+                                          size="small"
+                                          style={{ margin: 0 }}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages || totalPages === 0}
-                        className="h-9 w-9 p-0 rounded-lg"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(totalPages)}
-                        disabled={currentPage === totalPages || totalPages === 0}
-                        className="h-9 w-9 p-0 rounded-lg"
-                      >
-                        <ChevronsRight className="h-4 w-4" />
-                      </Button>
+                                {/* Vertical Separator */}
+                                <div style={{ 
+                                  width: '2px', 
+                                  background: '#e2e8f0',
+                                  alignSelf: 'stretch'
+                                }} />
+
+                                <div style={{ flex: 1 }}>
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <BulbOutlined style={{ color: '#6366f1' }} />
+                                    <Text strong style={{ fontSize: 14 }}>Agent Recommendations</Text>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {record.violationBreakdown
+                                      .filter(v => v.suggestions && v.suggestions.length > 0)
+                                      .flatMap(v => v.suggestions || [])
+                                      .map((suggestion, sIndex) => (
+                                        <div key={sIndex} style={{ display: 'flex', gap: 8, fontSize: 14 }}>
+                                          <Text type="secondary">•</Text>
+                                          <Text>{suggestion.text}</Text>
+                                        </div>
+                                      ))
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
-                  </motion.div>
+                  ))}
                 </div>
+                
+                {/* Exact CallInsight Pagination - No Table Wrapper */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                  <Pagination
+                    total={totalRecords}
+                    pageSize={pageSize}
+                    showTotal={(total, range) => (
+                      <Text type="secondary">
+                        Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
+                      </Text>
+                    )}
+                    showSizeChanger={true}
+                    pageSizeOptions={['5', '8', '10', '20']}
+                    current={currentPage}
+                    onChange={(page) => setCurrentPage(page)}
+                    onShowSizeChange={(current, size) => {
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+                </motion.div>
 
                 {/* Violation-wise Analysis Section */}
-                <ViolationWiseAnalysis />
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <ViolationWiseAnalysis />
+                </motion.div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }

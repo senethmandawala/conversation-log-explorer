@@ -1,24 +1,28 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Eye, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { 
+  Card, 
+  Table, 
+  Button, 
+  Tag, 
+  Typography,
+  Skeleton,
+  Drawer,
+  Pagination,
+  ConfigProvider
+} from "antd";
+import { 
+  ArrowLeftOutlined,
+  EyeOutlined,
+  LeftOutlined,
+  RightOutlined,
+  DoubleLeftOutlined,
+  DoubleRightOutlined
+} from "@ant-design/icons";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import type { ColumnsType } from "antd/es/table";
 import CallDetails from "./CallDetails";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
+const { Title, Text } = Typography;
 
 interface CallLog {
   callId: string;
@@ -119,8 +123,60 @@ export default function AgentCallLogs({ agentName, agentId, onBack }: AgentCallL
     }, 500);
   }, [agentId]);
 
-  const totalPages = Math.ceil(callLogs.length / pageSize);
-  const paginatedLogs = callLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // Table columns definition
+  const columns: ColumnsType<CallLog> = [
+    {
+      title: 'Date/Time',
+      dataIndex: 'date',
+      key: 'datetime',
+      width: 150,
+      render: (date: string, record: CallLog) => (
+        <div>
+          <div style={{ fontWeight: 500 }}>{date}</div>
+          <div style={{ fontSize: 12, color: '#94a3b8' }}>{record.time}</div>
+        </div>
+      ),
+    },
+    {
+      title: 'MSISDN',
+      dataIndex: 'msisdn',
+      key: 'msisdn',
+      width: 150,
+    },
+    {
+      title: 'Service',
+      dataIndex: 'service',
+      key: 'service',
+      width: 100,
+    },
+    {
+      title: 'Violation Types',
+      dataIndex: 'violationType',
+      key: 'violationType',
+      render: (violations: string[]) => (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {violations.map((violation, idx) => (
+            <Tag key={idx} color="purple" style={{ borderRadius: 6 }}>
+              {violation}
+            </Tag>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 100,
+      align: 'center' as const,
+      render: (_, record: CallLog) => (
+        <Button
+          type="text"
+          icon={<EyeOutlined />}
+          onClick={() => handleViewDetails(record)}
+        />
+      ),
+    },
+  ];
 
   const handleViewDetails = (log: CallLog) => {
     setSelectedCallId(log.callId);
@@ -130,190 +186,128 @@ export default function AgentCallLogs({ agentName, agentId, onBack }: AgentCallL
     setSelectedCallId(null);
   };
 
+  const totalPages = Math.ceil(callLogs.length / pageSize);
+  const paginatedLogs = callLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   return (
-    <>
-      {/* Call Details Side Panel */}
-      <Sheet open={!!selectedCallId} onOpenChange={(open) => !open && handleCloseDetails()}>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Call Details</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            {selectedCallId && <CallDetails callId={selectedCallId} />}
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onBack}
-          className="h-9 w-9 shrink-0"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h5 className="text-lg font-semibold">{agentName} - Call Logs</h5>
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      ) : callLogs.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          No call logs available
-        </div>
-      ) : (
-        <>
-          {/* Table */}
-          <div className="border border-border/50 rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[150px]">Date/Time</TableHead>
-                  <TableHead className="w-[150px]">MSISDN</TableHead>
-                  <TableHead className="w-[100px]">Service</TableHead>
-                  <TableHead>Violation Types</TableHead>
-                  <TableHead className="text-center w-[100px]">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedLogs.map((log, index) => (
-                  <motion.tr
-                    key={log.callId}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="border-b border-border/30 hover:bg-muted/20"
-                  >
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{log.date}</div>
-                        <div className="text-sm text-muted-foreground">{log.time}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{log.msisdn}</TableCell>
-                    <TableCell>{log.service}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {log.violationType.map((violation, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="outline"
-                            className="bg-accent/50 text-accent-foreground border-accent"
-                          >
-                            {violation}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleViewDetails(log)}
-                        className="h-8 w-8"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </motion.tr>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center justify-between mt-4 pt-4 border-t border-border/30"
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+        },
+      }}
+    >
+      <>
+        {/* Call Details Drawer */}
+        <Drawer
+          title="Call Details"
+          placement="right"
+          size="large"
+          open={!!selectedCallId}
+          closable={false}
+          extra={
+            <Button
+              type="text"
+              onClick={handleCloseDetails}
+              style={{ 
+                border: 'none', 
+                background: 'none', 
+                fontSize: '20px',
+                fontWeight: 'bold',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
             >
-              <p className="text-sm text-muted-foreground">
-                Showing <span className="font-medium text-foreground">{paginatedLogs.length}</span> of{" "}
-                <span className="font-medium text-foreground">{callLogs.length}</span> results
-              </p>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="h-9 w-9 p-0 rounded-lg"
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="h-9 w-9 p-0 rounded-lg"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex items-center gap-1 mx-2">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={cn(
-                          "h-9 w-9 p-0 rounded-lg transition-all duration-200",
-                          currentPage === pageNum && "shadow-md"
-                        )}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                </div>
+              ×
+            </Button>
+          }
+        >
+          {selectedCallId && <CallDetails callId={selectedCallId} />}
+        </Drawer>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="h-9 w-9 p-0 rounded-lg"
+        <div style={{ padding: '0 24px' }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <Button
+              type="default"
+              icon={<ArrowLeftOutlined />}
+              onClick={onBack}
+              style={{ borderRadius: 8 }}
+            />
+            <div>
+              <Title level={5} style={{ margin: 0 }}>{agentName} - Call Logs</Title>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+              <Skeleton.Input active style={{ width: 200 }} />
+            </div>
+          ) : callLogs.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <Text type="secondary">No call logs available</Text>
+            </div>
+          ) : (
+            <>
+              {/* Table */}
+              <Card
+                style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+                styles={{ body: { padding: 0 } }}
+              >
+                <Table
+                  columns={columns}
+                  dataSource={paginatedLogs}
+                  pagination={false}
+                  rowKey="callId"
+                  style={{ borderRadius: 12 }}
+                />
+              </Card>
+
+              {/* Pagination - Right aligned */}
+              {totalPages > 1 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'flex-end', 
+                    marginTop: 16,
+                    paddingTop: 16,
+                    borderTop: '1px solid #e2e8f0'
+                  }}
                 >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="h-9 w-9 p-0 rounded-lg"
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
+                  <Pagination
+                    total={callLogs.length}
+                    pageSize={pageSize}
+                    current={currentPage}
+                    onChange={(page) => setCurrentPage(page)}
+                    showTotal={(total, range) => (
+                      <Text type="secondary">
+                        Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
+                      </Text>
+                    )}
+                    showSizeChanger={true}
+                    pageSizeOptions={['5', '8', '10', '20']}
+                  />
+                </motion.div>
+              )}
+            </>
           )}
-        </>
-      )}
-      </div>
-    </>
+        </div>
+      </>
+    </ConfigProvider>
   );
 }

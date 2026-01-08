@@ -53,14 +53,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         padding: '0.25rem 0.625rem',
-        borderRadius: '0.5rem',
+        borderRadius: '0.25rem',
         fontWeight: 600,
         fontSize: '0.75rem',
         lineHeight: 1,
         whiteSpace: 'nowrap',
         minWidth: 'fit-content',
         width: fullWidth ? '100%' : 'auto',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.2s ease',
         ...getColorStyle()
       }}

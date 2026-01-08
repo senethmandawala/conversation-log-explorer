@@ -1,11 +1,16 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+import { 
+  Button, 
+  Input, 
+  Typography, 
+  Card,
+  Spin,
+  message
+} from "antd";
+import { EditOutlined, SaveOutlined } from "@ant-design/icons";
+
+const { Text, Title } = Typography;
+const { TextArea } = Input;
 
 interface UpdateAlertMessageTemplateProps {
   messageTemplateHeader?: string;
@@ -28,7 +33,7 @@ export default function UpdateAlertMessageTemplate({
 
   const handleUpdate = () => {
     setIsEditMode(false);
-    toast.success("Message template updated successfully");
+    message.success("Message template updated successfully");
   };
 
   const handleCancel = () => {
@@ -38,62 +43,69 @@ export default function UpdateAlertMessageTemplate({
   };
 
   if (contentLoading) {
-    return <Skeleton className="h-96 w-full" />;
+    return <Spin size="large" className="flex justify-center items-center h-96" />;
   }
 
   return (
     <div className="space-y-4">
       {isEditMode ? (
         <>
-          <p className="text-sm text-muted-foreground">
+          <Text className="text-sm text-gray-600 block" style={{ fontFamily: 'Geist, sans-serif' }}>
             Customize the message template for this alert. Use placeholders to insert dynamic values.
-          </p>
+          </Text>
 
           <div className="space-y-2">
-            <Label htmlFor="message-header">Message Header</Label>
+            <Text className="text-sm font-medium text-gray-900 block" style={{ fontFamily: 'Geist, sans-serif' }}>Message Header</Text>
             <Input
-              id="message-header"
               placeholder="Enter Message Header"
               value={messageTemplateHeader}
               onChange={(e) => setMessageTemplateHeader(e.target.value)}
+              className="font-geist"
+              style={{ fontFamily: 'Geist, sans-serif' }}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="message-template">Message Template</Label>
-            <Textarea
-              id="message-template"
+            <Text className="text-sm font-medium text-gray-900 block" style={{ fontFamily: 'Geist, sans-serif' }}>Message Template</Text>
+            <TextArea
               placeholder="Enter Message Template"
               value={messageTemplate}
               onChange={(e) => setMessageTemplate(e.target.value)}
               rows={10}
+              className="font-geist"
+              style={{ fontFamily: 'Geist, sans-serif' }}
             />
-            <p className="text-xs text-muted-foreground">{messageTemplateHint}</p>
+            <Text className="text-xs text-gray-500 block" style={{ fontFamily: 'Geist, sans-serif' }}>{messageTemplateHint}</Text>
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={handleCancel}>
+            <Button onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={handleUpdate}>Save</Button>
+            <Button type="primary" onClick={handleUpdate} icon={<SaveOutlined />}>
+              Save
+            </Button>
           </div>
         </>
       ) : (
         <>
           <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Message Header</Label>
-            <h6 className="text-base font-semibold">{messageTemplateHeader}</h6>
+            <Text className="text-sm text-gray-600 block" style={{ fontFamily: 'Geist, sans-serif' }}>Message Header</Text>
+            <Title level={5} className="text-base font-semibold m-0" style={{ fontFamily: 'Geist, sans-serif' }}>{messageTemplateHeader}</Title>
           </div>
 
-          <Card className="border">
-            <CardContent className="p-3">
-              <Label className="text-sm text-muted-foreground mb-2 block">Message Template</Label>
-              <p className="text-sm whitespace-pre-wrap">{messageTemplate}</p>
-            </CardContent>
+          <Card 
+            className="border border-gray-200"
+            styles={{ body: { padding: '12px' } }}
+          >
+            <Text className="text-sm text-gray-600 block mb-2" style={{ fontFamily: 'Geist, sans-serif' }}>Message Template</Text>
+            <Text className="text-sm whitespace-pre-wrap text-gray-700 block" style={{ fontFamily: 'Geist, sans-serif' }}>{messageTemplate}</Text>
           </Card>
 
           <div className="flex justify-end">
-            <Button onClick={handleEdit}>Edit</Button>
+            <Button type="primary" onClick={handleEdit} icon={<EditOutlined />}>
+              Edit
+            </Button>
           </div>
         </>
       )}

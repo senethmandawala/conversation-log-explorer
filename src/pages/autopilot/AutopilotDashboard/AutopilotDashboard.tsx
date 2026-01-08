@@ -1,6 +1,22 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
+import { 
+  Card, 
+  Row, 
+  Col, 
+  Typography,
+  ConfigProvider,
+  Statistic,
+  Space,
+  Tag
+} from "antd";
+import { 
+  PhoneIncoming,
+  PhoneOutgoing,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+import WideStatCard from "@/components/ui/wide-stat-card";
 import { HandledCallsAnalysis } from "./Handled Calls Analysis/HandledCallsAnalysis";
 import { CallsHandledByDTMF } from "./autopilot-calls-handled-by-DTMF/CallsHandledByDTMF";
 import { CallDurationDistribution } from "./Call Duration Distribution/CallDurationDistribution";
@@ -12,99 +28,6 @@ import { CategoryWiseFailureReason } from "./Category Wise Failure Reason/Catego
 import { CategoryWiseFailureReasonAttempt } from "./Category Wise Failure Reason Attempt/CategoryWiseFailureReasonAttempt";
 import { CategoryWiseVDN } from "./Category Wise VDN/CategoryWiseVDN";
 import { WeeklyTrendsAndPatterns } from "./Weekly Trends/WeeklyTrendsAndPatterns";
-import {
-  PhoneIncoming,
-  PhoneOutgoing,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
-
-// Enhanced stat card component with modern design
-interface WideStatCardProps {
-  color: string;
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  tooltip?: string;
-  trend?: { value: string; positive: boolean };
-  rightItems?: { label: string; value: string; tooltip?: string }[];
-}
-
-const WideStatCard = ({ color, icon, label, value, trend, rightItems }: WideStatCardProps) => {
-  const colorConfig: Record<string, { gradient: string; iconBg: string; border: string; glow: string }> = {
-    blue: {
-      gradient: "from-blue-500/10 via-blue-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/30",
-      border: "border-blue-500/20",
-      glow: "shadow-[0_0_30px_-5px_rgba(59,130,246,0.3)]",
-    },
-    green: {
-      gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/30",
-      border: "border-emerald-500/20",
-      glow: "shadow-[0_0_30px_-5px_rgba(16,185,129,0.3)]",
-    },
-    red: {
-      gradient: "from-red-500/10 via-red-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/30",
-      border: "border-red-500/20",
-      glow: "shadow-[0_0_30px_-5px_rgba(239,68,68,0.3)]",
-    },
-    amber: {
-      gradient: "from-amber-500/10 via-amber-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-amber-500 to-amber-600 shadow-amber-500/30",
-      border: "border-amber-500/20",
-      glow: "shadow-[0_0_30px_-5px_rgba(245,158,11,0.3)]",
-    },
-    purple: {
-      gradient: "from-purple-500/10 via-purple-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-500/30",
-      border: "border-purple-500/20",
-      glow: "shadow-[0_0_30px_-5px_rgba(139,92,246,0.3)]",
-    },
-  };
-
-  const config = colorConfig[color] || colorConfig.blue;
-
-  return (
-    <Card className={`relative overflow-hidden bg-card/80 backdrop-blur-xl border ${config.border} ${config.glow} hover:scale-[1.01] transition-all duration-300`}>
-      {/* Background gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
-      
-      <div className="relative p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center ${config.iconBg} shadow-lg`}>
-              {icon}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
-              <div className="flex items-baseline gap-3">
-                <p className="text-4xl font-bold text-foreground tracking-tight">{value}</p>
-                {trend && (
-                  <span className={`flex items-center gap-1 text-sm font-medium ${trend.positive ? "text-emerald-500" : "text-red-500"}`}>
-                    {trend.positive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                    {trend.value}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          {rightItems && (
-            <div className="flex flex-wrap gap-8">
-              {rightItems.map((item, index) => (
-                <div key={index} className="text-center px-4 py-2 rounded-xl bg-background/50 backdrop-blur-sm border border-border/30">
-                  <p className="text-2xl font-bold text-foreground">{item.value}</p>
-                  <p className="text-xs font-medium text-muted-foreground mt-1">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </Card>
-  );
-};
 
 export default function AutopilotDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -119,7 +42,7 @@ export default function AutopilotDashboard() {
       >
         <WideStatCard
           color="blue"
-          icon={<PhoneIncoming className="h-6 w-6 text-white" />}
+          icon={<PhoneIncoming style={{ color: 'white', fontSize: 20 }} />}
           label="Total Incoming Calls"
           value="12,450"
           trend={{ value: "+12.5%", positive: true }}
@@ -137,7 +60,7 @@ export default function AutopilotDashboard() {
       >
         <WideStatCard
           color="green"
-          icon={<PhoneOutgoing className="h-6 w-6 text-white" />}
+          icon={<PhoneOutgoing style={{ color: 'white', fontSize: 20 }} />}
           label="Transferred to Agent"
           value="2,340"
           trend={{ value: "-5.2%", positive: false }}
@@ -149,7 +72,7 @@ export default function AutopilotDashboard() {
           ]}
         />
       </motion.div>
-
+      
       {/* Handled Calls Analysis */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
