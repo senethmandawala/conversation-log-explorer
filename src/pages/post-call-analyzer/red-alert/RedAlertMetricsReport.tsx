@@ -249,7 +249,7 @@ export default function RedAlertMetricsReport() {
         padding: '16px 16px 16px 16px'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ marginTop: -12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>

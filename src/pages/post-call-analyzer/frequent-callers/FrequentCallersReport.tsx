@@ -94,7 +94,7 @@ export default function FrequentCallersReport() {
         padding: '16px 16px 16px 16px'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ marginTop: -12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <Space align="center" size="middle" orientation="horizontal">

@@ -13,7 +13,6 @@ import { AIHelper } from "@/components/post-call/AIHelper";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 import { UsersSentiment } from "./UsersSentiment";
 import { SentimentTopCategories } from "./SentimentTopCategories";
 import { SentimentTopAgents } from "./SentimentTopAgents";
@@ -128,7 +127,7 @@ export default function SentimentAnalysisReport() {
         padding: '16px 16px 16px 16px'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ marginTop: -12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <Space align="center" size="middle" orientation="horizontal">
@@ -196,117 +195,125 @@ export default function SentimentAnalysisReport() {
           onChange={handleTabChange}
           style={{ width: '100%' }}
           size="large"
-        >
-          <TabPane tab="Callers" key="callers">
-            <div style={{ marginTop: 24 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
-                <AnimatePresence mode="sync">
-                  {col1Visible && (
-                    <motion.div
-                      key="col1-callers"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
-                    >
-                      <UsersSentiment onSentimentSelect={handleUserSentimentSelect} />
-                    </motion.div>
-                  )}
+          items={[
+            {
+              key: "callers",
+              label: "Callers",
+              children: (
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                    <AnimatePresence mode="sync">
+                      {col1Visible && (
+                        <motion.div
+                          key="col1-callers"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
+                        >
+                          <UsersSentiment onSentimentSelect={handleUserSentimentSelect} />
+                        </motion.div>
+                      )}
 
-                  {col2Visible && selectedSentiment && (
-                    <motion.div
-                      key="col2-callers"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
-                    >
-                      <SentimentTopCategories
-                        selectedSentiment={selectedSentiment}
-                        onCategorySelect={handleCategorySelect}
-                        onClose={handleCloseCategoryChart}
-                      />
-                    </motion.div>
-                  )}
+                      {col2Visible && selectedSentiment && (
+                        <motion.div
+                          key="col2-callers"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
+                        >
+                          <SentimentTopCategories
+                            selectedSentiment={selectedSentiment}
+                            onCategorySelect={handleCategorySelect}
+                            onClose={handleCloseCategoryChart}
+                          />
+                        </motion.div>
+                      )}
 
-                  {col3Visible && selectedCategory && (
-                    <motion.div
-                      key="col3-callers"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col3Class)}` }}
-                    >
-                      <SentimentTopAgents
-                        selectedSentiment={selectedSentiment}
-                        selectedCategory={selectedCategory}
-                        onClose={handleCloseAgentChart}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </TabPane>
+                      {col3Visible && selectedCategory && (
+                        <motion.div
+                          key="col3-callers"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col3Class)}` }}
+                        >
+                          <SentimentTopAgents
+                            selectedSentiment={selectedSentiment}
+                            selectedCategory={selectedCategory}
+                            onClose={handleCloseAgentChart}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )
+            },
+            {
+              key: "agents",
+              label: "Agents",
+              children: (
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                    <AnimatePresence mode="sync">
+                      {col1Visible && (
+                        <motion.div
+                          key="col1-agents"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
+                        >
+                          <AgentsSentiment onSentimentSelect={handleAgentSentimentSelect} />
+                        </motion.div>
+                      )}
 
-          <TabPane tab="Agents" key="agents">
-            <div style={{ marginTop: 24 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
-                <AnimatePresence mode="sync">
-                  {col1Visible && (
-                    <motion.div
-                      key="col1-agents"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
-                    >
-                      <AgentsSentiment onSentimentSelect={handleAgentSentimentSelect} />
-                    </motion.div>
-                  )}
+                      {col2Visible && selectedSentiment && (
+                        <motion.div
+                          key="col2-agents"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
+                        >
+                          <AgentsSentimentTopCategory
+                            selectedSentiment={selectedSentiment}
+                            onCategorySelect={handleCategorySelect}
+                            onClose={handleCloseCategoryChart}
+                          />
+                        </motion.div>
+                      )}
 
-                  {col2Visible && selectedSentiment && (
-                    <motion.div
-                      key="col2-agents"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
-                    >
-                      <AgentsSentimentTopCategory
-                        selectedSentiment={selectedSentiment}
-                        onCategorySelect={handleCategorySelect}
-                        onClose={handleCloseCategoryChart}
-                      />
-                    </motion.div>
-                  )}
-
-                  {col3Visible && selectedCategory && (
-                    <motion.div
-                      key="col3-agents"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col3Class)}` }}
-                    >
-                      <AgentsSentimentTopAgents
-                        selectedSentiment={selectedSentiment}
-                        selectedCategory={selectedCategory}
-                        onClose={handleCloseAgentChart}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </TabPane>
-        </Tabs>
+                      {col3Visible && selectedCategory && (
+                        <motion.div
+                          key="col3-agents"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col3Class)}` }}
+                        >
+                          <AgentsSentimentTopAgents
+                            selectedSentiment={selectedSentiment}
+                            selectedCategory={selectedCategory}
+                            onClose={handleCloseAgentChart}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )
+            }
+          ]}
+        />
       </Space>
     </Card>
   );

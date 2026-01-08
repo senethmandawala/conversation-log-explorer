@@ -21,7 +21,7 @@ export const ColumnToggle = ({ columns, onToggle, onReset }: ColumnToggleProps) 
           Reset
         </Button>
       </div>
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space orientation="vertical" style={{ width: '100%' }}>
         {toggleableColumns.map(col => (
           <Checkbox
             key={col.def}

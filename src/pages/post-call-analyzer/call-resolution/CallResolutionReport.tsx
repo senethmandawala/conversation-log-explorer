@@ -24,7 +24,6 @@ interface SelectedCategory {
 }
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 
 export default function CallResolutionReport() {
   const { setSelectedTab } = usePostCall();
@@ -136,7 +135,7 @@ export default function CallResolutionReport() {
         padding: '16px 16px 16px 16px'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ marginTop: -12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <Space align="center" size="middle" orientation="horizontal">
@@ -206,120 +205,128 @@ export default function CallResolutionReport() {
           onChange={handleTabChange}
           style={{ width: '100%' }}
           size="large"
-        >
-          <TabPane tab="Resolution Status" key="resolution-status">
-            <div style={{ marginTop: 24 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
-                <AnimatePresence mode="sync">
-                  {col1Visible && (
-                    <motion.div
-                      key="col1-status"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
-                    >
-                      <CaseStatusOverall onCaseSelect={handleCaseSelect} />
-                    </motion.div>
-                  )}
+          items={[
+            {
+              key: "resolution-status",
+              label: "Resolution Status",
+              children: (
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                    <AnimatePresence mode="sync">
+                      {col1Visible && (
+                        <motion.div
+                          key="col1-status"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
+                        >
+                          <CaseStatusOverall onCaseSelect={handleCaseSelect} />
+                        </motion.div>
+                      )}
 
-                  {col2Visible && selectedCaseType && (
-                    <motion.div
-                      key="col2-status"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
-                    >
-                      <CaseStatusTopCategories
-                        selectedCaseType={selectedCaseType}
-                        onCategorySelect={handleCaseStatusCategorySelect}
-                        onClose={handleCloseCategoryChart}
-                      />
-                    </motion.div>
-                  )}
+                      {col2Visible && selectedCaseType && (
+                        <motion.div
+                          key="col2-status"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
+                        >
+                          <CaseStatusTopCategories
+                            selectedCaseType={selectedCaseType}
+                            onCategorySelect={handleCaseStatusCategorySelect}
+                            onClose={handleCloseCategoryChart}
+                          />
+                        </motion.div>
+                      )}
 
-                  {col3Visible && selectedCategory && (
-                    <motion.div
-                      key="col3-status"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col3Class)}` }}
-                    >
-                      <CaseStatusTopAgents
-                        selectedCaseType={selectedCaseType}
-                        selectedCategory={selectedCategory}
-                        onClose={handleCloseAgentChart}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </TabPane>
-
-          <TabPane tab="Average Resolution Time" key="average-time">
-            <div style={{ marginTop: 24 }}>
-              <div style={{ marginBottom: 16 }}>
-                <Card
-                  style={{
-                    borderRadius: 12,
-                    border: '1px solid #e8e8e8',
-                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                    padding: '16px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Resolution Time</p>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                        <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageTime}</h2>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {callCount} calls</span>
-                      </div>
-                    </div>
+                      {col3Visible && selectedCategory && (
+                        <motion.div
+                          key="col3-status"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col3Class)}` }}
+                        >
+                          <CaseStatusTopAgents
+                            selectedCaseType={selectedCaseType}
+                            selectedCategory={selectedCategory}
+                            onClose={handleCloseAgentChart}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                </Card>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
-                <AnimatePresence mode="sync">
-                  {col1Visible && (
-                    <motion.div
-                      key="col1-avgtime"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
+                </div>
+              )
+            },
+            {
+              key: "average-time",
+              label: "Average Resolution Time",
+              children: (
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <Card
+                      style={{
+                        borderRadius: 12,
+                        border: '1px solid #e8e8e8',
+                        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                        padding: '16px'
+                      }}
                     >
-                      <AverageTimeTopCategories onCategorySelect={handleAverageTimeCategorySelect} />
-                    </motion.div>
-                  )}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Resolution Time</p>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageTime}</h2>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {callCount} calls</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
 
-                  {col2Visible && selectedCategory && (
-                    <motion.div
-                      key="col2-avgtime"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
-                    >
-                      <AverageTimeTopAgents
-                        selectedCategory={selectedCategory}
-                        onClose={handleCloseAverageTimeAgentChart}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </TabPane>
-        </Tabs>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                    <AnimatePresence mode="sync">
+                      {col1Visible && (
+                        <motion.div
+                          key="col1-avgtime"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
+                        >
+                          <AverageTimeTopCategories onCategorySelect={handleAverageTimeCategorySelect} />
+                        </motion.div>
+                      )}
+
+                      {col2Visible && selectedCategory && (
+                        <motion.div
+                          key="col2-avgtime"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
+                        >
+                          <AverageTimeTopAgents
+                            selectedCategory={selectedCategory}
+                            onClose={handleCloseAverageTimeAgentChart}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )
+            }
+          ]}
+        />
         </div>
       </Space>
     </Card>

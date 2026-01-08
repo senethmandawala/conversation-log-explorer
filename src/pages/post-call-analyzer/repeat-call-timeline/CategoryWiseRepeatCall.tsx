@@ -29,7 +29,7 @@ export function CategoryWiseRepeatCall() {
         marginTop: 24
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
           <Space align="center" size="middle" orientation="horizontal">
             <div

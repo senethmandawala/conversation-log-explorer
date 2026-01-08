@@ -14,7 +14,6 @@ import { PhoneOutlined, CalendarOutlined, ReloadOutlined, UnorderedListOutlined,
 import { TablerIcon } from "@/components/ui/tabler-icon";
 
 const { Title, Text } = Typography;
-const { TabPane } = AntTabs;
 
 const mockCategoryData = [
   { name: "Billing Issues", value: 145, fill: "#4285F4" },
@@ -280,185 +279,197 @@ export default function CallDurationReport() {
           onChange={(value) => setActiveTab(value)}
           style={{ width: '100%' }}
           size="large"
-        >
-          <TabPane tab="Call Duration" key="duration">
-                <div style={{ marginBottom: 16 }}>
-                <Card
-                  style={{
-                    borderRadius: 12,
-                    border: '1px solid #e8e8e8',
-                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                    padding: '16px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Call Time</p>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                        <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageCallTime}</h2>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCallCount} Calls</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-                {loading ? (
-                  <div className="flex items-center justify-center h-[400px]">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    {/* Navigation Buttons */}
-                    {slides.length > 1 && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
-                          onClick={scrollPrev}
-                          disabled={visibleStartIndex === 0}
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
-                          onClick={scrollNext}
-                          disabled={visibleStartIndex >= slides.length - 2}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-
-                    {/* Slides */}
-                    <div ref={carouselRef} className="overflow-hidden w-full">
-                      <div
-                        className="flex"
-                        style={{
-                          transform: `translateX(-${visibleStartIndex * 50}%)`,
-                          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                      >
-                        {slides.map((slide, index) => (
-                          <div
-                            key={slide.id}
-                            className="flex-shrink-0 pr-4"
-                            style={{ 
-                              width: slides.length === 1 ? '100%' : '50%',
-                              transition: 'width 0.15s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }}
-                          >
-                            <Card className="h-[450px] p-4 border-border/50 bg-background/50">
-                              <div className="h-full flex flex-col">
-                                <div className="flex items-center justify-between mb-3">
-                                  <h5 className="text-base font-semibold text-foreground">{slide.title}</h5>
-                                  {slide.id > 1 && (
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => closeSlide(slide.id)}>
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  )}
-                                </div>
-                                <div className="flex-1 min-h-0">
-                                  {slide.type === "categories" ? (
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <Treemap
-                                        data={mockCategoryData}
-                                        dataKey="value"
-                                        stroke="white"
-                                        fill="hsl(226, 70%, 55%)"
-                                        content={<CustomTreemapContent />}
-                                        onClick={handleCategoryClick}
-                                      >
-                                        <RechartsTooltip
-                                          content={({ active, payload }) => {
-                                            if (active && payload && payload.length) {
-                                              const data = payload[0].payload;
-                                              const avgDuration = Math.floor(Math.random() * 15) + 5;
-                                              const avgSeconds = Math.floor(Math.random() * 60);
-                                              const totalMinutes = data.value * avgDuration;
-                                              const totalSeconds = Math.floor(Math.random() * 60);
-                                              return (
-                                                <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-                                                  <div className="flex items-center gap-2 mb-2">
-                                                    <div 
-                                                      className="h-4 w-4 rounded-full"
-                                                      style={{ backgroundColor: data.fill }}
-                                                    />
-                                                    <p className="font-semibold">{data.name}</p>
-                                                  </div>
-                                                  <p className="text-sm"><span className="font-medium">Average Call Duration:</span> {avgDuration}min {avgSeconds}sec</p>
-                                                  <p className="text-sm"><span className="font-medium">Call Duration:</span> {totalMinutes}min {totalSeconds}sec</p>
-                                                </div>
-                                              );
-                                            }
-                                            return null;
-                                          }}
-                                        />
-                                      </Treemap>
-                                    </ResponsiveContainer>
-                                  ) : (
-                                    <div className="h-full overflow-auto">
-                                      <DurationCallLogs />
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </Card>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-          </TabPane>
-
-          <TabPane tab="Long Calls" key="long-calls">
-                {loading ? (
-                  <div className="flex items-center justify-center h-[400px]">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : (
-                  <Card style={{ border: '1px solid #e8e8e8', borderRadius: 12 }}>
-                    <div style={{ padding: '24px' }}>
-                      <h5 className="text-lg font-semibold mb-4">Long Calls Overview</h5>
-                      
-                      <div className="grid grid-cols-3 gap-4 mb-6">
+          items={[
+            {
+              key: "duration",
+              label: "Call Duration",
+              children: (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <Card
+                      style={{
+                        borderRadius: 12,
+                        border: '1px solid #e8e8e8',
+                        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                        padding: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                          <h3 className="text-2xl font-bold">{longCallThreshold}</h3>
-                          <p className="text-sm text-muted-foreground">Threshold for Long Call</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-medium text-muted-foreground mb-1">Total Calls</p>
-                          <h3 className="text-2xl font-bold">{totalCalls}</h3>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-medium text-muted-foreground mb-1">Long Calls</p>
-                          <h3 className="text-2xl font-bold text-primary">{totalLongCalls}</h3>
-                        </div>
-                      </div>
-
-                      <div className="mb-6">
-                        <div className="relative">
-                          <div className="absolute -top-6 text-sm font-semibold text-primary" style={{ left: `calc(${longCallPercentage}% - 20px)` }}>
-                            {longCallPercentage}%
-                          </div>
-                          <Progress value={longCallPercentage} className="h-3" />
-                          <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-                            <span>0</span>
-                            <span>{totalCalls}</span>
+                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Call Time</p>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageCallTime}</h2>
+                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCallCount} Calls</span>
                           </div>
                         </div>
                       </div>
+                    </Card>
+                  </div>
 
-                      <DurationCallLogs />
+                  {loading ? (
+                    <div className="flex items-center justify-center h-[400px]">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
-                  </Card>
-                )}
-          </TabPane>
-        </AntTabs>
+                  ) : (
+                    <div className="relative">
+                      {/* Navigation Buttons */}
+                      {slides.length > 1 && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
+                            onClick={scrollPrev}
+                            disabled={visibleStartIndex === 0}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
+                            onClick={scrollNext}
+                            disabled={visibleStartIndex >= slides.length - 2}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+
+                      {/* Slides */}
+                      <div ref={carouselRef} className="overflow-hidden w-full">
+                        <div
+                          className="flex"
+                          style={{
+                            transform: `translateX(-${visibleStartIndex * 50}%)`,
+                            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        >
+                          {slides.map((slide, index) => (
+                            <div
+                              key={slide.id}
+                              className="flex-shrink-0 pr-4"
+                              style={{ 
+                                width: slides.length === 1 ? '100%' : '50%',
+                                transition: 'width 0.15s cubic-bezier(0.4, 0, 0.2, 1)'
+                              }}
+                            >
+                              <Card className="h-[450px] p-4 border-border/50 bg-background/50">
+                                <div className="h-full flex flex-col">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h5 className="text-base font-semibold text-foreground">{slide.title}</h5>
+                                    {slide.id > 1 && (
+                                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => closeSlide(slide.id)}>
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-h-0">
+                                    {slide.type === "categories" ? (
+                                      <ResponsiveContainer width="100%" height="100%">
+                                        <Treemap
+                                          data={mockCategoryData}
+                                          dataKey="value"
+                                          stroke="white"
+                                          fill="hsl(226, 70%, 55%)"
+                                          content={<CustomTreemapContent />}
+                                          onClick={handleCategoryClick}
+                                        >
+                                          <RechartsTooltip
+                                            content={({ active, payload }) => {
+                                              if (active && payload && payload.length) {
+                                                const data = payload[0].payload;
+                                                const avgDuration = Math.floor(Math.random() * 15) + 5;
+                                                const avgSeconds = Math.floor(Math.random() * 60);
+                                                const totalMinutes = data.value * avgDuration;
+                                                const totalSeconds = Math.floor(Math.random() * 60);
+                                                return (
+                                                  <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                      <div 
+                                                        className="h-4 w-4 rounded-full"
+                                                        style={{ backgroundColor: data.fill }}
+                                                      />
+                                                      <p className="font-semibold">{data.name}</p>
+                                                    </div>
+                                                    <p className="text-sm"><span className="font-medium">Average Call Duration:</span> {avgDuration}min {avgSeconds}sec</p>
+                                                    <p className="text-sm"><span className="font-medium">Call Duration:</span> {totalMinutes}min {totalSeconds}sec</p>
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            }}
+                                          />
+                                        </Treemap>
+                                      </ResponsiveContainer>
+                                    ) : (
+                                      <div className="h-full overflow-auto">
+                                        <DurationCallLogs />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </Card>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )
+            },
+            {
+              key: "long-calls",
+              label: "Long Calls",
+              children: (
+                <>
+                  {loading ? (
+                    <div className="flex items-center justify-center h-[400px]">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <Card style={{ border: '1px solid #e8e8e8', borderRadius: 12 }}>
+                      <div style={{ padding: '24px' }}>
+                        <h5 className="text-lg font-semibold mb-4">Long Calls Overview</h5>
+                        
+                        <div className="grid grid-cols-3 gap-4 mb-6">
+                          <div>
+                            <h3 className="text-2xl font-bold">{longCallThreshold}</h3>
+                            <p className="text-sm text-muted-foreground">Threshold for Long Call</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm font-medium text-muted-foreground mb-1">Total Calls</p>
+                            <h3 className="text-2xl font-bold">{totalCalls}</h3>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm font-medium text-muted-foreground mb-1">Long Calls</p>
+                            <h3 className="text-2xl font-bold text-primary">{totalLongCalls}</h3>
+                          </div>
+                        </div>
+
+                        <div className="mb-6">
+                          <div className="relative">
+                            <div className="absolute -top-6 text-sm font-semibold text-primary" style={{ left: `calc(${longCallPercentage}% - 20px)` }}>
+                              {longCallPercentage}%
+                            </div>
+                            <Progress value={longCallPercentage} className="h-3" />
+                            <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                              <span>0</span>
+                              <span>{totalCalls}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <DurationCallLogs />
+                      </div>
+                    </Card>
+                  )}
+                </>
+              )
+            }
+          ]}
+        />
       </CardContent>
     </Card>
   );

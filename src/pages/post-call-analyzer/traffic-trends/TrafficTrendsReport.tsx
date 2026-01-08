@@ -11,7 +11,6 @@ import { usePostCall } from "@/contexts/PostCallContext";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 import { motion, AnimatePresence } from "framer-motion";
 
 // Generate mock heatmap data for General tab (Date x Hour)
@@ -188,7 +187,7 @@ export default function TrafficTrendsReport() {
         padding: '16px 16px 16px 16px'
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ marginTop: -12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <Space align="center" size="middle">
@@ -244,140 +243,148 @@ export default function TrafficTrendsReport() {
             onChange={setActiveTab}
             style={{ width: '100%' }}
             size="large"
-          >
-            <TabPane tab="General" key="general">
-              <AnimatePresence mode="wait">
-                {loading ? (
-                  <motion.div
-                    key="loading-general"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}
-                  >
-                    <div style={{ 
-                      width: 32, 
-                      height: 32, 
-                      border: '2px solid #1890ff', 
-                      borderTop: '2px solid transparent', 
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }}></div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="content-general"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ overflowX: 'auto' }}
-                  >
-                    <div style={{ display: 'inline-block', minWidth: '100%' }}>
-                      {/* Hour labels */}
-                      <div style={{ display: 'flex', marginBottom: 12 }}>
-                        <div style={{ width: 96, flexShrink: 0 }}></div>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <div key={i} style={{ width: 48, fontSize: 11, textAlign: 'center', fontWeight: 500, color: '#666' }}>
-                            {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+            items={[
+              {
+                key: "general",
+                label: "General",
+                children: (
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.div
+                        key="loading-general"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}
+                      >
+                        <div style={{ 
+                          width: 32, 
+                          height: 32, 
+                          border: '2px solid #1890ff', 
+                          borderTop: '2px solid transparent', 
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }}></div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="content-general"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ overflowX: 'auto' }}
+                      >
+                        <div style={{ display: 'inline-block', minWidth: '100%' }}>
+                          {/* Hour labels */}
+                          <div style={{ display: 'flex', marginBottom: 12 }}>
+                            <div style={{ width: 96, flexShrink: 0 }}></div>
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <div key={i} style={{ width: 48, fontSize: 11, textAlign: 'center', fontWeight: 500, color: '#666' }}>
+                                {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                      
-                      {/* Heatmap grid */}
-                      {['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'].map((day, dayIndex) => (
-                        <div key={day} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                          <div style={{ width: 96, fontSize: 12, fontWeight: 600, textAlign: 'right', paddingRight: 12, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={day}>{day}</div>
-                          <div style={{ display: 'flex', gap: 4 }}>
-                            {Array.from({ length: 24 }, (_, hour) => {
-                              const dataPoint = generalData.find(d => d.y === dayIndex && d.x === hour);
-                              return (
-                                <HeatmapCell
-                                  key={hour}
-                                  value={dataPoint?.value || 0}
-                                  maxValue={maxGeneralValue}
-                                  label={day}
-                                  hour={`${hour.toString().padStart(2, '0')}:00`}
-                                />
-                              );
-                            })}
-                          </div>
+                          
+                          {/* Heatmap grid */}
+                          {['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'].map((day, dayIndex) => (
+                            <div key={day} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                              <div style={{ width: 96, fontSize: 12, fontWeight: 600, textAlign: 'right', paddingRight: 12, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={day}>{day}</div>
+                              <div style={{ display: 'flex', gap: 4 }}>
+                                {Array.from({ length: 24 }, (_, hour) => {
+                                  const dataPoint = generalData.find(d => d.y === dayIndex && d.x === hour);
+                                  return (
+                                    <HeatmapCell
+                                      key={hour}
+                                      value={dataPoint?.value || 0}
+                                      maxValue={maxGeneralValue}
+                                      label={day}
+                                      hour={`${hour.toString().padStart(2, '0')}:00`}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </TabPane>
-
-            <TabPane tab="Categories" key="categories">
-              <AnimatePresence mode="wait">
-                {loading ? (
-                  <motion.div
-                    key="loading-categories"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}
-                  >
-                    <div style={{ 
-                      width: 32, 
-                      height: 32, 
-                      border: '2px solid #1890ff', 
-                      borderTop: '2px solid transparent', 
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }}></div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="content-categories"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ overflowX: 'auto' }}
-                  >
-                    <div style={{ display: 'inline-block', minWidth: '100%' }}>
-                      {/* Hour labels */}
-                      <div style={{ display: 'flex', marginBottom: 12 }}>
-                        <div style={{ width: 160, flexShrink: 0 }}></div>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <div key={i} style={{ width: 48, fontSize: 11, textAlign: 'center', fontWeight: 500, color: '#666' }}>
-                            {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )
+              },
+              {
+                key: "categories",
+                label: "Categories",
+                children: (
+                  <AnimatePresence mode="wait">
+                    {loading ? (
+                      <motion.div
+                        key="loading-categories"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}
+                      >
+                        <div style={{ 
+                          width: 32, 
+                          height: 32, 
+                          border: '2px solid #1890ff', 
+                          borderTop: '2px solid transparent', 
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }}></div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="content-categories"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ overflowX: 'auto' }}
+                      >
+                        <div style={{ display: 'inline-block', minWidth: '100%' }}>
+                          {/* Hour labels */}
+                          <div style={{ display: 'flex', marginBottom: 12 }}>
+                            <div style={{ width: 160, flexShrink: 0 }}></div>
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <div key={i} style={{ width: 48, fontSize: 11, textAlign: 'center', fontWeight: 500, color: '#666' }}>
+                                {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                      
-                      {/* Heatmap grid */}
-                      {['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'].map((category, catIndex) => (
-                        <div key={category} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                          <div style={{ width: 160, fontSize: 12, fontWeight: 600, textAlign: 'right', paddingRight: 12, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={category}>{category}</div>
-                          <div style={{ display: 'flex', gap: 4 }}>
-                            {Array.from({ length: 24 }, (_, hour) => {
-                              const dataPoint = categoryData.find(d => d.y === catIndex && d.x === hour);
-                              return (
-                                <HeatmapCell
-                                  key={hour}
-                                  value={dataPoint?.value || 0}
-                                  maxValue={maxCategoryValue}
-                                  label={category}
-                                  hour={`${hour.toString().padStart(2, '0')}:00`}
-                                  categoryIndex={catIndex}
-                                />
-                              );
-                            })}
-                          </div>
+                          
+                          {/* Heatmap grid */}
+                          {['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'].map((category, catIndex) => (
+                            <div key={category} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                              <div style={{ width: 160, fontSize: 12, fontWeight: 600, textAlign: 'right', paddingRight: 12, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={category}>{category}</div>
+                              <div style={{ display: 'flex', gap: 4 }}>
+                                {Array.from({ length: 24 }, (_, hour) => {
+                                  const dataPoint = categoryData.find(d => d.y === catIndex && d.x === hour);
+                                  return (
+                                    <HeatmapCell
+                                      key={hour}
+                                      value={dataPoint?.value || 0}
+                                      maxValue={maxCategoryValue}
+                                      label={category}
+                                      hour={`${hour.toString().padStart(2, '0')}:00`}
+                                      categoryIndex={catIndex}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </TabPane>
-          </Tabs>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )
+              }
+            ]}
+          />
         </div>
       </Space>
     </Card>
