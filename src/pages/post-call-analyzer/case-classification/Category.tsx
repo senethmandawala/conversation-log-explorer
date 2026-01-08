@@ -35,26 +35,24 @@ const CustomTreemapContent = (props: any) => {
     return null;
   }
 
-  // Calculate dynamic font size based on cell dimensions
-  const maxFontSize = 14;
-  const minFontSize = 8;
-  const padding = 8;
-  
-  // Calculate font size that fits within the cell
+  // Simplified text rendering for treemap cells
+  const padding = 10;
   const availableWidth = width - padding * 2;
   const availableHeight = height - padding * 2;
   
-  // Estimate characters per line based on available width (approx 0.6 ratio for font width)
-  const charWidth = 0.6;
-  const estimatedFontSizeByWidth = availableWidth / (name.length * charWidth);
-  const estimatedFontSizeByHeight = availableHeight * 0.6;
+  // Simple font size calculation
+  let fontSize = Math.min(availableWidth / (name.length * 0.7), availableHeight / 1.5, 12);
+  fontSize = Math.max(fontSize, 6); // Minimum readable size
   
-  // Use the smaller of the two to ensure it fits
-  let fontSize = Math.min(estimatedFontSizeByWidth, estimatedFontSizeByHeight, maxFontSize);
-  fontSize = Math.max(fontSize, minFontSize);
+  // Truncate if too long
+  let displayText = name;
+  const maxChars = Math.floor(availableWidth / (fontSize * 0.7));
+  if (name.length > maxChars && maxChars > 3) {
+    displayText = name.substring(0, maxChars - 2) + '..';
+  }
   
-  // Only show text if there's enough space
-  const showText = width > 40 && height > 20 && fontSize >= minFontSize;
+  // Show text if box is reasonably sized
+  const showText = width > 40 && height > 25 && fontSize >= 6;
   
   return (
     <g>
@@ -77,10 +75,10 @@ const CustomTreemapContent = (props: any) => {
           dominantBaseline="middle"
           fill="white"
           fontSize={fontSize}
-          fontWeight={600}
+          fontWeight={400}
           style={{ pointerEvents: "none" }}
         >
-          {name}
+          {displayText}
         </text>
       )}
     </g>
@@ -109,9 +107,15 @@ export function Category({ onCategorySelect, onTotalCallsChange }: CategoryProps
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 min-h-0 bg-white rounded-md p-2">
-        <ResponsiveContainer width="100%" height="100%">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ 
+        flex: 1, 
+        minHeight: 0, 
+        backgroundColor: 'white', 
+        borderRadius: 6, 
+        padding: 8 
+      }}>
+        <ResponsiveContainer width="100%" height={250}>
           <Treemap
             data={chartData}
             dataKey="value"
@@ -125,21 +129,52 @@ export function Category({ onCategorySelect, onTotalCallsChange }: CategoryProps
         </ResponsiveContainer>
       </div>
       
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div style={{ 
+        marginTop: 12, 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(2, 1fr)', 
+        gap: 8,
+        padding: '4px 0'
+      }}>
         {chartData.map((item, idx) => (
-          <div key={idx} className="flex items-center gap-2">
+          <div key={idx} style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 8,
+            minHeight: 20
+          }}>
             <div 
-              className="w-3 h-3 rounded-sm flex-shrink-0" 
-              style={{ backgroundColor: item.fill }}
+              style={{ 
+                width: 12, 
+                height: 12, 
+                borderRadius: 2, 
+                flexShrink: 0,
+                backgroundColor: item.fill,
+                border: '1px solid #e8e8e8'
+              }}
             />
-            <span className="text-xs text-muted-foreground truncate">{item.name}</span>
+            <span style={{ 
+              fontSize: 12, 
+              color: '#333', 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              whiteSpace: 'nowrap',
+              lineHeight: 1.2
+            }}>
+              {item.name}
+            </span>
           </div>
         ))}
       </div>
       
-      <p className="text-xs text-center text-muted-foreground mt-3">
+      <div style={{ 
+        fontSize: 12, 
+        textAlign: 'center', 
+        color: '#666', 
+        marginTop: 12 
+      }}>
         Click on a category to drill down
-      </p>
+      </div>
     </div>
   );
 }

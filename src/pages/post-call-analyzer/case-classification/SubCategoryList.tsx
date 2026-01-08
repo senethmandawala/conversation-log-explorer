@@ -110,31 +110,35 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ 
+        flex: 1, 
+        minHeight: 0,
+        marginTop: 16
+      }}>
+        <ResponsiveContainer width="100%" height={250}>
           <BarChart
             data={chartData}
             margin={{ top: 5, right: 5, left: 5, bottom: 20 }}
             onClick={handleClick}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" />
             <XAxis 
               dataKey="name" 
-              stroke="hsl(var(--muted-foreground))" 
+              stroke="#666" 
               fontSize={10}
               angle={-45}
               textAnchor="end"
               height={60}
             />
             <YAxis 
-              stroke="hsl(var(--muted-foreground))" 
+              stroke="#666" 
               fontSize={11}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e8e8e8",
                 borderRadius: "8px",
               }}
             />
@@ -147,9 +151,14 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
         </ResponsiveContainer>
       </div>
       
-      <p className="text-xs text-center text-muted-foreground mt-2">
+      <div style={{ 
+        fontSize: 12, 
+        textAlign: 'center', 
+        color: '#666', 
+        marginTop: 8 
+      }}>
         Click on a bar to drill down further
-      </p>
+      </div>
     </div>
   );
 }

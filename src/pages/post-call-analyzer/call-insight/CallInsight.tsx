@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { 
   Card, 
   Table, 
@@ -27,11 +27,17 @@ import {
   RiseOutlined,
   FallOutlined,
   MinusOutlined,
-  ClearOutlined
+  ClearOutlined,
+  SettingOutlined
 } from "@ant-design/icons";
+import { TablerIcon } from "@/components/ui/tabler-icon";
+import { StatusBadge } from "@/components/ui/status-badge";
+import "@/components/ui/status-badge.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { CallLogDetails } from "@/components/post-call/CallLogDetails";
+import { useColumnConfig } from "@/hooks/useColumnConfig";
+import { ColumnToggle } from "@/components/ui/column-toggle";
 import type { ColumnsType } from "antd/es/table";
 
 const { Title, Text } = Typography;
@@ -47,19 +53,20 @@ interface CallRecord {
   date: string;
   time: string;
   status: "completed" | "pending" | "failed";
+  callDisposition?: string;
 }
 
 const mockCalls: CallRecord[] = [
-  { id: "1", msisdn: "+1234567890", agentName: "John Smith", category: "Billing", sentiment: "positive", duration: "5:23", date: "2024-01-15", time: "09:30", status: "completed" },
-  { id: "2", msisdn: "+1234567891", agentName: "Sarah Johnson", category: "Technical Support", sentiment: "negative", duration: "12:45", date: "2024-01-15", time: "10:15", status: "completed" },
-  { id: "3", msisdn: "+1234567892", agentName: "Mike Wilson", category: "Sales", sentiment: "neutral", duration: "8:10", date: "2024-01-15", time: "11:00", status: "completed" },
-  { id: "4", msisdn: "+1234567893", agentName: "Emily Davis", category: "Complaints", sentiment: "negative", duration: "15:30", date: "2024-01-15", time: "11:45", status: "pending" },
-  { id: "5", msisdn: "+1234567894", agentName: "John Smith", category: "General Inquiry", sentiment: "positive", duration: "3:15", date: "2024-01-15", time: "12:30", status: "completed" },
-  { id: "6", msisdn: "+1234567895", agentName: "Sarah Johnson", category: "Billing", sentiment: "neutral", duration: "6:45", date: "2024-01-15", time: "14:00", status: "completed" },
-  { id: "7", msisdn: "+1234567896", agentName: "Mike Wilson", category: "Technical Support", sentiment: "positive", duration: "9:20", date: "2024-01-15", time: "14:45", status: "failed" },
-  { id: "8", msisdn: "+1234567897", agentName: "Emily Davis", category: "Sales", sentiment: "positive", duration: "7:00", date: "2024-01-15", time: "15:30", status: "completed" },
-  { id: "9", msisdn: "+1234567898", agentName: "John Smith", category: "Billing", sentiment: "neutral", duration: "4:50", date: "2024-01-16", time: "09:00", status: "completed" },
-  { id: "10", msisdn: "+1234567899", agentName: "Sarah Johnson", category: "Technical Support", sentiment: "negative", duration: "18:20", date: "2024-01-16", time: "10:30", status: "completed" },
+  { id: "1", msisdn: "+1234567890", agentName: "John Smith", category: "Billing", sentiment: "positive", duration: "5:23", date: "2024-01-15", time: "09:30", status: "completed", callDisposition: "Completed" },
+  { id: "2", msisdn: "+1234567891", agentName: "Sarah Johnson", category: "Technical Support", sentiment: "negative", duration: "12:45", date: "2024-01-15", time: "10:15", status: "completed", callDisposition: "Transferred" },
+  { id: "3", msisdn: "+1234567892", agentName: "Mike Wilson", category: "Sales", sentiment: "neutral", duration: "8:10", date: "2024-01-15", time: "11:00", status: "completed", callDisposition: "Success" },
+  { id: "4", msisdn: "+1234567893", agentName: "Emily Davis", category: "Complaints", sentiment: "negative", duration: "15:30", date: "2024-01-15", time: "11:45", status: "pending", callDisposition: "Pending" },
+  { id: "5", msisdn: "+1234567894", agentName: "John Smith", category: "General Inquiry", sentiment: "positive", duration: "3:15", date: "2024-01-15", time: "12:30", status: "completed", callDisposition: "Completed" },
+  { id: "6", msisdn: "+1234567895", agentName: "Sarah Johnson", category: "Billing", sentiment: "neutral", duration: "6:45", date: "2024-01-15", time: "14:00", status: "completed", callDisposition: "Success" },
+  { id: "7", msisdn: "+1234567896", agentName: "Mike Wilson", category: "Technical Support", sentiment: "positive", duration: "9:20", date: "2024-01-15", time: "14:45", status: "failed", callDisposition: "Failed" },
+  { id: "8", msisdn: "+1234567897", agentName: "Emily Davis", category: "Sales", sentiment: "positive", duration: "7:00", date: "2024-01-15", time: "15:30", status: "completed", callDisposition: "Completed" },
+  { id: "9", msisdn: "+1234567898", agentName: "John Smith", category: "Billing", sentiment: "neutral", duration: "4:50", date: "2024-01-16", time: "09:00", status: "completed", callDisposition: "Success" },
+  { id: "10", msisdn: "+1234567899", agentName: "Sarah Johnson", category: "Technical Support", sentiment: "negative", duration: "18:20", date: "2024-01-16", time: "10:30", status: "completed", callDisposition: "Cancelled" },
 ];
 
 const SentimentIcon = ({ sentiment }: { sentiment: CallRecord["sentiment"] }) => {
@@ -90,6 +97,7 @@ const getStatusConfig = (status: CallRecord["status"]) => {
 };
 
 export default function CallInsight() {
+  const { columns: columnConfig, visibleColumns, toggleColumnVisibility, resetToDefault } = useColumnConfig('callInsight');
   const [isLoading, setIsLoading] = useState(true);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -127,113 +135,208 @@ export default function CallInsight() {
   const uniqueAgents = [...new Set(mockCalls.map(c => c.agentName))];
   const uniqueCategories = [...new Set(mockCalls.map(c => c.category))];
 
-  const columns: ColumnsType<CallRecord> = [
-    {
-      title: 'MSISDN',
-      dataIndex: 'msisdn',
-      key: 'msisdn',
-      render: (text: string) => (
-        <Text code style={{ fontSize: 13 }}>{text}</Text>
+  // Check if a column should be visible based on env config
+  const isColVisible = (key: string): boolean => {
+    const col = visibleColumns.find(c => c.def === key);
+    return col ? col.visible : true;
+  };
+
+  // Create columns based on env config
+  const allColumns: ColumnsType<CallRecord> = useMemo(() => {
+    const envColumns = visibleColumns;
+    
+    const baseColumns: ColumnsType<CallRecord> = envColumns.map(col => {
+      const columnKey = col.def;
+      
+      // Map env column definitions to actual table columns
+      switch (columnKey) {
+        case 'msisdn':
+          return {
+            title: col.label,
+            dataIndex: 'msisdn',
+            key: 'msisdn',
+            align: 'center' as const,
+            render: (text: string) => (
+              <StatusBadge title={text} color="primary" size="xs" />
+            ),
+          };
+          
+        case 'agent':
+          return {
+            title: col.label,
+            dataIndex: 'agentName',
+            key: 'agent',
+            render: (text: string) => (
+              <Space>
+                <div 
+                  style={{ 
+                    width: 32, 
+                    height: 32, 
+                    borderRadius: '50%', 
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <UserOutlined style={{ color: 'white', fontSize: 14 }} />
+                </div>
+                <Text strong>{text}</Text>
+              </Space>
+            ),
+          };
+          
+        case 'catSubCat':
+          return {
+            title: col.label,
+            dataIndex: 'category',
+            key: 'catSubCat',
+            align: 'center' as const,
+            render: (text: string) => (
+              <StatusBadge title={text} color="basic" size="xs" />
+            ),
+          };
+          
+        case 'userSentiment':
+          return {
+            title: col.label,
+            dataIndex: 'sentiment',
+            key: 'userSentiment',
+            align: 'center' as const,
+            render: (sentiment: CallRecord["sentiment"]) => {
+              const getSentimentIcon = (sentiment: CallRecord["sentiment"]) => {
+                switch (sentiment) {
+                  case "positive":
+                    return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={24} />, title: "Positive" };
+                  case "negative":
+                    return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={24} />, title: "Negative" };
+                  default:
+                    return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={24} />, title: "Neutral" };
+                }
+              };
+
+              const sentimentConfig = getSentimentIcon(sentiment);
+              return (
+                <Tooltip title={sentimentConfig.title}>
+                  {sentimentConfig.icon}
+                </Tooltip>
+              );
+            },
+          };
+          
+        case 'callDuration':
+          return {
+            title: col.label,
+            dataIndex: 'duration',
+            key: 'callDuration',
+            align: 'center' as const,
+            render: (text: string) => (
+              <Space size={4}>
+                <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
+                <Text type="secondary">{text}</Text>
+              </Space>
+            ),
+          };
+          
+        case 'dateTime':
+          return {
+            title: col.label,
+            key: 'dateTime',
+            align: 'center' as const,
+            render: (_, record) => (
+              <div>
+                <Text style={{ display: 'block' }}>{record.date}</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+              </div>
+            ),
+          };
+          
+        case 'caseStatus':
+          return {
+            title: col.label,
+            dataIndex: 'status',
+            key: 'caseStatus',
+            align: 'center' as const,
+            render: (status: CallRecord["status"]) => {
+              const getStatusColor = (status: string) => {
+                switch (status?.toLowerCase()) {
+                  case 'completed':
+                    return 'success';
+                  case 'pending':
+                    return 'amber';
+                  case 'failed':
+                    return 'warn';
+                  default:
+                    return 'basic';
+                }
+              };
+              
+              return (
+                <StatusBadge 
+                  title={status} 
+                  color={getStatusColor(status)} 
+                  size="xs" 
+                />
+              );
+            },
+          };
+          
+        case 'calldisposition':
+          return {
+            title: col.label,
+            dataIndex: 'callDisposition',
+            key: 'calldisposition',
+            align: 'center' as const,
+            render: (text: string) => {
+              const getDispositionColor = (disposition: string) => {
+                switch (disposition?.toLowerCase()) {
+                  case 'completed':
+                  case 'success':
+                    return 'success';
+                  case 'pending':
+                  case 'in progress':
+                    return 'amber';
+                  case 'failed':
+                  case 'cancelled':
+                    return 'warn';
+                  default:
+                    return 'basic';
+                }
+              };
+              
+              return (
+                <StatusBadge 
+                  title={text || 'N/A'} 
+                  color={getDispositionColor(text)} 
+                  size="xs" 
+                />
+              );
+            },
+          };
+          
+        default:
+          return {
+            title: col.label,
+            dataIndex: columnKey,
+            key: columnKey,
+            align: 'center' as const,
+            render: (text: any) => <Text>{text || 'N/A'}</Text>,
+          };
+      }
+    });
+    
+    // Add actions column at the end
+    baseColumns.push({
+      title: (
+        <ColumnToggle 
+          columns={columnConfig} 
+          onToggle={toggleColumnVisibility} 
+          onReset={resetToDefault}
+        />
       ),
-    },
-    {
-      title: 'Agent',
-      dataIndex: 'agentName',
-      key: 'agentName',
-      render: (text: string) => (
-        <Space>
-          <div 
-            style={{ 
-              width: 32, 
-              height: 32, 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <UserOutlined style={{ color: 'white', fontSize: 14 }} />
-          </div>
-          <Text strong>{text}</Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Category',
-      dataIndex: 'category',
-      key: 'category',
-      render: (text: string) => (
-        <Tag 
-          style={{ 
-            borderRadius: 6, 
-            padding: '2px 10px',
-            background: '#f1f5f9',
-            border: '1px solid #e2e8f0',
-            color: '#475569'
-          }}
-        >
-          {text}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Sentiment',
-      dataIndex: 'sentiment',
-      key: 'sentiment',
-      render: (sentiment: CallRecord["sentiment"]) => {
-        const colors = getSentimentColor(sentiment);
-        return (
-          <Tag
-            style={{
-              borderRadius: 6,
-              padding: '2px 10px',
-              background: colors.bg,
-              border: `1px solid ${colors.border}`,
-              color: colors.text,
-              textTransform: 'capitalize'
-            }}
-            icon={<SentimentIcon sentiment={sentiment} />}
-          >
-            {sentiment}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: 'Duration',
-      dataIndex: 'duration',
-      key: 'duration',
-      render: (text: string) => (
-        <Space size={4}>
-          <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
-          <Text type="secondary">{text}</Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Date & Time',
-      key: 'datetime',
-      render: (_, record) => (
-        <div>
-          <Text style={{ display: 'block' }}>{record.date}</Text>
-          <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
-        </div>
-      ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: CallRecord["status"]) => {
-        const config = getStatusConfig(status);
-        return <Badge status={config.color} text={config.text} />;
-      },
-    },
-    {
-      title: '',
       key: 'actions',
       width: 60,
+      fixed: 'right' as const,
       render: (_, record) => (
         <Tooltip title="View Details">
           <Button 
@@ -248,8 +351,13 @@ export default function CallInsight() {
           />
         </Tooltip>
       ),
-    },
-  ];
+    });
+    
+    return baseColumns;
+  }, [visibleColumns, columnConfig, toggleColumnVisibility, resetToDefault]);
+
+  // Use the columns directly from allColumns since they're already filtered by env config
+  const columns = allColumns;
 
   return (
     <ConfigProvider
@@ -467,6 +575,7 @@ export default function CallInsight() {
                 columns={columns}
                 dataSource={filteredCalls}
                 rowKey="id"
+                scroll={{ x: 'max-content' }}
                 pagination={{
                   total: filteredCalls.length,
                   pageSize: 8,

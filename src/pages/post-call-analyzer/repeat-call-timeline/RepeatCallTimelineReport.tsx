@@ -1,13 +1,25 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Info, RefreshCw, Calendar, List } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card, Typography, Space, DatePicker, Button, Tooltip, Row, Col } from "antd";
+import { 
+  InfoCircleOutlined, 
+  ReloadOutlined, 
+  CalendarOutlined, 
+  UnorderedListOutlined,
+  LineChartOutlined,
+  PhoneOutlined,
+  ClockCircleOutlined,
+  AimOutlined,
+  UserOutlined
+} from "@ant-design/icons";
+import { TablerIcon } from "@/components/ui/tabler-icon";
+import { StatCard } from "@/components/ui/stat-card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
 import { LineChartTooltip } from "@/components/ui/custom-chart-tooltip";
 import { ReasonWiseRepeatCall } from "./ReasonWiseRepeatCall.tsx";
 import { CategoryWiseRepeatCall } from "./CategoryWiseRepeatCall.tsx";
 import { AgentRepeatCallHandling } from "./AgentRepeatCallHandling.tsx";
+
+const { Title, Text } = Typography;
 
 // Mock data for the main timeline chart
 const generateTimelineData = () => {
@@ -36,91 +48,135 @@ export default function RepeatCallTimelineReport() {
   };
 
   return (
-    <Card className="border-border/50">
-      <CardHeader className="pb-4 border-b border-border/30">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg font-semibold">7 Day Repeat Call Timeline</CardTitle>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                    <Info className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Track repeat callers over the past 7 days</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <span className="text-sm text-muted-foreground">Jun 19 - Jun 25, 2025</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <Calendar className="h-4 w-4" />
-              Week
-            </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload}>
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <List className="h-4 w-4" />
-            </Button>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle" orientation="horizontal">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <LineChartOutlined style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    7 Day Repeat Call Timeline
+                  </Title>
+                  <Tooltip title="Track repeat callers over the past 7 days">
+                    <div style={{ marginTop: '-4px' }}>
+                      <TablerIcon 
+                        name="info-circle" 
+                        className="wn-tabler-14"
+                        size={14}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Jun 19 - Jun 25, 2025
+                </Text>
+              </div>
+            </Space>
+            
+            <Space size="small" orientation="horizontal">
+              <DatePicker 
+                suffixIcon={<CalendarOutlined />}
+                style={{ 
+                  borderRadius: 8,
+                  borderColor: '#d9d9d9'
+                }}
+              />
+              <Button 
+                type="text" 
+                icon={<ReloadOutlined />}
+                onClick={handleReload}
+                style={{ width: 36, height: 36 }}
+              />
+              <Button 
+                type="text" 
+                icon={<UnorderedListOutlined />}
+                style={{ width: 36, height: 36 }}
+              />
+            </Space>
           </div>
         </div>
-      </CardHeader>
-
-      <CardContent className="p-6">
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <Card className="bg-blue-500/5 border-blue-500/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Daily Repeat Rate</p>
-                  <p className="text-2xl font-bold text-foreground">{dailyRepeatRate}%</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-green-500/5 border-green-500/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <Info className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Most Affected Category</p>
-                  <p className="text-lg font-bold text-foreground">{mostAffectedCategory}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard
+              label="Daily Repeat Rate"
+              value={`${dailyRepeatRate}%`}
+              icon={<AimOutlined />}
+              color="#3b82f6"
+              gradientColors={["#3b82f6", "#2563eb"] as [string, string]}
+              isLoading={loading}
+            />
+          </Col>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard
+              label="Most Affected Category"
+              value={mostAffectedCategory}
+              icon={<PhoneOutlined />}
+              color="#ef4444"
+              gradientColors={["#ef4444", "#dc2626"] as [string, string]}
+              isLoading={loading}
+            />
+          </Col>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard
+              label="Total Repeat Calls"
+              value={timelineData.reduce((sum, day) => sum + day.repeatCalls, 0).toString()}
+              icon={<ClockCircleOutlined />}
+              color="#f59e0b"
+              gradientColors={["#f59e0b", "#d97706"] as [string, string]}
+              isLoading={loading}
+            />
+          </Col>
+        </Row>
 
         {/* Main Timeline Chart */}
-        <div className="mb-6">
+        <div style={{ marginBottom: 24 }}>
           {loading ? (
-            <div className="flex items-center justify-center h-[350px]">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 350 }}>
+              <div style={{ 
+                width: 32, 
+                height: 32, 
+                border: '2px solid #1890ff', 
+                borderTop: '2px solid transparent', 
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={timelineData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" vertical={false} />
                 <XAxis 
                   dataKey="date" 
-                  className="text-xs" 
+                  style={{ fontSize: 12 }} 
                   axisLine={false} 
                   tickLine={false}
                 />
                 <YAxis 
-                  className="text-xs" 
+                  style={{ fontSize: 12 }} 
                   axisLine={false} 
                   tickLine={false}
                 />
@@ -156,12 +212,12 @@ export default function RepeatCallTimelineReport() {
         </div>
 
         {/* Sub-reports */}
-        <div className="space-y-6 mt-8">
+        <div style={{ marginTop: 32 }}>
           <ReasonWiseRepeatCall />
           <CategoryWiseRepeatCall />
           <AgentRepeatCallHandling />
         </div>
-      </CardContent>
+      </Space>
     </Card>
   );
 }

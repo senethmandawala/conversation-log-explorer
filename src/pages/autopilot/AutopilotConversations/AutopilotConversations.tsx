@@ -15,6 +15,8 @@ import { ConversationTable } from "@/components/conversation/ConversationTable";
 import { AutopilotSingleChatHistoryView } from "./autopilot-single-chat-history-view/AutopilotSingleChatHistoryView";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord } from "@/types/conversation";
+import { useColumnConfig } from "@/hooks/useColumnConfig";
+import { ColumnToggle } from "@/components/ui/column-toggle";
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,6 +30,7 @@ import {
 } from "@/components/ui/select";
 
 export default function AutopilotConversations() {
+  const { columns: columnConfig, visibleColumns, toggleColumnVisibility, resetToDefault } = useColumnConfig('autopilot');
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRecord, setSelectedRecord] = useState<ConversationRecord | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -87,6 +90,11 @@ export default function AutopilotConversations() {
                 <Download className="h-4 w-4" />
                 Export CSV
               </Button>
+              <ColumnToggle 
+                columns={columnConfig} 
+                onToggle={toggleColumnVisibility} 
+                onReset={resetToDefault} 
+              />
               <Button 
                 variant={filtersOpen ? "default" : "outline"} 
                 size="sm" 

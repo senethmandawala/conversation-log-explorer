@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Info, RefreshCw, Calendar, List } from "lucide-react";
+import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
+import { 
+  LeftOutlined, 
+  InfoCircleOutlined, 
+  ReloadOutlined, 
+  CalendarOutlined, 
+  UnorderedListOutlined,
+  PhoneOutlined
+} from "@ant-design/icons";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TablerIcon } from "@/components/ui/tabler-icon";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from "recharts";
+
+const { Title, Text } = Typography;
 
 const mockFrequentCallersData = [
   { msisdn: "+94771234567", callCount: 28 },
@@ -77,52 +85,96 @@ export default function FrequentCallersReport() {
   };
 
   return (
-    <Card className="h-full border-border/50">
-      <CardHeader className="pb-4 border-b border-border/30">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg font-semibold">Frequent Callers</CardTitle>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                    <Info className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Top callers by call frequency</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <span className="text-sm text-muted-foreground">Jun 19 - Jun 25, 2025</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <Calendar className="h-4 w-4" />
-              Week
-            </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload}>
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <List className="h-4 w-4" />
-            </Button>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle" orientation="horizontal">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <PhoneOutlined style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                    Frequent Callers
+                  </Title>
+                  <Tooltip title="Top callers by call frequency">
+                    <div style={{ marginTop: '-4px' }}>
+                      <TablerIcon 
+                        name="info-circle" 
+                        className="wn-tabler-14"
+                        size={14}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Jun 19 - Jun 25, 2025
+                </Text>
+              </div>
+            </Space>
+            
+            <Space size="small" orientation="horizontal">
+              <DatePicker 
+                suffixIcon={<CalendarOutlined />}
+                style={{ 
+                  borderRadius: 8,
+                  borderColor: '#d9d9d9'
+                }}
+                placeholder="Select date"
+              />
+              <Button 
+                type="text" 
+                icon={<ReloadOutlined />}
+                onClick={handleReload}
+                style={{ width: 36, height: 36 }}
+              />
+              <Button 
+                type="text" 
+                icon={<UnorderedListOutlined />}
+                style={{ width: 36, height: 36 }}
+              />
+            </Space>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-6">
-        {loading ? (
-          <div className="flex items-center justify-center h-[400px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : chartData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-[400px] text-muted-foreground">
-            <p className="text-lg font-medium">No Data Available</p>
-            <p className="text-sm">No frequent callers found for the selected period</p>
-          </div>
-        ) : (
-          <div className="mt-4">
+        
+        <div style={{ marginTop: 16 }}>
+          {loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
+              <div style={{ 
+                animation: 'spin 1s linear infinite',
+                borderRadius: '50%',
+                height: '32px',
+                width: '32px',
+                borderBottom: '2px solid #1890ff'
+              }}></div>
+            </div>
+          ) : chartData.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '400px', color: '#8c8c8c' }}>
+              <p style={{ fontSize: '18px', fontWeight: 500, marginBottom: 8 }}>No Data Available</p>
+              <p style={{ fontSize: '14px' }}>No frequent callers found for the selected period</p>
+            </div>
+          ) : (
+            <div style={{ marginTop: 16 }}>
             <ResponsiveContainer width="100%" height={450}>
               <BarChart 
                 data={chartData} 
@@ -161,9 +213,10 @@ export default function FrequentCallersReport() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        )}
-      </CardContent>
+            </div>
+          )}
+        </div>
+      </Space>
     </Card>
   );
 }

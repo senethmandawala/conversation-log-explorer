@@ -6,11 +6,15 @@ import { ArrowLeft, Info, RefreshCw, Calendar, List, ChevronLeft, ChevronRight, 
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { DurationCallLogs } from "./DurationCallLogs.tsx";
+import { Typography, DatePicker, Tabs as AntTabs, Table as AntTable, Badge as AntBadge, Space, Tooltip as AntTooltip } from "antd";
+import { PhoneOutlined, CalendarOutlined, ReloadOutlined, UnorderedListOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { TablerIcon } from "@/components/ui/tabler-icon";
+
+const { Title, Text } = Typography;
+const { TabPane } = AntTabs;
 
 const mockCategoryData = [
   { name: "Billing Issues", value: 145, fill: "#4285F4" },
@@ -184,96 +188,120 @@ export default function CallDurationReport() {
     }
   };
 
-  const getSentimentBadge = (sentiment: string) => {
-    switch (sentiment.toLowerCase()) {
-      case "positive": return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Positive</Badge>;
-      case "negative": return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Negative</Badge>;
-      default: return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">Neutral</Badge>;
+  const getSentimentIcon = (sentiment: string) => {
+    switch (sentiment) {
+      case "positive":
+        return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={20} />, title: "Positive" };
+      case "negative":
+        return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={20} />, title: "Negative" };
+      default:
+        return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
-      case "resolved": return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Resolved</Badge>;
-      case "pending": return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">Pending</Badge>;
-      case "escalated": return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Escalated</Badge>;
-      default: return <Badge variant="outline">{status}</Badge>;
+      case "resolved": return { color: 'success', text: 'Resolved' };
+      case "pending": return { color: 'processing', text: 'Pending' };
+      case "escalated": return { color: 'error', text: 'Escalated' };
+      default: return { color: 'default', text: status };
     }
   };
 
   return (
     <Card className="border-border/50">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setSelectedTab("reports")}
-                  className="h-10 w-10 rounded-lg"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl font-semibold tracking-tight">
-                      Call Duration Analysis
-                    </CardTitle>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                          <Info className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Analyze call duration patterns and identify long calls</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Duration distribution and long call analysis
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Calendar className="h-4 w-4" />
-                  Today
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload}>
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+      <CardHeader className="pb-4 border-b border-border/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white'
+              }}
+            >
+              <PhoneOutlined style={{ fontSize: 20 }} />
             </div>
-          </CardHeader>
-
-          <CardContent className="pt-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="duration">Call Duration</TabsTrigger>
-                <TabsTrigger value="long-calls">Long Calls</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="duration" className="mt-6">
-                <div className="mb-4">
-                  <Card className="border-border/50 bg-gradient-to-br from-blue-500/10 to-purple-500/10">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Average Call Time</p>
-                          <div className="flex items-baseline gap-2">
-                            <h2 className="text-3xl font-bold">{averageCallTime}</h2>
-                            <span className="text-sm text-muted-foreground">from {totalCallCount} Calls</span>
-                          </div>
-                        </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                  Call Duration Analysis
+                </Title>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                      <div style={{ marginTop: '-4px' }}>
+                        <TablerIcon 
+                          name="info-circle" 
+                          className="wn-tabler-14"
+                          size={14}
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Analyze call duration patterns and identify long calls</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Text type="secondary" style={{ fontSize: 14 }}>
+                Duration distribution and long call analysis
+              </Text>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <DatePicker 
+              suffixIcon={<CalendarOutlined />}
+              style={{ 
+                borderRadius: 8,
+                borderColor: '#d9d9d9'
+              }}
+              placeholder="Select date"
+            />
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-9 w-9">
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-2">
+        <AntTabs
+          activeKey={activeTab}
+          onChange={(value) => setActiveTab(value)}
+          style={{ width: '100%' }}
+          size="large"
+        >
+          <TabPane tab="Call Duration" key="duration">
+                <div style={{ marginBottom: 16 }}>
+                <Card
+                  style={{
+                    borderRadius: 12,
+                    border: '1px solid #e8e8e8',
+                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                    padding: '16px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Call Time</p>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                        <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageCallTime}</h2>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCallCount} Calls</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
 
                 {loading ? (
                   <div className="flex items-center justify-center h-[400px]">
@@ -298,7 +326,7 @@ export default function CallDurationReport() {
                           size="icon"
                           className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
                           onClick={scrollNext}
-                          disabled={visibleStartIndex >= slides.length - 1}
+                          disabled={visibleStartIndex >= slides.length - 2}
                         >
                           <ChevronRight className="h-4 w-4" />
                         </Button>
@@ -328,13 +356,8 @@ export default function CallDurationReport() {
                                 <div className="flex items-center justify-between mb-3">
                                   <h5 className="text-base font-semibold text-foreground">{slide.title}</h5>
                                   {slide.id > 1 && (
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      onClick={() => closeSlide(slide.id)}
-                                    >
-                                      <X className="h-3.5 w-3.5" />
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => closeSlide(slide.id)}>
+                                      <X className="h-3 w-3" />
                                     </Button>
                                   )}
                                 </div>
@@ -390,16 +413,16 @@ export default function CallDurationReport() {
                     </div>
                   </div>
                 )}
-              </TabsContent>
+          </TabPane>
 
-              <TabsContent value="long-calls" className="mt-6">
+          <TabPane tab="Long Calls" key="long-calls">
                 {loading ? (
                   <div className="flex items-center justify-center h-[400px]">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                   </div>
                 ) : (
-                  <Card className="border-border/50">
-                    <CardContent className="p-6">
+                  <Card style={{ border: '1px solid #e8e8e8', borderRadius: 12 }}>
+                    <div style={{ padding: '24px' }}>
                       <h5 className="text-lg font-semibold mb-4">Long Calls Overview</h5>
                       
                       <div className="grid grid-cols-3 gap-4 mb-6">
@@ -430,42 +453,13 @@ export default function CallDurationReport() {
                         </div>
                       </div>
 
-                      <h6 className="text-base font-semibold mb-3">Long Call Logs Summary</h6>
-                      <div className="border rounded-lg">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Date Time</TableHead>
-                              <TableHead>MSISDN</TableHead>
-                              <TableHead className="text-center">Sentiment</TableHead>
-                              <TableHead className="text-center">Status</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {mockLongCallsData.map((call) => (
-                              <TableRow key={call.id}>
-                                <TableCell>
-                                  <div>
-                                    <div className="font-medium">{call.date}</div>
-                                    <div className="text-sm text-muted-foreground">{call.time}</div>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="font-mono text-sm">{call.msisdn}</TableCell>
-                                <TableCell className="text-center">{getSentimentBadge(call.sentiment)}</TableCell>
-                                <TableCell className="text-center">{getStatusBadge(call.status)}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-
                       <DurationCallLogs />
-                    </CardContent>
+                    </div>
                   </Card>
                 )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
+          </TabPane>
+        </AntTabs>
+      </CardContent>
     </Card>
   );
 }

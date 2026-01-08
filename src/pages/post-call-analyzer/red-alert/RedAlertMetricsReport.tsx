@@ -1,19 +1,32 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Info, RefreshCw, X } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
+import { 
+  ReloadOutlined, 
+  CloseOutlined, 
+  BarChartOutlined,
+  CalendarOutlined, 
+  ApartmentOutlined
+} from "@ant-design/icons";
+import { TablerIcon } from "@/components/ui/tabler-icon";
 import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
+
+const { Title, Text } = Typography;
 
 // Custom Tooltip Components
 const TreemapTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-popover border border-border rounded-lg p-2 shadow-lg">
-        <p className="font-medium">{data.name}</p>
-        <p className="text-sm text-muted-foreground">Value: {data.value}</p>
-        <p className="text-sm text-muted-foreground">Percentage: {data.percentage}%</p>
+      <div style={{
+        backgroundColor: 'white',
+        border: '1px solid #d9d9d9',
+        borderRadius: 8,
+        padding: 8,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+      }}>
+        <div style={{ fontWeight: 500, marginBottom: 4 }}>{data.name}</div>
+        <div style={{ fontSize: 12, color: '#666' }}>Value: {data.value}</div>
+        <div style={{ fontSize: 12, color: '#666' }}>Percentage: {data.percentage}%</div>
       </div>
     );
   }
@@ -24,9 +37,15 @@ const BarChartTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-popover border border-border rounded-lg p-2 shadow-lg">
-        <p className="font-medium">{data.name}</p>
-        <p className="text-sm text-muted-foreground">Value: {data.value}</p>
+      <div style={{
+        backgroundColor: 'white',
+        border: '1px solid #d9d9d9',
+        borderRadius: 8,
+        padding: 8,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+      }}>
+        <div style={{ fontWeight: 500, marginBottom: 4 }}>{data.name}</div>
+        <div style={{ fontSize: 12, color: '#666' }}>Value: {data.value}</div>
       </div>
     );
   }
@@ -43,14 +62,19 @@ const RedAlertCallLogs = ({ category, subCategory }: { category: string; subCate
   ];
 
   return (
-    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+    <div className="space-y-2" style={{ maxHeight: 300, overflowY: 'auto' }}>
       {mockLogs.map((log) => (
-        <div key={log.id} className="p-2 bg-muted/30 rounded-lg text-sm">
-          <div className="flex justify-between">
+        <div key={log.id} style={{
+          padding: 8,
+          backgroundColor: '#fafafa',
+          borderRadius: 8,
+          fontSize: 14
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
             <span>{log.time}</span>
-            <span className="text-muted-foreground">{log.duration}</span>
+            <span style={{ color: '#666' }}>{log.duration}</span>
           </div>
-          <div className="text-muted-foreground">{log.status}</div>
+          <div style={{ color: '#666' }}>{log.status}</div>
         </div>
       ))}
     </div>
@@ -216,102 +240,193 @@ export default function RedAlertMetricsReport() {
   };
 
   return (
-    <Card className="border-border/50">
-      <CardHeader className="pb-4 border-b border-border/30">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg font-semibold">Red Alert Metrics</CardTitle>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                    <Info className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Highlighting key areas that require immediate attention</p>
-                </TooltipContent>
-              </Tooltip>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <ApartmentOutlined style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                        Red Alert Metrics
+                      </Title>
+                      <Tooltip title="Highlighting key areas that require immediate attention">
+                        <div style={{ marginTop: '-4px' }}>
+                          <TablerIcon 
+                            name="info-circle" 
+                            className="wn-tabler-14"
+                            size={14}
+                          />
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <Text type="secondary" style={{ fontSize: 14 }}>
+                      Highlighting key areas that require immediate attention
+                    </Text>
+                  </div>
+                </div>
+              </div>
             </div>
-            <span className="text-sm text-muted-foreground">Highlighting key areas that require immediate attention</span>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <DatePicker 
+                suffixIcon={<CalendarOutlined />}
+                style={{ 
+                  borderRadius: 8,
+                  borderColor: '#d9d9d9'
+                }}
+              />
+              <Button 
+                type="text"
+                icon={<ReloadOutlined className={loading ? 'animate-spin' : ''} />}
+                onClick={handleReload}
+                style={{ borderRadius: 8 }}
+              />
+            </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-9 w-9"
-            onClick={handleReload}
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
         </div>
-      </CardHeader>
-
-      <CardContent className="pt-6">
         {loading ? (
-          <div className="flex items-center justify-center h-[350px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            height: 350 
+          }}>
+            <div style={{
+              width: 32,
+              height: 32,
+              border: '2px solid #1890ff',
+              borderTop: '2px solid transparent',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
           </div>
         ) : (
-          <div className="grid grid-cols-12 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
             {/* Treemap Chart - First Level */}
-            <div className={showThirdChart ? "col-span-12 md:col-span-4" : showSecondChart ? "col-span-12 md:col-span-6" : "col-span-12"}>
-              <ResponsiveContainer width="100%" height={350}>
-                <Treemap
-                  data={treemapData}
-                  dataKey="value"
-                  stroke="white"
-                  fill="hsl(226, 70%, 55%)"
-                  content={<CustomTreemapContent />}
-                  onClick={handleTreemapClick}
-                >
-                  <RechartsTooltip content={<TreemapTooltip />} />
-                </Treemap>
-              </ResponsiveContainer>
-              
-              {/* Legend */}
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {treemapData.filter(item => item.value > 0).map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-sm flex-shrink-0" 
-                      style={{ backgroundColor: item.fill }}
-                    />
-                    <span className="text-xs text-muted-foreground truncate">{item.name}</span>
-                  </div>
-                ))}
-              </div>
-              
-              <p className="text-sm text-muted-foreground text-center mt-3 py-2 bg-muted/30 rounded-lg">
-                <span className="font-medium text-primary">Note:</span> Data is based on the selected date range
-              </p>
+            <div style={{ 
+              gridColumn: showThirdChart ? 'span 4' : showSecondChart ? 'span 6' : 'span 12'
+            }}>
+              <Card
+                style={{
+                  borderRadius: 12,
+                  border: '1px solid #e8e8e8',
+                  background: '#ffffff',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                  padding: 16
+                }}
+              >
+                <ResponsiveContainer width="100%" height={350}>
+                  <Treemap
+                    data={treemapData}
+                    dataKey="value"
+                    stroke="white"
+                    fill="hsl(226, 70%, 55%)"
+                    content={<CustomTreemapContent />}
+                    onClick={handleTreemapClick}
+                  >
+                    <RechartsTooltip content={<TreemapTooltip />} />
+                  </Treemap>
+                </ResponsiveContainer>
+                
+                {/* Legend */}
+                <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                  {treemapData.filter(item => item.value > 0).map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div 
+                        style={{ 
+                          width: 12, 
+                          height: 12, 
+                          borderRadius: 2, 
+                          flexShrink: 0,
+                          backgroundColor: item.fill 
+                        }}
+                      />
+                      <span style={{ fontSize: 12, color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <div style={{ 
+                  fontSize: 14, 
+                  color: '#666', 
+                  textAlign: 'center', 
+                  marginTop: 12, 
+                  padding: 8, 
+                  backgroundColor: '#fafafa', 
+                  borderRadius: 8 
+                }}>
+                  <span style={{ fontWeight: 500, color: '#1890ff' }}>Note:</span> Data is based on the selected date range
+                </div>
+              </Card>
             </div>
 
             {/* Bar Chart - Second Level */}
             {showSecondChart && (
-              <div className={showThirdChart ? "col-span-12 md:col-span-4" : "col-span-12 md:col-span-6"}>
-                <div className="border border-border/30 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
+              <div style={{ 
+                gridColumn: showThirdChart ? 'span 4' : 'span 6'
+              }}>
+                <div style={{ 
+                  border: '1px solid #e8e8e8', 
+                  borderRadius: 8, 
+                  padding: 16 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                     <div>
-                      <p className="text-sm text-muted-foreground">{selectedCategory}</p>
-                      <h5 className="text-base font-semibold">
+                      <Text type="secondary" style={{ fontSize: 14 }}>{selectedCategory}</Text>
+                      <Title level={5} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
                         {selectedCategory === 'Open Cases' || selectedCategory === 'Drop calls' 
                           ? 'Top Agents' 
                           : 'Reasons for ' + selectedCategory}
-                      </h5>
+                      </Title>
                     </div>
                     <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
+                      type="text"
+                      icon={<CloseOutlined />}
                       onClick={closeSecondChart}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                      style={{ borderRadius: 8 }}
+                    />
                   </div>
 
                   {secondChartLoading ? (
-                    <div className="flex items-center justify-center h-[300px]">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      height: 300 
+                    }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        border: '2px solid #1890ff',
+                        borderTop: '2px solid transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}></div>
                     </div>
                   ) : (
                     <>
@@ -343,9 +458,17 @@ export default function RedAlertMetricsReport() {
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
-                      <p className="text-sm text-muted-foreground text-center mt-2 py-2 bg-muted/30 rounded-lg">
-                        <span className="font-medium text-primary">Note:</span> Data is based on the selected date range
-                      </p>
+                      <div style={{ 
+                        fontSize: 14, 
+                        color: '#666', 
+                        textAlign: 'center', 
+                        marginTop: 8, 
+                        padding: 8, 
+                        backgroundColor: '#fafafa', 
+                        borderRadius: 8 
+                      }}>
+                        <span style={{ fontWeight: 500, color: '#1890ff' }}>Note:</span> Data is based on the selected date range
+                      </div>
                     </>
                   )}
                 </div>
@@ -354,26 +477,40 @@ export default function RedAlertMetricsReport() {
 
             {/* Call Logs - Third Level */}
             {showThirdChart && (
-              <div className="col-span-12 md:col-span-4">
-                <div className="border border-border/30 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
+              <div style={{ gridColumn: 'span 4' }}>
+                <div style={{ 
+                  border: '1px solid #e8e8e8', 
+                  borderRadius: 8, 
+                  padding: 16 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                     <div>
-                      <p className="text-sm text-muted-foreground">{selectedCategory} / {selectedSubCategory}</p>
-                      <h5 className="text-base font-semibold">Call Logs</h5>
+                      <Text type="secondary" style={{ fontSize: 14 }}>{selectedCategory} / {selectedSubCategory}</Text>
+                      <Title level={5} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Call Logs</Title>
                     </div>
                     <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
+                      type="text"
+                      icon={<CloseOutlined />}
                       onClick={closeThirdChart}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                      style={{ borderRadius: 8 }}
+                    />
                   </div>
 
                   {thirdChartLoading ? (
-                    <div className="flex items-center justify-center h-[300px]">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      height: 300 
+                    }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        border: '2px solid #1890ff',
+                        borderTop: '2px solid transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}></div>
                     </div>
                   ) : (
                     <RedAlertCallLogs 
@@ -386,7 +523,7 @@ export default function RedAlertMetricsReport() {
             )}
           </div>
         )}
-      </CardContent>
+      </Space>
     </Card>
   );
 }

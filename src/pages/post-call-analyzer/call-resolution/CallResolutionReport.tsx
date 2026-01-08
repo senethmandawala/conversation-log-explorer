@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Info, RefreshCw, Calendar, List } from "lucide-react";
+import { Card, Typography, Space, DatePicker, Button, Tooltip, Tabs } from "antd";
+import { 
+  LeftOutlined, 
+  InfoCircleOutlined, 
+  ReloadOutlined, 
+  CalendarOutlined, 
+  UnorderedListOutlined,
+  PhoneOutlined
+} from "@ant-design/icons";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TablerIcon } from "@/components/ui/tabler-icon";
 import { CaseStatusOverall } from "./CaseStatusOverall";
 import { CaseStatusTopCategories } from "./CaseStatusTopCategories";
 import { CaseStatusTopAgents } from "./CaseStatusTopAgents";
@@ -17,6 +22,9 @@ interface SelectedCategory {
   name: string;
   color: string;
 }
+
+const { Title, Text } = Typography;
+const { TabPane } = Tabs;
 
 export default function CallResolutionReport() {
   const { setSelectedTab } = usePostCall();
@@ -109,168 +117,211 @@ export default function CallResolutionReport() {
     handleCloseCategoryChart();
   };
 
+  const getColSpan = (colClass: string) => {
+    if (colClass === "col-span-12") return 12;
+    if (colClass === "col-span-6") return 6;
+    if (colClass === "col-span-5") return 5;
+    if (colClass === "col-span-3") return 3;
+    if (colClass === "col-span-4") return 4;
+    return 12;
+  };
+
   return (
-    <Card className="border-border/50">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setSelectedTab("reports")}
-                  className="h-10 w-10 rounded-lg"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl font-semibold tracking-tight">
-                      Call Resolution
-                    </CardTitle>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                          <Info className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Track resolution rates and handling times</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Resolution status and average handling time analysis
-                  </p>
-                </div>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle" orientation="horizontal">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <PhoneOutlined style={{ fontSize: 20 }} />
               </div>
-              
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Calendar className="h-4 w-4" />
-                  Today
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload}>
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <List className="h-4 w-4" />
-                </Button>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                    Call Resolution
+                  </Title>
+                  <Tooltip title="Track resolution rates and handling times">
+                    <div style={{ marginTop: '-4px' }}>
+                      <TablerIcon 
+                        name="info-circle" 
+                        className="wn-tabler-14"
+                        size={14}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Resolution status and average handling time analysis
+                </Text>
+              </div>
+            </Space>
+            
+            <Space size="small" orientation="horizontal">
+              <DatePicker 
+                suffixIcon={<CalendarOutlined />}
+                style={{ 
+                  borderRadius: 8,
+                  borderColor: '#d9d9d9'
+                }}
+                placeholder="Select date"
+              />
+              <Button 
+                type="text" 
+                icon={<ReloadOutlined />}
+                onClick={handleReload}
+                style={{ width: 36, height: 36 }}
+              />
+              <Button 
+                type="text" 
+                icon={<UnorderedListOutlined />}
+                style={{ width: 36, height: 36 }}
+              />
+            </Space>
+          </div>
+        </div>
+
+        
+        <div style={{ marginTop: 16 }}>
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          style={{ width: '100%' }}
+          size="large"
+        >
+          <TabPane tab="Resolution Status" key="resolution-status">
+            <div style={{ marginTop: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                <AnimatePresence mode="sync">
+                  {col1Visible && (
+                    <motion.div
+                      key="col1-status"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
+                    >
+                      <CaseStatusOverall onCaseSelect={handleCaseSelect} />
+                    </motion.div>
+                  )}
+
+                  {col2Visible && selectedCaseType && (
+                    <motion.div
+                      key="col2-status"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
+                    >
+                      <CaseStatusTopCategories
+                        selectedCaseType={selectedCaseType}
+                        onCategorySelect={handleCaseStatusCategorySelect}
+                        onClose={handleCloseCategoryChart}
+                      />
+                    </motion.div>
+                  )}
+
+                  {col3Visible && selectedCategory && (
+                    <motion.div
+                      key="col3-status"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ gridColumn: `span ${getColSpan(col3Class)}` }}
+                    >
+                      <CaseStatusTopAgents
+                        selectedCaseType={selectedCaseType}
+                        selectedCategory={selectedCategory}
+                        onClose={handleCloseAgentChart}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
-          </CardHeader>
+          </TabPane>
 
-          <CardContent className="pt-6">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="resolution-status">Resolution Status</TabsTrigger>
-                <TabsTrigger value="average-time">Average Resolution Time</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="resolution-status" className="mt-6">
-                <div className="grid grid-cols-12 gap-4">
-                  <AnimatePresence mode="sync">
-                    {col1Visible && (
-                      <motion.div
-                        key="col1-status"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.3 }}
-                        className={col1Class}
-                      >
-                        <CaseStatusOverall onCaseSelect={handleCaseSelect} />
-                      </motion.div>
-                    )}
-
-                    {col2Visible && selectedCaseType && (
-                      <motion.div
-                        key="col2-status"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
-                        className={col2Class}
-                      >
-                        <CaseStatusTopCategories
-                          selectedCaseType={selectedCaseType}
-                          onCategorySelect={handleCaseStatusCategorySelect}
-                          onClose={handleCloseCategoryChart}
-                        />
-                      </motion.div>
-                    )}
-
-                    {col3Visible && selectedCategory && (
-                      <motion.div
-                        key="col3-status"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
-                        className={col3Class}
-                      >
-                        <CaseStatusTopAgents
-                          selectedCaseType={selectedCaseType}
-                          selectedCategory={selectedCategory}
-                          onClose={handleCloseAgentChart}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="average-time" className="mt-6">
-                <div className="mb-4">
-                  <Card className="border-border/50 bg-gradient-to-br from-blue-500/10 to-purple-500/10">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Average Resolution Time</p>
-                          <div className="flex items-baseline gap-2">
-                            <h2 className="text-3xl font-bold">{averageTime}</h2>
-                            <span className="text-sm text-muted-foreground">from {callCount} calls</span>
-                          </div>
-                        </div>
+          <TabPane tab="Average Resolution Time" key="average-time">
+            <div style={{ marginTop: 24 }}>
+              <div style={{ marginBottom: 16 }}>
+                <Card
+                  style={{
+                    borderRadius: 12,
+                    border: '1px solid #e8e8e8',
+                    background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                    padding: '16px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Resolution Time</p>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                        <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageTime}</h2>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {callCount} calls</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
 
-                <div className="grid grid-cols-12 gap-4">
-                  <AnimatePresence mode="sync">
-                    {col1Visible && (
-                      <motion.div
-                        key="col1-avgtime"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.3 }}
-                        className={col1Class}
-                      >
-                        <AverageTimeTopCategories onCategorySelect={handleAverageTimeCategorySelect} />
-                      </motion.div>
-                    )}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                <AnimatePresence mode="sync">
+                  {col1Visible && (
+                    <motion.div
+                      key="col1-avgtime"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ gridColumn: `span ${getColSpan(col1Class)}` }}
+                    >
+                      <AverageTimeTopCategories onCategorySelect={handleAverageTimeCategorySelect} />
+                    </motion.div>
+                  )}
 
-                    {col2Visible && selectedCategory && (
-                      <motion.div
-                        key="col2-avgtime"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
-                        className={col2Class}
-                      >
-                        <AverageTimeTopAgents
-                          selectedCategory={selectedCategory}
-                          onClose={handleCloseAverageTimeAgentChart}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
+                  {col2Visible && selectedCategory && (
+                    <motion.div
+                      key="col2-avgtime"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ gridColumn: `span ${getColSpan(col2Class)}` }}
+                    >
+                      <AverageTimeTopAgents
+                        selectedCategory={selectedCategory}
+                        onClose={handleCloseAverageTimeAgentChart}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </TabPane>
+        </Tabs>
+        </div>
+      </Space>
     </Card>
   );
 }

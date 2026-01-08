@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Table,
@@ -19,13 +19,15 @@ import { Eye, Columns3, Settings2 } from "lucide-react";
 import { ConversationRecord, ColumnDefinition } from "@/types/conversation";
 import { StatusBadge, getResolutionVariant, getVdnSourceVariant } from "./StatusBadge";
 import { cn } from "@/lib/utils";
+import { getColumnDefinitionsAutopilot } from "@/utils/envConfig";
 
 interface ConversationTableProps {
   data: ConversationRecord[];
   onView: (record: ConversationRecord) => void;
 }
 
-const defaultColumns: ColumnDefinition[] = [
+// Fallback columns if env config is not available
+const fallbackColumns: ColumnDefinition[] = [
   { id: 'date', label: 'Date & Time', visible: true },
   { id: 'msisdn', label: 'MSISDN', visible: true },
   { id: 'category', label: 'Category', visible: true },
@@ -42,6 +44,19 @@ const defaultColumns: ColumnDefinition[] = [
   { id: 'duration', label: 'Duration', visible: true },
 ];
 
+// Get columns from env config or use fallback
+const getDefaultColumns = (): ColumnDefinition[] => {
+  const envColumns = getColumnDefinitionsAutopilot();
+  if (envColumns && envColumns.length > 0) {
+    return envColumns.map(col => ({
+      id: col.def,
+      label: col.label,
+      visible: col.visible,
+    }));
+  }
+  return fallbackColumns;
+};
+
 const rowVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: (i: number) => ({
@@ -56,7 +71,7 @@ const rowVariants = {
 };
 
 export function ConversationTable({ data, onView }: ConversationTableProps) {
-  const [columns, setColumns] = useState<ColumnDefinition[]>(defaultColumns);
+  const [columns, setColumns] = useState<ColumnDefinition[]>(getDefaultColumns);
 
   const visibleColumns = columns.filter((col) => col.visible);
 

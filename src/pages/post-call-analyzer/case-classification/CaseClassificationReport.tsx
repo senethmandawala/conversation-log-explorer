@@ -1,12 +1,20 @@
 import { useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X, Calendar, Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
+import { 
+  LeftOutlined, 
+  RightOutlined, 
+  CloseOutlined, 
+  CalendarOutlined, 
+  BarChartOutlined,
+  ApartmentOutlined 
+} from "@ant-design/icons";
+import { TablerIcon } from "@/components/ui/tabler-icon";
 import { Category } from "./Category";
 import { TopSubCategory } from "./TopSubCategory";
 import { SubCategoryList } from "./SubCategoryList";
 import { CallLogsSummary } from "./CallLogsSummary";
+
+const { Title, Text } = Typography;
 
 interface Slide {
   id: number;
@@ -187,130 +195,210 @@ export const CaseClassificationReport = ({
   };
 
   return (
-    <Card className="overflow-hidden border-border/50 bg-card shadow-sm hover:shadow-md transition-shadow duration-300">
-      <CardHeader className="pb-2 border-b border-border/30">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            {!hideAccentLine && (
-              <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                      <Info className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Drill down into case categories to analyze call distribution</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
-              {hasFilter && (
-                <div className="mt-3 inline-flex items-center px-3 py-1.5 bg-primary/5 border border-primary/20 rounded-full text-xs font-medium">
-                  Total Calls 
-                  <span className="ml-2 px-2 py-0.5 bg-primary text-primary-foreground rounded-full">{totalCalls}</span>
-                </div>
+    <Card
+      style={{
+        borderRadius: 12,
+        border: '1px solid #e8e8e8',
+        background: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        padding: '16px 16px 16px 16px'
+      }}
+    >
+      <div>
+        {/* Header Section */}
+        <div style={{ marginTop: -12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Space align="center" size="middle" orientation="horizontal">
+              {!hideAccentLine && (
+                <div
+                  style={{
+                    width: 4,
+                    height: 32,
+                    background: 'linear-gradient(to bottom, #1890ff, rgba(24, 144, 255, 0.5))',
+                    borderRadius: 2
+                  }}
+                />
               )}
-            </div>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <ApartmentOutlined style={{ fontSize: 20 }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    {title}
+                  </Title>
+                  <Tooltip title="Drill down into case categories to analyze call distribution">
+                    <div style={{ marginTop: '-4px' }}>
+                      <TablerIcon 
+                        name="info-circle" 
+                        className="wn-tabler-14"
+                        size={14}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <Text type="secondary" style={{ fontSize: 14, marginBottom: 8 }}>
+                  {description}
+                </Text>
+              </div>
+            </Space>
+            
+            <DatePicker 
+              suffixIcon={<CalendarOutlined />}
+              style={{ 
+                borderRadius: 8,
+                borderColor: '#d9d9d9'
+              }}
+            />
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
-              <Calendar className="h-3.5 w-3.5" />
-              Today
-            </Button>
-          </div>
+          {hasFilter && (
+            <div style={{ 
+              marginTop: 8, 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              padding: '6px 12px', 
+              backgroundColor: 'rgba(24, 144, 255, 0.05)', 
+              border: '1px solid rgba(24, 144, 255, 0.2)', 
+              borderRadius: 16, 
+              fontSize: 12, 
+              fontWeight: 500 
+            }}>
+              Total Calls 
+              <span style={{ 
+                marginLeft: 8, 
+                padding: '2px 8px', 
+                backgroundColor: '#1890ff', 
+                color: 'white', 
+                borderRadius: 12 
+              }}>
+                {totalCalls}
+              </span>
+            </div>
+          )}
         </div>
-      </CardHeader>
-      
-      <CardContent className="pt-4">
-        <div className="relative">
-      {/* Navigation Buttons */}
-      {slides.length > 2 && (
-        <>
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
-            onClick={scrollPrev}
-            disabled={visibleStartIndex === 0}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
-            onClick={scrollNext}
-            disabled={visibleStartIndex >= slides.length - 2}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </>
-      )}
+        
+        {/* Carousel Section */}
+        <div style={{ position: 'relative' }}>
+          {/* Navigation Buttons */}
+          {slides.length > 2 && (
+            <>
+              <Button
+                type="default"
+                icon={<LeftOutlined />}
+                onClick={scrollPrev}
+                disabled={visibleStartIndex === 0}
+                style={{
+                  position: 'absolute',
+                  left: -16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 10,
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                }}
+              />
+              <Button
+                type="default"
+                icon={<RightOutlined />}
+                onClick={scrollNext}
+                disabled={visibleStartIndex >= slides.length - 2}
+                style={{
+                  position: 'absolute',
+                  right: -16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 10,
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                }}
+              />
+            </>
+          )}
 
-      {/* Slides */}
-      <div 
-        ref={carouselRef}
-        className="overflow-hidden w-full"
-      >
-        <div
-          className="flex"
-          style={{
-            transform: `translateX(-${visibleStartIndex * 50}%)`,
-            transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-        >
-          {slides.map((slide, index) => (
+          {/* Slides */}
+          <div 
+            ref={carouselRef}
+            style={{ overflow: 'hidden', width: '100%' }}
+          >
             <div
-              key={slide.id}
-              className="flex-shrink-0 pr-4"
-              style={{ 
-                width: slides.length === 1 ? '100%' : '50%',
-                transition: 'width 0.15s cubic-bezier(0.4, 0, 0.2, 1)'
+              style={{
+                display: 'flex',
+                transform: `translateX(-${visibleStartIndex * 50}%)`,
+                transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              <Card className="h-[350px] p-3 border-border/50 bg-background/50">
-                <div className="h-full flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="min-w-0 flex-1">
-                      <h5 className="text-sm font-semibold text-foreground">{slide.title}</h5>
-                      {slide.breadcrumb.length > 0 && (
-                        <p 
-                          className="text-xs text-muted-foreground mt-1 truncate"
-                          title={slide.breadcrumb.join(" / ")}
-                        >
-                          {slide.breadcrumb.join(" / ")}
-                        </p>
-                      )}
+              {slides.map((slide, index) => (
+                <div
+                  key={slide.id}
+                  style={{ 
+                    flexShrink: 0,
+                    paddingRight: 16,
+                    width: slides.length === 1 ? '100%' : '50%',
+                    transition: 'width 0.15s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  <Card
+                    style={{
+                      borderRadius: 12,
+                      border: '1px solid #e8e8e8',
+                      background: '#ffffff',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                      padding: 16,
+                      height: 450
+                    }}
+                  >
+                    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <Title level={5} style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                            {slide.title}
+                          </Title>
+                          {slide.breadcrumb.length > 0 && (
+                            <Text 
+                              type="secondary" 
+                              style={{ fontSize: 12, marginTop: 4, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                              title={slide.breadcrumb.join(" / ")}
+                            >
+                              {slide.breadcrumb.join(" / ")}
+                            </Text>
+                          )}
+                        </div>
+                        {slide.id > 1 && (
+                          <Button
+                            type="text"
+                            icon={<CloseOutlined />}
+                            onClick={() => closeSlide(slide.id)}
+                            style={{ width: 28, height: 28 }}
+                          />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minHeight: 0 }}>
+                        {renderSlideContent(slide, index)}
+                      </div>
                     </div>
-                    {slide.id > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => closeSlide(slide.id)}
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </div>
-                  <div className="flex-1 min-h-0">
-                    {renderSlideContent(slide, index)}
-                  </div>
+                  </Card>
                 </div>
-              </Card>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
-
-        </div>
-      </CardContent>
     </Card>
   );
 };

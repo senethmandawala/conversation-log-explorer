@@ -231,7 +231,7 @@ export default function GeographicDistributionMap() {
 
       // Popup content
       const popupContent = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; min-width: 200px;">
+        <div style="font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; min-width: 200px;">
           <div style="font-weight: 600; font-size: 15px; margin-bottom: 10px; color: #1a1a1a;">
             ${location.name}
           </div>

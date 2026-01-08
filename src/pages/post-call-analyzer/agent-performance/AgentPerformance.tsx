@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { 
   Card, 
   Table, 
@@ -36,6 +36,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { usePostCall } from "@/contexts/PostCallContext";
+import { useColumnConfig } from "@/hooks/useColumnConfig";
+import { ColumnToggle } from "@/components/ui/column-toggle";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { StatCard } from "@/components/ui/stat-card";
 import type { ColumnsType } from "antd/es/table";
 
 const { Title, Text } = Typography;
@@ -55,17 +59,18 @@ interface AgentMetric {
   trend: "up" | "down" | "stable";
   performance: "excellent" | "good" | "average" | "poor";
   status: "active" | "inactive";
+  qualityScore?: number;
 }
 
 const mockAgents: AgentMetric[] = [
-  { id: "1", agentId: "AGT-001", name: "John Smith", avatar: "JS", department: "Customer Support", totalCalls: 245, avgHandleTime: "4:32", fcr: 92, csat: 4.8, sentiment: 85, trend: "up", performance: "excellent", status: "active" },
-  { id: "2", agentId: "AGT-002", name: "Sarah Johnson", avatar: "SJ", department: "Technical Support", totalCalls: 230, avgHandleTime: "5:15", fcr: 88, csat: 4.6, sentiment: 78, trend: "up", performance: "good", status: "active" },
-  { id: "3", agentId: "AGT-003", name: "Mike Wilson", avatar: "MW", department: "Sales", totalCalls: 198, avgHandleTime: "4:45", fcr: 85, csat: 4.5, sentiment: 72, trend: "stable", performance: "good", status: "active" },
-  { id: "4", agentId: "AGT-004", name: "Emily Davis", avatar: "ED", department: "Customer Support", totalCalls: 210, avgHandleTime: "6:10", fcr: 78, csat: 4.2, sentiment: 65, trend: "down", performance: "average", status: "active" },
-  { id: "5", agentId: "AGT-005", name: "David Brown", avatar: "DB", department: "Billing", totalCalls: 175, avgHandleTime: "5:30", fcr: 82, csat: 4.4, sentiment: 70, trend: "up", performance: "good", status: "active" },
-  { id: "6", agentId: "AGT-006", name: "Lisa Chen", avatar: "LC", department: "Technical Support", totalCalls: 221, avgHandleTime: "5:45", fcr: 80, csat: 4.1, sentiment: 68, trend: "stable", performance: "average", status: "active" },
-  { id: "7", agentId: "AGT-007", name: "Robert Taylor", avatar: "RT", department: "Customer Support", totalCalls: 134, avgHandleTime: "4:55", fcr: 75, csat: 3.7, sentiment: 55, trend: "down", performance: "poor", status: "inactive" },
-  { id: "8", agentId: "AGT-008", name: "Jennifer Lee", avatar: "JL", department: "Sales", totalCalls: 278, avgHandleTime: "3:30", fcr: 89, csat: 4.4, sentiment: 76, trend: "up", performance: "good", status: "active" },
+  { id: "1", agentId: "AGT-001", name: "John Smith", avatar: "JS", department: "Customer Support", totalCalls: 245, avgHandleTime: "4:32", fcr: 92, csat: 4.8, sentiment: 85, trend: "up", performance: "excellent", status: "active", qualityScore: 95 },
+  { id: "2", agentId: "AGT-002", name: "Sarah Johnson", avatar: "SJ", department: "Technical Support", totalCalls: 230, avgHandleTime: "5:15", fcr: 88, csat: 4.6, sentiment: 78, trend: "up", performance: "good", status: "active", qualityScore: 87 },
+  { id: "3", agentId: "AGT-003", name: "Mike Wilson", avatar: "MW", department: "Sales", totalCalls: 198, avgHandleTime: "4:45", fcr: 85, csat: 4.5, sentiment: 72, trend: "stable", performance: "good", status: "active", qualityScore: 82 },
+  { id: "4", agentId: "AGT-004", name: "Emily Davis", avatar: "ED", department: "Customer Support", totalCalls: 210, avgHandleTime: "6:10", fcr: 78, csat: 4.2, sentiment: 65, trend: "down", performance: "average", status: "active", qualityScore: 73 },
+  { id: "5", agentId: "AGT-005", name: "David Brown", avatar: "DB", department: "Billing", totalCalls: 175, avgHandleTime: "5:30", fcr: 82, csat: 4.4, sentiment: 70, trend: "up", performance: "good", status: "active", qualityScore: 79 },
+  { id: "6", agentId: "AGT-006", name: "Lisa Chen", avatar: "LC", department: "Technical Support", totalCalls: 221, avgHandleTime: "5:45", fcr: 80, csat: 4.1, sentiment: 68, trend: "stable", performance: "average", status: "active", qualityScore: 76 },
+  { id: "7", agentId: "AGT-007", name: "Robert Taylor", avatar: "RT", department: "Customer Support", totalCalls: 134, avgHandleTime: "4:55", fcr: 75, csat: 3.7, sentiment: 55, trend: "down", performance: "poor", status: "inactive", qualityScore: 68 },
+  { id: "8", agentId: "AGT-008", name: "Jennifer Lee", avatar: "JL", department: "Sales", totalCalls: 278, avgHandleTime: "3:30", fcr: 89, csat: 4.4, sentiment: 76, trend: "up", performance: "good", status: "active", qualityScore: 91 },
 ];
 
 const getPerformanceConfig = (performance: AgentMetric["performance"]) => {
@@ -113,6 +118,7 @@ const agentsNeedAttention: PerformingAgent[] = [
 
 export default function AgentPerformance() {
   const { setSelectedAgentId, setSelectedTab } = usePostCall();
+  const { columns: columnConfig, visibleColumns, toggleColumnVisibility, resetToDefault } = useColumnConfig('agent');
   const [isLoading, setIsLoading] = useState(true);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -156,161 +162,127 @@ export default function AgentPerformance() {
   const avgFCR = Math.round(mockAgents.reduce((sum, a) => sum + a.fcr, 0) / mockAgents.length);
   const avgCSAT = (mockAgents.reduce((sum, a) => sum + a.csat, 0) / mockAgents.length).toFixed(1);
 
-  const columns: ColumnsType<AgentMetric> = [
-    {
-      title: 'Agent',
-      key: 'agent',
-      render: (_, record) => (
-        <Space>
-          <div 
-            style={{ 
-              width: 40, 
-              height: 40, 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{record.avatar}</span>
-          </div>
-          <div>
-            <Text strong>{record.name}</Text>
-            <br />
-            <Text type="secondary" style={{ fontSize: 12 }}>{record.agentId}</Text>
-          </div>
-        </Space>
-      ),
-    },
-    {
-      title: 'Department',
-      dataIndex: 'department',
-      key: 'department',
-      render: (text: string) => (
-        <Tag 
-          style={{ 
-            borderRadius: 6, 
-            padding: '2px 10px',
-            background: '#f1f5f9',
-            border: '1px solid #e2e8f0',
-            color: '#475569'
-          }}
-        >
-          {text}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Total Calls',
-      dataIndex: 'totalCalls',
-      key: 'totalCalls',
-      sorter: (a, b) => a.totalCalls - b.totalCalls,
-      render: (value: number) => (
-        <Space size={4}>
-          <PhoneOutlined style={{ color: '#6366f1', fontSize: 12 }} />
-          <Text strong>{value}</Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Avg Handle Time',
-      dataIndex: 'avgHandleTime',
-      key: 'avgHandleTime',
-      render: (text: string) => (
-        <Space size={4}>
-          <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
-          <Text type="secondary">{text}</Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'FCR Rate',
-      dataIndex: 'fcr',
-      key: 'fcr',
-      sorter: (a, b) => a.fcr - b.fcr,
-      render: (value: number) => (
-        <div style={{ minWidth: 100 }}>
-          <div className="flex items-center justify-between mb-1">
-            <Text strong style={{ fontSize: 13 }}>{value}%</Text>
-          </div>
-          <Progress 
-            percent={value} 
-            showInfo={false} 
-            size="small"
-            strokeColor={getProgressColor(value)}
-            trailColor="#e2e8f0"
-          />
-        </div>
-      ),
-    },
-    {
-      title: 'CSAT',
-      dataIndex: 'csat',
-      key: 'csat',
-      sorter: (a, b) => a.csat - b.csat,
-      render: (value: number) => (
-        <Space size={4}>
-          <StarOutlined style={{ color: '#f59e0b', fontSize: 14 }} />
-          <Text strong>{value}</Text>
-          <Text type="secondary" style={{ fontSize: 11 }}>/5</Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Performance',
-      dataIndex: 'performance',
-      key: 'performance',
-      filters: [
-        { text: 'Excellent', value: 'excellent' },
-        { text: 'Good', value: 'good' },
-        { text: 'Average', value: 'average' },
-        { text: 'Poor', value: 'poor' },
-      ],
-      onFilter: (value, record) => record.performance === value,
-      render: (performance: AgentMetric["performance"]) => {
-        const config = getPerformanceConfig(performance);
-        return (
-          <Tag
-            style={{
-              borderRadius: 6,
-              padding: '2px 10px',
-              background: config.bg,
-              border: `1px solid ${config.color}`,
-              color: config.color,
-            }}
-          >
-            {config.label}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: 'Trend',
-      dataIndex: 'trend',
-      key: 'trend',
-      align: 'center',
-      render: (trend: AgentMetric["trend"]) => (
-        <Tooltip title={trend === 'up' ? 'Improving' : trend === 'down' ? 'Declining' : 'Stable'}>
-          {getTrendIcon(trend)}
-        </Tooltip>
-      ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: AgentMetric["status"]) => (
-        <Badge 
-          status={status === 'active' ? 'success' : 'default'} 
-          text={status === 'active' ? 'Active' : 'Inactive'} 
+  // Check if a column should be visible based on env config
+  const isColVisible = (key: string): boolean => {
+    const col = visibleColumns.find(c => c.def === key);
+    return col ? col.visible : true; // Default to true if not in config
+  };
+
+  // Create columns based on env config
+  const allColumns: ColumnsType<AgentMetric> = useMemo(() => {
+    const envColumns = visibleColumns;
+    
+    const baseColumns: ColumnsType<AgentMetric> = envColumns.map(col => {
+      const columnKey = col.def;
+      
+      // Map env column definitions to actual table columns
+      switch (columnKey) {
+        case 'agent':
+          return {
+            title: col.label,
+            key: 'agent',
+            render: (_, record) => (
+              <Space>
+                <div 
+                  style={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: '50%', 
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{record.avatar}</span>
+                </div>
+                <div>
+                  <Text strong>{record.name}</Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 12 }}>{record.agentId}</Text>
+                </div>
+              </Space>
+            ),
+          };
+          
+        case 'qualityScore':
+          return {
+            title: col.label,
+            dataIndex: 'qualityScore',
+            key: 'qualityScore',
+            align: 'center' as const,
+            render: (value: number) => (
+              <StatusBadge title={`${value || 0}%`} color="success" size="xs" />
+            ),
+          };
+          
+        case 'totalCalls':
+          return {
+            title: col.label,
+            dataIndex: 'totalCalls',
+            key: 'totalCalls',
+            align: 'center' as const,
+            sorter: (a, b) => a.totalCalls - b.totalCalls,
+            render: (value: number) => (
+              <StatusBadge title={value.toString()} color="primary" size="xs" />
+            ),
+          };
+          
+        case 'fcr':
+          return {
+            title: col.label,
+            dataIndex: 'fcr',
+            key: 'fcr',
+            align: 'center' as const,
+            sorter: (a, b) => a.fcr - b.fcr,
+            render: (value: number) => {
+              const getColor = (val: number) => {
+                if (val >= 90) return 'success';
+                if (val >= 80) return 'primary';
+                if (val >= 70) return 'amber';
+                return 'warn';
+              };
+              return (
+                <StatusBadge title={`${value}%`} color={getColor(value)} size="xs" />
+              );
+            },
+          };
+          
+        case 'csat':
+          return {
+            title: col.label,
+            dataIndex: 'csat',
+            key: 'csat',
+            align: 'center' as const,
+            sorter: (a, b) => a.csat - b.csat,
+            render: (value: number) => (
+              <StatusBadge title={value.toString()} color="accent" size="xs" />
+            ),
+          };
+          
+        default:
+          return {
+            title: col.label,
+            dataIndex: columnKey,
+            key: columnKey,
+            align: 'center' as const,
+            render: (text: any) => <StatusBadge title={text?.toString() || 'N/A'} color="basic" size="xs" />,
+          };
+      }
+    });
+    
+    // Add actions column at the end
+    baseColumns.push({
+      title: (
+        <ColumnToggle 
+          columns={columnConfig} 
+          onToggle={toggleColumnVisibility} 
+          onReset={resetToDefault}
         />
       ),
-    },
-    {
-      title: '',
       key: 'actions',
       width: 60,
+      fixed: 'right' as const,
       render: (_, record) => (
         <Tooltip title="View Details">
           <Button 
@@ -322,8 +294,13 @@ export default function AgentPerformance() {
           />
         </Tooltip>
       ),
-    },
-  ];
+    });
+    
+    return baseColumns;
+  }, [visibleColumns, columnConfig, toggleColumnVisibility, resetToDefault]);
+
+  // Use the columns directly from allColumns since they're already filtered by env config
+  const columns = allColumns;
 
   return (
     <ConfigProvider
@@ -358,55 +335,47 @@ export default function AgentPerformance() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Row gutter={16}>
-            {[
-              { title: 'Total Agents', value: totalAgents, icon: <TeamOutlined />, color: '#6366f1' },
-              { title: 'Active Agents', value: activeAgents, icon: <UserOutlined />, color: '#10b981' },
-              { title: 'Avg FCR Rate', value: `${avgFCR}%`, icon: <AimOutlined />, color: '#f59e0b' },
-              { title: 'Avg CSAT Score', value: avgCSAT, icon: <StarOutlined />, color: '#3b82f6' },
-            ].map((stat, index) => (
-              <Col xs={12} lg={6} key={stat.title}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card 
-                    size="small" 
-                    style={{ 
-                      borderRadius: 12,
-                      border: '1px solid #e2e8f0',
-                      marginBottom: 16
-                    }}
-                    styles={{ body: { padding: 16 } }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Text type="secondary" style={{ fontSize: 12 }}>{stat.title}</Text>
-                        <div style={{ fontSize: 24, fontWeight: 700, color: stat.color }}>
-                          {isLoading ? <Skeleton.Input active size="small" style={{ width: 60 }} /> : stat.value}
-                        </div>
-                      </div>
-                      <div 
-                        style={{ 
-                          width: 48, 
-                          height: 48, 
-                          borderRadius: 12, 
-                          background: `${stat.color}15`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 20,
-                          color: stat.color
-                        }}
-                      >
-                        {stat.icon}
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              </Col>
-            ))}
+          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                label="Total Agents"
+                value={totalAgents.toString()}
+                icon={<TeamOutlined />}
+                color="#3b82f6"
+                gradientColors={["#3b82f6", "#2563eb"] as [string, string]}
+                isLoading={isLoading}
+              />
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                label="Active Agents"
+                value={activeAgents.toString()}
+                icon={<UserOutlined />}
+                color="#10b981"
+                gradientColors={["#10b981", "#059669"] as [string, string]}
+                isLoading={isLoading}
+              />
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                label="Avg FCR Rate"
+                value={`${avgFCR}%`}
+                icon={<AimOutlined />}
+                color="#f59e0b"
+                gradientColors={["#f59e0b", "#d97706"] as [string, string]}
+                isLoading={isLoading}
+              />
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <StatCard
+                label="Avg CSAT Score"
+                value={avgCSAT}
+                icon={<StarOutlined />}
+                color="#8b5cf6"
+                gradientColors={["#8b5cf6", "#7c3aed"] as [string, string]}
+                isLoading={isLoading}
+              />
+            </Col>
           </Row>
         </motion.div>
 
@@ -543,6 +512,11 @@ export default function AgentPerformance() {
             extra={
               <Space>
                 <Button icon={<DownloadOutlined />}>Export</Button>
+                <ColumnToggle 
+                  columns={columnConfig} 
+                  onToggle={toggleColumnVisibility} 
+                  onReset={resetToDefault} 
+                />
                 <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersVisible ? "primary" : "default"}
@@ -680,6 +654,7 @@ export default function AgentPerformance() {
                 columns={columns}
                 dataSource={filteredAgents}
                 rowKey="id"
+                scroll={{ x: 'max-content' }}
                 pagination={{
                   total: filteredAgents.length,
                   pageSize: 8,

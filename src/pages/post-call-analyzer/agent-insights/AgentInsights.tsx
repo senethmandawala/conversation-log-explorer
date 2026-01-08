@@ -1,44 +1,48 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
-  ArrowLeft,
-  Phone,
-  Clock,
-  Target,
-  Star,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Play,
-  Pause,
-  Eye,
-  Heart,
-  Users,
-  PhoneOff
-} from "lucide-react";
+  Card, 
+  Button, 
+  Badge, 
+  Table, 
+  Space, 
+  Typography, 
+  Skeleton,
+  Tooltip,
+  ConfigProvider
+} from "antd";
+import { 
+  ArrowLeftOutlined,
+  PhoneOutlined,
+  ClockCircleOutlined,
+  AimOutlined,
+  StarOutlined,
+  RiseOutlined,
+  FallOutlined,
+  MinusOutlined,
+  PlayCircleOutlined,
+  PauseCircleOutlined,
+  EyeOutlined,
+  HeartOutlined,
+  TeamOutlined,
+  PhoneOutlined as PhoneOffIcon
+} from "@ant-design/icons";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { StatCard } from "@/components/ui/stat-card";
+import { TablerIcon } from "@/components/ui/tabler-icon";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
 import SingleCallView from "./SingleCallView";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
   Legend,
-  Tooltip,
+  Tooltip as RechartsTooltip,
 } from "recharts";
+
+const { Title, Text } = Typography;
 
 interface CallLog {
   id: string;
@@ -54,23 +58,21 @@ interface CallLog {
   isPlaying?: boolean;
 }
 
-interface StatCard {
+interface StatCardData {
   label: string;
   value: string;
-  icon: React.ElementType;
-  gradientColor: string;
-  bgColor: string;
-  textColor: string;
-  tooltip?: string;
+  icon: React.ReactNode;
+  color: string;
+  gradientColors: [string, string];
 }
 
-const mockStats: StatCard[] = [
-  { label: "Total Calls", value: "245", icon: Phone, gradientColor: "from-blue-500 to-blue-600", bgColor: "bg-blue-500/10", textColor: "text-blue-500" },
-  { label: "Avg Handle Time", value: "4:32", icon: Clock, gradientColor: "from-purple-500 to-purple-600", bgColor: "bg-purple-500/10", textColor: "text-purple-500" },
-  { label: "FCR Rate", value: "92%", icon: Target, gradientColor: "from-green-500 to-green-600", bgColor: "bg-green-500/10", textColor: "text-green-500" },
-  { label: "CSAT Score", value: "4.8", icon: Star, gradientColor: "from-amber-500 to-amber-600", bgColor: "bg-amber-500/10", textColor: "text-amber-500" },
-  { label: "Kindness Score", value: "85%", icon: Heart, gradientColor: "from-pink-500 to-pink-600", bgColor: "bg-pink-500/10", textColor: "text-pink-500" },
-  { label: "Dropped Calls", value: "3%", icon: PhoneOff, gradientColor: "from-red-500 to-red-600", bgColor: "bg-red-500/10", textColor: "text-red-500" },
+const mockStats: StatCardData[] = [
+  { label: "Total Calls", value: "245", icon: <PhoneOutlined />, color: "#3b82f6", gradientColors: ["#3b82f6", "#2563eb"] },
+  { label: "Avg Handle Time", value: "4:32", icon: <ClockCircleOutlined />, color: "#8b5cf6", gradientColors: ["#8b5cf6", "#7c3aed"] },
+  { label: "FCR Rate", value: "92%", icon: <AimOutlined />, color: "#10b981", gradientColors: ["#10b981", "#059669"] },
+  { label: "CSAT Score", value: "4.8", icon: <StarOutlined />, color: "#f59e0b", gradientColors: ["#f59e0b", "#d97706"] },
+  { label: "Kindness Score", value: "85%", icon: <HeartOutlined />, color: "#ec4899", gradientColors: ["#ec4899", "#db2777"] },
+  { label: "Dropped Calls", value: "3%", icon: <PhoneOffIcon />, color: "#ef4444", gradientColors: ["#ef4444", "#dc2626"] },
 ];
 
 const mockCallLogs: CallLog[] = [
@@ -92,9 +94,9 @@ const categoryData = [
 // Custom legend with names only
 const CustomLegend = ({ payload }: any) => {
   return (
-    <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4">
+    <div className="d-flex flex-wrap justify-content-center gap-x-4 gap-y-2 mt-2">
       {payload.map((entry: any, index: number) => (
-        <div key={`legend-${index}`} className="flex items-center gap-2">
+        <div key={`legend-${index}`} className="d-flex align-items-center gap-2">
           <div 
             className="w-3 h-3 rounded-full" 
             style={{ backgroundColor: entry.color }}
@@ -131,26 +133,26 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, value, 
 const SentimentIcon = ({ sentiment }: { sentiment: CallLog["callerSentiment"] }) => {
   switch (sentiment) {
     case "positive":
-      return <TrendingUp className="h-4 w-4 text-green-500" />;
+      return <RiseOutlined style={{ color: '#10b981', fontSize: 16 }} />;
     case "negative":
-      return <TrendingDown className="h-4 w-4 text-red-500" />;
+      return <FallOutlined style={{ color: '#ef4444', fontSize: 16 }} />;
     default:
-      return <Minus className="h-4 w-4 text-yellow-500" />;
+      return <MinusOutlined style={{ color: '#f59e0b', fontSize: 16 }} />;
   }
 };
 
 const getStatusBadgeColor = (color: string) => {
   switch (color) {
     case "green":
-      return "bg-green-500/10 text-green-500 border-green-500/30";
+      return "success";
     case "amber":
-      return "bg-amber-500/10 text-amber-500 border-amber-500/30";
+      return "amber";
     case "blue":
-      return "bg-blue-500/10 text-blue-500 border-blue-500/30";
+      return "primary";
     case "red":
-      return "bg-red-500/10 text-red-500 border-red-500/30";
+      return "warn";
     default:
-      return "bg-muted";
+      return "basic";
   }
 };
 
@@ -173,77 +175,128 @@ export default function AgentInsights() {
   };
 
   return (
-    <>
-      <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-10 w-10 rounded-xl"
-                onClick={() => setSelectedTab("agent-performance")}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-xl font-semibold tracking-tight">
-                    Agent Insights
-                  </CardTitle>
-                  <span className="text-xl text-muted-foreground">-</span>
-                  <Badge variant="secondary" className="text-sm font-medium">
-                    {agentName} - {agentIdDisplay}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Overall Performance
-                </p>
+    <ConfigProvider
+      theme={{
+        components: {
+          Card: {
+            headerBg: 'transparent',
+          },
+          Button: {
+            borderRadius: 8,
+          },
+        },
+      }}
+    >
+      <div className="container-fluid p-6 space-y-6">
+        <Card
+          style={{
+            borderRadius: 12,
+            border: '1px solid #e2e8f0',
+            background: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          }}
+          styles={{ body: { padding: '16px 24px' } }}
+        >
+          <div className="d-flex align-items-center gap-4">
+            <Button
+              type="default"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => setSelectedTab("agent-performance")}
+              style={{
+                height: 40,
+                width: 40,
+                borderRadius: 12,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            />
+            <div className="d-flex flex-column">
+              <div className="d-flex align-items-center gap-2">
+                <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                  Agent Insights
+                </Title>
+                <span style={{ fontSize: 20, color: '#94a3b8' }}>-</span>
+                <Badge 
+                  count={`${agentName} - ${agentIdDisplay}`}
+                  style={{ 
+                    backgroundColor: '#f1f5f9',
+                    color: '#475569',
+                    fontWeight: 500,
+                    fontSize: 14
+                  }}
+                />
               </div>
             </div>
-          </CardHeader>
+          </div>
         </Card>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            {mockStats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className={`border-0 backdrop-blur-sm hover:shadow-lg transition-all duration-300 h-full ${stat.bgColor}`}>
-                  <CardContent className="p-4">
-                    {isLoading ? (
-                      <Skeleton className="h-16 w-full" />
-                    ) : (
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className={`text-xs ${stat.textColor} font-medium mb-1`}>{stat.label}</p>
-                          <p className={`text-2xl font-bold ${stat.textColor}`}>{stat.value}</p>
-                        </div>
-                        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${stat.gradientColor} shadow-lg`}>
-                          <stat.icon className="h-5 w-5 text-white" />
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+        <div className="row g-3">
+          <div className="col-12 col-xl-6">
+            <div className="row g-3">
+              {mockStats.map((stat, index) => (
+                <div className="col-6" key={stat.label}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <StatCard
+                      label={stat.label}
+                      value={stat.value}
+                      icon={stat.icon}
+                      color={stat.color}
+                      gradientColors={stat.gradientColors}
+                      isLoading={isLoading}
+                    />
+                  </motion.div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-medium">Case Category Report</CardTitle>
-              <p className="text-sm text-muted-foreground">Distribution of calls by category</p>
-            </CardHeader>
-            <CardContent className="pb-6">
+          <div className="col-12 col-xl-6">
+            <Card
+              style={{
+                borderRadius: 12,
+                border: '1px solid #e2e8f0',
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(8px)'
+              }}
+              title={
+                <div>
+                  <Title level={5} style={{ 
+                    margin: 0, 
+                    fontSize: 18, 
+                    fontWeight: 600,
+                    color: '#1e293b'
+                  }}>
+                    Case Category Report
+                  </Title>
+                  <Text type="secondary" style={{ 
+                    fontSize: 13,
+                    fontWeight: 500,
+                    marginTop: 3,
+                    lineHeight: 1,
+                    display: 'block'
+                  }}>
+                    Distribution of calls by category
+                  </Text>
+                </div>
+              }
+              styles={{ 
+                body: { padding: '14px 24px' },
+                header: { 
+                  borderBottom: '1px solid #e2e8f0',
+                  padding: '14px 24px'
+                }
+              }}
+            >
               {isLoading ? (
-                <Skeleton className="h-[280px] w-full" />
+                <Skeleton.Input active block style={{ height: 280 }} />
               ) : (
-                <ResponsiveContainer width="100%" height={280}>
+                <ResponsiveContainer width="100%" height={280} className="mt-3">
                   <PieChart>
                     <Pie
                       data={categoryData}
@@ -260,119 +313,156 @@ export default function AgentInsights() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip
+                    <RechartsTooltip
                       contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
+                        backgroundColor: "white",
+                        border: "1px solid #e2e8f0",
                         borderRadius: "8px",
                       }}
                       formatter={(value: number) => [`${value} calls`, 'Count']}
                     />
-                    <Legend content={<CustomLegend />} verticalAlign="bottom" />
+                    <Legend content={<CustomLegend />} />
                   </PieChart>
                 </ResponsiveContainer>
               )}
-            </CardContent>
-          </Card>
+            </Card>
+          </div>
         </div>
 
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <CardTitle className="text-base font-medium">Call Logs</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {isLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full" />
-                ))}
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30">
-                    <TableHead className="font-semibold">Date</TableHead>
-                    <TableHead className="font-semibold">MSISDN</TableHead>
-                    <TableHead className="font-semibold">Category</TableHead>
-                    <TableHead className="font-semibold text-center">Caller Sentiment</TableHead>
-                    <TableHead className="font-semibold text-center">Score</TableHead>
-                    <TableHead className="font-semibold">Case Status</TableHead>
-                    <TableHead className="font-semibold w-24"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockCallLogs.map((log, index) => (
-                    <motion.tr
-                      key={log.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="group border-b border-border/30 hover:bg-muted/20"
-                    >
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{log.date}</span>
-                          <span className="text-xs text-muted-foreground">{log.time}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">{log.msisdn}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{log.category}</span>
-                          <span className="text-xs text-muted-foreground">{log.subCategory}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <SentimentIcon sentiment={log.callerSentiment} />
-                          <span className="capitalize text-sm">{log.callerSentiment}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex flex-col items-center">
-                          <span className="font-semibold">{log.score}</span>
-                          <span className="text-xs text-muted-foreground">out of 10</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusBadgeColor(log.statusColor)}>
-                          {log.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`h-8 w-8 rounded-lg ${
-                              playingId === log.id
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-muted"
-                            }`}
-                            onClick={() => handlePlayAudio(log.id)}
-                          >
-                            {playingId === log.id ? (
-                              <Pause className="h-4 w-4" />
-                            ) : (
-                              <Play className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg hover:bg-muted"
-                            onClick={() => setSelectedCallLog(log)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </motion.tr>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
+        <Card
+          style={{
+            borderRadius: 12,
+            border: '1px solid #e2e8f0',
+            background: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(8px)'
+          }}
+          title={
+            <Title level={5} style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>
+              Call Logs
+            </Title>
+          }
+          styles={{ body: { paddingTop: 16 } }}
+        >
+          {isLoading ? (
+            <div className="d-flex flex-column gap-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton.Input key={i} active block style={{ height: 56 }} />
+              ))}
+            </div>
+          ) : (
+            <Table
+              dataSource={mockCallLogs}
+              rowKey="id"
+              pagination={false}
+              scroll={{ x: 'max-content' }}
+              columns={[
+                {
+                  title: 'Date',
+                  dataIndex: 'date',
+                  key: 'date',
+                  render: (_, record) => (
+                    <div>
+                      <Text strong>{record.date}</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+                    </div>
+                  ),
+                },
+                {
+                  title: 'MSISDN',
+                  dataIndex: 'msisdn',
+                  key: 'msisdn',
+                  render: (text: string) => (
+                    <StatusBadge title={text} color="primary" size="xs" />
+                  ),
+                },
+                {
+                  title: 'Category',
+                  dataIndex: 'category',
+                  key: 'category',
+                  render: (_, record) => (
+                    <div>
+                      <Text>{record.category}</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>{record.subCategory}</Text>
+                    </div>
+                  ),
+                },
+                {
+                  title: 'Caller Sentiment',
+                  dataIndex: 'callerSentiment',
+                  key: 'callerSentiment',
+                  align: 'center',
+                  render: (sentiment: CallLog["callerSentiment"]) => {
+                    const getSentimentIcon = (sentiment: CallLog["callerSentiment"]) => {
+                      switch (sentiment) {
+                        case "positive":
+                          return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={24} />, title: "Positive" };
+                        case "negative":
+                          return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={24} />, title: "Negative" };
+                        default:
+                          return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={24} />, title: "Neutral" };
+                      }
+                    };
+
+                    const sentimentConfig = getSentimentIcon(sentiment);
+                    return (
+                      <Tooltip title={sentimentConfig.title}>
+                        {sentimentConfig.icon}
+                      </Tooltip>
+                    );
+                  },
+                },
+                {
+                  title: 'Score',
+                  dataIndex: 'score',
+                  key: 'score',
+                  align: 'center',
+                  render: (score: number) => (
+                    <div>
+                      <Text strong>{score}</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>out of 10</Text>
+                    </div>
+                  ),
+                },
+                {
+                  title: 'Case Status',
+                  dataIndex: 'status',
+                  key: 'status',
+                  render: (status: string, record: CallLog) => (
+                    <StatusBadge 
+                      title={status} 
+                      color={getStatusBadgeColor(record.statusColor)} 
+                      size="xs" 
+                    />
+                  ),
+                },
+                {
+                  title: '',
+                  key: 'actions',
+                  width: 100,
+                  align: 'right',
+                  render: (_, record: CallLog) => (
+                    <Space>
+                      <Button
+                        type={playingId === record.id ? "primary" : "text"}
+                        icon={playingId === record.id ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                        onClick={() => handlePlayAudio(record.id)}
+                        style={{ borderRadius: 8 }}
+                      />
+                      <Button
+                        type="text"
+                        icon={<EyeOutlined />}
+                        onClick={() => setSelectedCallLog(record)}
+                        style={{ borderRadius: 8 }}
+                      />
+                    </Space>
+                  ),
+                },
+              ]}
+            />
+          )}
         </Card>
       </div>
 
@@ -383,6 +473,6 @@ export default function AgentInsights() {
       />
 
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }

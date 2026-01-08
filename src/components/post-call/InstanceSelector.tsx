@@ -26,8 +26,8 @@ export const InstanceSelector = ({ instances, onSelectInstance }: InstanceSelect
         transition={{ duration: 0.5 }}
       >
         <Card className="p-6 border-border/50 bg-card/80 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                 <Server className="h-5 w-5 text-white" />
               </div>
@@ -36,7 +36,7 @@ export const InstanceSelector = ({ instances, onSelectInstance }: InstanceSelect
                 <p className="text-sm text-muted-foreground">Select an instance to view its analytics and configuration</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="d-flex align-items-center gap-2 text-sm text-muted-foreground">
               <Activity className="h-4 w-4 text-blue-500" />
               <span>{instances.length} active</span>
             </div>
@@ -61,49 +61,47 @@ export const InstanceSelector = ({ instances, onSelectInstance }: InstanceSelect
       </motion.div>
 
       {/* Instance Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="row g-4">
         <AnimatePresence mode="popLayout">
           {filteredInstances.map((instance, index) => (
-            <motion.div
-              key={instance.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, delay: index * 0.03 }}
-              whileHover={{ y: -4 }}
-            >
-              <Card
-                className="group relative overflow-hidden cursor-pointer border border-border/50 bg-card hover:border-blue-500/30 hover:shadow-lg transition-all duration-300"
-                onClick={() => onSelectInstance(instance)}
+            <div key={instance.id} className="col-12 col-md-6 col-lg-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, delay: index * 0.03 }}
+                whileHover={{ y: -4 }}
               >
-                {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
-                <div className="relative p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/15 transition-colors">
-                          <Server className="h-5 w-5 text-blue-500" />
+                <Card
+                  className="group relative overflow-hidden cursor-pointer border border-border/50 bg-card hover:border-blue-500/30 hover:shadow-lg transition-all duration-300"
+                  onClick={() => onSelectInstance(instance)}
+                >
+                  {/* Gradient overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  <div className="relative p-5">
+                    <div className="d-flex align-items-center justify-content-between">
+                      <div className="d-flex align-items-center gap-4">
+                        <div className="relative">
+                          <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/15 transition-colors">
+                            <Server className="h-5 w-5 text-blue-500" />
+                          </div>
+                          {/* Status indicator */}
+                          <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-success rounded-full border-2 border-card" />
                         </div>
-                        {/* Status indicator */}
-                        <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-success rounded-full border-2 border-card" />
+                        <div>
+                          <p className="font-semibold text-lg text-foreground group-hover:text-blue-500 transition-colors">
+                            {instance.name}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-foreground group-hover:text-blue-500 transition-colors">
-                          {instance.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Post Call Analyzer
-                        </p>
-                      </div>
+                      
+                      <ArrowRight className="h-5 w-5 text-muted-foreground/50 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
-                    
-                    <ArrowRight className="h-5 w-5 text-muted-foreground/50 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300" />
                   </div>
-                </div>
-              </Card>
-            </motion.div>
+                </Card>
+              </motion.div>
+            </div>
           ))}
         </AnimatePresence>
       </div>

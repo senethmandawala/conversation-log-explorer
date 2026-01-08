@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Info, RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Typography, Table as AntTable, Badge as AntBadge, Space, Tooltip as AntTooltip } from "antd";
+import { ClockCircleOutlined, UserOutlined } from "@ant-design/icons";
+import { TablerIcon } from "@/components/ui/tabler-icon";
+import { StatusBadge } from "@/components/ui/status-badge";
+import "@/components/ui/status-badge.css";
+
+const { Title, Text } = Typography;
 
 const mockCallLogs = [
   { id: 1, date: "2024-01-15", time: "10:30 AM", msisdn: "+94771234567", duration: "25:30", category: "Technical Issues", agent: "John Smith", sentiment: "Negative", status: "Resolved" },
@@ -29,20 +36,27 @@ export function DurationCallLogs() {
     console.log("Call clicked:", call);
   };
 
-  const getSentimentBadge = (sentiment: string) => {
-    switch (sentiment.toLowerCase()) {
-      case "positive": return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Positive</Badge>;
-      case "negative": return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Negative</Badge>;
-      default: return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">Neutral</Badge>;
+  const getSentimentIcon = (sentiment: string) => {
+    switch (sentiment) {
+      case "positive":
+        return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={24} />, title: "Positive" };
+      case "negative":
+        return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={24} />, title: "Negative" };
+      default:
+        return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={24} />, title: "Neutral" };
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "resolved": return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Resolved</Badge>;
-      case "pending": return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">Pending</Badge>;
-      case "escalated": return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Escalated</Badge>;
-      default: return <Badge variant="outline">{status}</Badge>;
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'resolved':
+        return 'success';
+      case 'pending':
+        return 'amber';
+      case 'escalated':
+        return 'warn';
+      default:
+        return 'basic';
     }
   };
 
@@ -50,7 +64,7 @@ export function DurationCallLogs() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="text-sm text-muted-foreground">Showing {mockCallLogs.length} calls</span>
+          <Text type="secondary">Showing {mockCallLogs.length} calls</Text>
         </div>
         <Button 
           variant="ghost" 
@@ -67,55 +81,105 @@ export function DurationCallLogs() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : (
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>MSISDN</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Agent</TableHead>
-                <TableHead className="text-center">Sentiment</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockCallLogs.length > 0 ? (
-                mockCallLogs.map((call) => (
-                  <TableRow 
-                    key={call.id} 
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => handleCallClick(call)}
+        <AntTable
+          dataSource={mockCallLogs}
+          rowKey="id"
+          pagination={{
+            pageSize: 8,
+            showTotal: (total, range) => (
+              <Text type="secondary">
+                Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
+              </Text>
+            ),
+            showSizeChanger: true,
+            pageSizeOptions: ['5', '8', '10', '20'],
+          }}
+          style={{ borderRadius: 12, overflow: 'hidden' }}
+          rowClassName={() => 
+            'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#6366f1]'
+          }
+          columns={[
+            {
+              title: 'Date & Time',
+              key: 'dateTime',
+              align: 'center',
+              render: (_, record) => (
+                <div>
+                  <Text style={{ display: 'block' }}>{record.date}</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+                </div>
+              ),
+            },
+            {
+              title: 'MSISDN',
+              dataIndex: 'msisdn',
+              key: 'msisdn',
+              align: 'center',
+              render: (text: string) => (
+                <StatusBadge title={text} color="primary" size="xs" />
+              ),
+            },
+            {
+              title: 'Category',
+              dataIndex: 'category',
+              key: 'category',
+              align: 'center',
+              render: (text: string) => (
+                <StatusBadge title={text} color="basic" size="xs" />
+              ),
+            },
+            {
+              title: 'Agent',
+              dataIndex: 'agent',
+              key: 'agent',
+              render: (text: string) => (
+                <Space>
+                  <div 
+                    style={{ 
+                      width: 32, 
+                      height: 32, 
+                      borderRadius: '50%', 
+                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
                   >
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{call.date}</div>
-                        <div className="text-sm text-muted-foreground">{call.time}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">{call.msisdn}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">
-                        {call.duration}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{call.category}</TableCell>
-                    <TableCell>{call.agent}</TableCell>
-                    <TableCell className="text-center">{getSentimentBadge(call.sentiment)}</TableCell>
-                    <TableCell className="text-center">{getStatusBadge(call.status)}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    No calls found matching your filters
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                    <UserOutlined style={{ color: 'white', fontSize: 14 }} />
+                  </div>
+                  <Text strong>{text}</Text>
+                </Space>
+              ),
+            },
+            {
+              title: 'Sentiment',
+              dataIndex: 'sentiment',
+              key: 'sentiment',
+              align: 'center',
+              render: (sentiment: string) => {
+                const sentimentConfig = getSentimentIcon(sentiment);
+                return (
+                  <AntTooltip title={sentimentConfig.title}>
+                    {sentimentConfig.icon}
+                  </AntTooltip>
+                );
+              },
+            },
+            {
+              title: 'Status',
+              dataIndex: 'status',
+              key: 'status',
+              align: 'center',
+              render: (status: string) => (
+                <StatusBadge 
+                  title={status} 
+                  color={getStatusColor(status)} 
+                  size="xs" 
+                />
+              ),
+            },
+          ]}
+        />
       )}
     </div>
   );
