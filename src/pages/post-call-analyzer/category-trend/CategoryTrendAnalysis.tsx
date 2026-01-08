@@ -1,21 +1,20 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ArrowLeft, Filter, Calendar, TrendingUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { 
+  Card, 
+  Select, 
+  DatePicker, 
+  Button, 
+  Row, 
+  Col, 
+  Typography,
+  ConfigProvider
+} from "antd";
+import { 
+  FilterOutlined, 
+  ArrowLeftOutlined,
+  LineChartOutlined
+} from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import {
@@ -28,6 +27,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { AntdLineChartTooltip } from "@/components/ui/antd-chart-tooltip";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 // Mock data for the line chart
 const mockChartData = [
@@ -51,152 +54,187 @@ const CHART_COLORS = [
   "#ef4444", // red
 ];
 
+const callTypes = [
+  { value: "all", label: "All Call Types" },
+  { value: "home", label: "Home" },
+  { value: "mobile", label: "Mobile" },
+  { value: "unknown", label: "Unknown" },
+];
+
 export default function CategoryTrendAnalysis() {
   const { setSelectedTab } = usePostCall();
   const [loading, setLoading] = useState(false);
-  const [panelOpenState, setPanelOpenState] = useState(false);
-  const [numberOfFilters, setNumberOfFilters] = useState(0);
-  const [selectedCallType, setSelectedCallType] = useState<string>("");
-  const [chartData, setChartData] = useState(mockChartData);
-  const [emptyData, setEmptyData] = useState(false);
-
-  useEffect(() => {
-    let count = 0;
-    if (selectedCallType) count++;
-    setNumberOfFilters(count);
-  }, [selectedCallType]);
-
-  const toggleFilters = () => {
-    setPanelOpenState(!panelOpenState);
-  };
-
-  const searchFilterData = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  };
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [selectedCallType, setSelectedCallType] = useState<string | undefined>(undefined);
+  const [chartData] = useState(mockChartData);
 
   const categories = ["Billing", "Technical", "Sales", "Complaints", "General"];
+  const activeFiltersCount = [selectedCallType].filter(Boolean).length;
+
+  const handleSearch = () => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 1000);
+  };
 
   return (
-    <>
-      <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
+    <ConfigProvider
+      theme={{
+        components: {
+          Card: {
+            headerBg: 'transparent',
+          },
+          Select: {
+            borderRadius: 8,
+          },
+          Button: {
+            borderRadius: 8,
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            styles={{
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center gap-3">
+                <Button 
+                  type="text" 
+                  icon={<ArrowLeftOutlined />} 
                   onClick={() => setSelectedTab("reports")}
-                  className="h-9 w-9 shrink-0"
+                  style={{ marginRight: 8 }}
+                />
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                  }}
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
+                  <LineChartOutlined style={{ color: 'white', fontSize: 20 }} />
+                </div>
                 <div>
-                  <CardTitle className="text-xl font-semibold">
-                    Category Trend Analysis
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Category Trend Analysis</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
                     Track call volume trends across different categories over time
-                  </p>
+                  </Text>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={panelOpenState ? "default" : "outline"}
-                  size="icon"
-                  onClick={toggleFilters}
-                  className="relative h-9 w-9"
-                >
-                  <Filter className="h-4 w-4" />
-                  {numberOfFilters > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
-                      {numberOfFilters}
-                    </span>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-6">
-            <Collapsible open={panelOpenState} onOpenChange={setPanelOpenState}>
-              <CollapsibleContent>
+            }
+            extra={
+              <Button 
+                type={filtersVisible ? "primary" : "default"}
+                icon={<FilterOutlined />}
+                onClick={() => setFiltersVisible(!filtersVisible)}
+              >
+                Filters
+                {activeFiltersCount > 0 && (
+                  <span style={{ 
+                    marginLeft: 8, 
+                    background: '#ef4444', 
+                    color: 'white', 
+                    borderRadius: 10, 
+                    padding: '2px 8px',
+                    fontSize: 12 
+                  }}>
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
+            }
+          >
+            {/* Filters Panel */}
+            <AnimatePresence>
+              {filtersVisible && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ 
-                    opacity: panelOpenState ? 1 : 0, 
-                    height: panelOpenState ? "auto" : 0 
-                  }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="mb-6 p-4 border border-border/50 rounded-lg bg-muted/30"
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-                      <Button variant="outline" className="w-full justify-start gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Select dates
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Call Type</label>
-                      <Select value={selectedCallType} onValueChange={setSelectedCallType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Call Types" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Call Types</SelectItem>
-                          <SelectItem value="home">Home</SelectItem>
-                          <SelectItem value="mobile">Mobile</SelectItem>
-                          <SelectItem value="unknown">Unknown</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button
-                        onClick={searchFilterData}
-                        className="w-full rounded-full"
-                      >
-                        Search
-                      </Button>
-                    </div>
-                  </div>
+                  <Card
+                    size="small"
+                    style={{ 
+                      marginBottom: 20, 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12
+                    }}
+                    styles={{ body: { padding: 16 } }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={12} lg={8}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
+                          <RangePicker style={{ width: '100%' }} />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={8}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Select
+                            placeholder="All Call Types"
+                            style={{ width: '100%' }}
+                            allowClear
+                            value={selectedCallType}
+                            onChange={setSelectedCallType}
+                            options={callTypes}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={8} className="flex items-end">
+                        <Button type="primary" onClick={handleSearch} style={{ width: '100%' }}>
+                          Search
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Card>
                 </motion.div>
-              </CollapsibleContent>
-            </Collapsible>
+              )}
+            </AnimatePresence>
 
+            {/* Chart */}
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            ) : emptyData ? (
-              <div className="text-center py-20 text-muted-foreground">
-                <p className="text-lg font-medium mb-2">No data available</p>
-                <p className="text-sm">Try adjusting your filters to see results</p>
               </div>
             ) : (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="mt-6"
               >
-                <div className="border border-border/50 rounded-lg p-6 bg-card">
+                <Card
+                  size="small"
+                  style={{ 
+                    borderRadius: 12, 
+                    border: '1px solid #e2e8f0',
+                  }}
+                  styles={{ body: { padding: 24 } }}
+                >
                   <ResponsiveContainer width="100%" height={400}>
                     <LineChart
                       data={chartData}
                       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
                       <XAxis
                         dataKey="date"
-                        stroke="hsl(var(--muted-foreground))"
+                        stroke="#64748b"
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
@@ -206,7 +244,7 @@ export default function CategoryTrendAnalysis() {
                         }}
                       />
                       <YAxis
-                        stroke="hsl(var(--muted-foreground))"
+                        stroke="#64748b"
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
@@ -214,22 +252,12 @@ export default function CategoryTrendAnalysis() {
                           value: "Calls Count",
                           angle: -90,
                           position: "insideLeft",
-                          style: { fontSize: 14, fontWeight: 600, fill: "hsl(var(--foreground))" },
+                          style: { fontSize: 14, fontWeight: 600, fill: "#1e293b" },
                         }}
                       />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                        }}
-                        labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
-                      />
+                      <Tooltip content={<AntdLineChartTooltip />} />
                       <Legend
-                        wrapperStyle={{
-                          paddingTop: "20px",
-                        }}
+                        wrapperStyle={{ paddingTop: "20px" }}
                         iconType="circle"
                       />
                       {categories.map((category, index) => (
@@ -247,13 +275,13 @@ export default function CategoryTrendAnalysis() {
                       ))}
                     </LineChart>
                   </ResponsiveContainer>
-                </div>
+                </Card>
               </motion.div>
             )}
-          </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }

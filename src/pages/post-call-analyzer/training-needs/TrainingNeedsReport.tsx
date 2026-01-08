@@ -1,83 +1,56 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { 
-  ArrowLeft, 
-  Filter, 
-  Calendar,
-  AlertTriangle,
-  GraduationCap,
-  X,
-  Search,
-  ArrowUpRight,
-  ArrowDownRight
-} from "lucide-react";
+  Card, 
+  Table, 
+  Input, 
+  Select, 
+  DatePicker, 
+  Button, 
+  Tag, 
+  Space, 
+  Row, 
+  Col, 
+  Typography,
+  Skeleton,
+  ConfigProvider
+} from "antd";
+import { 
+  SearchOutlined, 
+  FilterOutlined, 
+  ArrowLeftOutlined,
+  WarningOutlined,
+  BookOutlined,
+  RiseOutlined,
+  FallOutlined
+} from "@ant-design/icons";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { motion } from "framer-motion";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { motion, AnimatePresence } from "framer-motion";
+import { StatCard } from "@/components/ui/stat-card";
+import type { ColumnsType } from "antd/es/table";
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 // Mock data
 const mockTrainingAreasData = [
-  { training_type: "Product Knowledge", count: 45 },
-  { training_type: "Communication Skills", count: 38 },
-  { training_type: "Technical Support", count: 32 },
-  { training_type: "Problem Solving", count: 28 },
-  { training_type: "Customer Service Excellence", count: 25 },
-  { training_type: "Time Management", count: 22 },
-  { training_type: "Conflict Resolution", count: 18 },
+  { key: "1", training_type: "Product Knowledge", count: 45 },
+  { key: "2", training_type: "Communication Skills", count: 38 },
+  { key: "3", training_type: "Technical Support", count: 32 },
+  { key: "4", training_type: "Problem Solving", count: 28 },
+  { key: "5", training_type: "Customer Service Excellence", count: 25 },
+  { key: "6", training_type: "Time Management", count: 22 },
+  { key: "7", training_type: "Conflict Resolution", count: 18 },
 ];
 
 const mockAgentSkillsGap = [
-  { 
-    agent_name: "John Smith", 
-    skills_gap: "Product Knowledge, Technical Support, Communication Skills" 
-  },
-  { 
-    agent_name: "Sarah Johnson", 
-    skills_gap: "Problem Solving, Time Management" 
-  },
-  { 
-    agent_name: "Mike Davis", 
-    skills_gap: "Customer Service Excellence, Conflict Resolution" 
-  },
-  { 
-    agent_name: "Emily Wilson", 
-    skills_gap: "Product Knowledge, Communication Skills" 
-  },
-  { 
-    agent_name: "Chris Brown", 
-    skills_gap: "Technical Support, Problem Solving, Time Management" 
-  },
-  { 
-    agent_name: "Lisa Anderson", 
-    skills_gap: "Product Knowledge, Customer Service Excellence" 
-  },
-  { 
-    agent_name: "David Martinez", 
-    skills_gap: "Communication Skills, Conflict Resolution" 
-  },
+  { key: "1", agent_name: "John Smith", skills_gap: "Product Knowledge, Technical Support, Communication Skills" },
+  { key: "2", agent_name: "Sarah Johnson", skills_gap: "Problem Solving, Time Management" },
+  { key: "3", agent_name: "Mike Davis", skills_gap: "Customer Service Excellence, Conflict Resolution" },
+  { key: "4", agent_name: "Emily Wilson", skills_gap: "Product Knowledge, Communication Skills" },
+  { key: "5", agent_name: "Chris Brown", skills_gap: "Technical Support, Problem Solving, Time Management" },
+  { key: "6", agent_name: "Lisa Anderson", skills_gap: "Product Knowledge, Customer Service Excellence" },
+  { key: "7", agent_name: "David Martinez", skills_gap: "Communication Skills, Conflict Resolution" },
 ];
 
 const callTypes = [
@@ -86,334 +59,284 @@ const callTypes = [
   { value: "outbound", label: "Outbound" },
 ];
 
-// Compact stat card component matching PCA Dashboard design
-interface CompactStatCardProps {
-  color: string;
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  trend?: { value: number; isPositive: boolean };
-}
-
-const CompactStatCard = ({ color, icon, label, value, trend }: CompactStatCardProps) => {
-  const colorConfig: Record<string, { gradient: string; iconBg: string; border: string; glow: string }> = {
-    amber: {
-      gradient: "from-amber-500/10 via-amber-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-amber-500 to-amber-600 shadow-amber-500/30",
-      border: "border-amber-500/20",
-      glow: "shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]",
-    },
-    purple: {
-      gradient: "from-purple-500/10 via-purple-500/5 to-transparent",
-      iconBg: "bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-500/30",
-      border: "border-purple-500/20",
-      glow: "shadow-[0_0_20px_-5px_rgba(139,92,246,0.3)]",
-    },
-  };
-
-  const config = colorConfig[color] || colorConfig.purple;
-
-  return (
-    <Card className={`relative overflow-hidden bg-card/80 backdrop-blur-xl border ${config.border} ${config.glow} hover:scale-[1.02] transition-all duration-300`}>
-      {/* Background gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient}`} />
-      
-      <div className="relative p-4">
-        <div className="flex items-center gap-4">
-          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${config.iconBg} shadow-lg`}>
-            {icon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-muted-foreground mb-0.5">{label}</p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-foreground tracking-tight">{value}</p>
-              {trend && (
-                <span className={`flex items-center gap-0.5 text-xs font-medium ${trend.isPositive ? "text-emerald-500" : "text-red-500"}`}>
-                  {trend.isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                  {trend.value}%
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-};
-
 export default function TrainingNeedsAnalysisReport() {
   const { setSelectedTab } = usePostCall();
-  const [loading, setLoading] = useState(false);
-  const [panelOpenState, setPanelOpenState] = useState(false);
-  const [numberOfFilters, setNumberOfFilters] = useState(0);
-  
-  // Filter states
-  const [selectedDateRange, setSelectedDateRange] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [agentName, setAgentName] = useState("");
-  const [selectedCallType, setSelectedCallType] = useState("");
+  const [selectedCallType, setSelectedCallType] = useState<string | undefined>(undefined);
 
   // Stats
-  const [highPriorityAreas, setHighPriorityAreas] = useState(3);
-  const [agentsRequiringTraining, setAgentsRequiringTraining] = useState(24);
+  const highPriorityAreas = 3;
+  const agentsRequiringTraining = 24;
 
   useEffect(() => {
-    let count = 0;
-    if (selectedDateRange) count++;
-    if (agentName) count++;
-    if (selectedCallType) count++;
-    setNumberOfFilters(count);
-  }, [selectedDateRange, agentName, selectedCallType]);
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const backToReports = () => {
-    setSelectedTab("reports");
-  };
+  const activeFiltersCount = [agentName, selectedCallType].filter(Boolean).length;
 
-  const toggleFilters = () => {
-    setPanelOpenState(!panelOpenState);
-  };
-
-  const clearSelectedAgentName = () => {
+  const clearAllFilters = () => {
     setAgentName("");
+    setSelectedCallType(undefined);
   };
 
-  const clearSelectedCallType = () => {
-    setSelectedCallType("");
-  };
+  const trainingAreasColumns: ColumnsType<typeof mockTrainingAreasData[0]> = [
+    {
+      title: 'Training Type',
+      dataIndex: 'training_type',
+      key: 'training_type',
+      render: (text: string) => <Text strong>{text}</Text>,
+    },
+    {
+      title: 'Count',
+      dataIndex: 'count',
+      key: 'count',
+      align: 'right' as const,
+      render: (count: number) => (
+        <Tag color="blue" style={{ borderRadius: 12, fontWeight: 600 }}>{count}</Tag>
+      ),
+    },
+  ];
 
-  const applyAgentName = (value: string) => {
-    setAgentName(value);
-  };
-
-  const searchFilterData = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  };
+  const agentSkillsColumns: ColumnsType<typeof mockAgentSkillsGap[0]> = [
+    {
+      title: 'Agent Name',
+      dataIndex: 'agent_name',
+      key: 'agent_name',
+      render: (text: string) => <Text strong>{text}</Text>,
+    },
+    {
+      title: 'Recommended Trainings',
+      dataIndex: 'skills_gap',
+      key: 'skills_gap',
+      render: (skills: string) => (
+        <Space wrap>
+          {skills.split(", ").map((skill, index) => (
+            <Tag 
+              key={index} 
+              style={{ 
+                background: '#f0f5ff', 
+                border: '1px solid #adc6ff', 
+                color: '#2f54eb',
+                borderRadius: 6,
+              }}
+            >
+              {skill}
+            </Tag>
+          ))}
+        </Space>
+      ),
+    },
+  ];
 
   return (
-    <>
-      <div className="p-6 space-y-6">
-        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-4 border-b border-border/30">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={backToReports}
-                  className="h-9 w-9 shrink-0"
+    <ConfigProvider
+      theme={{
+        components: {
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#475569',
+            headerSortActiveBg: '#f1f5f9',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#e2e8f0',
+          },
+          Card: {
+            headerBg: 'transparent',
+          },
+          Select: {
+            borderRadius: 8,
+          },
+          Input: {
+            borderRadius: 8,
+          },
+          Button: {
+            borderRadius: 8,
+          },
+        },
+      }}
+    >
+      <div className="p-6 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            styles={{
+              header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
+              body: { padding: 24 }
+            }}
+            title={
+              <div className="flex items-center gap-3">
+                <Button 
+                  type="text" 
+                  icon={<ArrowLeftOutlined />} 
+                  onClick={() => setSelectedTab("reports")}
+                  style={{ marginRight: 8 }}
+                />
+                <div 
+                  style={{ 
+                    width: 42, 
+                    height: 42, 
+                    borderRadius: 12, 
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                  }}
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
+                  <BookOutlined style={{ color: 'white', fontSize: 20 }} />
+                </div>
                 <div>
-                  <CardTitle className="text-xl font-semibold">
-                    Training Needs Analysis
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Training Needs Analysis</Title>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
                     Identify areas where agents require additional training and development
-                  </p>
+                  </Text>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={panelOpenState ? "default" : "outline"}
-                  size="icon"
-                  onClick={toggleFilters}
-                  className="relative h-9 w-9"
+            }
+            extra={
+              <Space>
+                <Button 
+                  type={filtersVisible ? "primary" : "default"}
+                  icon={<FilterOutlined />}
+                  onClick={() => setFiltersVisible(!filtersVisible)}
                 >
-                  <Filter className="h-4 w-4" />
-                  {numberOfFilters > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
-                      {numberOfFilters}
-                    </span>
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <Tag color="red" style={{ marginLeft: 8, borderRadius: 10 }}>{activeFiltersCount}</Tag>
                   )}
                 </Button>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-6">
-            {/* Filters Section */}
-            <Collapsible open={panelOpenState} onOpenChange={setPanelOpenState}>
-              <CollapsibleContent>
+              </Space>
+            }
+          >
+            {/* Filters Panel */}
+            <AnimatePresence>
+              {filtersVisible && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ 
-                    opacity: panelOpenState ? 1 : 0, 
-                    height: panelOpenState ? "auto" : 0 
-                  }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="mb-6 p-4 border border-border/50 rounded-lg bg-muted/30"
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Date Range Filter */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-                      <Button variant="outline" className="w-full justify-start gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Select dates
-                      </Button>
-                    </div>
-
-                    {/* Agent Name Filter */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Search Agent Name</label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search agent..."
-                          className="pl-9"
-                          value={agentName}
-                          onChange={(e) => setAgentName(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Call Type Filter */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Call Type</label>
-                      <Select value={selectedCallType} onValueChange={setSelectedCallType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Call Types" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {callTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Search Button */}
-                    <div className="flex items-end">
-                      <Button
-                        onClick={searchFilterData}
-                        className="w-full rounded-full"
-                      >
-                        Search
-                      </Button>
-                    </div>
-                  </div>
+                  <Card
+                    size="small"
+                    style={{ 
+                      marginBottom: 20, 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12
+                    }}
+                    styles={{ body: { padding: 16 } }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
+                          <RangePicker style={{ width: '100%' }} />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Search Agent</Text>
+                          <Input
+                            placeholder="Search agent..."
+                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            value={agentName}
+                            onChange={(e) => setAgentName(e.target.value)}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Select
+                            placeholder="All Call Types"
+                            style={{ width: '100%' }}
+                            allowClear
+                            value={selectedCallType}
+                            onChange={setSelectedCallType}
+                            options={callTypes}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={12} lg={6} className="flex items-end">
+                        <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                          <Button onClick={clearAllFilters}>Clear</Button>
+                          <Button type="primary">Search</Button>
+                        </Space>
+                      </Col>
+                    </Row>
+                  </Card>
                 </motion.div>
-              </CollapsibleContent>
-            </Collapsible>
+              )}
+            </AnimatePresence>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <CompactStatCard
-                  color="amber"
-                  icon={<AlertTriangle className="h-5 w-5 text-white" />}
+            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+              <Col xs={24} sm={12}>
+                <StatCard
                   label="High Priority Training Areas"
                   value={highPriorityAreas.toString()}
+                  icon={<WarningOutlined />}
+                  color="#f59e0b"
+                  gradientColors={["#f59e0b", "#d97706"] as [string, string]}
+                  isLoading={loading}
                 />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <CompactStatCard
-                  color="purple"
-                  icon={<GraduationCap className="h-5 w-5 text-white" />}
+              </Col>
+              <Col xs={24} sm={12}>
+                <StatCard
                   label="Agents Requiring Training"
                   value={agentsRequiringTraining.toString()}
+                  icon={<BookOutlined />}
+                  color="#8b5cf6"
+                  gradientColors={["#8b5cf6", "#7c3aed"] as [string, string]}
+                  isLoading={loading}
                 />
-              </motion.div>
-            </div>
+              </Col>
+            </Row>
 
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <>
-                {/* Training Areas Table */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mb-6"
-                >
-                  <h5 className="text-lg font-semibold mb-4">Training Areas</h5>
-                  <div className="border border-border/50 rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Training Type</TableHead>
-                          <TableHead className="text-right">Count</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {mockTrainingAreasData.map((area, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{area.training_type}</TableCell>
-                            <TableCell className="text-right">{area.count}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </motion.div>
+            {/* Training Areas Table */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              style={{ marginBottom: 24 }}
+            >
+              <Title level={5} style={{ marginBottom: 16 }}>Training Areas</Title>
+              <Table
+                columns={trainingAreasColumns}
+                dataSource={mockTrainingAreasData}
+                loading={loading}
+                pagination={false}
+                style={{ borderRadius: 12, overflow: 'hidden' }}
+              />
+            </motion.div>
 
-                {/* Agent Skills Gap Table */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <h5 className="text-lg font-semibold mb-4">Agent Skills Gap</h5>
-                  {mockAgentSkillsGap && mockAgentSkillsGap.length > 0 ? (
-                    <div className="border border-border/50 rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Agent Name</TableHead>
-                            <TableHead>Recommended Trainings</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {mockAgentSkillsGap.map((agent, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium">{agent.agent_name}</TableCell>
-                              <TableCell>
-                                <div className="flex flex-wrap gap-2">
-                                  {agent.skills_gap.split(", ").map((skill, skillIndex) => (
-                                    <Badge
-                                      key={skillIndex}
-                                      variant="outline"
-                                      className="bg-accent/50 text-accent-foreground border-accent"
-                                    >
-                                      {skill}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      No data available
-                    </div>
-                  )}
-                </motion.div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+            {/* Agent Skills Gap Table */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Title level={5} style={{ marginBottom: 16 }}>Agent Skills Gap</Title>
+              <Table
+                columns={agentSkillsColumns}
+                dataSource={mockAgentSkillsGap}
+                loading={loading}
+                pagination={{ pageSize: 5, showSizeChanger: false }}
+                style={{ borderRadius: 12, overflow: 'hidden' }}
+              />
+            </motion.div>
+          </Card>
+        </motion.div>
       </div>
       <AIHelper />
-    </>
+    </ConfigProvider>
   );
 }
