@@ -1,4 +1,5 @@
 import { getBaseUrl } from '../utils/envConfig';
+import { responseInterceptor } from './common/authenticator/responseInterceptor';
 
 // Common Response Types
 export interface CommonResponse<T> {
@@ -81,13 +82,17 @@ export class BaseApiService {
       const response = await fetch(url, config);
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        // Create error object with response for interceptor to parse
+        const error = new Error(`API request failed: ${response.status} ${response.statusText}`);
+        (error as any).response = response;
+        throw error;
       }
 
       return await response.json();
     } catch (error) {
-      console.error('API Service Error:', error);
-      throw error;
+      // Use response interceptor to handle auth errors
+      const interceptor = responseInterceptor();
+      return interceptor.onError!(error);
     }
   }
 
@@ -179,17 +184,18 @@ export class CallRoutingApiService extends BaseApiService {
     async overallPerformanceTrend(
     filters: Filters
   ): Promise<CommonResponse<any>> {
-    const params = new URLSearchParams();
+    let queryParams = '';
 
     if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          params.append(key, value.toString());
-        }
-      });
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
     }
 
-    const endpoint = `/reports/overall_performance_trends?${params.toString()}`;
+    const endpoint = `/reports/overall_performance_trends${queryParams}`;
     return this.get<any>(endpoint);
   }
 }

@@ -1,6 +1,5 @@
-import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   ChevronDown, 
   Image as ImageIcon,
@@ -14,9 +13,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Building2
-} from "lucide-react";
-import { Button, Dropdown, Avatar, Badge, Space } from "antd";
-import { useModule } from "@/contexts/ModuleContext";
+} from 'lucide-react';
+import { Button, Dropdown, Avatar, Badge, Space } from 'antd';
+import { motion } from 'framer-motion';
+import { useModule } from '@/contexts/ModuleContext';
+import { projectSelectionService } from '@/services/projectSelectionService';
 
 // Types for project/instance data
 interface Project {
@@ -86,7 +87,6 @@ export function TopHeader() {
           }
         }
         
-        console.log('Detected module:', selectedModule, 'from path:', currentPath, 'search:', location.search);
         
         if (selectedModule === 'pca' || selectedModule === 'copilot') {
           // For PCA/Copilot: Load departments with company names (matching Angular logic)
@@ -108,7 +108,6 @@ export function TopHeader() {
             dept.ref_code?.toLowerCase().startsWith(selectedModule)
           );
           
-          console.log('Filtered departments for', selectedModule, ':', filteredDepartments);
           setProjects(filteredDepartments);
           
           // Set selected project based on URL parameter
@@ -118,7 +117,7 @@ export function TopHeader() {
             const selectedDept = filteredDepartments.find(dept => dept.id === departmentId);
             if (selectedDept) {
               setSelectedProject(selectedDept);
-              console.log('Set selected project from URL:', selectedDept);
+              projectSelectionService.changeSelectedProject(selectedDept);
             }
           }
         } else if (selectedModule === 'autopilot') {
@@ -130,7 +129,6 @@ export function TopHeader() {
             id: project.project_id || project.id
           }));
           
-          console.log('Autopilot projects:', formattedProjects);
           setProjects(formattedProjects);
           
           // Set selected project based on URL parameter
@@ -140,14 +138,14 @@ export function TopHeader() {
             const selectedProj = formattedProjects.find(proj => proj.id === projectId);
             if (selectedProj) {
               setSelectedProject(selectedProj);
-              console.log('Set selected project from URL:', selectedProj);
+              projectSelectionService.changeSelectedProject(selectedProj);
             }
           }
         }
         
-        // Set default selected project if none exists and no URL parameter
         if (!selectedProject && projects.length > 0) {
           setSelectedProject(projects[0]);
+          projectSelectionService.changeSelectedProject(projects[0]);
         }
       }
     } catch (error) {
@@ -159,6 +157,8 @@ export function TopHeader() {
 
   const changeProject = (project: Project) => {
     setSelectedProject(project);
+    
+    projectSelectionService.changeSelectedProject(project);
     
     // Store in localStorage (similar to Angular project selection service)
     localStorage.setItem('selectedProject', JSON.stringify(project));
@@ -183,7 +183,6 @@ export function TopHeader() {
       const currentPath = location.pathname;
       if (currentPath.includes('/pca/dashboard')) {
         // Connect to alert notification websocket for PCA dashboard
-        console.log('Connecting to alert notification websocket for project:', project);
         // TODO: Implement WebSocket connection logic here
       }
     }

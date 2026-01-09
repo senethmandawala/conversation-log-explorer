@@ -98,7 +98,6 @@ export function RedAlertCallLogs({ category, subCategory }: RedAlertCallLogsProp
                   <TableRow 
                     key={index} 
                     className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => console.log("Call clicked:", call)}
                   >
                     <TableCell>
                       <div className="flex flex-col">

@@ -160,7 +160,6 @@ export default function CustomReports({ onBack }: CustomReportsProps) {
 
   const gotoConfig = () => {
     // Navigate to configuration page
-    console.log("Navigate to configuration");
   };
 
   const renderReport = (report: CustomReport) => {

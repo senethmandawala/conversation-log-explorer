@@ -329,8 +329,6 @@ export function HandledCallsAnalysis() {
   );
 
   const renderTable = (data: TableDataItem[], onRowClick?: (label: string) => void) => {
-    console.log('renderTable called with data:', data);
-    console.log('renderTable data length:', data?.length);
     
     return (
       <div style={{ border: '1px solid #d9d9d9', borderRadius: 8, overflow: 'hidden' }}>
@@ -378,10 +376,7 @@ export function HandledCallsAnalysis() {
       }
       
       case 3: {
-        console.log('Slide 3 - selectedType:', selectedType);
-        console.log('Slide 3 - available keys:', Object.keys(slide3DataMap));
         const data = slide3DataMap[selectedType];
-        console.log('Slide 3 - found data:', data);
         if (!data) return null;
         return renderTable(data, handlePrioritySelected);
       }

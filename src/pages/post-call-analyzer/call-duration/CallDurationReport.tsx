@@ -152,7 +152,6 @@ export default function CallDurationReport() {
 
   const handleCategoryClick = (data: any) => {
     if (data?.name) {
-      console.log("Category clicked:", data.name);
       const newSlide: Slide = {
         id: 2,
         type: "callLogs",

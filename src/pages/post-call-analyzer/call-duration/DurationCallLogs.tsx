@@ -33,7 +33,6 @@ export function DurationCallLogs() {
   };
 
   const handleCallClick = (call: typeof mockCallLogs[0]) => {
-    console.log("Call clicked:", call);
   };
 
   const getSentimentIcon = (sentiment: string) => {

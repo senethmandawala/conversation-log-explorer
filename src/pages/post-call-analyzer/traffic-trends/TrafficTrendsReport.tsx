@@ -70,7 +70,6 @@ const getHeatmapColor = (value: number, maxValue: number, categoryIndex?: number
   
   if (categoryIndex !== undefined && window.env_vars.colors && window.env_vars.colors[categoryIndex]) {
     const color = window.env_vars.colors[categoryIndex];
-    console.log(`Category ${categoryIndex}: ${color}`); // Debug log
     // Convert hex to HSL properly
     const r = parseInt(color.slice(1, 3), 16) / 255;
     const g = parseInt(color.slice(3, 5), 16) / 255;

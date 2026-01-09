@@ -181,7 +181,6 @@ export default function ChannelWiseCategoryReport() {
   };
 
   const handleCategoryClick = (category: string) => {
-    console.log("Category clicked:", category);
   };
 
   const getChannelIcon = (iconName: string) => {

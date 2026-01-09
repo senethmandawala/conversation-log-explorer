@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Dropdown, Radio, Space, Typography, Divider, Tag } from 'antd';
+import { Button, Dropdown, Radio, Space, Typography, Divider, Tag, Tooltip } from 'antd';
 import { CalendarOutlined, LeftOutlined, RightOutlined, ClockCircleOutlined, CheckOutlined } from '@ant-design/icons';
 import { DatePickerProps, DateRangeObject } from './DatePicker';
 import dayjs from 'dayjs';
@@ -390,13 +390,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
       return [
         { value: 'This Week', label: 'This Week' },
         { value: 'Last Week', label: 'Last Week' },
-        { value: 'Custom', label: 'Custom Range' },
+        { value: 'Custom', label: 'Custom' },
       ];
     } else if (calenderType === 'month') {
       return [
         { value: 'This Month', label: 'This Month' },
         { value: 'Last Month', label: 'Last Month' },
-        { value: 'Custom', label: 'Custom Range' },
+        { value: 'Custom', label: 'Custom' },
       ];
     } else {
       return [
@@ -404,7 +404,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         { value: 'This Week', label: 'This Week' },
         { value: 'This Month', label: 'This Month' },
         { value: 'Last Month', label: 'Last Month' },
-        { value: 'Custom', label: 'Custom Range' },
+        { value: 'Custom', label: 'Custom' },
       ];
     }
   };
@@ -501,21 +501,20 @@ const DatePicker: React.FC<DatePickerProps> = ({
       open={isOpen}
       onOpenChange={setIsOpen}
     >
-      <div>
-        <Button
-          type="default"
-          icon={<CalendarOutlined />}
-          title={toolTipValue || dateOutput?.dateRangeForDisplay}
-          className="h-10 rounded-xl border-2 hover:border-primary/50 transition-all duration-200 shadow-sm hover:shadow-md"
-        >
-          <span className="ml-2 font-medium">
-            {selectedOption === 'Custom' && dateOutput?.dateRangeForDisplay 
-              ? dateOutput.dateRangeForDisplay 
-              : selectedOption
-            }
-          </span>
-        </Button>
-      </div>
+      <Tooltip title={dateOutput?.dateRangeForDisplay || toolTipValue || 'Select date range'}>
+        <div>
+          <Button
+            type="default"
+            icon={<CalendarOutlined />}
+            title={toolTipValue || dateOutput?.dateRangeForDisplay}
+            className="h-10 rounded-xl border-2 hover:border-primary/50 transition-all duration-200"
+          >
+            <span className="ml-2 font-medium">
+              {selectedOption === 'Custom' ? 'Custom' : selectedOption}
+            </span>
+          </Button>
+        </div>
+      </Tooltip>
     </Dropdown>
   );
 };

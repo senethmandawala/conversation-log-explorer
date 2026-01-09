@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAutopilot, AutopilotTab } from "@/contexts/AutopilotContext";
 import { usePostCall, PostCallTab } from "@/contexts/PostCallContext";
+import { useDate } from "@/contexts/DateContext";
 import { DatePicker, Select } from "antd";
 import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
 import { DateRangeObject } from "@/components/common/DatePicker/DatePicker";
@@ -54,6 +55,7 @@ interface ModuleTabsProps {
 export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsProps) {
   const { selectedInstance: autopilotInstance, selectedTab: autopilotSelectedTab, setSelectedTab: setAutopilotTab } = useAutopilot();
   const { selectedInstance: postCallInstance, selectedTab: postCallSelectedTab, setSelectedTab: setPostCallTab } = usePostCall();
+  const { globalDateRange, setGlobalDateRange } = useDate();
   const isPostCallAnalyzer = currentPath.startsWith("/pca");
   const isAutopilot = currentPath.startsWith("/autopilot");
   const tabs = isPostCallAnalyzer ? postCallAnalyzerTabs : autopilotTabs;
@@ -80,16 +82,12 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
   // Check if current tab is dashboard
   const isDashboardTab = currentActiveTab === "dashboard";
   
-  // Date range picker state
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRangeObject | null>(null);
-  
   // Service type filter state
   const [selectedServiceTypes, setSelectedServiceTypes] = useState<string[]>([]);
   
-  // Handle date range change
+  // Handle date range change - update global context
   const handleDateRangeChange = (dateRange: DateRangeObject) => {
-    setSelectedDateRange(dateRange);
-    console.log('Date range changed:', dateRange);
+    setGlobalDateRange(dateRange);
   };
   
   // Service type options

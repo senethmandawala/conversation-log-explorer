@@ -2,17 +2,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ModuleProvider } from "./contexts/ModuleContext";
 import { AutopilotProvider } from "./contexts/AutopilotContext";
 import { PostCallProvider } from "./contexts/PostCallContext";
+import { DateProvider } from "./contexts/DateContext";
 import Index from "./pages/Index";
 import GetStarted from "./pages/GetStarted";
 import Instances from "./pages/Instances";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
 import Autopilot from "./pages/autopilot/Autopilot";
 import Copilot from "./pages/Copilot";
+import UserManagementRedirect from "./pages/UserManagementRedirect";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,7 @@ const App = () => (
         <ModuleProvider>
         <AutopilotProvider>
         <PostCallProvider>
+        <DateProvider>
         <MainLayout>
           <Routes>
             <Route path="/" element={<GetStarted />} />
@@ -34,11 +37,12 @@ const App = () => (
             <Route path="/pca" element={<PostCallAnalyzer />} />
             <Route path="/autopilot" element={<Autopilot />} />
             <Route path="/copilot" element={<Copilot />} />
-            <Route path="/user-management" element={<Index />} />
+            <Route path="/user-management" element={<UserManagementRedirect />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </MainLayout>
+        </DateProvider>
         </PostCallProvider>
         </AutopilotProvider>
         </ModuleProvider>
