@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Dropdown, Radio, TimePicker, Space, Typography } from 'antd';
-import { CalendarOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Radio, Space, Typography, Divider, Tag } from 'antd';
+import { CalendarOutlined, LeftOutlined, RightOutlined, ClockCircleOutlined, CheckOutlined } from '@ant-design/icons';
 import { DatePickerProps, DateRangeObject } from './DatePicker';
 import dayjs from 'dayjs';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const { Text } = Typography;
 
-// Custom calendar component
+// Enhanced Custom Calendar Component
 const CustomCalendar: React.FC<{
-  selectedRange: [dayjs.Dayjs, dayjs.Dayjs] | null;
-  onRangeSelect: (range: [dayjs.Dayjs, dayjs.Dayjs] | null) => void;
+  fromDate: dayjs.Dayjs | null;
+  toDate: dayjs.Dayjs | null;
+  onFromDateSelect: (date: dayjs.Dayjs) => void;
+  onToDateSelect: (date: dayjs.Dayjs) => void;
   disabledDate?: (date: dayjs.Dayjs) => boolean;
-}> = ({ selectedRange, onRangeSelect, disabledDate }) => {
+  selectionMode: 'from' | 'to';
+}> = ({ fromDate, toDate, onFromDateSelect, onToDateSelect, disabledDate, selectionMode }) => {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
-  const [selectingStart, setSelectingStart] = useState(true);
   
   const getDaysInMonth = (date: dayjs.Dayjs) => {
     return date.daysInMonth();
@@ -24,15 +27,22 @@ const CustomCalendar: React.FC<{
   };
   
   const isDateInRange = (date: dayjs.Dayjs) => {
-    if (!selectedRange || !selectedRange[0] || !selectedRange[1]) return false;
-    const start = selectedRange[0].isBefore(selectedRange[1]) ? selectedRange[0] : selectedRange[1];
-    const end = selectedRange[0].isBefore(selectedRange[1]) ? selectedRange[1] : selectedRange[0];
-    return date.isAfter(start) && date.isBefore(end);
+    if (!fromDate || !toDate) return false;
+    const start = fromDate.isBefore(toDate) ? fromDate : toDate;
+    const end = fromDate.isBefore(toDate) ? toDate : fromDate;
+    return date.isAfter(start.subtract(1, 'day')) && date.isBefore(end.add(1, 'day'));
   };
+
+  const isFromDate = (date: dayjs.Dayjs) => fromDate?.isSame(date, 'day');
+  const isToDate = (date: dayjs.Dayjs) => toDate?.isSame(date, 'day');
+  const isToday = (date: dayjs.Dayjs) => date.isSame(dayjs(), 'day');
   
-  const isDateSelected = (date: dayjs.Dayjs) => {
-    if (!selectedRange) return false;
-    return selectedRange[0]?.isSame(date, 'day') || selectedRange[1]?.isSame(date, 'day');
+  const handleDateClick = (date: dayjs.Dayjs) => {
+    if (selectionMode === 'from') {
+      onFromDateSelect(date);
+    } else {
+      onToDateSelect(date);
+    }
   };
   
   const generateCalendarDays = () => {
@@ -42,54 +52,41 @@ const CustomCalendar: React.FC<{
     
     // Add empty cells for days before month starts
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="p-2"></div>);
+      days.push(
+        <div key={`empty-${i}`} className="h-9 w-9" />
+      );
     }
     
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = currentMonth.date(day);
-      const isSelected = isDateSelected(date);
-      const isInRange = isDateInRange(date);
+      const isFrom = isFromDate(date);
+      const isTo = isToDate(date);
+      const inRange = isDateInRange(date);
       const isDisabled = disabledDate?.(date);
+      const isTodayDate = isToday(date);
       
       days.push(
-        <div
+        <motion.div
           key={day}
-          style={{
-            padding: '8px',
-            textAlign: 'center',
-            cursor: isDisabled ? 'not-allowed' : 'pointer',
-            borderRadius: '4px',
-            backgroundColor: isSelected ? '#1677ff' : isInRange ? '#e6f7ff' : 'transparent',
-            color: isSelected ? 'white' : isDisabled ? '#bfbfbf' : 'inherit',
-            userSelect: 'none'
-          }}
+          whileHover={!isDisabled ? { scale: 1.1 } : undefined}
+          whileTap={!isDisabled ? { scale: 0.95 } : undefined}
+          className={`
+            h-9 w-9 flex items-center justify-center text-sm cursor-pointer rounded-lg transition-all duration-200
+            ${isFrom || isTo ? 'bg-primary text-white font-semibold shadow-md' : ''}
+            ${inRange && !isFrom && !isTo ? 'bg-primary/15 text-primary' : ''}
+            ${!isFrom && !isTo && !inRange && isTodayDate ? 'ring-2 ring-primary/30 font-medium' : ''}
+            ${isDisabled ? 'text-muted-foreground/40 cursor-not-allowed' : ''}
+            ${!isFrom && !isTo && !inRange && !isDisabled ? 'hover:bg-accent hover:text-accent-foreground' : ''}
+          `}
           onClick={() => !isDisabled && handleDateClick(date)}
-          onMouseEnter={(e) => !isDisabled && !isSelected && !isInRange && (e.currentTarget.style.backgroundColor = '#f5f5f5')}
-          onMouseLeave={(e) => !isDisabled && !isSelected && !isInRange && (e.currentTarget.style.backgroundColor = 'transparent')}
         >
           {day}
-        </div>
+        </motion.div>
       );
     }
     
     return days;
-  };
-  
-  const handleDateClick = (date: dayjs.Dayjs) => {
-    if (!selectedRange || !selectedRange[0]) {
-      // First selection - set start date
-      onRangeSelect([date, null]);
-      setSelectingStart(false);
-    } else if (!selectedRange[1]) {
-      // Second selection - set end date
-      onRangeSelect([selectedRange[0], date]);
-      setSelectingStart(true);
-    } else {
-      // Start new range
-      onRangeSelect([date, null]);
-      setSelectingStart(false);
-    }
   };
   
   const changeMonth = (direction: 'prev' | 'next') => {
@@ -97,43 +94,78 @@ const CustomCalendar: React.FC<{
   };
   
   return (
-    <div className="w-100">
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <Button 
-          type="text" 
-          size="small"
+    <div className="w-full">
+      {/* Month Navigation */}
+      <div className="flex justify-between items-center mb-4 px-1">
+        <motion.button 
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-accent transition-colors"
           onClick={() => changeMonth('prev')}
         >
-          ‹
-        </Button>
-        <Text strong>{currentMonth.format('MMMM YYYY')}</Text>
-        <Button 
-          type="text" 
-          size="small"
+          <LeftOutlined className="text-xs text-muted-foreground" />
+        </motion.button>
+        <Text className="font-semibold text-base">{currentMonth.format('MMMM YYYY')}</Text>
+        <motion.button 
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-accent transition-colors"
           onClick={() => changeMonth('next')}
         >
-          ›
-        </Button>
+          <RightOutlined className="text-xs text-muted-foreground" />
+        </motion.button>
       </div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center', marginBottom: '4px' }}>
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} style={{ padding: '4px', color: '#6c757d', fontSize: '12px', fontWeight: 'bold' }}>
+      {/* Weekday Headers */}
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+          <div 
+            key={day} 
+            className="h-9 w-9 flex items-center justify-center text-xs font-medium text-muted-foreground"
+          >
             {day}
           </div>
         ))}
       </div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 gap-1">
         {generateCalendarDays()}
-      </div>
-      
-      <div className="text-muted small mt-2">
-        {selectingStart ? 'Select start date' : 'Select end date'}
       </div>
     </div>
   );
 };
+
+// Date Selection Card Component
+const DateSelectionCard: React.FC<{
+  label: string;
+  date: dayjs.Dayjs | null;
+  isActive: boolean;
+  onClick: () => void;
+}> = ({ label, date, isActive, onClick }) => (
+  <motion.div
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className={`
+      flex-1 p-3 rounded-xl cursor-pointer transition-all duration-200 border-2
+      ${isActive 
+        ? 'border-primary bg-primary/5 shadow-sm' 
+        : 'border-border hover:border-primary/50 bg-card'
+      }
+    `}
+  >
+    <div className="flex items-center gap-2 mb-1">
+      <CalendarOutlined className={`text-xs ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+      <Text className={`text-xs font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+        {label}
+      </Text>
+    </div>
+    <Text className={`text-sm font-semibold ${date ? '' : 'text-muted-foreground'}`}>
+      {date ? date.format('MMM DD, YYYY') : 'Select date'}
+    </Text>
+  </motion.div>
+);
 
 const DatePicker: React.FC<DatePickerProps> = ({
   selectedOption: initialSelectedOption = null,
@@ -146,13 +178,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   const [selectedOption, setSelectedOption] = useState<string>(initialSelectedOption || 'Today');
   const [customCalendar, setCustomCalendar] = useState<boolean>(false);
-  const [selectedRange, setSelectedRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
-  const [selectedFromTime, setSelectedFromTime] = useState<dayjs.Dayjs>(dayjs().hour(0).minute(0));
-  const [selectedToTime, setSelectedToTime] = useState<dayjs.Dayjs>(dayjs().hour(23).minute(59));
+  const [fromDate, setFromDate] = useState<dayjs.Dayjs | null>(null);
+  const [toDate, setToDate] = useState<dayjs.Dayjs | null>(null);
+  const [selectionMode, setSelectionMode] = useState<'from' | 'to'>('from');
   const [dateOutput, setDateOutput] = useState<DateRangeObject | null>(null);
-  const [pickerContainerControl, setPickerContainerControl] = useState<'datepicker' | 'timepicker'>('datepicker');
-
-  const maxDate = dayjs();
+  const [isOpen, setIsOpen] = useState(false);
 
   // Utility functions
   const formatDateToString = (date: Date): string => {
@@ -236,9 +266,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
     if (dateInput) {
       setSelectedOption(dateInput.type);
       if (dateInput.fromDateWithoutTransform && dateInput.toDateWithoutTransform) {
-        setSelectedRange([dayjs(dateInput.fromDateWithoutTransform), dayjs(dateInput.toDateWithoutTransform)]);
-        setSelectedFromTime(dayjs(dateInput.fromDateWithoutTransform));
-        setSelectedToTime(dayjs(dateInput.toDateWithoutTransform));
+        setFromDate(dayjs(dateInput.fromDateWithoutTransform));
+        setToDate(dayjs(dateInput.toDateWithoutTransform));
       }
       setDateOutput(dateInput);
     }
@@ -248,6 +277,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
     setSelectedOption(value);
     if (value === 'Custom') {
       setCustomCalendar(true);
+      setFromDate(null);
+      setToDate(null);
+      setSelectionMode('from');
     } else {
       setCustomCalendar(false);
       handlePresetSelection(value);
@@ -300,229 +332,194 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
     const dateRange = createDateRange(startDate, endDate, value);
     setDateOutput(dateRange);
+    setFromDate(dayjs(startDate));
+    setToDate(dayjs(endDate));
     onSelectedRangeValueChange?.(dateRange);
+    setIsOpen(false);
   };
 
-  const handleDateChange = (range: [dayjs.Dayjs, dayjs.Dayjs] | null) => {
-    if (!range || !range[0]) return;
-
-    const m = range[0].toDate();
+  const handleFromDateSelect = (date: dayjs.Dayjs) => {
+    const startOfDay = date.startOf('day');
+    setFromDate(startOfDay);
     
-    if (!isAfterNinetyDaysAgo(m)) {
-      return;
+    // Auto-switch to "to" selection mode
+    setSelectionMode('to');
+    
+    // If toDate is before new fromDate, clear it
+    if (toDate && startOfDay.isAfter(toDate)) {
+      setToDate(null);
     }
+  };
 
-    let newRange: [dayjs.Dayjs, dayjs.Dayjs] | null = null;
-
-    if (calenderType && calenderType === "week") {
-      let sevenDaysLater = new Date(m);
-      sevenDaysLater.setDate(m.getDate() + 6);
-      sevenDaysLater = new Date(sevenDaysLater.getFullYear(), sevenDaysLater.getMonth(), sevenDaysLater.getDate(), 23, 59, 59);
-      newRange = [dayjs(m), dayjs(sevenDaysLater)];
-    } else if (calenderType && calenderType === "month") {
-      let thirtyDaysLater = new Date(m);
-      thirtyDaysLater.setDate(m.getDate() + 30);
-      thirtyDaysLater = new Date(thirtyDaysLater.getFullYear(), thirtyDaysLater.getMonth(), thirtyDaysLater.getDate(), 23, 59, 59);
-      newRange = [dayjs(m), dayjs(thirtyDaysLater)];
+  const handleToDateSelect = (date: dayjs.Dayjs) => {
+    const endOfDay = date.endOf('day');
+    
+    // If selected date is before fromDate, swap them
+    if (fromDate && date.isBefore(fromDate)) {
+      setToDate(fromDate.endOf('day'));
+      setFromDate(date.startOf('day'));
     } else {
-      if (!selectedRange || !selectedRange[0] || selectedRange[1]) {
-        newRange = [dayjs(m), null];
-      } else {
-        let end = m;
-        let start = selectedRange[0].toDate();
-        
-        if (end < start) {
-          if (limitCalender && limitCalender === "limitMonth") {
-            start = new Date(start.getFullYear(), start.getMonth(), start.getDate(), selectedToTime.hour(), selectedToTime.minute(), 0);
-            end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), selectedFromTime.hour(), selectedFromTime.minute(), 0);
-
-            // Calculate the difference in days
-            const dayDifference = Math.abs((start.getTime() - end.getTime()) / (1000 * 60 * 60 * 24));
-            if (dayDifference <= 30) {
-              newRange = [dayjs(end), dayjs(start)];
-            }
-          } else {
-            start = new Date(start.getFullYear(), start.getMonth(), start.getDate(), selectedToTime.hour(), selectedToTime.minute(), 0);
-            end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), selectedFromTime.hour(), selectedFromTime.minute(), 0);
-            newRange = [dayjs(end), dayjs(start)];
-          }
-        } else {
-          if (limitCalender && limitCalender === "limitMonth") {
-            start = new Date(start.getFullYear(), start.getMonth(), start.getDate(), selectedFromTime.hour(), selectedFromTime.minute(), 0);
-            end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), selectedToTime.hour(), selectedToTime.minute(), 0);
-            const dayDifference = Math.abs((start.getTime() - end.getTime()) / (1000 * 60 * 60 * 24));
-            if (dayDifference <= 31) {
-              newRange = [dayjs(start), dayjs(end)];
-            }
-          } else {
-            start = new Date(start.getFullYear(), start.getMonth(), start.getDate(), selectedFromTime.hour(), selectedFromTime.minute(), 0);
-            end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), selectedToTime.hour(), selectedToTime.minute(), 0);
-            newRange = [dayjs(start), dayjs(end)];
-          }
-        }
-      }
-    }
-
-    // Update selectedRange
-    setSelectedRange(newRange);
-
-    if (newRange && newRange[0]) {
-      let endDate = newRange[1] ? dayjs(newRange[1]).format('YYYY-MM-DDTHH:mm:ss') : null;
-      let startDate = dayjs(newRange[0]).format('YYYY-MM-DDTHH:mm:ss');
-
-      let endTime = newRange[1] ? newRange[1].toDate() : newRange[0].toDate();
-      let startTime = newRange[0].toDate();
-      
-      if (endDate == null && startDate != null) {
-        startTime = new Date(m.getFullYear(), m.getMonth(), m.getDate(), selectedFromTime.hour(), selectedFromTime.minute(), 0);
-        startDate = startDate.slice(0, -8) + dayjs(startTime).format('HH:mm') + ':00';
-
-        endTime = new Date(m.getFullYear(), m.getMonth(), m.getDate(), selectedToTime.hour(), selectedToTime.minute(), 0);
-        endDate = startDate.slice(0, -8) + dayjs(endTime).format('HH:mm') + ':09';
-      }
-      
-      let fromDateDisplay = formatDateToString(startTime);
-      let toDateDisplay = formatDateToString(endTime);
-      let displayDate = "";
-      if (fromDateDisplay == toDateDisplay) {
-        displayDate = fromDateDisplay;
-      } else {
-        displayDate = fromDateDisplay + " - " + toDateDisplay;
-      }
-
-      let dateRange: DateRangeObject = {
-        fromDate: startDate,
-        toDate: endDate || startDate,
-        type: "Custom",
-        fromDateWithoutTransform: startTime,
-        toDateWithoutTransform: endTime,
-        dateRangeForDisplay: displayDate,
-        selectedRangeValue: { start: startTime, end: endTime },
-        fromDateForDisplay: formatDateToString(startTime),
-        toDateForDisplay: formatDateToString(endTime),
-      };
-      setDateOutput(dateRange);
+      setToDate(endOfDay);
     }
   };
 
-  const handleTimeChange = () => {
-    if (dateOutput && dateOutput.fromDateWithoutTransform && dateOutput.toDateWithoutTransform) {
-      const start = new Date(dateOutput.fromDateWithoutTransform);
-      const end = new Date(dateOutput.toDateWithoutTransform);
-      
-      start.setHours(selectedFromTime.hour(), selectedFromTime.minute(), 0, 0);
-      end.setHours(selectedToTime.hour(), selectedToTime.minute(), 0, 0);
-
-      const updatedDateRange = createDateRange(start, end, 'Custom');
-      setDateOutput(updatedDateRange);
-    }
-  };
-
-  const applyDate = () => {
-    if (dateOutput && dateOutput.fromDate && dateOutput.toDate && new Date(dateOutput.fromDate) > new Date(dateOutput.toDate)) {
-      // Show error - in real app, you'd use a toast notification
-      console.error('To time should be after From time.');
+  const applyCustomDate = () => {
+    if (!fromDate || !toDate) {
       return;
     }
+
+    const startDate = fromDate.toDate();
+    const endDate = toDate.toDate();
     
-    if (dateOutput) {
-      onSelectedRangeValueChange?.(dateOutput);
+    // Validate date range for limitCalender
+    if (limitCalender === 'limitMonth') {
+      const dayDifference = Math.abs((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (dayDifference > 31) {
+        console.error('Date range cannot exceed 31 days');
+        return;
+      }
     }
+
+    const dateRange = createDateRange(startDate, endDate, 'Custom');
+    setDateOutput(dateRange);
+    onSelectedRangeValueChange?.(dateRange);
+    setIsOpen(false);
   };
 
-  const renderRadioOptions = () => {
+  const presetOptions = () => {
     if (calenderType === 'week') {
-      return (
-        <Radio.Group 
-          value={selectedOption} 
-          onChange={(e) => toggleCalendar(e.target.value)} 
-          className="d-flex flex-column"
-          style={{ fontFamily: 'Geist, sans-serif' }}
-        >
-          <Radio value="This Week" className="mb-2">This Week</Radio>
-          <Radio value="Last Week" className="mb-2">Last Week</Radio>
-          <Radio value="Custom" className="mb-2">Custom</Radio>
-        </Radio.Group>
-      );
+      return [
+        { value: 'This Week', label: 'This Week' },
+        { value: 'Last Week', label: 'Last Week' },
+        { value: 'Custom', label: 'Custom Range' },
+      ];
     } else if (calenderType === 'month') {
-      return (
-        <Radio.Group 
-          value={selectedOption} 
-          onChange={(e) => toggleCalendar(e.target.value)} 
-          className="d-flex flex-column"
-          style={{ fontFamily: 'Geist, sans-serif' }}
-        >
-          <Radio value="This Month" className="mb-2">This Month</Radio>
-          <Radio value="Last Month" className="mb-2">Last Month</Radio>
-          <Radio value="Custom" className="mb-2">Custom</Radio>
-        </Radio.Group>
-      );
+      return [
+        { value: 'This Month', label: 'This Month' },
+        { value: 'Last Month', label: 'Last Month' },
+        { value: 'Custom', label: 'Custom Range' },
+      ];
     } else {
-      return (
-        <Radio.Group 
-          value={selectedOption} 
-          onChange={(e) => toggleCalendar(e.target.value)} 
-          className="d-flex flex-column"
-          style={{ fontFamily: 'Geist, sans-serif' }}
-        >
-          <Radio value="Today" className="mb-2">Today</Radio>
-          <Radio value="This Week" className="mb-2">This Week</Radio>
-          <Radio value="This Month" className="mb-2">This Month</Radio>
-          <Radio value="Last Month" className="mb-2">Last Month</Radio>
-          <Radio value="Custom" className="mb-2">Custom</Radio>
-        </Radio.Group>
-      );
+      return [
+        { value: 'Today', label: 'Today' },
+        { value: 'This Week', label: 'This Week' },
+        { value: 'This Month', label: 'This Month' },
+        { value: 'Last Month', label: 'Last Month' },
+        { value: 'Custom', label: 'Custom Range' },
+      ];
     }
   };
 
   const dropdownContent = (
-    <div className="shadow" style={{ 
-      padding: '0px', 
-      minWidth: '200px',
-      borderRadius: '8px',
-      overflow: 'hidden',
-      fontFamily: 'Geist, sans-serif'
-    }}>
-      <div className="d-flex flex-row" style={{ backgroundColor: '#fff' }}>
-        <div className="p-3" style={{ minWidth: '200px' }}>
-          {renderRadioOptions()}
+    <motion.div 
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-popover border border-border rounded-2xl shadow-xl overflow-hidden"
+      style={{ minWidth: customCalendar ? '560px' : '220px' }}
+    >
+      <div className="flex">
+        {/* Preset Options Panel */}
+        <div className="p-4 border-r border-border bg-card min-w-[200px]">
+          <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
+            Quick Select
+          </Text>
+          <div className="space-y-1">
+            {presetOptions().map((option) => (
+              <motion.div
+                key={option.value}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => toggleCalendar(option.value)}
+                className={`
+                  px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 flex items-center justify-between
+                  ${selectedOption === option.value 
+                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    : 'hover:bg-accent text-foreground'
+                  }
+                `}
+              >
+                <span className="text-sm font-medium">{option.label}</span>
+                {selectedOption === option.value && (
+                  <CheckOutlined className="text-xs" />
+                )}
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        {customCalendar && (
-          <div className="flex-grow-1 p-3" style={{ backgroundColor: '#fafafa', borderLeft: '1px solid #f0f0f0' }}>
-            <div className="w-100 mb-2">
-              <CustomCalendar
-                selectedRange={selectedRange}
-                onRangeSelect={handleDateChange}
-                disabledDate={(current) => !isAfterNinetyDaysAgo(current?.toDate() || new Date())}
-              />
-            </div>
-            <div className="text-muted small mb-2">
-              {calenderType === 'week' && '*Note: When a date is selected, the date range will automatically be extended to 7 days after the selected date.'}
-              {calenderType === 'month' && '*Note: When a date is selected, the date range will automatically be extended to 30 days after the selected date.'}
-              {calenderType !== 'week' && calenderType !== 'month' && '*Tip: Select two dates to create a range'}
-            </div>
-
-            {dateOutput && (
-              <div className="mb-2">
-                <Text strong>Selected Range</Text>
-                <div>
-                  <Text type="secondary">From: </Text>
-                  {dateOutput.fromDateForDisplay} {selectedFromTime.format('hh:mm A')}
-                  <br />
-                  <Text type="secondary">To: </Text>
-                  {dateOutput.toDateForDisplay} {selectedToTime.format('hh:mm A')}
-                </div>
+        {/* Custom Calendar Panel */}
+        <AnimatePresence>
+          {customCalendar && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 'auto', opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="p-4 bg-background overflow-hidden"
+            >
+              {/* Date Selection Cards */}
+              <div className="flex gap-3 mb-4">
+                <DateSelectionCard
+                  label="From"
+                  date={fromDate}
+                  isActive={selectionMode === 'from'}
+                  onClick={() => setSelectionMode('from')}
+                />
+                <DateSelectionCard
+                  label="To"
+                  date={toDate}
+                  isActive={selectionMode === 'to'}
+                  onClick={() => setSelectionMode('to')}
+                />
               </div>
-            )}
 
-            <Button type="primary" onClick={applyDate} className="w-100">
-              Apply
-            </Button>
-          </div>
-        )}
+              {/* Calendar */}
+              <div className="mb-4">
+                <CustomCalendar
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  onFromDateSelect={handleFromDateSelect}
+                  onToDateSelect={handleToDateSelect}
+                  selectionMode={selectionMode}
+                  disabledDate={(current) => !isAfterNinetyDaysAgo(current?.toDate() || new Date())}
+                />
+              </div>
+
+              {/* Helper Text */}
+              <div className="mb-4">
+                <Tag 
+                  color="blue" 
+                  className="text-xs"
+                  icon={<ClockCircleOutlined />}
+                >
+                  {selectionMode === 'from' ? 'Select start date' : 'Select end date'}
+                </Tag>
+                {limitCalender === 'limitMonth' && (
+                  <Text className="text-xs text-muted-foreground ml-2">
+                    Max range: 31 days
+                  </Text>
+                )}
+              </div>
+
+              <Divider className="my-3" />
+
+              {/* Apply Button */}
+              <Button 
+                type="primary" 
+                onClick={applyCustomDate}
+                disabled={!fromDate || !toDate}
+                block
+                size="large"
+                className="rounded-xl h-11 font-semibold shadow-md"
+                icon={<CheckOutlined />}
+              >
+                Apply Date Range
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 
   return (
@@ -530,14 +527,24 @@ const DatePicker: React.FC<DatePickerProps> = ({
       dropdownRender={() => dropdownContent}
       trigger={['click']}
       placement="bottomLeft"
+      open={isOpen}
+      onOpenChange={setIsOpen}
     >
-      <Button
-        type="default"
-        icon={<CalendarOutlined />}
-        title={toolTipValue || dateOutput?.dateRangeForDisplay}
-      >
-        <span style={{ marginLeft: '8px' }}>{selectedOption}</span>
-      </Button>
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <Button
+          type="default"
+          icon={<CalendarOutlined />}
+          title={toolTipValue || dateOutput?.dateRangeForDisplay}
+          className="h-10 rounded-xl border-2 hover:border-primary/50 transition-all duration-200 shadow-sm hover:shadow-md"
+        >
+          <span className="ml-2 font-medium">
+            {selectedOption === 'Custom' && dateOutput?.dateRangeForDisplay 
+              ? dateOutput.dateRangeForDisplay 
+              : selectedOption
+            }
+          </span>
+        </Button>
+      </motion.div>
     </Dropdown>
   );
 };
