@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
 import { 
   LayoutGrid, 
   MessageSquare, 
@@ -18,6 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAutopilot, AutopilotTab } from "@/contexts/AutopilotContext";
 import { usePostCall, PostCallTab } from "@/contexts/PostCallContext";
+import { DatePicker, Select } from "antd";
+import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
+import { DateRangeObject } from "@/components/common/DatePicker/DatePicker";
+import dayjs from "dayjs";
 
 interface Tab {
   id: string;
@@ -72,12 +76,31 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
   };
 
   const currentActiveTab = getActiveTabFromPath();
+  
+  // Check if current tab is dashboard
+  const isDashboardTab = currentActiveTab === "dashboard";
+  
+  // Date range picker state
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRangeObject | null>(null);
+  
+  // Service type filter state
+  const [selectedServiceTypes, setSelectedServiceTypes] = useState<string[]>([]);
+  
+  // Handle date range change
+  const handleDateRangeChange = (dateRange: DateRangeObject) => {
+    setSelectedDateRange(dateRange);
+    console.log('Date range changed:', dateRange);
+  };
+  
+  // Service type options
+  const serviceTypeOptions = [
+    { label: 'Home', value: 'home' },
+    { label: 'Mobile', value: 'mobile' },
+    { label: 'Unknown', value: 'unknown' },
+  ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
+    <div
       className="px-6 py-4 bg-card border-b border-border/30"
     >
       <div className="flex items-center justify-between">
@@ -126,13 +149,6 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                   >
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute inset-0 bg-primary rounded-xl"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
                     <tab.icon className={cn(
                       "h-5 w-5 relative z-10",
                       isActive && "text-primary-foreground"
@@ -147,9 +163,34 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
           })}
         </div>
 
-        {/* Spacer for balance */}
-        <div className="w-[200px]" />
+        {/* Right Side - Always maintain consistent width */}
+        <div className="flex items-center gap-3" style={{ minWidth: '320px', justifyContent: 'flex-end' }}>
+          {isDashboardTab ? (
+            <>
+              <DatePickerComponent
+                onSelectedRangeValueChange={handleDateRangeChange}
+                toolTipValue="Select date range"
+                calenderType=""
+              />
+              <Select
+                mode="multiple"
+                placeholder="Service Type"
+                value={selectedServiceTypes}
+                onChange={setSelectedServiceTypes}
+                options={serviceTypeOptions}
+                style={{
+                  minWidth: '150px',
+                  fontFamily: 'Geist, sans-serif',
+                }}
+                allowClear
+              />
+            </>
+          ) : (
+            /* Invisible spacer to maintain layout */
+            <div style={{ width: '270px' }} />
+          )}
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

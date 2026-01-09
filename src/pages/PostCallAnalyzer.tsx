@@ -1,9 +1,10 @@
-import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { InstanceSelector } from "@/components/post-call/InstanceSelector";
 import { PostCallDashboard } from "@/components/post-call/PostCallDashboard";
 import { AIHelper } from "@/components/post-call/AIHelper";
+import AutopilotInstanceSelector from "@/pages/autopilot/AutopilotInstanceSelector/AutopilotInstanceSelector";
 import { useModule } from "@/contexts/ModuleContext";
 import { usePostCall, PostCallInstance } from "@/contexts/PostCallContext";
 import CallInsight from "./post-call-analyzer/call-insight/CallInsight";
@@ -50,6 +51,8 @@ const mockInstances: Instance[] = [
 
 const PostCallAnalyzer = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { 
     selectedInstance, setSelectedInstance, 
     selectedTab, setSelectedTab,
@@ -58,46 +61,35 @@ const PostCallAnalyzer = () => {
   } = usePostCall();
   const { setShowModuleTabs } = useModule();
 
-  // Get project_id from URL params
-  const projectId = searchParams.get("project_id");
+  // Get departmentId and module from URL params
+  const departmentId = searchParams.get("departmentId");
+  const module = searchParams.get("module");
+  const selectedProject = location.state?.selectedProject;
 
   useEffect(() => {
-    // Show ModuleTabs only when an instance is selected (has project_id)
-    setShowModuleTabs(!!projectId && !!selectedInstance);
+    if (departmentId && !selectedInstance) {
+      let userString = localStorage.getItem('user');
+      if (userString) {
+        let user = JSON.parse(userString);
+        if (user && user.department_list) {
+          let department = user.department_list.find((d: any) => d.department_id === departmentId);
+          if (department) {
+            const instance: PostCallInstance = {
+              id: department.department_id,
+              name: department.department_name
+            };
+            setSelectedInstance(instance);
+            setSelectedTab("dashboard");
+          }
+        }
+      }
+    }
+    
+    // Show ModuleTabs when there's a selected instance or departmentId
+    const shouldShowTabs = !!selectedInstance || !!departmentId;
+    setShowModuleTabs(shouldShowTabs);
     return () => setShowModuleTabs(false);
-  }, [setShowModuleTabs, projectId, selectedInstance]);
-
-  const handleSelectInstance = (instance: PostCallInstance) => {
-    setSelectedInstance(instance);
-    setSelectedTab("dashboard");
-    // Navigate with project_id query param
-    setSearchParams({ project_id: instance.id });
-  };
-
-  // If no project_id in URL, show instance selector
-  if (!projectId || !selectedInstance) {
-    return (
-      <div className="min-h-full">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key="selector"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="p-4 md:p-6 max-w-7xl mx-auto">
-              <InstanceSelector
-                instances={mockInstances}
-                onSelectInstance={handleSelectInstance}
-              />
-            </div>
-          </motion.div>
-        </AnimatePresence>
-        <AIHelper />
-      </div>
-    );
-  }
+  }, [setShowModuleTabs, departmentId, selectedInstance, setSelectedInstance, setSelectedTab]);
 
   // Render report detail based on selectedReportId
   const renderReportDetail = () => {

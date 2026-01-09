@@ -9,8 +9,10 @@ import { AutopilotProvider } from "./contexts/AutopilotContext";
 import { PostCallProvider } from "./contexts/PostCallContext";
 import Index from "./pages/Index";
 import GetStarted from "./pages/GetStarted";
+import Instances from "./pages/Instances";
 import PostCallAnalyzer from "./pages/PostCallAnalyzer";
 import Autopilot from "./pages/autopilot/Autopilot";
+import Copilot from "./pages/Copilot";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,8 +30,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<GetStarted />} />
             <Route path="/get-started" element={<GetStarted />} />
+            <Route path="/instances" element={<Instances />} />
             <Route path="/pca" element={<PostCallAnalyzer />} />
             <Route path="/autopilot" element={<Autopilot />} />
+            <Route path="/copilot" element={<Copilot />} />
             <Route path="/user-management" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

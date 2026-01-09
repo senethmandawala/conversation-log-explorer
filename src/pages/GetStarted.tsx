@@ -110,7 +110,7 @@ export default function GetStarted() {
       gradient: "bg-gradient-to-br from-blue-500/10 via-transparent to-transparent",
       iconBg: "bg-gradient-to-br from-blue-500 to-blue-600",
       enabled: true,
-      route: "/pca",
+      route: "/instances?module=pca",
     },
     {
       title: "Autopilot",
@@ -119,7 +119,7 @@ export default function GetStarted() {
       gradient: "bg-gradient-to-br from-purple-500/10 via-transparent to-transparent",
       iconBg: "bg-gradient-to-br from-purple-500 to-purple-600",
       enabled: true,
-      route: "/autopilot",
+      route: "/instances?module=autopilot",
     },
     {
       title: "Copilot",
@@ -128,7 +128,7 @@ export default function GetStarted() {
       gradient: "bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent",
       iconBg: "bg-gradient-to-br from-emerald-500 to-emerald-600",
       enabled: false,
-      route: "/copilot",
+      route: "/instances?module=copilot",
     },
   ];
 

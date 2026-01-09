@@ -36,8 +36,8 @@ const navigation: NavSection[] = [
   {
     label: "Module",
     items: [
-      { title: "Post Call Analyzer", icon: PhoneCall, href: "/pca" },
-      { title: "Autopilot", icon: Bot, href: "/autopilot" },
+      { title: "Post Call Analyzer", icon: PhoneCall, href: "/instances?module=pca" },
+      { title: "Autopilot", icon: Bot, href: "/instances?module=autopilot" },
     ],
   },
   {
