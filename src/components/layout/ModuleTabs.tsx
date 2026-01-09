@@ -100,12 +100,10 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
   ];
 
   return (
-    <div
-      className="px-6 py-4 bg-card border-b border-border/30"
-    >
-      <div className="flex items-center justify-between">
-        {/* Module Title - Left */}
-        <div className="flex items-center gap-3">
+    <div className="px-6 py-4 bg-card border-b border-border/30">
+      <div className="relative flex items-center justify-between">
+        {/* Module Title - Left (fixed width) */}
+        <div className="flex items-center gap-3" style={{ width: '280px', flexShrink: 0 }}>
           <div 
             style={{ 
               padding: '10px',
@@ -124,8 +122,11 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
           </div>
         </div>
 
-        {/* Tab Navigation - Center */}
-        <div className="flex items-center bg-muted/50 rounded-2xl p-1">
+        {/* Tab Navigation - Center (absolutely positioned for stability) */}
+        <div 
+          className="absolute left-1/2 transform -translate-x-1/2 flex items-center bg-muted/50 rounded-2xl p-1"
+          style={{ zIndex: 10 }}
+        >
           {tabs.map((tab) => {
             const isActive = currentActiveTab === tab.id;
             return (
@@ -135,10 +136,8 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
                     onClick={() => {
                       onTabChange(tab.id);
                       if (isPostCallAnalyzer) {
-                        // Use context to switch tabs (URL stays the same)
                         setPostCallTab(tab.id as PostCallTab);
                       } else {
-                        // For autopilot, use context to switch tabs (URL stays the same)
                         setAutopilotTab(tab.id as AutopilotTab);
                       }
                     }}
@@ -163,8 +162,11 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
           })}
         </div>
 
-        {/* Right Side - Always maintain consistent width */}
-        <div className="flex items-center gap-3" style={{ minWidth: '320px', justifyContent: 'flex-end' }}>
+        {/* Right Side - Fixed width container */}
+        <div 
+          className="flex items-center gap-3 justify-end" 
+          style={{ width: '340px', flexShrink: 0 }}
+        >
           {isDashboardTab ? (
             <>
               <DatePickerComponent
@@ -178,16 +180,75 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
                 value={selectedServiceTypes}
                 onChange={setSelectedServiceTypes}
                 options={serviceTypeOptions}
+                maxTagCount={1}
+                maxTagPlaceholder={(omittedValues) => `+${omittedValues.length}`}
                 style={{
-                  minWidth: '150px',
+                  minWidth: '160px',
                   fontFamily: 'Geist, sans-serif',
                 }}
+                popupClassName="service-type-dropdown"
+                dropdownStyle={{
+                  borderRadius: '12px',
+                  padding: '4px',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
+                }}
                 allowClear
+                suffixIcon={
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    width: 20,
+                    height: 20,
+                    borderRadius: 6,
+                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                }
+                tagRender={(props) => {
+                  const { label, closable, onClose } = props;
+                  return (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        padding: '2px 8px',
+                        background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+                        borderRadius: 6,
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: '#1e40af',
+                        marginRight: 4,
+                      }}
+                    >
+                      {label}
+                      {closable && (
+                        <span
+                          onClick={onClose}
+                          style={{ 
+                            cursor: 'pointer', 
+                            marginLeft: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1e40af" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </span>
+                      )}
+                    </span>
+                  );
+                }}
               />
             </>
           ) : (
-            /* Invisible spacer to maintain layout */
-            <div style={{ width: '270px' }} />
+            <div style={{ width: '100%' }} />
           )}
         </div>
       </div>
