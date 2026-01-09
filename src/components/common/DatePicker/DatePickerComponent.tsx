@@ -3,7 +3,6 @@ import { Button, Dropdown, Radio, Space, Typography, Divider, Tag } from 'antd';
 import { CalendarOutlined, LeftOutlined, RightOutlined, ClockCircleOutlined, CheckOutlined } from '@ant-design/icons';
 import { DatePickerProps, DateRangeObject } from './DatePicker';
 import dayjs from 'dayjs';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const { Text } = Typography;
 
@@ -30,7 +29,7 @@ const CustomCalendar: React.FC<{
     if (!fromDate || !toDate) return false;
     const start = fromDate.isBefore(toDate) ? fromDate : toDate;
     const end = fromDate.isBefore(toDate) ? toDate : fromDate;
-    return date.isAfter(start.subtract(1, 'day')) && date.isBefore(end.add(1, 'day'));
+    return date.isAfter(start) && date.isBefore(end);
   };
 
   const isFromDate = (date: dayjs.Dayjs) => fromDate?.isSame(date, 'day');
@@ -67,22 +66,20 @@ const CustomCalendar: React.FC<{
       const isTodayDate = isToday(date);
       
       days.push(
-        <motion.div
+        <div
           key={day}
-          whileHover={!isDisabled ? { scale: 1.1 } : undefined}
-          whileTap={!isDisabled ? { scale: 0.95 } : undefined}
           className={`
-            h-9 w-9 flex items-center justify-center text-sm cursor-pointer rounded-lg transition-all duration-200
-            ${isFrom || isTo ? 'bg-primary text-white font-semibold shadow-md' : ''}
+            h-6 w-6 flex items-center justify-center text-xs cursor-pointer rounded transition-all duration-200
+            ${isFrom || isTo ? 'bg-primary text-white font-semibold shadow-sm' : ''}
             ${inRange && !isFrom && !isTo ? 'bg-primary/15 text-primary' : ''}
-            ${!isFrom && !isTo && !inRange && isTodayDate ? 'ring-2 ring-primary/30 font-medium' : ''}
+            ${!isFrom && !isTo && !inRange && isTodayDate ? 'ring-1 ring-primary/30 font-medium' : ''}
             ${isDisabled ? 'text-muted-foreground/40 cursor-not-allowed' : ''}
             ${!isFrom && !isTo && !inRange && !isDisabled ? 'hover:bg-accent hover:text-accent-foreground' : ''}
           `}
           onClick={() => !isDisabled && handleDateClick(date)}
         >
           {day}
-        </motion.div>
+        </div>
       );
     }
     
@@ -94,34 +91,30 @@ const CustomCalendar: React.FC<{
   };
   
   return (
-    <div className="w-full">
+    <div className="w-full" style={{ fontFamily: 'Geist, sans-serif' }}>
       {/* Month Navigation */}
-      <div className="flex justify-between items-center mb-4 px-1">
-        <motion.button 
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-accent transition-colors"
+      <div className="flex justify-between items-center mb-2 px-1">
+        <button 
+          className="h-6 w-6 flex items-center justify-center rounded hover:bg-accent transition-colors"
           onClick={() => changeMonth('prev')}
         >
           <LeftOutlined className="text-xs text-muted-foreground" />
-        </motion.button>
-        <Text className="font-semibold text-base">{currentMonth.format('MMMM YYYY')}</Text>
-        <motion.button 
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-accent transition-colors"
+        </button>
+        <Text className="font-medium text-sm">{currentMonth.format('MMM YYYY')}</Text>
+        <button 
+          className="h-6 w-6 flex items-center justify-center rounded hover:bg-accent transition-colors"
           onClick={() => changeMonth('next')}
         >
           <RightOutlined className="text-xs text-muted-foreground" />
-        </motion.button>
+        </button>
       </div>
       
       {/* Weekday Headers */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-0.5 mb-1">
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
           <div 
             key={day} 
-            className="h-9 w-9 flex items-center justify-center text-xs font-medium text-muted-foreground"
+            className="h-6 w-6 flex items-center justify-center text-xs font-medium text-muted-foreground"
           >
             {day}
           </div>
@@ -129,7 +122,7 @@ const CustomCalendar: React.FC<{
       </div>
       
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5">
         {generateCalendarDays()}
       </div>
     </div>
@@ -143,28 +136,27 @@ const DateSelectionCard: React.FC<{
   isActive: boolean;
   onClick: () => void;
 }> = ({ label, date, isActive, onClick }) => (
-  <motion.div
-    whileHover={{ scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
+  <div
     onClick={onClick}
     className={`
-      flex-1 p-3 rounded-xl cursor-pointer transition-all duration-200 border-2
+      flex-1 p-2 rounded-lg cursor-pointer transition-all duration-200 border
       ${isActive 
         ? 'border-primary bg-primary/5 shadow-sm' 
         : 'border-border hover:border-primary/50 bg-card'
       }
     `}
+    style={{ fontFamily: 'Geist, sans-serif' }}
   >
-    <div className="flex items-center gap-2 mb-1">
+    <div className="flex items-center gap-1 mb-1">
       <CalendarOutlined className={`text-xs ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
       <Text className={`text-xs font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
         {label}
       </Text>
     </div>
-    <Text className={`text-sm font-semibold ${date ? '' : 'text-muted-foreground'}`}>
-      {date ? date.format('MMM DD, YYYY') : 'Select date'}
+    <Text className={`text-xs font-semibold ${date ? '' : 'text-muted-foreground'}`}>
+      {date ? date.format('MMM DD') : 'Select date'}
     </Text>
-  </motion.div>
+  </div>
 );
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -183,6 +175,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const [selectionMode, setSelectionMode] = useState<'from' | 'to'>('from');
   const [dateOutput, setDateOutput] = useState<DateRangeObject | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Initialize with Today range on first run
+  useEffect(() => {
+    if (!dateInput && !dateOutput) {
+      handlePresetSelection('Today');
+    }
+  }, []);
 
   // Utility functions
   const formatDateToString = (date: Date): string => {
@@ -411,115 +410,87 @@ const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   const dropdownContent = (
-    <motion.div 
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-popover border border-border rounded-2xl shadow-xl overflow-hidden"
-      style={{ minWidth: customCalendar ? '560px' : '220px' }}
+    <div 
+      className="bg-popover border border-border rounded-xl shadow-lg overflow-hidden"
+      style={{ 
+        minWidth: customCalendar ? '420px' : '180px',
+        fontFamily: 'Geist, sans-serif'
+      }}
     >
       <div className="flex">
         {/* Preset Options Panel */}
-        <div className="p-4 border-r border-border bg-card min-w-[200px]">
-          <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
+        <div className="p-3 bg-card min-w-[160px]">
+          <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
             Quick Select
           </Text>
           <div className="space-y-1">
             {presetOptions().map((option) => (
-              <motion.div
+              <div
                 key={option.value}
-                whileHover={{ x: 4 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => toggleCalendar(option.value)}
                 className={`
-                  px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 flex items-center justify-between
+                  px-2 py-1.5 rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-between
                   ${selectedOption === option.value 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
                     : 'hover:bg-accent text-foreground'
                   }
                 `}
               >
-                <span className="text-sm font-medium">{option.label}</span>
+                <span className="text-xs font-medium">{option.label}</span>
                 {selectedOption === option.value && (
                   <CheckOutlined className="text-xs" />
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Custom Calendar Panel */}
-        <AnimatePresence>
-          {customCalendar && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 'auto', opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="p-4 bg-background overflow-hidden"
+        {customCalendar && (
+          <div className="p-3 bg-background overflow-hidden">
+            {/* Date Selection Cards */}
+            <div className="flex gap-2 mb-3">
+              <DateSelectionCard
+                label="From"
+                date={fromDate}
+                isActive={selectionMode === 'from'}
+                onClick={() => setSelectionMode('from')}
+              />
+              <DateSelectionCard
+                label="To"
+                date={toDate}
+                isActive={selectionMode === 'to'}
+                onClick={() => setSelectionMode('to')}
+              />
+            </div>
+
+            {/* Calendar */}
+            <div className="mb-3">
+              <CustomCalendar
+                fromDate={fromDate}
+                toDate={toDate}
+                onFromDateSelect={handleFromDateSelect}
+                onToDateSelect={handleToDateSelect}
+                selectionMode={selectionMode}
+                disabledDate={(current) => !isAfterNinetyDaysAgo(current?.toDate() || new Date())}
+              />
+            </div>
+
+            {/* Apply Button */}
+            <Button 
+              type="primary" 
+              onClick={applyCustomDate}
+              disabled={!fromDate || !toDate}
+              block
+              size="small"
+              className="rounded-lg h-8 font-medium shadow-sm"
             >
-              {/* Date Selection Cards */}
-              <div className="flex gap-3 mb-4">
-                <DateSelectionCard
-                  label="From"
-                  date={fromDate}
-                  isActive={selectionMode === 'from'}
-                  onClick={() => setSelectionMode('from')}
-                />
-                <DateSelectionCard
-                  label="To"
-                  date={toDate}
-                  isActive={selectionMode === 'to'}
-                  onClick={() => setSelectionMode('to')}
-                />
-              </div>
-
-              {/* Calendar */}
-              <div className="mb-4">
-                <CustomCalendar
-                  fromDate={fromDate}
-                  toDate={toDate}
-                  onFromDateSelect={handleFromDateSelect}
-                  onToDateSelect={handleToDateSelect}
-                  selectionMode={selectionMode}
-                  disabledDate={(current) => !isAfterNinetyDaysAgo(current?.toDate() || new Date())}
-                />
-              </div>
-
-              {/* Helper Text */}
-              <div className="mb-4">
-                <Tag 
-                  color="blue" 
-                  className="text-xs"
-                  icon={<ClockCircleOutlined />}
-                >
-                  {selectionMode === 'from' ? 'Select start date' : 'Select end date'}
-                </Tag>
-                {limitCalender === 'limitMonth' && (
-                  <Text className="text-xs text-muted-foreground ml-2">
-                    Max range: 31 days
-                  </Text>
-                )}
-              </div>
-
-              <Divider className="my-3" />
-
-              {/* Apply Button */}
-              <Button 
-                type="primary" 
-                onClick={applyCustomDate}
-                disabled={!fromDate || !toDate}
-                block
-                size="large"
-                className="rounded-xl h-11 font-semibold shadow-md"
-                icon={<CheckOutlined />}
-              >
-                Apply Date Range
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              Apply Date Range
+            </Button>
+          </div>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 
   return (
@@ -530,7 +501,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       open={isOpen}
       onOpenChange={setIsOpen}
     >
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+      <div>
         <Button
           type="default"
           icon={<CalendarOutlined />}
@@ -544,7 +515,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             }
           </span>
         </Button>
-      </motion.div>
+      </div>
     </Dropdown>
   );
 };
