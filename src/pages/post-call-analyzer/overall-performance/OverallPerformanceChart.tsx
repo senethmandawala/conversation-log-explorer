@@ -230,7 +230,7 @@ export default function OverallPerformanceChart() {
                   </Tooltip>
                 </div>
                 <Text type="secondary" style={{ fontSize: 14 }}>
-                  Weekly performance trends and metrics
+                  {globalDateRange?.dateRangeForDisplay || ''}
                 </Text>
               </div>
             </Space>

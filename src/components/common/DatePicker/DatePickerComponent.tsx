@@ -185,7 +185,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   // Utility functions
   const formatDateToString = (date: Date): string => {
-    return dayjs(date).format('YYYY-MM-DD');
+    return `${date.getDate()}, ${dayjs(date).format('MMM')}, ${date.getFullYear()}`;
   };
 
   const isAfterNinetyDaysAgo = (dateToCheck: Date): boolean => {
