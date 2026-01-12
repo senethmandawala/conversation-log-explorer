@@ -39,19 +39,101 @@ import {
   FrownOutlined,
   DislikeOutlined,
   DashboardOutlined,
-  FallOutlined
+  FallOutlined,
+  HolderOutlined
 } from "@ant-design/icons";
 import { AIHelper } from "@/components/post-call/AIHelper";
-import { Reorder } from "framer-motion";
 import { toast } from "sonner";
 import CategoryStructure, { CategoryNode } from "./CategoryStructure";
 import UpdateCategoryDialog from "./UpdateCategoryDialog";
 import ImportCategories from "./ImportCategories";
 import UpdateRecipients from "./UpdateRecipients";
 import UpdateAlertMessageTemplate from "./UpdateAlertMessageTemplate";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
+
+// Sortable Tag Component for dnd-kit
+interface SortableTagProps {
+  tag: NameTag;
+  onRemove: (id: string) => void;
+}
+
+function SortableTag({ tag, onRemove }: SortableTagProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: tag.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 100 : 'auto',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`
+        px-3 py-2 rounded-lg cursor-grab select-none shadow-sm 
+        transition-all duration-200 flex items-center gap-2
+        hover:shadow-md hover:-translate-y-0.5
+        ${tag.mandatory 
+          ? 'bg-gradient-to-r from-blue-500 to-blue-600 border border-blue-400' 
+          : 'bg-white border border-gray-200 hover:border-blue-300'
+        }
+        ${isDragging ? 'shadow-xl scale-105' : ''}
+      `}
+      {...attributes}
+      {...listeners}
+    >
+      <HolderOutlined 
+        className={`text-xs ${tag.mandatory ? 'text-white/70' : 'text-gray-400'}`}
+      />
+      <Text 
+        className={`${tag.mandatory ? 'text-white' : 'text-gray-700'} text-sm font-medium`}
+        style={{ fontFamily: 'Geist, sans-serif' }}
+      >
+        {tag.name}
+      </Text>
+      {tag.mandatory && (
+        <span className="text-white/90 text-xs font-bold">*</span>
+      )}
+      {!tag.mandatory && (
+        <CloseOutlined
+          className="text-xs text-gray-400 cursor-pointer p-1 hover:text-red-500 hover:bg-red-50 rounded-full transition-all duration-200"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(tag.id);
+          }}
+        />
+      )}
+    </div>
+  );
+}
 
 interface NameTag {
   id: string;
@@ -219,6 +301,30 @@ export default function Configuration() {
     trainingNeedAnalysisReport: false,
     unresolvedCasesAnalysisReport: false,
   });
+
+  // dnd-kit sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setNameTags((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
@@ -417,56 +523,24 @@ export default function Configuration() {
                     <div>
                       <Text type="secondary" className="text-sm mb-2 block text-gray-600" style={{ fontFamily: 'Geist, sans-serif' }}>Name Format Tags</Text>
                       <div 
-                        className="p-3 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg min-h-[80px] relative drag-drop-zone"
+                        className="p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-slate-50 border-2 border-dashed border-gray-200 rounded-xl min-h-[100px] relative"
                       >
-                        <Reorder.Group 
-                          axis="x" 
-                          values={nameTags} 
-                          onReorder={setNameTags}
-                          className="flex flex-wrap gap-2"
-                          style={{ minHeight: '56px' }}
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
                         >
-                          {nameTags.map(tag => (
-                            <Reorder.Item key={tag.id} value={tag}>
-                              <div
-                                className={tag.mandatory 
-                                  ? "px-3 py-2 bg-blue-500 border border-blue-500 rounded-md cursor-grab select-none shadow-sm transition-all duration-200 flex items-center gap-1.5 hover:shadow-md hover:-translate-y-0.5 draggable-tag"
-                                  : "px-3 py-2 bg-white border border-gray-200 rounded-md cursor-grab select-none shadow-sm transition-all duration-200 flex items-center gap-1.5 hover:shadow-md hover:-translate-y-0.5 draggable-tag"
-                                }
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(-2px)';
-                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(0)';
-                                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-                                }}
-                              >
-                                <DragOutlined 
-                                  className={`text-xs ${tag.mandatory ? 'text-white' : 'text-gray-400'}`}
-                                />
-                                <Text 
-                                  className={`${tag.mandatory ? 'text-white' : 'text-gray-700'} text-sm font-medium`}
-                                  style={{ fontFamily: 'Geist, sans-serif' }}
-                                >
-                                  {tag.name}
-                                </Text>
-                                {tag.mandatory && (
-                                  <span className="text-white text-xs font-bold">*</span>
-                                )}
-                                {!tag.mandatory && (
-                                  <CloseOutlined
-                                    className="text-xs text-gray-400 cursor-pointer p-0.5 hover:text-red-500 hover:bg-red-50 rounded transition-all duration-200"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeNameTag(tag.id);
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </Reorder.Item>
-                          ))}
-                        </Reorder.Group>
+                          <SortableContext
+                            items={nameTags.map(t => t.id)}
+                            strategy={horizontalListSortingStrategy}
+                          >
+                            <div className="flex flex-wrap gap-2 sm:gap-3" style={{ minHeight: '56px' }}>
+                              {nameTags.map(tag => (
+                                <SortableTag key={tag.id} tag={tag} onRemove={removeNameTag} />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
                         {nameTags.length === 0 && (
                           <div 
                             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-400 text-sm"
