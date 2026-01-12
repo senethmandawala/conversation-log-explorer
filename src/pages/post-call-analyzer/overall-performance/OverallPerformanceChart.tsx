@@ -1,20 +1,40 @@
 import { useState, useEffect } from "react";
-import { Card, Typography, Space, Tooltip, Button } from "antd";
+import { Button, Tooltip } from "antd";
 import { BarChartOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
-import { ChartContainer, ChartTooltip, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 import { useDate } from "@/contexts/DateContext";
 import { useProjectSelection } from "@/services/projectSelectionService";
 import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-const { Title, Text } = Typography;
+// Get colors from env.js
+const categoryColors = (window as any).env_vars?.colors;
 
-// Custom tooltip component for the chart
+
+// Custom legend component with Tailwind styling
+const CustomChartLegend = ({ config }: any) => {
+  if (!config || Object.keys(config).length === 0) return null;
+  
+  return (
+    <div className="flex flex-wrap justify-center gap-4 mt-4">
+      {Object.entries(config).map(([key, entry]: [string, any]) => (
+        <div key={key} className="flex items-center gap-2 text-sm">
+          <div 
+            className="w-3 h-3 rounded-full" 
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-muted-foreground">{entry.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 const CustomChartTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -39,51 +59,71 @@ const CustomChartTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-// Chart config for the performance chart
+// Chart config for the performance chart using env.js colors
 const chartConfig = {
-  calls: { label: "Open Calls", color: "hsl(226, 70%, 55%)" },
-  resolved: { label: "Call Resolution", color: "hsl(142, 71%, 45%)" },
-  fulfilled: { label: "Satisfaction", color: "hsl(38, 92%, 50%)" },
 };
 
-// Helper to transform API performance data to chart format
+// Helper to transform API performance data to chart format dynamically
 const transformPerformanceData = (apiData: any[]) => {
   if (!apiData || apiData.length === 0) {
     return defaultPerformanceData;
   }
 
+  // Get all keys except call_date from the first item to determine categories
+  const firstItem = apiData[0];
+  const categories = Object.keys(firstItem).filter(key => key !== 'call_date');
+  
   // Transform the API data to match the expected chart format
   return apiData.map((item) => {
     // Parse the call_date and format for display
     const date = new Date(item.call_date);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     
-    return {
-      name: formattedDate, // Use full date instead of just day name
-      calls: item.open_calls || 0,
-      resolved: item.avg_call_resolution ? parseFloat(item.avg_call_resolution) : 0, // No scaling
-      fulfilled: item.avg_satisfaction ? parseFloat(item.avg_satisfaction) : 0, // No scaling
-      // Additional metrics that could be useful
-      droppedCalls: item.dropped_calls || 0,
-      repeatCalls: item.repeat_calls || 0,
-      avgDuration: item.avg_call_duration ? parseFloat(item.avg_call_duration) : 0,
-      avgSilentTime: item.avg_silent_time ? parseFloat(item.avg_silent_time) : 0,
-      avgWaitingTime: item.avg_waiting_time ? parseFloat(item.avg_waiting_time) : 0,
-      churnPercentage: item.churn_percentage ? parseFloat(item.churn_percentage) : 0,
+    const transformedItem: any = {
+      name: formattedDate,
     };
+    
+    // Add all categories dynamically
+    categories.forEach(category => {
+      const value = item[category];
+      transformedItem[category] = value ? Math.round(parseFloat(value)) : 0;
+    });
+    
+    return transformedItem;
   });
 };
 
-// Default fallback data (same as in PostCallDashboard)
+// Helper to get chart config dynamically based on data
+const getChartConfig = (data: any[]) => {
+  if (!data || data.length === 0) {
+    return {};
+  }
+  
+  // Get all keys except name from the first data item
+  const categories = Object.keys(data[0]).filter(key => key !== 'name');
+  const config: any = {};
+  
+  categories.forEach((category, index) => {
+    // Use colors from env.js, cycling through if needed
+    const colorIndex = index % (categoryColors?.length || 18);
+    config[category] = {
+      label: category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' '),
+      color: categoryColors?.[colorIndex] || `hsl(${index * 30}, 70%, 50%)`
+    };
+  });
+  
+  return config;
+};
+
+// Default fallback data
 const defaultPerformanceData = [
-  { name: "Mon", calls: 0, resolved: 0 },
-  { name: "Tue", calls: 0, resolved: 0 },
-  { name: "Wed", calls: 0, resolved: 0 },
-  { name: "Thu", calls: 0, resolved: 0 },
-  { name: "Fri", calls: 0, resolved: 0 },
-  { name: "Sat", calls: 0, resolved: 0 },
-  { name: "Sun", calls: 0, resolved: 0 },
+  { name: "Mon" },
+  { name: "Tue" },
+  { name: "Wed" },
+  { name: "Thu" },
+  { name: "Fri" },
+  { name: "Sat" },
+  { name: "Sun" },
 ];
 
 export default function OverallPerformanceChart() {
@@ -187,85 +227,71 @@ export default function OverallPerformanceChart() {
   }, [globalDateRange, selectedProject]); // Re-fetch when global date range or selected project changes
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <Space align="center" size="middle">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <BarChartOutlined style={{ fontSize: 20 }} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
-                    Overall Performance Chart
-                  </Title>
-                  <Tooltip title="Weekly performance trends and metrics">
-                    <div style={{ marginTop: '-4px' }}>
-                      <TablerIcon 
-                        name="info-circle" 
-                        className="wn-tabler-14"
-                        size={14}
-                      />
-                    </div>
-                  </Tooltip>
-                </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
-                  {globalDateRange?.dateRangeForDisplay || ''}
-                </Text>
-              </div>
-            </Space>
-            
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <DatePickerComponent
-                onSelectedRangeValueChange={handleDateRangeChange}
-                toolTipValue="Select date range for performance data"
-                calenderType=""
-                dateInput={globalDateRange}
-              />
-              <Tooltip title="Reload data">
-                <Button
-                  type="default"
-                  icon={<ReloadOutlined />}
-                  onClick={handleReload}
-                  loading={isLoading}
-                  className="h-10 rounded-xl border-2 hover:border-primary/50 transition-all duration-200"
-                />
-              </Tooltip>
-              <Tooltip title="Go to Insights">
-                <Button
-                  type="default"
-                  icon={<EyeOutlined />}
-                  onClick={handleGoToInsights}
-                  className="h-10 rounded-xl border-2 hover:border-primary/50 transition-all duration-200"
-                />
-              </Tooltip>
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <div className="space-y-10">
+        {/* Header Section */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+              <BarChartOutlined className="text-lg" />
             </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Overall Performance Chart
+                </h3>
+                <Tooltip title="Weekly performance trends and metrics">
+                  <div className="-mt-1">
+                    <TablerIcon 
+                      name="info-circle" 
+                      className="wn-tabler-14"
+                      size={14}
+                    />
+                  </div>
+                </Tooltip>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {globalDateRange?.dateRangeForDisplay || ''}
+              </p>
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-4">
+            <DatePickerComponent
+              onSelectedRangeValueChange={handleDateRangeChange}
+              toolTipValue="Select date range for performance data"
+              calenderType=""
+              dateInput={globalDateRange}
+            />
+            <Tooltip title="Reload data">
+              <Button
+                type="default"
+                icon={<ReloadOutlined />}
+                onClick={handleReload}
+                loading={isLoading}
+                className={cn(
+                  "h-10 rounded-xl border-2 transition-all duration-200",
+                  "hover:border-primary/50"
+                )}
+              />
+            </Tooltip>
+            <Tooltip title="Go to Insights">
+              <Button
+                type="default"
+                icon={<EyeOutlined />}
+                onClick={handleGoToInsights}
+                className={cn(
+                  "h-10 rounded-xl border-2 transition-all duration-200",
+                  "hover:border-primary/50"
+                )}
+              />
+            </Tooltip>
           </div>
         </div>
         
-        {/* Actual Chart Component or Empty State */}
-        <div style={{ marginTop: 30}}>
+        {/* Chart Section */}
+        <div className="mt-8">
           {isLoading ? (
             <ExceptionHandleView type="loading" />
           ) : hasError ? (
@@ -307,64 +333,54 @@ export default function OverallPerformanceChart() {
               }}
             />
           ) : (
-            <ChartContainer config={chartConfig} className="h-[300px] w-full">
-              <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                <defs>
-                  <linearGradient id="callsGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(226, 70%, 55%)" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="hsl(226, 70%, 55%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="resolvedGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="hsl(142, 71%, 45%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="fulfilledGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" vertical={false} />
-                <XAxis dataKey="name" className="text-xs" axisLine={false} tickLine={false} />
-                <YAxis 
-                  className="text-xs" 
-                  axisLine={false} 
-                  tickLine={false}
-                  tickFormatter={(value) => Math.round(value).toString()}
-                />
-                <ChartTooltip content={<CustomChartTooltip />} />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="calls" 
-                  stroke="hsl(226, 70%, 55%)" 
-                  strokeWidth={2.5} 
-                  dot={{ fill: "hsl(226, 70%, 55%)", strokeWidth: 0, r: 4 }}
-                  activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
-                  name="Open Calls"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="resolved" 
-                  stroke="hsl(142, 71%, 45%)" 
-                  strokeWidth={2.5}
-                  dot={{ fill: "hsl(142, 71%, 45%)", strokeWidth: 0, r: 4 }}
-                  activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
-                  name="Call Resolution"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="fulfilled" 
-                  stroke="hsl(38, 92%, 50%)" 
-                  strokeWidth={2.5}
-                  dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 0, r: 4 }}
-                  activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
-                  name="Satisfaction"
-                />
-              </LineChart>
-            </ChartContainer>
+            <div className="space-y-7">
+              <ChartContainer config={getChartConfig(performanceData)} className="h-[300px] w-full">
+                <LineChart data={performanceData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                  {/* Dynamic gradients for each category */}
+                  {Object.keys(getChartConfig(performanceData)).map((category, index) => {
+                    const colorIndex = index % (categoryColors?.length || 18);
+                    const color = categoryColors?.[colorIndex] || `hsl(${index * 30}, 70%, 50%)`;
+                    return (
+                      <linearGradient key={`${category}Gradient`} id={`${category}Gradient`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+                        <stop offset="100%" stopColor={color} stopOpacity={0} />
+                      </linearGradient>
+                    );
+                  })}
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" vertical={false} />
+                  <XAxis dataKey="name" className="text-xs" axisLine={false} tickLine={false} />
+                  <YAxis 
+                    className="text-xs" 
+                    axisLine={false} 
+                    tickLine={false}
+                    tickFormatter={(value) => Math.round(value).toString()}
+                  />
+                  <ChartTooltip content={<CustomChartTooltip />} />
+                  {/* Dynamic lines for each category */}
+                  {Object.keys(getChartConfig(performanceData)).map((category, index) => {
+                    const colorIndex = index % (categoryColors?.length || 18);
+                    const color = categoryColors?.[colorIndex] || `hsl(${index * 30}, 70%, 50%)`;
+                    const config = getChartConfig(performanceData)[category];
+                    return (
+                      <Line 
+                        key={category}
+                        type="monotone" 
+                        dataKey={category} 
+                        stroke={color} 
+                        strokeWidth={2.5} 
+                        dot={{ fill: color, strokeWidth: 0, r: 4 }}
+                        activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+                        name={config.label}
+                      />
+                    );
+                  })}
+                </LineChart>
+              </ChartContainer>
+              <CustomChartLegend config={getChartConfig(performanceData)} />
+            </div>
           )}
         </div>
-      </Space>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -91,13 +91,13 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
   className = ''
 }) => {
   const getIconConfig = () => {
-    const baseIconClass = "h-12 w-12";
+    const baseIconClass = "h-8 w-8";
     
     switch (type) {
       case 'loading':
         return {
-          icon: <Loader2 className={cn(baseIconClass, "text-primary")} />,
-          containerClass: "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20",
+          icon: <Loader2 className={cn(baseIconClass, "text-slate-500")} />,
+          containerClass: "bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700",
           animate: true,
           spin: true
         };
@@ -105,7 +105,7 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
         return {
           icon: <SearchX className={cn(baseIconClass, "text-slate-500")} />,
           containerClass: "bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700",
-          animate: true,
+          animate: false,
           spin: false
         };
       case '204':
@@ -113,28 +113,28 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
         return {
           icon: <Inbox className={cn(baseIconClass, "text-slate-400")} />,
           containerClass: "bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700",
-          animate: true,
+          animate: false,
           spin: false
         };
       case '404':
         return {
           icon: <FileQuestion className={cn(baseIconClass, "text-blue-500")} />,
           containerClass: "bg-gradient-to-br from-blue-100 via-blue-50 to-white dark:from-blue-950 dark:via-blue-900/50 dark:to-slate-950 border border-blue-200 dark:border-blue-800",
-          animate: true,
+          animate: false,
           spin: false
         };
       case '500':
         return {
           icon: <AlertTriangle className={cn(baseIconClass, "text-red-500")} />,
-          containerClass: "bg-gradient-to-br from-red-100 via-red-50 to-white dark:from-red-950 dark:via-red-900/50 dark:to-slate-950 border border-red-200 dark:border-red-800 shadow-red-500/10",
-          animate: true,
+          containerClass: "bg-gradient-to-br from-red-100 via-red-50 to-white dark:from-red-950 dark:via-red-900/50 dark:to-slate-950 border border-red-200 dark:border-red-800",
+          animate: false,
           spin: false
         };
       case '503':
         return {
           icon: <WifiOff className={cn(baseIconClass, "text-amber-500")} />,
           containerClass: "bg-gradient-to-br from-amber-100 via-amber-50 to-white dark:from-amber-950 dark:via-amber-900/50 dark:to-slate-950 border border-amber-200 dark:border-amber-800",
-          animate: true,
+          animate: false,
           spin: false
         };
       case 'no-records':
@@ -202,7 +202,7 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
   const iconConfig = getIconConfig();
 
   const renderActionButton = () => {
-    const buttonClass = "rounded-full px-8 py-2.5 font-medium shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5";
+    const buttonClass = "rounded-full px-8 py-2.5 font-medium transition-all duration-300 hover:-translate-y-0.5";
     
     switch (type) {
       case '404':
@@ -250,7 +250,7 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
     <AnimatePresence mode="wait">
       <motion.div 
         className={cn(
-          "flex items-center justify-center min-h-[350px] w-full p-8",
+          "flex items-center justify-center min-h-[250px] w-full p-6",
           className
         )}
         variants={containerVariants}
@@ -258,7 +258,7 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
         animate="visible"
         exit="hidden"
       >
-        <div className="flex flex-col items-center text-center max-w-lg space-y-8">
+        <div className="flex flex-col items-center text-center max-w-lg space-y-6">
           {/* Animated Icon Container */}
           {iconConfig.icon && (
             <motion.div 
@@ -267,18 +267,18 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
             >
               {/* Glow effect */}
               <div className={cn(
-                "absolute inset-0 rounded-3xl blur-xl opacity-40",
+                "absolute inset-0 rounded-3xl opacity-20",
                 type === '500' && "bg-red-400",
                 type === '404' && "bg-blue-400",
                 type === '503' && "bg-amber-400",
-                type === 'loading' && "bg-primary",
+                type === 'loading' && "bg-slate-400",
                 type === 'no-records' && "bg-emerald-400",
                 (type === '200' || type === '204' || type === '203') && "bg-slate-400"
               )} />
               
               <motion.div 
                 className={cn(
-                  "relative p-8 rounded-3xl backdrop-blur-sm shadow-2xl",
+                  "relative p-6 rounded-3xl",
                   iconConfig.containerClass
                 )}
                 variants={iconConfig.spin ? undefined : floatVariants}
@@ -326,31 +326,7 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
           {/* Action Button */}
           {renderActionButton()}
 
-          {/* Loading indicator dots */}
-          {type === 'loading' && (
-            <motion.div 
-              variants={itemVariants}
-              className="flex items-center gap-1.5"
-            >
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  className="w-2 h-2 rounded-full bg-primary/60"
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.5, 1, 0.5]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: i * 0.2,
-                    ease: "easeInOut"
-                  }}
-                />
-              ))}
-            </motion.div>
-          )}
-        </div>
+                  </div>
       </motion.div>
     </AnimatePresence>
   );
