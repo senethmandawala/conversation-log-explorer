@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Button, Tooltip } from "antd";
+import { Button, Tooltip, Space } from "antd";
 import { BarChartOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
@@ -323,76 +323,78 @@ export default function OverallPerformanceChart({
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-      <div className="space-y-10">
-        {/* Header Section */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 ml-4">
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white'
-              }}
-            >
-              <BarChartOutlined style={{ fontSize: 20 }} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Overall Performance Chart
-                </h3>
-                <Tooltip title="Weekly performance trends and metrics">
-                  <div className="-mt-1">
-                    <TablerIcon 
-                      name="info-circle" 
-                      className="wn-tabler-14"
-                      size={14}
-                    />
-                  </div>
-                </Tooltip>
+      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ marginTop: -12 }}>
+          {/* Header Section */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 ml-4">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                <BarChartOutlined style={{ fontSize: 20 }} />
               </div>
-              <p className="text-sm text-muted-foreground">
-                {effectiveDateRange?.dateRangeForDisplay || ''}
-              </p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Overall Performance Chart
+                  </h3>
+                  <Tooltip title="Weekly performance trends and metrics">
+                    <div className="-mt-1">
+                      <TablerIcon 
+                        name="info-circle" 
+                        className="wn-tabler-14"
+                        size={14}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {effectiveDateRange?.dateRangeForDisplay || ''}
+                </p>
+              </div>
             </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="flex items-center gap-4">
-            <DatePickerComponent
-              onSelectedRangeValueChange={handleDateRangeChange}
-              toolTipValue="Select date range for performance data"
-              calenderType=""
-              dateInput={dateInputForPicker}
-            />
-            <Tooltip title="Reload data">
-              <Button
-                type="default"
-                icon={<ReloadOutlined />}
-                onClick={handleReload}
-                loading={isLoading}
-                className={cn(
-                  "h-10 rounded-xl border-2 transition-all duration-200",
-                  "hover:border-primary/50"
-                )}
+            
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <DatePickerComponent
+                onSelectedRangeValueChange={handleDateRangeChange}
+                toolTipValue="Select date range for performance data"
+                calenderType=""
+                dateInput={dateInputForPicker}
               />
-            </Tooltip>
-            <Tooltip title="Go to Insights">
-              <Button
-                type="default"
-                icon={<EyeOutlined />}
-                onClick={handleGoToInsights}
-                className={cn(
-                  "h-10 rounded-xl border-2 transition-all duration-200",
-                  "hover:border-primary/50"
-                )}
-              />
-            </Tooltip>
+              <Tooltip title="Reload data">
+                <Button
+                  type="default"
+                  icon={<ReloadOutlined />}
+                  onClick={handleReload}
+                  loading={isLoading}
+                  className={cn(
+                    "h-10 rounded-xl border-2 transition-all duration-200",
+                    "hover:border-primary/50"
+                  )}
+                />
+              </Tooltip>
+              <Tooltip title="Go to Insights">
+                <Button
+                  type="default"
+                  icon={<EyeOutlined />}
+                  onClick={handleGoToInsights}
+                  className={cn(
+                    "h-10 rounded-xl border-2 transition-all duration-200",
+                    "hover:border-primary/50"
+                  )}
+                />
+              </Tooltip>
+            </div>
           </div>
         </div>
         
@@ -484,7 +486,7 @@ export default function OverallPerformanceChart({
             </div>
           )}
         </div>
-      </div>
+      </Space>
     </div>
   );
 }

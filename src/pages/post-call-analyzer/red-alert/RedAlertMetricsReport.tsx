@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
-import { ReloadOutlined, CloseOutlined, BarChartOutlined, CalendarOutlined, ApartmentOutlined } from "@ant-design/icons";
+import { ReloadOutlined, CloseOutlined, BarChartOutlined, CalendarOutlined, ApartmentOutlined, EyeOutlined } from "@ant-design/icons";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
@@ -8,6 +8,7 @@ import { useDate } from "@/contexts/DateContext";
 import { useProjectSelection } from "@/services/projectSelectionService";
 import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
@@ -35,24 +36,24 @@ class SimpleSubject<T> {
 
 const { Title, Text } = Typography;
 
-// Custom Tooltip Components
+// Custom Tooltip Components - matching OverallPerformanceChart styling
 const TreemapTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
       <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-start">
             <div 
-              className="w-3 h-3 rounded-full" 
+              className="w-3 h-3 rounded-full flex-shrink-0" 
               style={{ backgroundColor: data.fill }}
             />
-            <p className="font-medium">{data.name}</p>
+            <p className="font-medium m-0">{data.name}</p>
           </div>
-          <div className="text-sm">
+          <div className="text-sm ml-5">
             Value: {data.value}
           </div>
-          <div className="text-sm">
+          <div className="text-sm ml-5">
             Percentage: {data.percentage}%
           </div>
         </div>
@@ -68,14 +69,14 @@ const BarChartTooltip = ({ active, payload }: any) => {
     return (
       <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-start">
             <div 
-              className="w-3 h-3 rounded-full" 
+              className="w-3 h-3 rounded-full flex-shrink-0" 
               style={{ backgroundColor: data.fill }}
             />
-            <p className="font-medium">{data.name}</p>
+            <p className="font-medium m-0">{data.name}</p>
           </div>
-          <div className="text-sm">
+          <div className="text-sm ml-5">
             Value: {data.value}
           </div>
         </div>
@@ -221,6 +222,7 @@ export default function RedAlertMetricsReport({
   const [localDateRange, setLocalDateRange] = useState<any>(null);
   const { globalDateRange } = useDate();
   const { selectedProject } = useProjectSelection();
+  const navigate = useNavigate();
 
   // Use local date range if user has set it, otherwise use global
   const effectiveDateRange = localDateRange || globalDateRange;
@@ -323,6 +325,11 @@ export default function RedAlertMetricsReport({
     setSelectedCategory("");
     setSelectedSubCategory("");
     manualRefreshRef.current.next(effectiveDateRange);
+  };
+
+  // Handle go to insights
+  const handleGoToInsights = () => {
+    navigate('/pca/call-insight');
   };
 
   // Load data function
@@ -530,13 +537,29 @@ export default function RedAlertMetricsReport({
                 calenderType=""
                 dateInput={dateInputForPicker}
               />
-              <Button 
-                type="text"
-                icon={<ReloadOutlined className={loading ? 'animate-spin' : ''} />}
-                onClick={handleReload}
-                loading={loading}
-                style={{ borderRadius: 8 }}
-              />
+              <Tooltip title="Reload data">
+                <Button
+                  type="default"
+                  icon={<ReloadOutlined />}
+                  onClick={handleReload}
+                  loading={loading}
+                  className={cn(
+                    "h-10 rounded-xl border-2 transition-all duration-200",
+                    "hover:border-primary/50"
+                  )}
+                />
+              </Tooltip>
+              <Tooltip title="Go to Insights">
+                <Button
+                  type="default"
+                  icon={<EyeOutlined />}
+                  onClick={handleGoToInsights}
+                  className={cn(
+                    "h-10 rounded-xl border-2 transition-all duration-200",
+                    "hover:border-primary/50"
+                  )}
+                />
+              </Tooltip>
             </div>
           </div>
         </div>
@@ -571,7 +594,8 @@ export default function RedAlertMetricsReport({
                   padding: 16
                 }}
               >
-                <ResponsiveContainer width="100%" height={350}>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
                   <Treemap
                     data={treemapData}
                     dataKey="value"
@@ -583,6 +607,7 @@ export default function RedAlertMetricsReport({
                     <RechartsTooltip content={<TreemapTooltip />} />
                   </Treemap>
                 </ResponsiveContainer>
+              </div>
                 
                 {/* Legend */}
                 <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
@@ -661,34 +686,37 @@ export default function RedAlertMetricsReport({
                     </div>
                   ) : (
                     <>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={barChartData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" vertical={false} />
-                          <XAxis 
-                            dataKey="name" 
-                            className="text-xs" 
-                            axisLine={false} 
-                            tickLine={false}
-                            hide
-                          />
-                          <YAxis 
-                            className="text-xs" 
-                            axisLine={false} 
-                            tickLine={false}
-                          />
-                          <RechartsTooltip content={<BarChartTooltip />} />
-                          <Bar 
-                            dataKey="value" 
-                            radius={[6, 6, 0, 0]}
-                            onClick={handleBarClick}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            {barChartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={getBarChartColors()[index]} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" vertical={false} />
+                            <XAxis 
+                              dataKey="name" 
+                              className="text-xs" 
+                              axisLine={false} 
+                              tickLine={false}
+                              hide
+                            />
+                            <YAxis 
+                              className="text-xs" 
+                              axisLine={false} 
+                              tickLine={false}
+                              tickFormatter={(value) => Math.round(value).toString()}
+                            />
+                            <RechartsTooltip content={<BarChartTooltip />} />
+                            <Bar 
+                              dataKey="value" 
+                              radius={[6, 6, 0, 0]}
+                              onClick={handleBarClick}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {barChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={getBarChartColors()[index]} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
                       <div style={{ 
                         fontSize: 14, 
                         color: '#666', 
