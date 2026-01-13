@@ -34,21 +34,6 @@ export interface Instance {
   name: string;
 }
 
-const mockInstances: Instance[] = [
-  { id: "1", name: "pca_qa" },
-  { id: "2", name: "pca_demo" },
-  { id: "3", name: "pca_qa2" },
-  { id: "4", name: "pca_qa4" },
-  { id: "5", name: "pca_po" },
-  { id: "6", name: "pca_qa5" },
-  { id: "7", name: "pca_qa7" },
-  { id: "8", name: "pca_qa8" },
-  { id: "9", name: "Claro Contact Center" },
-  { id: "10", name: "pca_qa9" },
-  { id: "11", name: "test_department1" },
-  { id: "12", name: "TigoBolivia" },
-];
-
 const PostCallAnalyzer = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();

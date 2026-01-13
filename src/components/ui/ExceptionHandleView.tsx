@@ -202,7 +202,7 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
   const iconConfig = getIconConfig();
 
   const renderActionButton = () => {
-    const buttonClass = "rounded-full px-8 py-2.5 font-medium transition-all duration-300 hover:-translate-y-0.5";
+    const buttonClass = "font-geist rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 hover:-translate-y-0.5";
     
     switch (type) {
       case '404':
@@ -308,7 +308,10 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
           {/* Title */}
           <motion.h5 
             variants={itemVariants}
-            className="text-2xl font-bold text-foreground tracking-tight leading-tight"
+            className={cn(
+              "font-geist text-foreground tracking-tight leading-tight",
+              (type === '204' || type === '203') ? "text-base font-medium" : "text-lg font-medium"
+            )}
           >
             {title || getTitle()}
           </motion.h5>
@@ -317,7 +320,7 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
           {getDescription() && (
             <motion.p 
               variants={itemVariants}
-              className="text-base text-muted-foreground leading-relaxed max-w-md"
+              className="font-geist text-sm text-muted-foreground leading-relaxed max-w-md"
             >
               {getDescription()}
             </motion.p>

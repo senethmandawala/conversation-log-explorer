@@ -198,6 +198,45 @@ export class CallRoutingApiService extends BaseApiService {
     const endpoint = `/reports/overall_performance_trends${queryParams}`;
     return this.get<any>(endpoint);
   }
+
+
+  
+    async redAlertMMetric(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/redalert_db${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+
+    async callStatistics(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/call_statistics${queryParams}`;
+    return this.get<any>(endpoint);
+  }
 }
 
 // Create a singleton instance for use throughout the app

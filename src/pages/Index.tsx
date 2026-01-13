@@ -12,7 +12,6 @@ import { EmptyState } from "@/components/conversation/EmptyState";
 import { LoadingSkeleton } from "@/components/conversation/LoadingSkeleton";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord, FilterState, DateRangeValue } from "@/types/conversation";
-import { fetchConversationHistory } from "@/lib/api";
 import { transformApiToConversationRecord } from "@/lib/transformers";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -56,15 +55,18 @@ export default function ConversationHistory() {
           ? appliedFilters.dateRange.to.toISOString().split('.')[0]
           : '2025-11-30T23:59:59';
 
-        const response = await fetchConversationHistory({
-          page: currentPage,
-          size: pageSize,
-          sort: 'call_start_time',
-          sortOrder: 'DESC',
-          fromTime,
-          toTime,
-          projectId: '706',
-        });
+        // Mock conversation data instead of API call
+        const mockResponse = {
+          data: {
+            ConversationHistoryList: mockConversations.slice(
+              (currentPage - 1) * pageSize,
+              currentPage * pageSize
+            ),
+            total: mockConversations.length
+          }
+        };
+
+        const response = mockResponse;
 
         const transformedData = response.data.ConversationHistoryList.map(transformApiToConversationRecord);
         setConversations(transformedData);

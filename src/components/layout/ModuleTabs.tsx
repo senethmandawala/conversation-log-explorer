@@ -168,6 +168,7 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
           {isDashboardTab ? (
             <>
               <DatePickerComponent
+                dateInput={globalDateRange}
                 onSelectedRangeValueChange={handleDateRangeChange}
                 toolTipValue="Select date range"
                 calenderType=""

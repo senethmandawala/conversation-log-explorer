@@ -1,14 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
-import { 
-  ReloadOutlined, 
-  CloseOutlined, 
-  BarChartOutlined,
-  CalendarOutlined, 
-  ApartmentOutlined
-} from "@ant-design/icons";
+import { ReloadOutlined, CloseOutlined, BarChartOutlined, CalendarOutlined, ApartmentOutlined } from "@ant-design/icons";
 import { TablerIcon } from "@/components/ui/tabler-icon";
+import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
+import { useDate } from "@/contexts/DateContext";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
+import dayjs from "dayjs";
 import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
+import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
+
+// Simple Subject implementation for reactive pattern
+class SimpleSubject<T> {
+  private observers: ((value: T) => void)[] = [];
+  
+  next(value: T) {
+    this.observers.forEach(observer => observer(value));
+  }
+  
+  subscribe(observer: (value: T) => void) {
+    this.observers.push(observer);
+    return {
+      unsubscribe: () => {
+        const index = this.observers.indexOf(observer);
+        if (index > -1) {
+          this.observers.splice(index, 1);
+        }
+      }
+    };
+  }
+}
 
 const { Title, Text } = Typography;
 
@@ -17,16 +40,22 @@ const TreemapTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div style={{
-        backgroundColor: 'white',
-        border: '1px solid #d9d9d9',
-        borderRadius: 8,
-        padding: 8,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-      }}>
-        <div style={{ fontWeight: 500, marginBottom: 4 }}>{data.name}</div>
-        <div style={{ fontSize: 12, color: '#666' }}>Value: {data.value}</div>
-        <div style={{ fontSize: 12, color: '#666' }}>Percentage: {data.percentage}%</div>
+      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: data.fill }}
+            />
+            <p className="font-medium">{data.name}</p>
+          </div>
+          <div className="text-sm">
+            Value: {data.value}
+          </div>
+          <div className="text-sm">
+            Percentage: {data.percentage}%
+          </div>
+        </div>
       </div>
     );
   }
@@ -37,33 +66,72 @@ const BarChartTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div style={{
-        backgroundColor: 'white',
-        border: '1px solid #d9d9d9',
-        borderRadius: 8,
-        padding: 8,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-      }}>
-        <div style={{ fontWeight: 500, marginBottom: 4 }}>{data.name}</div>
-        <div style={{ fontSize: 12, color: '#666' }}>Value: {data.value}</div>
+      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: data.fill }}
+            />
+            <p className="font-medium">{data.name}</p>
+          </div>
+          <div className="text-sm">
+            Value: {data.value}
+          </div>
+        </div>
       </div>
     );
   }
   return null;
 };
 
-// Mock Call Logs Component
+// Call Logs Component - will be populated with real data
 const RedAlertCallLogs = ({ category, subCategory }: { category: string; subCategory: string }) => {
-  const mockLogs = [
-    { id: 1, time: "10:30 AM", duration: "5:23", status: "Completed" },
-    { id: 2, time: "11:15 AM", duration: "3:45", status: "Dropped" },
-    { id: 3, time: "02:00 PM", duration: "8:12", status: "Completed" },
-    { id: 4, time: "03:30 PM", duration: "2:56", status: "Completed" },
-  ];
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // TODO: Fetch real call logs based on category and subCategory
+    setLoading(false);
+  }, [category, subCategory]);
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: 300 
+      }}>
+        <div style={{
+          width: 32,
+          height: 32,
+          border: '2px solid #1890ff',
+          borderTop: '2px solid transparent',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+      </div>
+    );
+  }
+
+  if (logs.length === 0) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: 300,
+        color: '#666'
+      }}>
+        No call logs available
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2" style={{ maxHeight: 300, overflowY: 'auto' }}>
-      {mockLogs.map((log) => (
+      {logs.map((log) => (
         <div key={log.id} style={{
           padding: 8,
           backgroundColor: '#fafafa',
@@ -81,19 +149,10 @@ const RedAlertCallLogs = ({ category, subCategory }: { category: string; subCate
   );
 };
 
-// Colors matching Angular environment.colors
-const COLORS = [
-  "#4285F4", "#34A853", "#FBBC04", "#EA4335", "#9C27B0",
-  "#FF5722", "#00BCD4", "#8BC34A", "#FFC107", "#E91E63"
-];
-
-// Mock data for red alert treemap
-const mockRedAlertData = [
-  { name: "Drop calls", value: 145, percentage: 28 },
-  { name: "Repeat Calls", value: 128, percentage: 25 },
-  { name: "Open Cases", value: 98, percentage: 19 },
-  { name: "Package Churn", value: 87, percentage: 17 },
-  { name: "Bad Practices", value: 55, percentage: 11 },
+// Colors from env.js
+const COLORS = (window as any).env_vars?.colors || [
+  "#FB6767", "#5766BC", "#62B766", "#FBA322", "#E83B76", "#3EA1F0", 
+  "#98C861", "#FB6C3E", "#24B1F1", "#D0DD52", "#896A5F", "#22C2D6"
 ];
 
 // Custom Treemap Content Component
@@ -126,7 +185,7 @@ const CustomTreemapContent = (props: any) => {
           dominantBaseline="middle"
           fill="white"
           fontSize={14}
-          fontWeight={600}
+          fontWeight={400}
           style={{ pointerEvents: "none" }}
         >
           {percentage}%
@@ -136,10 +195,20 @@ const CustomTreemapContent = (props: any) => {
   );
 };
 
-export default function RedAlertMetricsReport() {
-  const [loading, setLoading] = useState(false);
+interface RedAlertMetricsReportProps {
+  initialData?: any[];
+  isLoading?: boolean;
+}
+
+export default function RedAlertMetricsReport({ 
+  initialData, 
+  isLoading: propIsLoading 
+}: RedAlertMetricsReportProps = {}) {
+  const [loading, setLoading] = useState(propIsLoading !== undefined ? propIsLoading : false);
   const [secondChartLoading, setSecondChartLoading] = useState(false);
   const [thirdChartLoading, setThirdChartLoading] = useState(false);
+  const [hasData, setHasData] = useState(!!initialData);
+  const [hasError, setHasError] = useState(false);
   
   const [showSecondChart, setShowSecondChart] = useState(false);
   const [showThirdChart, setShowThirdChart] = useState(false);
@@ -147,18 +216,189 @@ export default function RedAlertMetricsReport() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
   
-  const [redAlertData] = useState(mockRedAlertData);
+  const [redAlertData, setRedAlertData] = useState<any[]>(initialData || []);
   const [barChartData, setBarChartData] = useState<any[]>([]);
+  const [localDateRange, setLocalDateRange] = useState<any>(null);
+  const { globalDateRange } = useDate();
+  const { selectedProject } = useProjectSelection();
 
+  // Use local date range if user has set it, otherwise use global
+  const effectiveDateRange = localDateRange || globalDateRange;
+  
+  // Force new reference when global date range changes to trigger DatePickerComponent update
+  const dateInputForPicker = effectiveDateRange ? { ...effectiveDateRange } : null;
+
+  // Reactive state management
+  const destroyRef = useRef(false);
+  const manualRefreshRef = useRef<SimpleSubject<any>>(new SimpleSubject<any>());
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced refresh function
+  const debouncedRefresh = useCallback((overrideDateRange?: any) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (selectedProject && !destroyRef.current) {
+        loadData(overrideDateRange);
+      }
+    }, 300);
+  }, [selectedProject]);
+
+  // Watch for global date range changes (from ModuleTabs.tsx)
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // If global date range changes, clear local selection to allow global to take precedence
+    if (globalDateRange) {
+      setLocalDateRange(null); // Clear local selection
+      // Trigger refresh with global date range
+      manualRefreshRef.current.next(globalDateRange);
+    }
+  }, [globalDateRange]);
+
+  // Combine date and project changes (similar to Angular's combineLatest)
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // Watch for both date and project changes
+    if (effectiveDateRange && selectedProject) {
+      // Trigger refresh through the unified debounced stream with current date range
+      manualRefreshRef.current.next(effectiveDateRange);
+    }
+  }, [effectiveDateRange, selectedProject]);
+
+  // Single debounced stream for ALL refresh triggers
+  useEffect(() => {
+    const subscription = manualRefreshRef.current.subscribe((dateRange) => {
+      // Use the date range passed through the Subject
+      debouncedRefresh(dateRange);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [debouncedRefresh]);
+
+  // Initial data handling
+  useEffect(() => {
+    if (initialData && initialData.length > 0) {
+      setRedAlertData(initialData);
+      setHasData(true);
+      setLoading(false);
+    }
+  }, [initialData]);
+
+  // Initial API call when component mounts with project and date range
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // Trigger initial API call if we have project and date range but no actual initial data
+    if (selectedProject && effectiveDateRange && (!initialData || initialData.length === 0)) {
+      manualRefreshRef.current.next(effectiveDateRange);
+    }
+  }, [selectedProject, effectiveDateRange, initialData]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      destroyRef.current = true;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Handle date range change
+  const handleDateRangeChange = (dateRange: any) => {
+    setLocalDateRange(dateRange);
+    // The combineLatest effect will trigger automatically
+  };
+
+  // Handle reload
   const handleReload = () => {
-    setLoading(true);
     setShowSecondChart(false);
     setShowThirdChart(false);
     setSelectedCategory("");
     setSelectedSubCategory("");
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    manualRefreshRef.current.next(effectiveDateRange);
+  };
+
+  // Load data function
+  const loadData = async (overrideDateRange?: any) => {
+    // Use override date range if provided, otherwise use effective date range
+    const dateRangeToUse = overrideDateRange || effectiveDateRange;
+    
+    if (!selectedProject || !dateRangeToUse) {
+      return;
+    }
+
+    setLoading(true);
+    setHasError(false);
+
+    try {
+      // Get IDs from selected project
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      // Use the date range
+      const fromTime = dateRangeToUse.fromDate;
+      const toTime = dateRangeToUse.toDate;
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime,
+        toTime,
+      };
+
+      const response = await callRoutingApiService.redAlertMMetric(filters);
+
+      // Check if response has data
+      if (response?.data && response.data.alert_elements) {
+        const alertElements = response.data.alert_elements;
+        
+        // Transform the alert_elements array into the expected format
+        const transformedData = alertElements.map(item => {
+          const [name, value] = Object.entries(item)[0]; // Get the key-value pair
+          return {
+            name: name,
+            value: typeof value === 'string' ? parseInt(value) || 0 : (value || 0),
+            percentage: 0 // Will be calculated below
+          };
+        }).filter(item => item.value > 0); // Only include items with values > 0
+
+        // Calculate percentages
+        const totalValue = transformedData.reduce((sum, item) => sum + item.value, 0);
+        const dataWithPercentages = transformedData.map(item => ({
+          ...item,
+          percentage: totalValue > 0 ? Math.round((item.value / totalValue) * 100) : 0
+        }));
+
+        if (dataWithPercentages.length > 0) {
+          setRedAlertData(dataWithPercentages);
+          setHasData(true);
+        } else {
+          // Handle empty data array (all values are 0)
+          setRedAlertData([]);
+          setHasData(false);
+        }
+      } else {
+        // Handle empty response
+        setRedAlertData([]);
+        setHasData(false);
+      }
+    } catch (error) {
+      setHasError(true);
+      setRedAlertData([]);
+    }
+    
+    setLoading(false);
   };
 
   const handleTreemapClick = (data: any) => {
@@ -174,19 +414,10 @@ export default function RedAlertMetricsReport() {
   const loadSecondChartData = (category: string) => {
     setSecondChartLoading(true);
     
-    // Mock data for bar chart based on category
+    // TODO: Fetch real bar chart data based on category
     setTimeout(() => {
-      const mockBarData = [
-        { name: "Agent A", value: 45 },
-        { name: "Agent B", value: 38 },
-        { name: "Agent C", value: 32 },
-        { name: "Agent D", value: 28 },
-        { name: "Agent E", value: 22 },
-        { name: "Agent F", value: 18 },
-        { name: "Agent G", value: 15 },
-        { name: "Agent H", value: 12 },
-      ];
-      setBarChartData(mockBarData);
+      // Placeholder for real API call
+      setBarChartData([]);
       setSecondChartLoading(false);
     }, 300);
   };
@@ -293,38 +524,38 @@ export default function RedAlertMetricsReport() {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <DatePicker 
-                suffixIcon={<CalendarOutlined />}
-                style={{ 
-                  borderRadius: 8,
-                  borderColor: '#d9d9d9'
-                }}
+              <DatePickerComponent
+                onSelectedRangeValueChange={handleDateRangeChange}
+                toolTipValue="Select date range for red alert metrics"
+                calenderType=""
+                dateInput={dateInputForPicker}
               />
               <Button 
                 type="text"
                 icon={<ReloadOutlined className={loading ? 'animate-spin' : ''} />}
                 onClick={handleReload}
+                loading={loading}
                 style={{ borderRadius: 8 }}
               />
             </div>
           </div>
         </div>
         {loading ? (
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            height: 350 
-          }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              border: '2px solid #1890ff',
-              borderTop: '2px solid transparent',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }}></div>
-          </div>
+          <ExceptionHandleView type="loading" />
+        ) : hasError ? (
+          <ExceptionHandleView 
+            type="500" 
+            title="Error Loading Data"
+            content="red alert metrics"
+            onTryAgain={handleReload}
+          />
+        ) : !hasData ? (
+          <ExceptionHandleView 
+            type="204" 
+            title="No Red Alert Data"
+            content="red alert metrics for the selected period"
+            onTryAgain={handleReload}
+          />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
             {/* Treemap Chart - First Level */}
@@ -361,12 +592,12 @@ export default function RedAlertMetricsReport() {
                         style={{ 
                           width: 12, 
                           height: 12, 
-                          borderRadius: 2, 
+                          borderRadius: '50%', 
                           flexShrink: 0,
                           backgroundColor: item.fill 
                         }}
                       />
-                      <span style={{ fontSize: 12, color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                      <span style={{ fontSize: 12, color: '#666', fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                     </div>
                   ))}
                 </div>

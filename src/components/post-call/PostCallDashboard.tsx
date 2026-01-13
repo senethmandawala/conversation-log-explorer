@@ -31,14 +31,6 @@ import OverallPerformanceChart from "@/pages/post-call-analyzer/overall-performa
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatCard } from "@/components/ui/stat-card";
 import type { Instance } from "@/pages/PostCallAnalyzer";
-import { 
-  fetchPostCallStats, 
-  fetchRedAlertMetrics,
-  fetchCaseClassification,
-  fetchSentimentAnalysis,
-  fetchAgentPerformance,
-  type PostCallStats
-} from "@/lib/api";
 
 interface PostCallDashboardProps {
   instance: Instance;
@@ -62,8 +54,23 @@ const formatTimeValue = (timeStr: string): string => {
   return timeStr;
 };
 
+// Mock data types
+interface MockPostCallStats {
+  stats: {
+    totalCalls: { value: number };
+    averageDuration: { value: string };
+    successRate: { value: number };
+    redAlerts: { value: number };
+    fcrRate: { value: number; unit?: string };
+    avgHandlingTime: { value: string };
+    openCases: { value: number };
+    avgWaitingTime: { value: string };
+    avgSilenceTime: { value: string };
+  };
+}
+
 // Helper to transform API stats to StatCard format
-const transformStatsToCards = (stats: PostCallStats['stats']) => [
+const transformStatsToCards = (stats: MockPostCallStats['stats']) => [
   { 
     label: "Total Calls", 
     value: stats.totalCalls.value.toLocaleString(), 
@@ -108,48 +115,89 @@ const transformStatsToCards = (stats: PostCallStats['stats']) => [
   },
 ];
 
-// Default fallback data for StatCard
-const defaultStatCards = [
-  { label: "Total Calls", value: "—", icon: <PhoneOutlined />, color: "#3b82f6", gradientColors: ["#3b82f6", "#2563eb"] as [string, string] },
-  { label: "FCR Rate", value: "—", icon: <CheckCircleOutlined />, color: "#10b981", gradientColors: ["#10b981", "#059669"] as [string, string] },
-  { label: "Avg. Handling Time", value: "—", icon: <ClockCircleOutlined />, color: "#8b5cf6", gradientColors: ["#8b5cf6", "#7c3aed"] as [string, string] },
-  { label: "Open Cases", value: "—", icon: <FolderOpenOutlined />, color: "#ef4444", gradientColors: ["#ef4444", "#dc2626"] as [string, string] },
-  { label: "Avg. Waiting Time", value: "—", icon: <FieldTimeOutlined />, color: "#f59e0b", gradientColors: ["#f59e0b", "#d97706"] as [string, string] },
-  { label: "Avg. Silence Time", value: "—", icon: <MinusCircleOutlined />, color: "#f97316", gradientColors: ["#f97316", "#ea580c"] as [string, string] },
-];
-
-// Default fallback data
+// Default empty data arrays
 const defaultRedAlertData: { name: string; value: number }[] = [];
 const defaultCaseClassificationData: { name: string; value: number }[] = [];
 const defaultSentimentData: { name: string; value: number }[] = [];
 const defaultAgentPerformanceData: { name: string; value: number }[] = [];
 
 export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) => {
-  const [statCards, setStatCards] = useState(defaultStatCards);
+  const [statCards, setStatCards] = useState([]);
   const [redAlertData, setRedAlertData] = useState(defaultRedAlertData);
   const [caseClassificationData, setCaseClassificationData] = useState(defaultCaseClassificationData);
   const [sentimentData, setSentimentData] = useState(defaultSentimentData);
   const [agentPerformanceData, setAgentPerformanceData] = useState(defaultAgentPerformanceData);
+  const [performanceData, setPerformanceData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Fetch all data in parallel
-        const [
-          statsResponse, 
-          redAlertResponse,
-          caseClassificationResponse,
-          sentimentResponse,
-          agentPerformanceResponse
-        ] = await Promise.all([
-          fetchPostCallStats(),
-          fetchRedAlertMetrics(),
-          fetchCaseClassification(),
-          fetchSentimentAnalysis(),
-          fetchAgentPerformance()
-        ]);
+        // Mock data instead of API calls
+        const mockStatsResponse: MockPostCallStats = {
+          stats: {
+            totalCalls: { value: 1247 },
+            averageDuration: { value: "04:32" },
+            successRate: { value: 87.3 },
+            redAlerts: { value: 23 },
+            fcrRate: { value: 92.1 },
+            avgHandlingTime: { value: "03:45" },
+            openCases: { value: 8 },
+            avgWaitingTime: { value: "00:28" },
+            avgSilenceTime: { value: "00:12" }
+          }
+        };
+
+        const mockRedAlertResponse = {
+          redAlertMetrics: {
+            data: [
+              { category: "High Talk Time", count: 15 },
+              { category: "Long Silence", count: 8 },
+              { category: "Agent Interrupt", count: 12 },
+              { category: "Customer Dissatisfaction", count: 5 }
+            ]
+          }
+        };
+
+        const mockCaseClassificationResponse = {
+          caseClassification: {
+            data: [
+              { category: "Billing Issue", count: 45 },
+              { category: "Technical Support", count: 67 },
+              { category: "General Inquiry", count: 89 },
+              { category: "Complaint", count: 23 }
+            ]
+          }
+        };
+
+        const mockSentimentResponse = {
+          sentimentAnalysis: {
+            data: {
+              positive: 567,
+              neutral: 412,
+              negative: 268
+            }
+          }
+        };
+
+        const mockAgentPerformanceResponse = {
+          agentPerformance: {
+            data: [
+              { agent: "John Smith", value: 94.2 },
+              { agent: "Sarah Johnson", value: 91.8 },
+              { agent: "Mike Davis", value: 88.5 },
+              { agent: "Emily Wilson", value: 96.1 }
+            ]
+          }
+        };
+
+        // Use mock data
+        const statsResponse = mockStatsResponse;
+        const redAlertResponse = mockRedAlertResponse;
+        const caseClassificationResponse = mockCaseClassificationResponse;
+        const sentimentResponse = mockSentimentResponse;
+        const agentPerformanceResponse = mockAgentPerformanceResponse;
 
         // Transform and set stat cards
         if (statsResponse?.stats) {
@@ -158,10 +206,11 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
 
         // Transform and set red alert data
         if (redAlertResponse?.redAlertMetrics?.data) {
-          setRedAlertData(redAlertResponse.redAlertMetrics.data.map(item => ({
+          const redAlertData = redAlertResponse.redAlertMetrics.data.map(item => ({
             name: item.category,
             value: item.count
-          })));
+          }));
+          setRedAlertData(redAlertData);
         }
 
         // Transform and set case classification data
@@ -184,10 +233,14 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
 
         // Transform and set agent performance data
         if (agentPerformanceResponse?.agentPerformance?.data) {
-          setAgentPerformanceData(agentPerformanceResponse.agentPerformance.data.map(item => ({
+          const agentData = agentPerformanceResponse.agentPerformance.data.map(item => ({
             name: item.agent,
             value: item.value
-          })));
+          }));
+          setAgentPerformanceData(agentData);
+          
+          // Also set this as performance data for the chart
+          setPerformanceData(agentData);
         }
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
@@ -197,7 +250,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
     };
 
     loadData();
-  }, []);
+  }, [instance]);
 
   const reports = [
     { 
@@ -264,7 +317,10 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.3 }}
         >
-          <OverallPerformanceChart />
+          <OverallPerformanceChart 
+            initialData={performanceData}
+            isLoading={isLoading}
+          />
         </motion.div>
 
         {reports.map((report, index) => (
@@ -278,7 +334,10 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
             {report.id === "case-classification" ? (
               <CaseClassificationReport {...report} hideAccentLine={true} />
             ) : report.id === "red-alerts" ? (
-              <RedAlertMetricsReport />
+              <RedAlertMetricsReport 
+                initialData={redAlertData}
+                isLoading={isLoading}
+              />
             ) : report.id === "repeat-call-timeline" ? (
               <RepeatCallTimelineReport />
             ) : report.id === "channel-category" ? (
