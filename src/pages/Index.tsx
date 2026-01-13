@@ -12,7 +12,6 @@ import { EmptyState } from "@/components/conversation/EmptyState";
 import { LoadingSkeleton } from "@/components/conversation/LoadingSkeleton";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord, FilterState, DateRangeValue } from "@/types/conversation";
-import { transformApiToConversationRecord } from "@/lib/transformers";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -68,7 +67,25 @@ export default function ConversationHistory() {
 
         const response = mockResponse;
 
-        const transformedData = response.data.ConversationHistoryList.map(transformApiToConversationRecord);
+        const transformedData: ConversationRecord[] = response.data.ConversationHistoryList.map((item: any) => ({
+          id: item.id || String(Math.random()),
+          date: item.date || '',
+          time: item.time || '',
+          msisdn: item.msisdn || '',
+          vdn: item.vdn || '',
+          vdnSource: item.vdnSource || '',
+          duration: item.duration || '',
+          channel: item.channel || '',
+          category: item.category || '',
+          subCategory: item.subCategory || '',
+          resolution: item.resolution || 'resolved',
+          sentiment: item.sentiment || 'neutral',
+          uniqueID: item.uniqueID || item.unique_id || '',
+          summary: item.summary || '',
+          callDisReason: item.callDisReason || '',
+          department: item.department || '',
+          city: item.city || '',
+        }));
         setConversations(transformedData);
         setTotalRecords(response.data.total);
       } catch (error) {

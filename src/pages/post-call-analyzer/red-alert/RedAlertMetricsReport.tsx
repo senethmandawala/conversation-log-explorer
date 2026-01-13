@@ -9,7 +9,7 @@ import { useProjectSelection } from "@/services/projectSelectionService";
 import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
+import { Treemap, ResponsiveContainer, Tooltip as RechartTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +36,14 @@ class SimpleSubject<T> {
 
 const { Title, Text } = Typography;
 
-// Custom Tooltip Components - matching OverallPerformanceChart styling
-const TreemapTooltip = ({ active, payload }: any) => {
+// Custom Tooltip Components with mouse position tracking
+interface TooltipProps {
+  active?: boolean;
+  payload?: any[];
+  mousePosition?: { x: number; y: number };
+}
+
+const TreemapTooltipContent = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -63,7 +69,7 @@ const TreemapTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const BarChartTooltip = ({ active, payload }: any) => {
+const BarChartTooltipContent = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -220,6 +226,10 @@ export default function RedAlertMetricsReport({
   const [redAlertData, setRedAlertData] = useState<any[]>(initialData || []);
   const [barChartData, setBarChartData] = useState<any[]>([]);
   const [localDateRange, setLocalDateRange] = useState<any>(null);
+  const [treemapMousePos, setTreemapMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [barChartMousePos, setBarChartMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const treemapContainerRef = useRef<HTMLDivElement>(null);
+  const barChartContainerRef = useRef<HTMLDivElement>(null);
   const { globalDateRange } = useDate();
   const { selectedProject } = useProjectSelection();
   const navigate = useNavigate();
@@ -604,7 +614,11 @@ export default function RedAlertMetricsReport({
                     content={<CustomTreemapContent />}
                     onClick={handleTreemapClick}
                   >
-                    <RechartsTooltip content={<TreemapTooltip />} />
+                    <RechartTooltip 
+                      content={<TreemapTooltipContent />} 
+                      cursor={{ fill: 'transparent' }}
+                      wrapperStyle={{ pointerEvents: 'none' }}
+                    />
                   </Treemap>
                 </ResponsiveContainer>
               </div>
@@ -703,7 +717,11 @@ export default function RedAlertMetricsReport({
                               tickLine={false}
                               tickFormatter={(value) => Math.round(value).toString()}
                             />
-                            <RechartsTooltip content={<BarChartTooltip />} />
+                            <RechartTooltip 
+                              content={<BarChartTooltipContent />} 
+                              cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                              wrapperStyle={{ pointerEvents: 'none' }}
+                            />
                             <Bar 
                               dataKey="value" 
                               radius={[6, 6, 0, 0]}
