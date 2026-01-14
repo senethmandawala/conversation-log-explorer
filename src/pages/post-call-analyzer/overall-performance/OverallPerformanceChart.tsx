@@ -1,42 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from "react";
 import { Button, Tooltip, Space } from "antd";
 import { BarChartOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { TablerIcon } from "@/components/ui/tabler-icon";
-import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
-import { useDate } from "@/contexts/DateContext";
-import { useProjectSelection } from "@/services/projectSelectionService";
+import { useReportDataFetch, type ReportFilters } from "@/hooks/useReportDataFetch";
 import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
-import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-// Simple Subject implementation for reactive pattern
-class SimpleSubject<T> {
-  private observers: ((value: T) => void)[] = [];
-  
-  next(value: T) {
-    this.observers.forEach(observer => observer(value));
-  }
-  
-  subscribe(observer: (value: T) => void) {
-    this.observers.push(observer);
-    return {
-      unsubscribe: () => {
-        const index = this.observers.indexOf(observer);
-        if (index > -1) {
-          this.observers.splice(index, 1);
-        }
-      }
-    };
-  }
-}
-
 // Get colors from env.js
 const categoryColors = (window as any).env_vars?.colors;
-
 
 // Custom legend component with Tailwind styling
 const CustomChartLegend = ({ config }: any) => {
@@ -56,6 +31,7 @@ const CustomChartLegend = ({ config }: any) => {
     </div>
   );
 };
+
 const CustomChartTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -80,13 +56,10 @@ const CustomChartTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-// Chart config for the performance chart using env.js colors
-const chartConfig = {
-};
-
 // Helper to transform API performance data to chart format dynamically
-const transformPerformanceData = (apiData: any[]) => {
-  if (!apiData || apiData.length === 0) {
+const transformPerformanceData = (response: any) => {
+  const apiData = response?.data?.data;
+  if (!apiData || !Array.isArray(apiData) || apiData.length === 0) {
     return [];
   }
 
@@ -95,7 +68,7 @@ const transformPerformanceData = (apiData: any[]) => {
   const categories = Object.keys(firstItem).filter(key => key !== 'call_date');
   
   // Transform the API data to match the expected chart format
-  return apiData.map((item) => {
+  return apiData.map((item: any) => {
     // Parse the call_date and format for display
     const date = new Date(item.call_date);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -136,6 +109,11 @@ const getChartConfig = (data: any[]) => {
   return config;
 };
 
+// Fetch function for the hook
+const fetchOverallPerformance = async (filters: ReportFilters) => {
+  return callRoutingApiService.overallPerformanceTrend(filters);
+};
+
 interface OverallPerformanceChartProps {
   initialData?: any[];
   isLoading?: boolean;
@@ -145,180 +123,29 @@ export default function OverallPerformanceChart({
   initialData, 
   isLoading: propIsLoading 
 }: OverallPerformanceChartProps = {}) {
-  const [performanceData, setPerformanceData] = useState(initialData || []);
-  const [isLoading, setIsLoading] = useState(propIsLoading !== undefined ? propIsLoading : false);
-  const [hasData, setHasData] = useState(!!initialData);
-  const [hasError, setHasError] = useState(false);
-  const [localDateRange, setLocalDateRange] = useState<any>(null);
-  const { globalDateRange } = useDate();
-  const { selectedProject } = useProjectSelection();
   const navigate = useNavigate();
-
-  // Use local date range if user has set it, otherwise use global
-  const effectiveDateRange = localDateRange || globalDateRange;
   
-  // Force new reference when global date range changes to trigger DatePickerComponent update
-  const dateInputForPicker = effectiveDateRange ? { ...effectiveDateRange } : null;
+  const {
+    data: performanceData,
+    isLoading: hookIsLoading,
+    hasData,
+    hasError,
+    effectiveDateRange,
+    dateInputForPicker,
+    handleDateRangeChange,
+    handleReload,
+  } = useReportDataFetch({
+    fetchFn: fetchOverallPerformance,
+    transformFn: transformPerformanceData,
+    initialData,
+  });
 
-  // Reactive state management
-  const destroyRef = useRef(false);
-  const manualRefreshRef = useRef<SimpleSubject<any>>(new SimpleSubject<any>());
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Debounced refresh function
-  const debouncedRefresh = useCallback((overrideDateRange?: any) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    
-    debounceTimerRef.current = setTimeout(() => {
-      if (selectedProject && !destroyRef.current) {
-        loadData(overrideDateRange);
-      }
-    }, 300);
-  }, [selectedProject]);
-
-  // Watch for global date range changes (from ModuleTabs.tsx)
-  useEffect(() => {
-    if (destroyRef.current) return;
-
-    // If global date range changes, clear local selection to allow global to take precedence
-    if (globalDateRange) {
-      setLocalDateRange(null); // Clear local selection
-      // Trigger refresh with global date range
-      manualRefreshRef.current.next(globalDateRange);
-    }
-  }, [globalDateRange]);
-
-  // Combine date and project changes (similar to Angular's combineLatest)
-  useEffect(() => {
-    if (destroyRef.current) return;
-
-    // Watch for both date and project changes
-    if (effectiveDateRange && selectedProject) {
-      // Update project details
-      const tenantId = parseInt(selectedProject.tenant_id);
-      const subtenantId = parseInt(selectedProject.sub_tenant_id);
-      const companyId = parseInt(selectedProject.company_id);
-      const departmentId = parseInt(selectedProject.department_id);
-      
-      // Trigger refresh through the unified debounced stream with current date range
-      manualRefreshRef.current.next(effectiveDateRange);
-    }
-  }, [effectiveDateRange, selectedProject]);
-
-  // Single debounced stream for ALL refresh triggers
-  useEffect(() => {
-    const subscription = manualRefreshRef.current.subscribe((dateRange) => {
-      // Use the date range passed through the Subject
-      debouncedRefresh(dateRange);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [debouncedRefresh]);
-
-  // Initial data handling
-  useEffect(() => {
-    if (initialData && initialData.length > 0) {
-      setPerformanceData(initialData);
-      setHasData(true);
-      setIsLoading(false);
-    }
-  }, [initialData]);
-
-  useEffect(() => {
-    if (destroyRef.current) return;
-
-    // Trigger initial API call if we have project and date range but no actual initial data
-    if (selectedProject && effectiveDateRange && (!initialData || initialData.length === 0)) {
-      manualRefreshRef.current.next(effectiveDateRange);
-    }
-  }, [selectedProject, effectiveDateRange, initialData]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      destroyRef.current = true;
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
-
-  // Handle date range change
-  const handleDateRangeChange = (dateRange: any) => {
-    setLocalDateRange(dateRange);
-  };
-
-  // Handle reload
-  const handleReload = () => {
-    manualRefreshRef.current.next(effectiveDateRange);
-  };
+  // Use prop loading state if provided, otherwise use hook state
+  const isLoading = propIsLoading !== undefined ? propIsLoading : hookIsLoading;
 
   // Handle go to insights
   const handleGoToInsights = () => {
     navigate('/pca/call-insight');
-  };
-
-  // Load data function
-  const loadData = async (overrideDateRange?: any) => {
-    // Use override date range if provided, otherwise use effective date range
-    const dateRangeToUse = overrideDateRange || effectiveDateRange;
-    
-    if (!selectedProject || !dateRangeToUse) {
-      return;
-    }
-
-    setIsLoading(true);
-    setHasError(false);
-
-    try {
-      // Get IDs from selected project
-      const tenantId = parseInt(selectedProject.tenant_id);
-      const subtenantId = parseInt(selectedProject.sub_tenant_id);
-      const companyId = parseInt(selectedProject.company_id);
-      const departmentId = parseInt(selectedProject.department_id);
-
-      // Use the date range
-      const fromTime = dateRangeToUse.fromDate;
-      const toTime = dateRangeToUse.toDate;
-
-      const filters = {
-        tenantId,
-        subtenantId,
-        companyId,
-        departmentId,
-        fromTime,
-        toTime,
-      };
-
-      const response = await callRoutingApiService.overallPerformanceTrend(filters);
-
-      // Check if response has data and transform it
-      if (response?.data?.data && Array.isArray(response.data.data)) {
-        if (response.data.data.length > 0) {
-          const transformedData = transformPerformanceData(response.data.data);
-          setPerformanceData(transformedData);
-          setHasData(true);
-        } else {
-          // Handle empty data array
-          setPerformanceData([]);
-          setHasData(false);
-        }
-      } else {
-        // Handle empty response
-        setPerformanceData([]);
-        setHasData(false);
-      }
-      
-      setIsLoading(false);
-    } catch (error) {
-      setHasError(true);
-      setPerformanceData([]);
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -407,36 +234,14 @@ export default function OverallPerformanceChart({
               type="500" 
               title="Error Loading Data"
               content="performance data"
-              onTryAgain={() => {
-                const loadData = async () => {
-                  try {
-                    setHasError(false);
-                    await loadData();
-                  } catch (error) {
-                    setHasError(true);
-                    setIsLoading(false);
-                  }
-                };
-                loadData();
-              }}
+              onTryAgain={handleReload}
             />
           ) : !hasData ? (
             <ExceptionHandleView 
               type="204" 
               title="No Performance Data"
               content="overall performance trends"
-              onTryAgain={() => {
-                const loadData = async () => {
-                  try {
-                    setHasError(false);
-                    await loadData();
-                  } catch (error) {
-                    setHasError(true);
-                    setIsLoading(false);
-                  }
-                };
-                loadData();
-              }}
+              onTryAgain={handleReload}
             />
           ) : (
             <div className="space-y-7">

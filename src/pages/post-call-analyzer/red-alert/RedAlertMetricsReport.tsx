@@ -1,50 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
-import { ReloadOutlined, CloseOutlined, BarChartOutlined, CalendarOutlined, ApartmentOutlined, EyeOutlined } from "@ant-design/icons";
+import { Card, Typography, Space, Button, Tooltip } from "antd";
+import { ReloadOutlined, CloseOutlined, EyeOutlined, ApartmentOutlined } from "@ant-design/icons";
 import { TablerIcon } from "@/components/ui/tabler-icon";
-import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
-import { useDate } from "@/contexts/DateContext";
-import { useProjectSelection } from "@/services/projectSelectionService";
+import { useReportDataFetch, type ReportFilters } from "@/hooks/useReportDataFetch";
 import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
-import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { Treemap, ResponsiveContainer, Tooltip as RechartTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
-import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { RedAlertCallLogs } from "./RedAlertCallLogs";
 
-// Simple Subject implementation for reactive pattern
-class SimpleSubject<T> {
-  private observers: ((value: T) => void)[] = [];
-  
-  next(value: T) {
-    this.observers.forEach(observer => observer(value));
-  }
-  
-  subscribe(observer: (value: T) => void) {
-    this.observers.push(observer);
-    return {
-      unsubscribe: () => {
-        const index = this.observers.indexOf(observer);
-        if (index > -1) {
-          this.observers.splice(index, 1);
-        }
-      }
-    };
-  }
-}
-
 const { Title, Text } = Typography;
 
-// Custom Tooltip Components with mouse position tracking
-interface TooltipProps {
-  active?: boolean;
-  payload?: any[];
-  mousePosition?: { x: number; y: number };
-}
-
-const TreemapTooltipContent = ({ active, payload }: TooltipProps) => {
+// Custom Tooltip Components
+const TreemapTooltipContent = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -116,6 +86,39 @@ const CustomTreemapContent = (props: any) => {
   );
 };
 
+// Transform function for red alert data
+const transformRedAlertData = (response: any) => {
+  if (!response?.data?.alert_elements) {
+    return [];
+  }
+  
+  const alertElements = response.data.alert_elements;
+  
+  // Transform the alert_elements array into the expected format
+  const transformedData = alertElements.map((item: any) => {
+    const [name, value] = Object.entries(item)[0]; // Get the key-value pair
+    return {
+      name: name,
+      value: typeof value === 'string' ? parseInt(value as string) || 0 : (value || 0),
+      percentage: 0 // Will be calculated below
+    };
+  }).filter((item: any) => item.value > 0); // Only include items with values > 0
+
+  // Calculate percentages
+  const totalValue = transformedData.reduce((sum: number, item: any) => sum + item.value, 0);
+  const dataWithPercentages = transformedData.map((item: any) => ({
+    ...item,
+    percentage: totalValue > 0 ? Math.round((item.value / totalValue) * 100) : 0
+  }));
+
+  return dataWithPercentages;
+};
+
+// Fetch function for red alert metrics
+const fetchRedAlertMetrics = async (filters: ReportFilters) => {
+  return callRoutingApiService.redAlertMMetric(filters);
+};
+
 interface RedAlertMetricsReportProps {
   initialData?: any[];
   isLoading?: boolean;
@@ -125,13 +128,33 @@ export default function RedAlertMetricsReport({
   initialData, 
   isLoading: propIsLoading 
 }: RedAlertMetricsReportProps = {}) {
-  const [loading, setLoading] = useState(propIsLoading !== undefined ? propIsLoading : false);
+  const navigate = useNavigate();
+  
+  // Use centralized hook for main data fetching
+  const {
+    data: redAlertData,
+    isLoading: hookIsLoading,
+    hasData,
+    hasError,
+    effectiveDateRange,
+    dateInputForPicker,
+    handleDateRangeChange,
+    handleReload: baseHandleReload,
+    selectedProject,
+  } = useReportDataFetch({
+    fetchFn: fetchRedAlertMetrics,
+    transformFn: transformRedAlertData,
+    initialData,
+  });
+
+  // Use prop loading state if provided, otherwise use hook state
+  const loading = propIsLoading !== undefined ? propIsLoading : hookIsLoading;
+
+  // Second chart state (drill-down)
   const [secondChartLoading, setSecondChartLoading] = useState(false);
   const [thirdChartLoading, setThirdChartLoading] = useState(false);
   const [secondChartError, setSecondChartError] = useState(false);
   const [hasSecondChartData, setHasSecondChartData] = useState(false);
-  const [hasData, setHasData] = useState(!!initialData);
-  const [hasError, setHasError] = useState(false);
   
   const [showSecondChart, setShowSecondChart] = useState(false);
   const [showThirdChart, setShowThirdChart] = useState(false);
@@ -139,199 +162,20 @@ export default function RedAlertMetricsReport({
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
   
-  const [redAlertData, setRedAlertData] = useState<any[]>(initialData || []);
   const [barChartData, setBarChartData] = useState<any[]>([]);
-  const [localDateRange, setLocalDateRange] = useState<any>(null);
-  const [treemapMousePos, setTreemapMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [barChartMousePos, setBarChartMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const treemapContainerRef = useRef<HTMLDivElement>(null);
-  const barChartContainerRef = useRef<HTMLDivElement>(null);
-  const { globalDateRange } = useDate();
-  const { selectedProject } = useProjectSelection();
-  const navigate = useNavigate();
 
-  // Use local date range if user has set it, otherwise use global
-  const effectiveDateRange = localDateRange || globalDateRange;
-  
-  // Force new reference when global date range changes to trigger DatePickerComponent update
-  const dateInputForPicker = effectiveDateRange ? { ...effectiveDateRange } : null;
-
-  // Reactive state management
-  const destroyRef = useRef(false);
-  const manualRefreshRef = useRef<SimpleSubject<any>>(new SimpleSubject<any>());
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Debounced refresh function
-  const debouncedRefresh = useCallback((overrideDateRange?: any) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    
-    debounceTimerRef.current = setTimeout(() => {
-      if (selectedProject && !destroyRef.current) {
-        loadData(overrideDateRange);
-      }
-    }, 300);
-  }, [selectedProject]);
-
-  // Watch for global date range changes (from ModuleTabs.tsx)
-  useEffect(() => {
-    if (destroyRef.current) return;
-
-    // If global date range changes, clear local selection to allow global to take precedence
-    if (globalDateRange) {
-      setLocalDateRange(null); // Clear local selection
-      // Trigger refresh with global date range
-      manualRefreshRef.current.next(globalDateRange);
-    }
-  }, [globalDateRange]);
-
-  // Combine date and project changes (similar to Angular's combineLatest)
-  useEffect(() => {
-    if (destroyRef.current) return;
-
-    // Watch for both date and project changes
-    if (effectiveDateRange && selectedProject) {
-      // Trigger refresh through the unified debounced stream with current date range
-      manualRefreshRef.current.next(effectiveDateRange);
-    }
-  }, [effectiveDateRange, selectedProject]);
-
-  // Single debounced stream for ALL refresh triggers
-  useEffect(() => {
-    const subscription = manualRefreshRef.current.subscribe((dateRange) => {
-      // Use the date range passed through the Subject
-      debouncedRefresh(dateRange);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [debouncedRefresh]);
-
-  // Initial data handling
-  useEffect(() => {
-    if (initialData && initialData.length > 0) {
-      setRedAlertData(initialData);
-      setHasData(true);
-      setLoading(false);
-    }
-  }, [initialData]);
-
-  // Initial API call when component mounts with project and date range
-  useEffect(() => {
-    if (destroyRef.current) return;
-
-    // Trigger initial API call if we have project and date range but no actual initial data
-    if (selectedProject && effectiveDateRange && (!initialData || initialData.length === 0)) {
-      manualRefreshRef.current.next(effectiveDateRange);
-    }
-  }, [selectedProject, effectiveDateRange, initialData]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      destroyRef.current = true;
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
-
-  // Handle date range change
-  const handleDateRangeChange = (dateRange: any) => {
-    setLocalDateRange(dateRange);
-    // The combineLatest effect will trigger automatically
-  };
-
-  // Handle reload
-  const handleReload = () => {
+  // Handle reload - reset drill-down state
+  const handleReload = useCallback(() => {
     setShowSecondChart(false);
     setShowThirdChart(false);
     setSelectedCategory("");
     setSelectedSubCategory("");
-    manualRefreshRef.current.next(effectiveDateRange);
-  };
+    baseHandleReload();
+  }, [baseHandleReload]);
 
   // Handle go to insights
   const handleGoToInsights = () => {
     navigate('/pca/call-insight');
-  };
-
-  // Load data function
-  const loadData = async (overrideDateRange?: any) => {
-    // Use override date range if provided, otherwise use effective date range
-    const dateRangeToUse = overrideDateRange || effectiveDateRange;
-    
-    if (!selectedProject || !dateRangeToUse) {
-      return;
-    }
-
-    setLoading(true);
-    setHasError(false);
-
-    try {
-      // Get IDs from selected project
-      const tenantId = parseInt(selectedProject.tenant_id);
-      const subtenantId = parseInt(selectedProject.sub_tenant_id);
-      const companyId = parseInt(selectedProject.company_id);
-      const departmentId = parseInt(selectedProject.department_id);
-
-      // Use the date range
-      const fromTime = dateRangeToUse.fromDate;
-      const toTime = dateRangeToUse.toDate;
-
-      const filters = {
-        tenantId,
-        subtenantId,
-        companyId,
-        departmentId,
-        fromTime,
-        toTime,
-      };
-
-      const response = await callRoutingApiService.redAlertMMetric(filters);
-
-      // Check if response has data
-      if (response?.data && response.data.alert_elements) {
-        const alertElements = response.data.alert_elements;
-        
-        // Transform the alert_elements array into the expected format
-        const transformedData = alertElements.map(item => {
-          const [name, value] = Object.entries(item)[0]; // Get the key-value pair
-          return {
-            name: name,
-            value: typeof value === 'string' ? parseInt(value) || 0 : (value || 0),
-            percentage: 0 // Will be calculated below
-          };
-        }).filter(item => item.value > 0); // Only include items with values > 0
-
-        // Calculate percentages
-        const totalValue = transformedData.reduce((sum, item) => sum + item.value, 0);
-        const dataWithPercentages = transformedData.map(item => ({
-          ...item,
-          percentage: totalValue > 0 ? Math.round((item.value / totalValue) * 100) : 0
-        }));
-
-        if (dataWithPercentages.length > 0) {
-          setRedAlertData(dataWithPercentages);
-          setHasData(true);
-        } else {
-          // Handle empty data array (all values are 0)
-          setRedAlertData([]);
-          setHasData(false);
-        }
-      } else {
-        // Handle empty response
-        setRedAlertData([]);
-        setHasData(false);
-      }
-    } catch (error) {
-      setHasError(true);
-      setRedAlertData([]);
-    }
-    
-    setLoading(false);
   };
 
   const handleTreemapClick = (data: any) => {
@@ -350,10 +194,7 @@ export default function RedAlertMetricsReport({
     setHasSecondChartData(false);
     
     try {
-      // Use the same filters as the first API call
-      const dateRangeToUse = effectiveDateRange;
-      
-      if (!selectedProject || !dateRangeToUse) {
+      if (!selectedProject || !effectiveDateRange) {
         setBarChartData([]);
         setSecondChartLoading(false);
         return;
@@ -365,28 +206,24 @@ export default function RedAlertMetricsReport({
       const companyId = parseInt(selectedProject.company_id);
       const departmentId = parseInt(selectedProject.department_id);
 
-      // Use the date range
-      const fromTime = dateRangeToUse.fromDate;
-      const toTime = dateRangeToUse.toDate;
-
       const filters = {
         tenantId,
         subtenantId,
         companyId,
         departmentId,
-        fromTime,
-        toTime,
-        alert: category, // Add the selected category as alert parameter
+        fromTime: effectiveDateRange.fromDate,
+        toTime: effectiveDateRange.toDate,
+        alert: category,
       };
 
       const response = await callRoutingApiService.redAlertReasons(filters);
 
       // Check if response has data and transform it for the bar chart
       if (response?.data?.reasons_elements && Array.isArray(response.data.reasons_elements)) {
-        const transformedData = response.data.reasons_elements.map(item => ({
+        const transformedData = response.data.reasons_elements.map((item: any) => ({
           name: item.reason,
           value: typeof item.call_count === 'string' ? parseInt(item.call_count) || 0 : (item.call_count || 0),
-        })).filter(item => item.value > 0); // Only include items with values > 0
+        })).filter((item: any) => item.value > 0);
 
         if (transformedData.length > 0) {
           setBarChartData(transformedData);
@@ -435,18 +272,6 @@ export default function RedAlertMetricsReport({
     fill: COLORS[idx % COLORS.length],
   }));
 
-  // Get column classes based on drill-down state
-  const getFirstChartCol = () => {
-    if (showThirdChart) return "col-12 md:col-span-4";
-    if (showSecondChart) return "col-12 md:col-span-6";
-    return "col-12";
-  };
-
-  const getSecondChartCol = () => {
-    if (showThirdChart) return "col-12 md:col-span-4";
-    return "col-12 md:col-span-6";
-  };
-
   // Generate shades for bar chart
   const getBarChartColors = () => {
     const categoryIndex = redAlertData.findIndex(item => item.name === selectedCategory);
@@ -457,14 +282,14 @@ export default function RedAlertMetricsReport({
     });
   };
 
-  // Bar Chart Tooltip Component with access to component state
+  // Bar Chart Tooltip Component
   const BarChartTooltipContent = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const barChartColors = getBarChartColors();
       
       // Remove duplicate entries by name
       const uniquePayload = payload.reduce((acc: any[], entry: any) => {
-        const existingIndex = acc.findIndex(item => item.name === entry.name);
+        const existingIndex = acc.findIndex((item: any) => item.name === entry.name);
         if (existingIndex === -1) {
           acc.push(entry);
         }
