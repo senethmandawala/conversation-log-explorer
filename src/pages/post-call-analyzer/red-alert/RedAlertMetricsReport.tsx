@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { Treemap, ResponsiveContainer, Tooltip as RechartTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { RedAlertCallLogs } from "./RedAlertCallLogs";
 
 // Simple Subject implementation for reactive pattern
 class SimpleSubject<T> {
@@ -47,7 +48,7 @@ const TreemapTooltipContent = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
+      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground backdrop-blur-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2 justify-start">
             <div 
@@ -67,93 +68,6 @@ const TreemapTooltipContent = ({ active, payload }: TooltipProps) => {
     );
   }
   return null;
-};
-
-const BarChartTooltipContent = ({ active, payload }: TooltipProps) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 justify-start">
-            <div 
-              className="w-3 h-3 rounded-full flex-shrink-0" 
-              style={{ backgroundColor: data.fill }}
-            />
-            <p className="font-medium m-0">{data.name}</p>
-          </div>
-          <div className="text-sm ml-5">
-            Value: {data.value}
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
-// Call Logs Component - will be populated with real data
-const RedAlertCallLogs = ({ category, subCategory }: { category: string; subCategory: string }) => {
-  const [logs, setLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // TODO: Fetch real call logs based on category and subCategory
-    setLoading(false);
-  }, [category, subCategory]);
-
-  if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        height: 300 
-      }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          border: '2px solid #1890ff',
-          borderTop: '2px solid transparent',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }}></div>
-      </div>
-    );
-  }
-
-  if (logs.length === 0) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        height: 300,
-        color: '#666'
-      }}>
-        No call logs available
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2" style={{ maxHeight: 300, overflowY: 'auto' }}>
-      {logs.map((log) => (
-        <div key={log.id} style={{
-          padding: 8,
-          backgroundColor: '#fafafa',
-          borderRadius: 8,
-          fontSize: 14
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span>{log.time}</span>
-            <span style={{ color: '#666' }}>{log.duration}</span>
-          </div>
-          <div style={{ color: '#666' }}>{log.status}</div>
-        </div>
-      ))}
-    </div>
-  );
 };
 
 // Colors from env.js
@@ -214,6 +128,8 @@ export default function RedAlertMetricsReport({
   const [loading, setLoading] = useState(propIsLoading !== undefined ? propIsLoading : false);
   const [secondChartLoading, setSecondChartLoading] = useState(false);
   const [thirdChartLoading, setThirdChartLoading] = useState(false);
+  const [secondChartError, setSecondChartError] = useState(false);
+  const [hasSecondChartData, setHasSecondChartData] = useState(false);
   const [hasData, setHasData] = useState(!!initialData);
   const [hasError, setHasError] = useState(false);
   
@@ -428,15 +344,69 @@ export default function RedAlertMetricsReport({
     }
   };
 
-  const loadSecondChartData = (category: string) => {
+  const loadSecondChartData = async (category: string) => {
     setSecondChartLoading(true);
+    setSecondChartError(false);
+    setHasSecondChartData(false);
     
-    // TODO: Fetch real bar chart data based on category
-    setTimeout(() => {
-      // Placeholder for real API call
+    try {
+      // Use the same filters as the first API call
+      const dateRangeToUse = effectiveDateRange;
+      
+      if (!selectedProject || !dateRangeToUse) {
+        setBarChartData([]);
+        setSecondChartLoading(false);
+        return;
+      }
+
+      // Get IDs from selected project
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      // Use the date range
+      const fromTime = dateRangeToUse.fromDate;
+      const toTime = dateRangeToUse.toDate;
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime,
+        toTime,
+        alert: category, // Add the selected category as alert parameter
+      };
+
+      const response = await callRoutingApiService.redAlertReasons(filters);
+
+      // Check if response has data and transform it for the bar chart
+      if (response?.data?.reasons_elements && Array.isArray(response.data.reasons_elements)) {
+        const transformedData = response.data.reasons_elements.map(item => ({
+          name: item.reason,
+          value: typeof item.call_count === 'string' ? parseInt(item.call_count) || 0 : (item.call_count || 0),
+        })).filter(item => item.value > 0); // Only include items with values > 0
+
+        if (transformedData.length > 0) {
+          setBarChartData(transformedData);
+          setHasSecondChartData(true);
+        } else {
+          setBarChartData([]);
+          setHasSecondChartData(false);
+        }
+      } else {
+        setBarChartData([]);
+        setHasSecondChartData(false);
+      }
+    } catch (error) {
+      console.error('Error loading second chart data:', error);
+      setSecondChartError(true);
       setBarChartData([]);
-      setSecondChartLoading(false);
-    }, 300);
+      setHasSecondChartData(false);
+    }
+    
+    setSecondChartLoading(false);
   };
 
   const handleBarClick = (data: any) => {
@@ -487,13 +457,48 @@ export default function RedAlertMetricsReport({
     });
   };
 
+  // Bar Chart Tooltip Component with access to component state
+  const BarChartTooltipContent = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const barChartColors = getBarChartColors();
+      
+      // Remove duplicate entries by name
+      const uniquePayload = payload.reduce((acc: any[], entry: any) => {
+        const existingIndex = acc.findIndex(item => item.name === entry.name);
+        if (existingIndex === -1) {
+          acc.push(entry);
+        }
+        return acc;
+      }, []);
+      
+      return (
+        <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground backdrop-blur-sm">
+          <div className="space-y-1">
+            <p className="font-medium">{label}</p>
+            {uniquePayload.map((entry: any, index: number) => (
+              <div key={index} className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: barChartColors[index] }}
+                />
+                <span className="text-sm">
+                  {entry.name}: {Math.round(entry.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card
       style={{
         borderRadius: 12,
         border: '1px solid #e8e8e8',
         background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         padding: '16px 16px 16px 16px'
       }}
     >
@@ -533,7 +538,7 @@ export default function RedAlertMetricsReport({
                       </Tooltip>
                     </div>
                     <Text type="secondary" style={{ fontSize: 14 }}>
-                      Highlighting key areas that require immediate attention
+                      {effectiveDateRange?.dateRangeForDisplay || ''}
                     </Text>
                   </div>
                 </div>
@@ -590,19 +595,11 @@ export default function RedAlertMetricsReport({
             onTryAgain={handleReload}
           />
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+          <div className="grid grid-cols-12 gap-4">
             {/* Treemap Chart - First Level */}
-            <div style={{ 
-              gridColumn: showThirdChart ? 'span 4' : showSecondChart ? 'span 6' : 'span 12'
-            }}>
+            <div className={showThirdChart ? "col-span-4" : showSecondChart ? "col-span-6" : "col-span-12"}>
               <Card
-                style={{
-                  borderRadius: 12,
-                  border: '1px solid #e8e8e8',
-                  background: '#ffffff',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                  padding: 16
-                }}
+                className="rounded-xl border border-border bg-card p-4"
               >
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -657,47 +654,42 @@ export default function RedAlertMetricsReport({
 
             {/* Bar Chart - Second Level */}
             {showSecondChart && (
-              <div style={{ 
-                gridColumn: showThirdChart ? 'span 4' : 'span 6'
-              }}>
-                <div style={{ 
-                  border: '1px solid #e8e8e8', 
-                  borderRadius: 8, 
-                  padding: 16 
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div className={showThirdChart ? "col-span-4" : "col-span-6"}>
+                <div className="border border-border rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-4">
                     <div>
-                      <Text type="secondary" style={{ fontSize: 14 }}>{selectedCategory}</Text>
-                      <Title level={5} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-                        {selectedCategory === 'Open Cases' || selectedCategory === 'Drop calls' 
-                          ? 'Top Agents' 
-                          : 'Reasons for ' + selectedCategory}
-                      </Title>
+                      <p className="text-sm text-muted-foreground mb-1">{selectedCategory}</p>
+                      <h3 className="text-base font-semibold leading-tight">
+                        {selectedCategory === 'Open Cases' && 'Top Agents Handling Open Cases'}
+                        {selectedCategory === 'Drop calls' && 'Top Agents Handling Dropped Calls'}
+                        {selectedCategory === 'Bad Practices' && 'Violation Breakdown'}
+                        {selectedCategory !== 'Open Cases' && selectedCategory !== 'Drop calls' && selectedCategory !== 'Bad Practices' && `Reasons for ${selectedCategory}`}
+                      </h3>
                     </div>
                     <Button 
                       type="text"
                       icon={<CloseOutlined />}
                       onClick={closeSecondChart}
-                      style={{ borderRadius: 8 }}
+                      className="rounded-lg"
                     />
                   </div>
 
                   {secondChartLoading ? (
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      height: 300 
-                    }}>
-                      <div style={{
-                        width: 32,
-                        height: 32,
-                        border: '2px solid #1890ff',
-                        borderTop: '2px solid transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
-                    </div>
+                    <ExceptionHandleView type="loading" />
+                  ) : secondChartError ? (
+                    <ExceptionHandleView 
+                      type="500" 
+                      title="Error Loading Data"
+                      content="reasons for red alert"
+                      onTryAgain={() => loadSecondChartData(selectedCategory)}
+                    />
+                  ) : !hasSecondChartData ? (
+                    <ExceptionHandleView 
+                      type="204" 
+                      title="No Data Available"
+                      content={`reasons for ${selectedCategory}`}
+                      onTryAgain={() => loadSecondChartData(selectedCategory)}
+                    />
                   ) : (
                     <>
                       <div className="h-[300px] w-full">
@@ -716,6 +708,9 @@ export default function RedAlertMetricsReport({
                               axisLine={false} 
                               tickLine={false}
                               tickFormatter={(value) => Math.round(value).toString()}
+                              domain={[0, 'dataMax']}
+                              ticks={barChartData.length > 0 ? [0, Math.max(...barChartData.map(d => d.value))] : [0, 1]}
+                              allowDecimals={false}
                             />
                             <RechartTooltip 
                               content={<BarChartTooltipContent />} 
@@ -754,22 +749,18 @@ export default function RedAlertMetricsReport({
 
             {/* Call Logs - Third Level */}
             {showThirdChart && (
-              <div style={{ gridColumn: 'span 4' }}>
-                <div style={{ 
-                  border: '1px solid #e8e8e8', 
-                  borderRadius: 8, 
-                  padding: 16 
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div className="col-span-4">
+                <div className="border border-border rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-4">
                     <div>
-                      <Text type="secondary" style={{ fontSize: 14 }}>{selectedCategory} / {selectedSubCategory}</Text>
-                      <Title level={5} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Call Logs</Title>
+                      <p className="text-sm text-muted-foreground mb-1">{selectedCategory} / {selectedSubCategory}</p>
+                      <h3 className="text-base font-semibold leading-tight">Call Logs</h3>
                     </div>
                     <Button 
                       type="text"
                       icon={<CloseOutlined />}
                       onClick={closeThirdChart}
-                      style={{ borderRadius: 8 }}
+                      className="rounded-lg"
                     />
                   </div>
 
@@ -793,6 +784,8 @@ export default function RedAlertMetricsReport({
                     <RedAlertCallLogs 
                       category={selectedCategory}
                       subCategory={selectedSubCategory}
+                      fromTime={effectiveDateRange?.fromDate || ''}
+                      toTime={effectiveDateRange?.toDate || ''}
                     />
                   )}
                 </div>

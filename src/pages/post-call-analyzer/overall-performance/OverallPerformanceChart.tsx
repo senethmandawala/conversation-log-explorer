@@ -324,7 +324,7 @@ export default function OverallPerformanceChart({
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
+        <div style={{ marginTop: -4 }}>
           {/* Header Section */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 ml-4">
@@ -399,7 +399,7 @@ export default function OverallPerformanceChart({
         </div>
         
         {/* Chart Section */}
-        <div className="mt-8">
+        <div className="mt-12">
           {isLoading ? (
             <ExceptionHandleView type="loading" />
           ) : hasError ? (
