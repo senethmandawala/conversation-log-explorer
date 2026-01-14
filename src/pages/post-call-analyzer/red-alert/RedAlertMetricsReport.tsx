@@ -241,6 +241,11 @@ export default function RedAlertMetricsReport({
   // Handle date range change
   const handleDateRangeChange = (dateRange: any) => {
     setLocalDateRange(dateRange);
+    // Close all tabs/charts when date range changes
+    setShowSecondChart(false);
+    setShowThirdChart(false);
+    setSelectedCategory("");
+    setSelectedSubCategory("");
     // The combineLatest effect will trigger automatically
   };
 

@@ -43,11 +43,9 @@ export class BaseApiService {
   }
 
   private getAuthToken(): string {
-    // TODO: Uncomment this when you have proper authentication flow
-    // return localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '';
-    
-    // FOR NOW: Use hardcoded token
-    return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IkdJOXhxdXZtc29nOXdXbUVULXR4TV9wYURTUSJ9.eyJpc3MiOiJodHRwczovL3ZvZGFjb21jYW0uY29tcG9zZWFwaS5pbyIsInN1YiI6InN1cGVyX2FkbWluQGdsb2JhbHdhdmVuZXQuY29tIiwiYXVkIjoiaHR0cDovL2dsb2JhbHdhdmVuZXQuY29tL3dhdmVuZXRfcmVzdF9hcGkvIiwiY2lkIjoiaW50ZXJuYWwiLCJleHAiOjE3Njc5ODA5ODUsImF1dGhfdGltZSI6MTc2Nzk3Mzc4NSwiaWF0IjoxNzY3OTczNzg1LCJqdGkiOiJNTzExMml5NXpEN2U4WmxUZzBxdHQtdEZpcnowVEFHX2pLRHdvb08xaUZZIiwic2NwIjpbXX0.Muc5h17nrNRUfeBsMkbNSethnTW25K7nGfWP2S97iIWI9a4nvTV5tIYDnqyylGcoZFy-AYTfL8Svz9wnbWP9tvPXhIauxNQsXcS1KgbHy_sML8HgPQldKVFxbpvT_NdacnKj-2HxbAV8A1x9JWBCwdDpwItHY0zS9eiwD-2KLkkthKwatBS48TPxUg-zzHm_zlC51ijFl6eHR4uzp1EIIfLTRRAfAcaXImWiGuvncB--VwlA5JFgETyWVicgl_YyMCFU749XsjwGw-W9cmCm1O4XCI_jYOR0U_cdVJWW0zWNznbAbpU2MmMJwv95S71DJAffUzFtU0Slsbn72D8dvA'
+
+    return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IkdJOXhxdXZtc29nOXdXbUVULXR4TV9wYURTUSJ9.eyJpc3MiOiJodHRwczovL3ZvZGFjb21jYW0uY29tcG9zZWFwaS5pbyIsInN1YiI6InN1cGVyX2FkbWluQGdsb2JhbHdhdmVuZXQuY29tIiwiYXVkIjoiaHR0cDovL2dsb2JhbHdhdmVuZXQuY29tL3dhdmVuZXRfcmVzdF9hcGkvIiwiY2lkIjoiaW50ZXJuYWwiLCJleHAiOjE3NjgzOTMyNDgsImF1dGhfdGltZSI6MTc2ODM4NjA0OCwiaWF0IjoxNzY4Mzg2MDQ4LCJqdGkiOiI3cndlMlB6OEx6NVVjQ20yYnoxVVR4OHRkUW50SXBBUFVFa3p4dVE0VFVRIiwic2NwIjpbXX0.qV7Fg48cCKPpcX_woBlblwIhJqSPK-5v8Vj76HQuD6XYDiBzqxt9-Htyt9ZVGgHm1yN2zbG1hWpcuDi0FtUYB-zLUy5Fl2lLNt9xZQYptzs3vqDJL-9CXumdLys84jHFW4oY51imRNBq2pwgOKn3D-3yeihgJx4UYwj1VwqRQ4f9CTtuY_qko86QmCYvLG6C9aAilNm6xqcT4bAZTbJ9kv8b59f1RubUQUUrdGhOjn2Qw5mzNt9vf4Nhq3afhalcrQyxxN254OIjdje2UwV_QLx9_i3r0SQLX6TO06oHLsLQAfG_e-x7RKZeSpVwlMgEuMnJNCMuBa27bFt6WuST_w'
+
   }
 
   protected setAuthToken(token: string): void {
@@ -276,6 +274,27 @@ export class CallRoutingApiService extends BaseApiService {
     const endpoint = `/redalert_call_logs${queryParams}`;
     return this.get<any>(endpoint);
   }
+
+
+
+      async CaseClassification(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/category_percentage${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
 }
 
 // Create a singleton instance for use throughout the app

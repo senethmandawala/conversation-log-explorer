@@ -1,20 +1,50 @@
-import { useState, useRef } from "react";
-import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Card, Button, Tooltip, Space, DatePicker, Typography } from "antd";
 import { 
   LeftOutlined, 
   RightOutlined, 
   CloseOutlined, 
   CalendarOutlined, 
   BarChartOutlined,
-  ApartmentOutlined 
+  ApartmentOutlined,
+  ReloadOutlined,
+  EyeOutlined 
 } from "@ant-design/icons";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { Category } from "./Category";
 import { TopSubCategory } from "./TopSubCategory";
 import { SubCategoryList } from "./SubCategoryList";
 import { CallLogsSummary } from "./CallLogsSummary";
-
+import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
+import { useDate } from "@/contexts/DateContext";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
+import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 const { Title, Text } = Typography;
+
+// Simple Subject implementation for reactive pattern
+class SimpleSubject<T> {
+  private observers: ((value: T) => void)[] = [];
+  
+  next(value: T) {
+    this.observers.forEach(observer => observer(value));
+  }
+  
+  subscribe(observer: (value: T) => void) {
+    this.observers.push(observer);
+    return {
+      unsubscribe: () => {
+        const index = this.observers.indexOf(observer);
+        if (index > -1) {
+          this.observers.splice(index, 1);
+        }
+      }
+    };
+  }
+}
 
 interface Slide {
   id: number;
@@ -28,7 +58,7 @@ interface CaseClassificationReportProps {
   title: string;
   description: string;
   hasFilter?: boolean;
-  chartData: any[];
+  chartData?: any[];
   hideAccentLine?: boolean;
 }
 
@@ -41,12 +71,180 @@ export const CaseClassificationReport = ({
 }: CaseClassificationReportProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   
+  // API Integration State
+  const [classificationData, setClassificationData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasData, setHasData] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [localDateRange, setLocalDateRange] = useState<any>(null);
+  const { globalDateRange } = useDate();
+  const { selectedProject } = useProjectSelection();
+  const navigate = useNavigate();
+
+  // Use local date range if user has set it, otherwise use global
+  const effectiveDateRange = localDateRange || globalDateRange;
+  
+  // Force new reference when global date range changes to trigger DatePickerComponent update
+  const dateInputForPicker = effectiveDateRange ? { ...effectiveDateRange } : null;
+
+  // Reactive state management
+  const destroyRef = useRef(false);
+  const manualRefreshRef = useRef<SimpleSubject<any>>(new SimpleSubject<any>());
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Original component state
   const [slides, setSlides] = useState<Slide[]>([
     { id: 1, type: "category", title: "Categories", breadcrumb: [] }
   ]);
   const [visibleStartIndex, setVisibleStartIndex] = useState(0);
   const [totalCalls, setTotalCalls] = useState(1080);
   const [selectedCategory, setSelectedCategory] = useState<{ name: string; color: string } | null>(null);
+
+  // Debounced refresh function
+  const debouncedRefresh = useCallback((overrideDateRange?: any) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (selectedProject && !destroyRef.current) {
+        loadData(overrideDateRange);
+      }
+    }, 300);
+  }, [selectedProject]);
+
+  // Watch for global date range changes (from ModuleTabs.tsx)
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // If global date range changes, clear local selection to allow global to take precedence
+    if (globalDateRange) {
+      setLocalDateRange(null); // Clear local selection
+      // Trigger refresh with global date range
+      manualRefreshRef.current.next(globalDateRange);
+    }
+  }, [globalDateRange]);
+
+  // Combine date and project changes (similar to Angular's combineLatest)
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // Watch for both date and project changes
+    if (effectiveDateRange && selectedProject) {
+      // Update project details
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+      
+      // Trigger refresh through the unified debounced stream with current date range
+      manualRefreshRef.current.next(effectiveDateRange);
+    }
+  }, [effectiveDateRange, selectedProject]);
+
+  // Single debounced stream for ALL refresh triggers
+  useEffect(() => {
+    const subscription = manualRefreshRef.current.subscribe((dateRange) => {
+      // Use the date range passed through the Subject
+      debouncedRefresh(dateRange);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [debouncedRefresh]);
+
+  // Initial data loading
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // Trigger initial API call if we have project and date range
+    if (selectedProject && effectiveDateRange) {
+      manualRefreshRef.current.next(effectiveDateRange);
+    }
+  }, [selectedProject, effectiveDateRange]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      destroyRef.current = true;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Handle date range change
+  const handleDateRangeChange = (dateRange: any) => {
+    setLocalDateRange(dateRange);
+  };
+
+  // Handle reload
+  const handleReload = () => {
+    manualRefreshRef.current.next(effectiveDateRange);
+  };
+
+  // Handle go to insights
+  const handleGoToInsights = () => {
+    navigate('/pca/call-insight');
+  };
+
+  // Load data function
+  const loadData = async (overrideDateRange?: any) => {
+    // Use override date range if provided, otherwise use effective date range
+    const dateRangeToUse = overrideDateRange || effectiveDateRange;
+    
+    if (!selectedProject || !dateRangeToUse) {
+      return;
+    }
+
+    setIsLoading(true);
+    setHasError(false);
+
+    try {
+      // Get IDs from selected project
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      // Use the date range
+      const fromTime = dateRangeToUse.fromDate;
+      const toTime = dateRangeToUse.toDate;
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime,
+        toTime,
+      };
+
+      const response = await callRoutingApiService.CaseClassification(filters);
+
+      // Check if response has data and transform it
+      if (response?.data?.callPercentageData && response.data.callPercentageData.length > 0) {
+        setClassificationData(response.data.callPercentageData);
+        setTotalCalls(response.data.totalCallCount || 0);
+        setHasData(true);
+        setHasError(false);
+      } else {
+        setClassificationData([]);
+        setTotalCalls(0);
+        setHasData(false);
+        setHasError(false);
+      }
+    } catch (error) {
+      console.error('Error loading case classification data:', error);
+      setHasError(true);
+      setHasData(false);
+      setClassificationData([]);
+      setTotalCalls(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCategoryClick = (category: { name: string; color: string }) => {
     setSelectedCategory(category);
@@ -141,6 +339,7 @@ export const CaseClassificationReport = ({
         <Category 
           onCategorySelect={handleCategoryClick}
           onTotalCallsChange={setTotalCalls}
+          data={classificationData}
         />
       );
     }
@@ -254,13 +453,38 @@ export const CaseClassificationReport = ({
               </div>
             </Space>
             
-            <DatePicker 
-              suffixIcon={<CalendarOutlined />}
-              style={{ 
-                borderRadius: 8,
-                borderColor: '#d9d9d9'
-              }}
-            />
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <DatePickerComponent
+                onSelectedRangeValueChange={handleDateRangeChange}
+                toolTipValue="Select date range for case classification data"
+                calenderType=""
+                dateInput={dateInputForPicker}
+              />
+              <Tooltip title="Reload data">
+                <Button
+                  type="default"
+                  icon={<ReloadOutlined />}
+                  onClick={handleReload}
+                  loading={isLoading}
+                  className={cn(
+                    "h-10 rounded-xl border-2 transition-all duration-200",
+                    "hover:border-primary/50"
+                  )}
+                />
+              </Tooltip>
+              <Tooltip title="Go to Insights">
+                <Button
+                  type="default"
+                  icon={<EyeOutlined />}
+                  onClick={handleGoToInsights}
+                  className={cn(
+                    "h-10 rounded-xl border-2 transition-all duration-200",
+                    "hover:border-primary/50"
+                  )}
+                />
+              </Tooltip>
+            </div>
           </div>
           
           {hasFilter && (
@@ -290,7 +514,27 @@ export const CaseClassificationReport = ({
         </div>
         
         {/* Carousel Section */}
-        <div style={{ position: 'relative' }}>
+        {isLoading ? (
+          <ExceptionHandleView 
+            type="loading" 
+            justLoading={false}
+          />
+        ) : hasError ? (
+          <ExceptionHandleView 
+            type="500" 
+            title="Error loading case classification data"
+            content="case classification data"
+            onTryAgain={handleReload}
+          />
+        ) : !hasData ? (
+          <ExceptionHandleView 
+            type="204" 
+            title="No Case Classification Data"
+            content="case classification data"
+            onTryAgain={handleReload}
+          />
+        ) : (
+          <div style={{ position: 'relative' }}>
           {/* Navigation Buttons */}
           {slides.length > 2 && (
             <>
@@ -398,6 +642,7 @@ export const CaseClassificationReport = ({
             </div>
           </div>
         </div>
+        )}
       </div>
     </Card>
   );

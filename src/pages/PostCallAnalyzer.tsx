@@ -7,6 +7,7 @@ import { AIHelper } from "@/components/post-call/AIHelper";
 import AutopilotInstanceSelector from "@/pages/autopilot/AutopilotInstanceSelector/AutopilotInstanceSelector";
 import { useModule } from "@/contexts/ModuleContext";
 import { usePostCall, PostCallInstance } from "@/contexts/PostCallContext";
+import { useProjectSelection } from "@/services/projectSelectionService";
 import CallInsight from "./post-call-analyzer/call-insight/CallInsight";
 import AgentPerformance from "./post-call-analyzer/agent-performance/AgentPerformance";
 import AgentInsights from "./post-call-analyzer/agent-insights/AgentInsights";
@@ -45,11 +46,20 @@ const PostCallAnalyzer = () => {
     selectedReportId, setSelectedReportId
   } = usePostCall();
   const { setShowModuleTabs } = useModule();
+  const { changeSelectedProject } = useProjectSelection();
 
   // Get departmentId and module from URL params
   const departmentId = searchParams.get("departmentId");
   const module = searchParams.get("module");
   const selectedProject = location.state?.selectedProject;
+
+  // Set the project selection when we receive a project from navigation
+  useEffect(() => {
+    if (selectedProject) {
+      console.log('PostCallAnalyzer: Setting project from navigation state', selectedProject);
+      changeSelectedProject(selectedProject);
+    }
+  }, [selectedProject, changeSelectedProject]);
 
   useEffect(() => {
     if (departmentId && !selectedInstance) {

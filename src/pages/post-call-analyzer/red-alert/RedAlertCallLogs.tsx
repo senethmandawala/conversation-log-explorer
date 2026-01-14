@@ -7,6 +7,7 @@ import { callRoutingApiService } from "@/services/callRoutingApiService";
 import { useProjectSelection } from "@/services/projectSelectionService";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
 interface RedAlertCallLogsProps {
   category: string;
@@ -162,7 +163,7 @@ export function RedAlertCallLogs({ category, subCategory, fromTime, toTime }: Re
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
           Showing {callLogs.length} of {pagination.totalElements} calls
         </span>
@@ -178,16 +179,19 @@ export function RedAlertCallLogs({ category, subCategory, fromTime, toTime }: Re
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-[300px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <ExceptionHandleView 
+          type="loading" 
+          justLoading={false}
+          className="!p-0"
+        />
       ) : error ? (
-        <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-          <p className="mb-2">Error loading call logs</p>
-          <Button variant="outline" size="sm" onClick={handleReload}>
-            Try Again
-          </Button>
-        </div>
+        <ExceptionHandleView 
+          type="500" 
+          title="Error loading call logs"
+          content="red alert call logs"
+          onTryAgain={handleReload}
+          className="!p-0"
+        />
       ) : callLogs.length > 0 ? (
         <div className="border border-border/50 rounded-lg overflow-hidden">
           <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
@@ -267,9 +271,13 @@ export function RedAlertCallLogs({ category, subCategory, fromTime, toTime }: Re
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-          No data available
-        </div>
+        <ExceptionHandleView 
+          type="204" 
+          title="No Red Alert Data"
+          content="red alert call logs"
+          onTryAgain={handleReload}
+          className="!p-0"
+        />
       )}
     </div>
   );
