@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
 import { 
-  LeftOutlined, 
-  RightOutlined, 
-  CloseOutlined, 
-  CalendarOutlined, 
-  BarChartOutlined,
-  ApartmentOutlined 
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconArrowRight, 
+  IconX, 
+  IconCalendar, 
+  IconChartBar,
+  IconBuildingCommunity 
+} from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { Category } from "./Category";
 import { TopSubCategory } from "./TopSubCategory";
@@ -195,51 +195,25 @@ export const CaseClassificationReport = ({
   };
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
       <div>
         {/* Header Section */}
-        <div style={{ marginTop: -12, marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div className="-mt-3 mb-4">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle" orientation="horizontal">
               {!hideAccentLine && (
-                <div
-                  style={{
-                    width: 4,
-                    height: 32,
-                    background: 'linear-gradient(to bottom, #1890ff, rgba(24, 144, 255, 0.5))',
-                    borderRadius: 2
-                  }}
-                />
+                <div className="w-1 h-8 rounded-sm bg-gradient-to-b from-blue-500 to-blue-500/50" />
               )}
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <ApartmentOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconBuildingCommunity className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     {title}
                   </Title>
                   <Tooltip title="Drill down into case categories to analyze call distribution">
-                    <div style={{ marginTop: '-4px' }}>
+                    <div className="-mt-1">
                       <TablerIcon 
                         name="info-circle" 
                         className="wn-tabler-14"
@@ -248,85 +222,44 @@ export const CaseClassificationReport = ({
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14, marginBottom: 8 }}>
+                <Text type="secondary" className="text-sm mb-2">
                   {description}
                 </Text>
               </div>
             </Space>
             
             <DatePicker 
-              suffixIcon={<CalendarOutlined />}
-              style={{ 
-                borderRadius: 8,
-                borderColor: '#d9d9d9'
-              }}
+              suffixIcon={<IconCalendar />}
+              className="rounded-lg"
             />
           </div>
           
           {hasFilter && (
-            <div style={{ 
-              marginTop: 8, 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              padding: '6px 12px', 
-              backgroundColor: 'rgba(24, 144, 255, 0.05)', 
-              border: '1px solid rgba(24, 144, 255, 0.2)', 
-              borderRadius: 16, 
-              fontSize: 12, 
-              fontWeight: 500 
-            }}>
+            <div className="mt-2 inline-flex items-center px-3 py-1.5 bg-blue-500/5 rounded-md text-[13px] font-medium">
               Total Calls 
-              <span style={{ 
-                marginLeft: 8, 
-                padding: '2px 8px', 
-                backgroundColor: '#1890ff', 
-                color: 'white', 
-                borderRadius: 12 
-              }}>
-                {totalCalls}
-              </span>
+              <span className="ml-2 px-2 py-0.5 bg-blue-500 text-white rounded">{totalCalls}</span>
             </div>
           )}
         </div>
         
         {/* Carousel Section */}
-        <div style={{ position: 'relative' }}>
+        <div className="relative">
           {/* Navigation Buttons */}
           {slides.length > 2 && (
             <>
               <Button
                 type="default"
-                icon={<LeftOutlined />}
+                icon={<IconArrowLeft />}
                 onClick={scrollPrev}
                 disabled={visibleStartIndex === 0}
-                style={{
-                  position: 'absolute',
-                  left: -16,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 10,
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-                }}
+                className="absolute -left-4 top-1/2 -translate-y-1/2 z-10"
               />
               <Button
                 type="default"
-                icon={<RightOutlined />}
+                icon={<IconArrowRight />}
                 onClick={scrollNext}
                 disabled={visibleStartIndex >= slides.length - 2}
-                style={{
-                  position: 'absolute',
-                  right: -16,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 10,
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-                }}
+                className="absolute -right-4 top-1/2 -translate-y-1/2 z-10"
               />
             </>
           )}
@@ -334,7 +267,7 @@ export const CaseClassificationReport = ({
           {/* Slides */}
           <div 
             ref={carouselRef}
-            style={{ overflow: 'hidden', width: '100%' }}
+            className="overflow-hidden w-full"
           >
             <div
               style={{
@@ -366,13 +299,13 @@ export const CaseClassificationReport = ({
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                         <div style={{ minWidth: 0, flex: 1 }}>
-                          <Title level={5} style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                          <Title level={5} className="!m-0 !text-sm !font-semibold">
                             {slide.title}
                           </Title>
                           {slide.breadcrumb.length > 0 && (
                             <Text 
                               type="secondary" 
-                              style={{ fontSize: 12, marginTop: 4, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                              className="text-xs mt-1 block overflow-hidden text-ellipsis whitespace-nowrap"
                               title={slide.breadcrumb.join(" / ")}
                             >
                               {slide.breadcrumb.join(" / ")}
@@ -382,9 +315,9 @@ export const CaseClassificationReport = ({
                         {slide.id > 1 && (
                           <Button
                             type="text"
-                            icon={<CloseOutlined />}
+                            icon={<IconX />}
                             onClick={() => closeSlide(slide.id)}
-                            style={{ width: 28, height: 28 }}
+                            className="w-7 h-7"
                           />
                         )}
                       </div>

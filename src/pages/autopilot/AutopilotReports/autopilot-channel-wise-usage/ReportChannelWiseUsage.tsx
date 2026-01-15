@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Search, X, PieChart, Loader2 } from "lucide-react";
+import { IconArrowLeft, IconSearch, IconX, IconChartPie, IconLoader2 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChannelUsageData {
@@ -41,10 +41,10 @@ interface ReportChannelWiseUsageProps {
 
 export default function ReportChannelWiseUsage({ onBack }: ReportChannelWiseUsageProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchKeyword, setIconSearchKeyword] = useState("");
   const [filteredData, setFilteredData] = useState<ChannelUsageData[]>(mockChannelData);
 
-  const handleSearch = () => {
+  const handleIconSearch = () => {
     setIsLoading(true);
     setTimeout(() => {
       const filtered = mockChannelData.filter(
@@ -59,7 +59,7 @@ export default function ReportChannelWiseUsage({ onBack }: ReportChannelWiseUsag
   };
 
   const handleClear = () => {
-    setSearchKeyword("");
+    setIconSearchKeyword("");
     setFilteredData(mockChannelData);
   };
 
@@ -85,10 +85,10 @@ export default function ReportChannelWiseUsage({ onBack }: ReportChannelWiseUsag
               onClick={onBack}
               className="h-10 w-10 rounded-xl"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <IconArrowLeft className="h-5 w-5" />
             </Button>
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20 flex items-center justify-center">
-              <PieChart className="h-5 w-5 text-blue-500" />
+              <IconChartPie className="h-5 w-5 text-blue-500" />
             </div>
             <div>
               <CardTitle className="text-xl font-semibold tracking-tight">
@@ -101,23 +101,23 @@ export default function ReportChannelWiseUsage({ onBack }: ReportChannelWiseUsag
           </div>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
-          {/* Search Section */}
+          {/* IconSearch Section */}
           <div className="flex flex-wrap gap-3 items-center">
             <div className="flex-1 min-w-[200px]">
               <Input
-                placeholder="Search by keyword..."
+                placeholder="IconSearch by keyword..."
                 value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                onChange={(e) => setIconSearchKeyword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleIconSearch()}
               />
             </div>
-            <Button onClick={handleSearch} className="gap-2">
-              <Search className="h-4 w-4" />
-              Search
+            <Button onClick={handleIconSearch} className="gap-2">
+              <IconSearch className="h-4 w-4" />
+              IconSearch
             </Button>
             {searchKeyword && (
               <Button variant="outline" onClick={handleClear} className="gap-2">
-                <X className="h-4 w-4" />
+                <IconX className="h-4 w-4" />
                 Clear
               </Button>
             )}
@@ -132,7 +132,7 @@ export default function ReportChannelWiseUsage({ onBack }: ReportChannelWiseUsag
             </div>
           ) : filteredData.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <PieChart className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <IconChartPie className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No data matching the filter</p>
             </div>
           ) : (

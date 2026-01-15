@@ -11,21 +11,21 @@ import {
   ConfigProvider
 } from "antd";
 import { 
-  ArrowLeftOutlined,
-  PhoneOutlined,
-  ClockCircleOutlined,
-  AimOutlined,
-  StarOutlined,
-  RiseOutlined,
-  FallOutlined,
-  MinusOutlined,
-  PlayCircleOutlined,
-  PauseCircleOutlined,
-  EyeOutlined,
-  HeartOutlined,
-  TeamOutlined,
-  PhoneOutlined as PhoneOffIcon
-} from "@ant-design/icons";
+  IconArrowLeft,
+  IconPhone,
+  IconClock,
+  IconTarget,
+  IconStar,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconMinus,
+  IconPlayerPlay,
+  IconPlayerPause,
+  IconEye,
+  IconHeart,
+  IconUsers,
+  IconPhoneOff
+} from "@tabler/icons-react";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatCard } from "@/components/ui/stat-card";
 import { TablerIcon } from "@/components/ui/tabler-icon";
@@ -67,12 +67,12 @@ interface StatCardData {
 }
 
 const mockStats: StatCardData[] = [
-  { label: "Total Calls", value: "245", icon: <PhoneOutlined />, color: "#3b82f6", gradientColors: ["#3b82f6", "#2563eb"] },
-  { label: "Avg Handle Time", value: "4:32", icon: <ClockCircleOutlined />, color: "#8b5cf6", gradientColors: ["#8b5cf6", "#7c3aed"] },
-  { label: "FCR Rate", value: "92%", icon: <AimOutlined />, color: "#10b981", gradientColors: ["#10b981", "#059669"] },
-  { label: "CSAT Score", value: "4.8", icon: <StarOutlined />, color: "#f59e0b", gradientColors: ["#f59e0b", "#d97706"] },
-  { label: "Kindness Score", value: "85%", icon: <HeartOutlined />, color: "#ec4899", gradientColors: ["#ec4899", "#db2777"] },
-  { label: "Dropped Calls", value: "3%", icon: <PhoneOffIcon />, color: "#ef4444", gradientColors: ["#ef4444", "#dc2626"] },
+  { label: "Total Calls", value: "245", icon: <IconPhone />, color: "#3b82f6", gradientColors: ["#3b82f6", "#2563eb"] },
+  { label: "Avg Handle Time", value: "4:32", icon: <IconClock />, color: "#8b5cf6", gradientColors: ["#8b5cf6", "#7c3aed"] },
+  { label: "FCR Rate", value: "92%", icon: <IconTarget />, color: "#10b981", gradientColors: ["#10b981", "#059669"] },
+  { label: "CSAT Score", value: "4.8", icon: <IconStar />, color: "#f59e0b", gradientColors: ["#f59e0b", "#d97706"] },
+  { label: "Kindness Score", value: "85%", icon: <IconHeart />, color: "#ec4899", gradientColors: ["#ec4899", "#db2777"] },
+  { label: "Dropped Calls", value: "3%", icon: <IconPhoneOff />, color: "#ef4444", gradientColors: ["#ef4444", "#dc2626"] },
 ];
 
 const mockCallLogs: CallLog[] = [
@@ -133,11 +133,11 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, value, 
 const SentimentIcon = ({ sentiment }: { sentiment: CallLog["callerSentiment"] }) => {
   switch (sentiment) {
     case "positive":
-      return <RiseOutlined style={{ color: '#10b981', fontSize: 16 }} />;
+      return <IconTrendingUp className="text-emerald-500 text-base" />;
     case "negative":
-      return <FallOutlined style={{ color: '#ef4444', fontSize: 16 }} />;
+      return <IconTrendingDown className="text-red-500 text-base" />;
     default:
-      return <MinusOutlined style={{ color: '#f59e0b', fontSize: 16 }} />;
+      return <IconMinus className="text-amber-500 text-base" />;
   }
 };
 
@@ -189,43 +189,40 @@ export default function AgentInsights() {
     >
       <div className="container-fluid p-6 space-y-6">
         <Card
-          style={{
-            borderRadius: 12,
-            border: '1px solid #e2e8f0',
-            background: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-          }}
-          styles={{ body: { padding: '16px 24px' } }}
+          className="rounded-xl border-slate-200 bg-white/80 backdrop-blur-sm"
+          title={
+            <div className="d-flex align-items-center gap-3">
+              <Button
+                type="default"
+                icon={<IconArrowLeft />}
+                onClick={() => setSelectedTab("agent-performance")}
+                className="h-10 w-10 rounded-xl flex items-center justify-center"
+              />
+              <div className="d-flex flex-column">
+                <div className="d-flex align-items-center gap-2">
+                  <Title level={4} className="!m-0 !text-xl !font-semibold">
+                    Agent Insights
+                  </Title>
+                  <span className="text-xl text-slate-400">-</span>
+                  <Badge 
+                    count={`${agentName} - ${agentIdDisplay}`}
+                    className="bg-slate-100 text-slate-600 font-medium text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          }
         >
           <div className="d-flex align-items-center gap-4">
-            <Button
-              type="default"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => setSelectedTab("agent-performance")}
-              style={{
-                height: 40,
-                width: 40,
-                borderRadius: 12,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            />
             <div className="d-flex flex-column">
               <div className="d-flex align-items-center gap-2">
-                <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                <Title level={4} className="!m-0 !text-base !font-medium">
                   Agent Insights
                 </Title>
-                <span style={{ fontSize: 20, color: '#94a3b8' }}>-</span>
+                <span className="text-base text-slate-400">-</span>
                 <Badge 
                   count={`${agentName} - ${agentIdDisplay}`}
-                  style={{ 
-                    backgroundColor: '#f1f5f9',
-                    color: '#475569',
-                    fontWeight: 500,
-                    fontSize: 14
-                  }}
+                  className="bg-slate-100 text-slate-600 font-medium text-sm"
                 />
               </div>
             </div>
@@ -258,34 +255,18 @@ export default function AgentInsights() {
 
           <div className="col-12 col-xl-6">
             <Card
-              style={{
-                borderRadius: 12,
-                border: '1px solid #e2e8f0',
-                background: 'rgba(255, 255, 255, 0.8)',
-                backdropFilter: 'blur(8px)'
-              }}
+              className="rounded-xl border-slate-200 bg-white/80 backdrop-blur-sm"
               title={
                 <div>
-                  <Title level={5} style={{ 
-                    margin: 0, 
-                    fontSize: 18, 
-                    fontWeight: 600,
-                    color: '#1e293b'
-                  }}>
+                  <Title level={5} className="!m-0 !text-lg !font-semibold !mb-0.5">
                     Case Category Report
                   </Title>
-                  <Text type="secondary" style={{ 
-                    fontSize: 13,
-                    fontWeight: 500,
-                    marginTop: 3,
-                    lineHeight: 1,
-                    display: 'block'
-                  }}>
+                  <Text type="secondary" className="text-[13px] font-medium mt-1 block">
                     Distribution of calls by category
                   </Text>
                 </div>
               }
-              styles={{ 
+              styles={{
                 body: { padding: '14px 24px' },
                 header: { 
                   borderBottom: '1px solid #e2e8f0',
@@ -294,7 +275,7 @@ export default function AgentInsights() {
               }}
             >
               {isLoading ? (
-                <Skeleton.Input active block style={{ height: 280 }} />
+                <Skeleton.Input active block className="h-[280px]" />
               ) : (
                 <ResponsiveContainer width="100%" height={280} className="mt-3">
                   <PieChart>
@@ -330,14 +311,9 @@ export default function AgentInsights() {
         </div>
 
         <Card
-          style={{
-            borderRadius: 12,
-            border: '1px solid #e2e8f0',
-            background: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(8px)'
-          }}
+          className="rounded-xl border-slate-200 bg-white/80 backdrop-blur-sm"
           title={
-            <Title level={5} style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>
+            <Title level={5} className="!m-0 !text-base !font-medium">
               Call Logs
             </Title>
           }
@@ -346,7 +322,7 @@ export default function AgentInsights() {
           {isLoading ? (
             <div className="d-flex flex-column gap-3">
               {[...Array(5)].map((_, i) => (
-                <Skeleton.Input key={i} active block style={{ height: 56 }} />
+                <Skeleton.Input key={i} active block className="h-14" />
               ))}
             </div>
           ) : (
@@ -364,7 +340,7 @@ export default function AgentInsights() {
                     <div>
                       <Text strong>{record.date}</Text>
                       <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+                      <Text type="secondary" className="text-xs">{record.time}</Text>
                     </div>
                   ),
                 },
@@ -384,7 +360,7 @@ export default function AgentInsights() {
                     <div>
                       <Text>{record.category}</Text>
                       <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>{record.subCategory}</Text>
+                      <Text type="secondary" className="text-xs">{record.subCategory}</Text>
                     </div>
                   ),
                 },
@@ -422,7 +398,7 @@ export default function AgentInsights() {
                     <div>
                       <Text strong>{score}</Text>
                       <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>out of 10</Text>
+                      <Text type="secondary" className="text-xs">out of 10</Text>
                     </div>
                   ),
                 },
@@ -447,15 +423,15 @@ export default function AgentInsights() {
                     <Space>
                       <Button
                         type={playingId === record.id ? "primary" : "text"}
-                        icon={playingId === record.id ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                        icon={playingId === record.id ? <IconPlayerPause /> : <IconPlayerPlay />}
                         onClick={() => handlePlayAudio(record.id)}
-                        style={{ borderRadius: 8 }}
+                        className="rounded-lg"
                       />
                       <Button
                         type="text"
-                        icon={<EyeOutlined />}
+                        icon={<IconEye />}
                         onClick={() => setSelectedCallLog(record)}
-                        style={{ borderRadius: 8 }}
+                        className="rounded-lg"
                       />
                     </Space>
                   ),

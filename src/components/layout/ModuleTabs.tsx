@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { 
-  LayoutGrid, 
-  MessageSquare, 
-  UserCheck, 
-  Settings,
-  Info,
-  BarChart3,
-  FileText,
-  Activity,
-  PhoneCall,
-  Bot,
-  Upload,
-  Users
-} from "lucide-react";
+  IconLayoutGrid, 
+  IconMessage, 
+  IconUserCheck, 
+  IconSettings,
+  IconInfoCircle,
+  IconChartBar,
+  IconFileText,
+  IconActivity,
+  IconPhone,
+  IconRobot,
+  IconUpload,
+  IconUsers
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -31,19 +31,19 @@ interface Tab {
 }
 
 const autopilotTabs: Tab[] = [
-  { id: "dashboard", icon: LayoutGrid, label: "Dashboard" },
-  { id: "conversations", icon: MessageSquare, label: "Conversation History" },
-  { id: "reports", icon: FileText, label: "Reports" },
-  { id: "settings", icon: Settings, label: "Configuration" },
+  { id: "dashboard", icon: IconLayoutGrid, label: "Dashboard" },
+  { id: "conversations", icon: IconMessage, label: "Conversation History" },
+  { id: "reports", icon: IconFileText, label: "Reports" },
+  { id: "settings", icon: IconSettings, label: "Configuration" },
 ];
 
 const postCallAnalyzerTabs: Tab[] = [
-  { id: "dashboard", icon: LayoutGrid, label: "Dashboard" },
-  { id: "call-insight", icon: PhoneCall, label: "Call Insight" },
-  { id: "agent-performance", icon: Users, label: "Agent Performance" },
-  { id: "content-uploader", icon: Upload, label: "Content Uploader" },
-  { id: "reports", icon: FileText, label: "Reports" },
-  { id: "configuration", icon: Settings, label: "Configuration" },
+  { id: "dashboard", icon: IconLayoutGrid, label: "Dashboard" },
+  { id: "call-insight", icon: IconPhone, label: "Call Insight" },
+  { id: "agent-performance", icon: IconUsers, label: "Agent Performance" },
+  { id: "content-uploader", icon: IconUpload, label: "Content Uploader" },
+  { id: "reports", icon: IconFileText, label: "Reports" },
+  { id: "configuration", icon: IconSettings, label: "Configuration" },
 ];
 
 interface ModuleTabsProps {
@@ -60,7 +60,7 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
   const isAutopilot = currentPath.startsWith("/autopilot");
   const tabs = isPostCallAnalyzer ? postCallAnalyzerTabs : autopilotTabs;
   const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
-  const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;
+  const ModuleIcon = isPostCallAnalyzer ? IconPhone : IconRobot;
   
   // Get the selected instance name based on current module
   const instanceName = isPostCallAnalyzer 
@@ -101,18 +101,9 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
     <div className="px-6 py-4 bg-card border-b border-border/30">
       <div className="relative flex items-center justify-between">
         {/* Module Title - Left (fixed width) */}
-        <div className="flex items-center gap-3" style={{ width: '280px', flexShrink: 0 }}>
-          <div 
-            style={{ 
-              padding: '10px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <ModuleIcon style={{ color: '#3b82f6', fontSize: 20 }} />
+        <div className="flex items-center gap-3 w-[280px] flex-shrink-0">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+            <ModuleIcon className="text-blue-500 text-xl" />
           </div>
           <div>
             <h1 className="text-lg font-semibold text-foreground tracking-tight">{moduleTitle}</h1>
@@ -121,10 +112,7 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
         </div>
 
         {/* Tab Navigation - Center (absolutely positioned for stability) */}
-        <div 
-          className="absolute left-1/2 transform -translate-x-1/2 flex items-center bg-muted/50 rounded-2xl p-1"
-          style={{ zIndex: 10 }}
-        >
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center bg-muted/50 rounded-2xl p-1 z-10">
           {tabs.map((tab) => {
             const isActive = currentActiveTab === tab.id;
             return (
@@ -161,10 +149,7 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
         </div>
 
         {/* Right Side - Fixed width container */}
-        <div 
-          className="flex items-center gap-3 justify-end" 
-          style={{ width: '340px', flexShrink: 0 }}
-        >
+        <div className="flex items-center gap-3 justify-end w-[340px] flex-shrink-0">
           {isDashboardTab ? (
             <>
               <DatePickerComponent
@@ -247,7 +232,7 @@ export function ModuleTabs({ activeTab, onTabChange, currentPath }: ModuleTabsPr
               />
             </>
           ) : (
-            <div style={{ width: '100%' }} />
+            <div className="w-full" />
           )}
         </div>
       </div>

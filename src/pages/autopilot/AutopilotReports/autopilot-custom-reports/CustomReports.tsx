@@ -11,11 +11,11 @@ import {
   DatePicker
 } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  SettingOutlined, 
-  FilterOutlined, 
-  ReloadOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconSettings, 
+  IconFilter, 
+  IconRefresh
+} from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -233,10 +233,7 @@ export default function CustomReports({ onBack }: CustomReportsProps) {
           transition={{ duration: 0.5 }}
         >
           <Card
-            style={{ 
-              borderRadius: 12, 
-              border: '1px solid #e2e8f0'
-            }}
+            className="rounded-xl border-slate-200"
             styles={{ 
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
@@ -246,30 +243,16 @@ export default function CustomReports({ onBack }: CustomReportsProps) {
                 <div className="flex items-center gap-3">
                   <Button
                     type="text"
-                    icon={<ArrowLeftOutlined />}
+                    icon={<IconArrowLeft />}
                     onClick={onBack}
-                    style={{ 
-                      borderRadius: 8,
-                      height: 40,
-                      width: 40
-                    }}
+                    className="rounded-lg h-10 w-10"
                   />
-                  <div 
-                    style={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: 8, 
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <SettingOutlined style={{ color: 'white', fontSize: 20 }} />
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                    <IconSettings className="text-white text-xl" />
                   </div>
                   <div>
-                    <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Custom Reports</Title>
-                    <Text type="secondary" style={{ fontSize: 13 }}>
+                    <Title level={5} className="!m-0 !font-semibold">Custom Reports</Title>
+                    <Text type="secondary" className="text-[13px]">
                       View and manage your custom autopilot reports
                     </Text>
                   </div>
@@ -278,23 +261,23 @@ export default function CustomReports({ onBack }: CustomReportsProps) {
                   <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
                     <Button 
                       type={filtersOpen ? "primary" : "default"}
-                      icon={<FilterOutlined />}
+                      icon={<IconFilter />}
                       onClick={() => setFiltersOpen(!filtersOpen)}
-                      style={{ borderRadius: 8 }}
+                      className="rounded-lg"
                     />
                   </Badge>
                   <Button
                     type="default"
-                    icon={<SettingOutlined />}
+                    icon={<IconSettings />}
                     onClick={gotoConfig}
-                    style={{ borderRadius: 8 }}
+                    className="rounded-lg"
                     title="Report Configurations"
                   />
                 </Space>
               </div>
             }
           >
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Space direction="vertical" size="large" className="w-full">
               {/* Collapsible Filters */}
               <AnimatePresence>
                 {filtersOpen && (
@@ -303,19 +286,15 @@ export default function CustomReports({ onBack }: CustomReportsProps) {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    style={{ overflow: 'hidden' }}
+                    className="overflow-hidden"
                   >
                     <Card
                       size="small"
-                      style={{ 
-                        background: '#f8fafc', 
-                        border: '1px solid #e2e8f0',
-                        borderRadius: 12
-                      }}
+                      className="bg-slate-50 border-slate-200 rounded-xl"
                       styles={{ body: { padding: 16 } }}
                     >
                       <RangePicker 
-                        style={{ minWidth: 200 }}
+                        className="min-w-[200px]"
                         value={dateRange}
                         onChange={(dates) => setDateRange(dates)}
                       />
@@ -326,36 +305,36 @@ export default function CustomReports({ onBack }: CustomReportsProps) {
 
               {/* Content */}
               {dataLoading ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 16, marginTop: 12 }}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-3">
                   {[...Array(4)].map((_, i) => (
-                    <Skeleton.Input key={i} active block style={{ height: 300, borderRadius: 12 }} />
+                    <Skeleton.Input key={i} active block className="h-[300px] rounded-xl" />
                   ))}
                 </div>
               ) : errorLoading ? (
-                <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                  <div style={{ color: '#ef4444', marginBottom: 16 }}>
-                    <SettingOutlined style={{ fontSize: 64 }} />
+                <div className="text-center py-12">
+                  <div className="text-red-500 mb-4">
+                    <IconSettings className="text-6xl" />
                   </div>
-                  <Title level={3} style={{ marginBottom: 8, color: '#ef4444' }}>Error Loading Reports</Title>
-                  <Text type="secondary" style={{ marginBottom: 16, display: 'block' }}>Something went wrong while loading the reports.</Text>
+                  <Title level={3} className="mb-2 text-red-500">Error Loading Reports</Title>
+                  <Text type="secondary" className="mb-4 block">Something went wrong while loading the reports.</Text>
                   <Button 
                     onClick={loadCustomizedReport} 
-                    icon={<ReloadOutlined />}
+                    icon={<IconRefresh />}
                     type="primary"
                   >
                     Try Again
                   </Button>
                 </div>
               ) : noRecordFound ? (
-                <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                  <div style={{ color: '#94a3b8', marginBottom: 16 }}>
-                    <SettingOutlined style={{ fontSize: 64 }} />
+                <div className="text-center py-12">
+                  <div className="text-slate-400 mb-4">
+                    <IconSettings className="text-6xl" />
                   </div>
-                  <Title level={3} style={{ marginBottom: 8 }}>No Custom Reports Found</Title>
-                  <Text type="secondary" style={{ display: 'block' }}>Configure custom reports in the settings to see them here.</Text>
+                  <Title level={3} className="mb-2">No Custom Reports Found</Title>
+                  <Text type="secondary" className="block">Configure custom reports in the settings to see them here.</Text>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16, marginTop: 12 }}>
+                <div className="grid grid-cols-12 gap-4 mt-3">
                   {customReports.map((report) => renderReport(report))}
                 </div>
               )}

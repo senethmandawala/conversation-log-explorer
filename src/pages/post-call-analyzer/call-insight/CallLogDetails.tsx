@@ -10,20 +10,20 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { 
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  CheckCircle2,
-  Circle,
-  Info,
-  FileText,
-  Calendar,
-  Clock,
-  Phone,
-  User,
-  Timer,
-  Tag
-} from "lucide-react";
+  IconTrendingUp,
+  IconTrendingDown,
+  IconMinus,
+  IconCircleCheck,
+  IconCircle,
+  IconInfoCircle,
+  IconFileText,
+  IconCalendar,
+  IconClock,
+  IconPhone,
+  IconUser,
+  IconHourglass,
+  IconTag
+} from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -160,25 +160,25 @@ const scoreChartData = [
 const SentimentIcon = ({ sentiment }: { sentiment: "positive" | "negative" | "neutral" }) => {
   switch (sentiment) {
     case "positive":
-      return <TrendingUp className="h-4 w-4 text-green-500" />;
+      return <IconTrendingUp className="h-4 w-4 text-green-500" />;
     case "negative":
-      return <TrendingDown className="h-4 w-4 text-red-500" />;
+      return <IconTrendingDown className="h-4 w-4 text-red-500" />;
     default:
-      return <Minus className="h-4 w-4 text-yellow-500" />;
+      return <IconMinus className="h-4 w-4 text-yellow-500" />;
   }
 };
 
 const getCompletionIcon = (completed: number) => {
   if (completed === 100) {
-    return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    return <IconCircleCheck className="h-4 w-4 text-green-500" />;
   } else if (completed === 0) {
-    return <Circle className="h-4 w-4 text-muted-foreground" />;
+    return <IconCircle className="h-4 w-4 text-muted-foreground" />;
   } else if (completed <= 25) {
-    return <CheckCircle2 className="h-4 w-4 text-red-500" />;
+    return <IconCircleCheck className="h-4 w-4 text-red-500" />;
   } else if (completed <= 75) {
-    return <CheckCircle2 className="h-4 w-4 text-amber-500" />;
+    return <IconCircleCheck className="h-4 w-4 text-amber-500" />;
   } else {
-    return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    return <IconCircleCheck className="h-4 w-4 text-green-500" />;
   }
 };
 
@@ -195,7 +195,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <SheetTitle className="text-xl font-semibold flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <FileText className="h-5 w-5 text-primary" />
+                <IconFileText className="h-5 w-5 text-primary" />
               </div>
               Call Details
             </SheetTitle>
@@ -218,15 +218,15 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
 
             {/* Call Info Tab */}
             <TabsContent value="call-info" className="space-y-1 mt-0">
-              <DetailItem icon={<Calendar className="h-5 w-5 text-primary" />} label="Date" value={callLog.date} delay={0.1} />
-              <DetailItem icon={<Clock className="h-5 w-5 text-primary" />} label="Time" value={callLog.time} delay={0.15} />
+              <DetailItem icon={<IconCalendar className="h-5 w-5 text-primary" />} label="Date" value={callLog.date} delay={0.1} />
+              <DetailItem icon={<IconClock className="h-5 w-5 text-primary" />} label="Time" value={callLog.time} delay={0.15} />
               <Separator className="my-4" />
-              <DetailItem icon={<Phone className="h-5 w-5 text-primary" />} label="MSISDN" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{callLog.msisdn}</code>} delay={0.2} />
-              <DetailItem icon={<User className="h-5 w-5 text-primary" />} label="Agent" value={callLog.agent} delay={0.25} />
+              <DetailItem icon={<IconPhone className="h-5 w-5 text-primary" />} label="MSISDN" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{callLog.msisdn}</code>} delay={0.2} />
+              <DetailItem icon={<IconUser className="h-5 w-5 text-primary" />} label="Agent" value={callLog.agent} delay={0.25} />
               <Separator className="my-4" />
-              <DetailItem icon={<Timer className="h-5 w-5 text-primary" />} label="Call Duration" value={callLog.callDuration} delay={0.3} />
-              <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Category" value={callLog.category} delay={0.35} />
-              <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Sub Category" value={callLog.subCategory} delay={0.4} />
+              <DetailItem icon={<IconHourglass className="h-5 w-5 text-primary" />} label="Call Duration" value={callLog.callDuration} delay={0.3} />
+              <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Category" value={callLog.category} delay={0.35} />
+              <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Sub Category" value={callLog.subCategory} delay={0.4} />
               <Separator className="my-4" />
 
               {/* Sentiment Analysis */}
@@ -457,7 +457,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
               <CardContent className="p-3 space-y-2">
                 {mockRecommendations.map((item, index) => (
                   <div key={index} className="flex items-start gap-2">
-                    <Info className="h-4 w-4 text-primary mt-0.5" />
+                    <IconInfoCircle className="h-4 w-4 text-primary mt-0.5" />
                     <span className="text-sm">{item.description}</span>
                   </div>
                 ))}
@@ -475,7 +475,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
               <CardContent className="p-3 space-y-2">
                 {mockRetentionStrategies.map((item, index) => (
                   <div key={index} className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
+                    <IconCircleCheck className="h-4 w-4 text-green-500 mt-0.5" />
                     <span className="text-sm font-medium">{item.title}</span>
                   </div>
                 ))}

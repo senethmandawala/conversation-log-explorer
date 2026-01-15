@@ -256,4 +256,63 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
   }
+
+  .ant-drawer-mask {
+    background-color: transparent !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  /* Global Ant Design overrides to match reference design */
+  .ant-card {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05) !important;
+  }
+
+  .ant-card:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+  }
+
+  .ant-card .ant-card-body {
+    padding: 20px !important;
+  }
+
+  /* Utility class for consistent card padding */
+  .card-padding {
+    padding: 20px !important;
+  }
+
+  .ant-table {
+    border-radius: 12px !important;
+  }
+
+  .ant-table-wrapper .ant-table-container {
+    border-radius: 12px !important;
+    overflow: hidden;
+  }
+
+  .ant-btn-default {
+    border-color: #e2e8f0 !important;
+  }
+
+  .ant-btn-default:hover {
+    border-color: #cbd5e1 !important;
+    background-color: #f8fafc !important;
+  }
+
+  .ant-input,
+  .ant-select-selector {
+    border-color: #e2e8f0 !important;
+  }
+
+  .ant-input:hover,
+  .ant-select-selector:hover {
+    border-color: #cbd5e1 !important;
+  }
+
+  .ant-input:focus,
+  .ant-select-focused .ant-select-selector {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  }
 }

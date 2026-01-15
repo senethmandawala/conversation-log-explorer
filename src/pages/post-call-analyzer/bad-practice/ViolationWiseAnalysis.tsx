@@ -11,11 +11,11 @@ import {
   ConfigProvider
 } from "antd";
 import { 
-  DownOutlined,
-  UpOutlined,
-  BarChartOutlined,
-  UserOutlined
-} from "@ant-design/icons";
+  IconChevronDown,
+  IconChevronUp,
+  IconChartBar,
+  IconUser
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ColumnsType } from "antd/es/table";
 
@@ -116,7 +116,7 @@ export default function ViolationWiseAnalysis() {
       dataIndex: 'violationType',
       key: 'violationType',
       render: (text: string) => (
-        <Tag color="purple" style={{ borderRadius: 6 }}>{text}</Tag>
+        <Tag color="purple" className="rounded-md">{text}</Tag>
       ),
     },
     {
@@ -124,7 +124,7 @@ export default function ViolationWiseAnalysis() {
       dataIndex: 'distribution',
       key: 'distribution',
       render: (text: string, record: ViolationData) => (
-        <Tag color={getDistributionColor(record.distributionValue)} style={{ borderRadius: 12, fontWeight: 600 }}>
+        <Tag color={getDistributionColor(record.distributionValue)} className="rounded-xl font-semibold">
           {text}
         </Tag>
       ),
@@ -142,7 +142,7 @@ export default function ViolationWiseAnalysis() {
       render: (_, record: ViolationData) => (
         <Button
           type="text"
-          icon={record.expanded ? <UpOutlined /> : <DownOutlined />}
+          icon={record.expanded ? <IconChevronUp /> : <IconChevronDown />}
           onClick={() => toggleRowExpand(record.violationType)}
         />
       ),
@@ -169,25 +169,25 @@ export default function ViolationWiseAnalysis() {
       }}
     >
       <div className="mt-6">
-        <Title level={5} style={{ marginBottom: 16 }}>Violation-wise Analysis</Title>
+        <Title level={5} className="mb-4">Violation-wise Analysis</Title>
 
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
-            <Skeleton.Input active style={{ width: 200 }} />
+          <div className="flex justify-center py-12">
+            <Skeleton.Input active className="w-[200px]" />
           </div>
         ) : data.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <div className="text-center py-12">
             <Text type="secondary">No violation data available</Text>
           </div>
         ) : (
           <>
-            <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+            <div className="rounded-xl overflow-hidden border border-slate-200">
               {/* Table Header */}
-              <div style={{ display: 'flex', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <div style={{ flex: 3, padding: '12px 16px', fontWeight: 600, color: '#475569' }}>Violation Type</div>
-                <div style={{ flex: 2, padding: '12px 16px', fontWeight: 600, color: '#475569' }}>Violation Proportion</div>
-                <div style={{ flex: 2, padding: '12px 16px', fontWeight: 600, color: '#475569' }}>Affected Agents</div>
-                <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Actions</div>
+              <div className="flex bg-slate-50 border-b border-slate-200">
+                <div className="flex-[3] px-4 py-3 font-semibold text-slate-600">Violation Type</div>
+                <div className="flex-[2] px-4 py-3 font-semibold text-slate-600">Violation Proportion</div>
+                <div className="flex-[2] px-4 py-3 font-semibold text-slate-600">Affected Agents</div>
+                <div className="flex-1 px-4 py-3 font-semibold text-slate-600 text-center">Actions</div>
               </div>
               
               {/* Table Body with Expanded Rows */}
@@ -198,29 +198,23 @@ export default function ViolationWiseAnalysis() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    style={{ 
-                      display: 'flex',
-                      borderBottom: '1px solid #e2e8f0',
-                      backgroundColor: violation.expanded ? '#fafafa' : 'transparent'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = violation.expanded ? '#fafafa' : '#f8fafc'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = violation.expanded ? '#fafafa' : 'transparent'}
+                    className={`flex border-b border-slate-200 hover:bg-slate-50 transition-colors ${violation.expanded ? 'bg-slate-50' : ''}`}
                   >
-                    <div style={{ flex: 3, padding: '12px 16px' }}>
-                      <Tag color="purple" style={{ borderRadius: 6 }}>{violation.violationType}</Tag>
+                    <div className="flex-[3] px-4 py-3">
+                      <Tag color="purple" className="rounded-md">{violation.violationType}</Tag>
                     </div>
-                    <div style={{ flex: 2, padding: '12px 16px' }}>
-                      <Tag color={getDistributionColor(violation.distributionValue)} style={{ borderRadius: 12, fontWeight: 600 }}>
+                    <div className="flex-[2] px-4 py-3">
+                      <Tag color={getDistributionColor(violation.distributionValue)} className="rounded-xl font-semibold">
                         {violation.distribution}
                       </Tag>
                     </div>
-                    <div style={{ flex: 2, padding: '12px 16px' }}>
+                    <div className="flex-[2] px-4 py-3">
                       {violation.affectedAgents}
                     </div>
-                    <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                    <div className="flex-1 px-4 py-3 text-center">
                       <Button
                         type="text"
-                        icon={violation.expanded ? <UpOutlined /> : <DownOutlined />}
+                        icon={violation.expanded ? <IconChevronUp /> : <IconChevronDown />}
                         onClick={() => toggleRowExpand(violation.violationType)}
                       />
                     </div>
@@ -234,27 +228,24 @@ export default function ViolationWiseAnalysis() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        style={{ 
-                          borderBottom: '1px solid #e2e8f0',
-                          backgroundColor: '#fafafa'
-                        }}
+                        className="border-b border-slate-200 bg-slate-50"
                       >
-                        <div style={{ padding: '16px 24px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                            <UserOutlined style={{ color: '#6366f1' }} />
-                            <Text strong style={{ fontSize: 14 }}>Agents with {violation.violationType}</Text>
+                        <div className="p-6">
+                          <div className="flex items-center gap-2 mb-3">
+                            <IconUser className="text-indigo-500" />
+                            <Text strong className="text-sm">Agents with {violation.violationType}</Text>
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          <div className="flex flex-col gap-3">
                             {violation.agents.map((agent, agentIndex) => (
-                              <div key={agentIndex} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <Text strong style={{ fontSize: 14 }}>{agent.name}</Text>
-                                  <Text type="secondary" style={{ fontSize: 14 }}>{agent.percentage}%</Text>
+                              <div key={agentIndex} className="flex flex-col gap-1">
+                                <div className="flex justify-between items-center">
+                                  <Text strong className="text-sm">{agent.name}</Text>
+                                  <Text type="secondary" className="text-sm">{agent.percentage}%</Text>
                                 </div>
                                 <Progress 
                                   percent={agent.progressPercentage} 
                                   size="small"
-                                  style={{ margin: 0 }}
+                                  className="!m-0"
                                 />
                               </div>
                             ))}
@@ -269,7 +260,7 @@ export default function ViolationWiseAnalysis() {
 
             {/* Pagination - Right aligned */}
             {totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+              <div className="flex justify-end mt-4">
                 <Pagination
                   total={data.length}
                   pageSize={pageSize}

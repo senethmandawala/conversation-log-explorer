@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, RefreshCw } from "lucide-react";
+import { IconX, IconRefresh } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -73,7 +73,7 @@ export function RedAlertCallLogs({ category, subCategory }: RedAlertCallLogsProp
           className="h-8 w-8"
           onClick={handleReload}
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <IconRefresh className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
 

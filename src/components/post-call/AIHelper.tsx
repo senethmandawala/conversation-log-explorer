@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, X, Send, Sparkles } from "lucide-react";
+import { IconRobot, IconX, IconSend, IconSparkles } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -69,7 +69,7 @@ export const AIHelper = () => {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <X className="h-6 w-6" />
+                <IconX className="h-6 w-6" />
               </motion.div>
             ) : (
               <motion.div
@@ -79,7 +79,7 @@ export const AIHelper = () => {
                 exit={{ rotate: -90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Bot className="h-6 w-6" />
+                <IconRobot className="h-6 w-6" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -106,7 +106,7 @@ export const AIHelper = () => {
               <div className="bg-gradient-to-r from-primary to-primary/80 p-4 text-primary-foreground">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary-foreground/20 rounded-lg">
-                    <Sparkles className="h-5 w-5" />
+                    <IconSparkles className="h-5 w-5" />
                   </div>
                   <div>
                     <h3 className="font-semibold">AI Assistant</h3>
@@ -150,7 +150,7 @@ export const AIHelper = () => {
                     className="flex-1 bg-background"
                   />
                   <Button onClick={handleSend} size="icon" className="shrink-0">
-                    <Send className="h-4 w-4" />
+                    <IconSend className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

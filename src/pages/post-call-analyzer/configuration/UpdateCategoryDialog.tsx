@@ -118,7 +118,7 @@ export default function UpdateCategoryDialog({
       >
         {isUpdatingChild && selectedNode && (
           <div className="mb-4">
-            <Text className="text-sm text-gray-600" style={{ fontFamily: 'Geist, sans-serif' }}>
+            <Text className="text-sm text-gray-600 font-sans">
               Parent Category: <span className="font-medium text-gray-900">{selectedNode.name}</span>
             </Text>
           </div>
@@ -133,8 +133,7 @@ export default function UpdateCategoryDialog({
         >
           <Input 
             placeholder="Enter category name"
-            className="font-geist"
-            style={{ fontFamily: 'Geist, sans-serif' }}
+            className="font-sans"
           />
         </Form.Item>
 
@@ -148,8 +147,7 @@ export default function UpdateCategoryDialog({
           <TextArea
             placeholder="Enter category description"
             rows={4}
-            className="font-geist"
-            style={{ fontFamily: 'Geist, sans-serif' }}
+            className="font-sans"
           />
         </Form.Item>
       </Form>

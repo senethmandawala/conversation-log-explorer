@@ -8,10 +8,10 @@ import {
   ConfigProvider
 } from "antd";
 import { 
-  ExclamationCircleOutlined,
-  UserOutlined,
-  ClockCircleOutlined
-} from "@ant-design/icons";
+  IconAlertCircle,
+  IconUser,
+  IconClock
+} from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import type { ColumnsType } from "antd/es/table";
 
@@ -154,13 +154,13 @@ const mockTranscript: TranscriptEntry[] = [
       title: 'Data Field',
       dataIndex: 'field',
       key: 'field',
-      render: (text: string) => <Text style={{ fontSize: 14 }}>{text}</Text>,
+      render: (text: string) => <Text className="text-sm">{text}</Text>,
     },
     {
       title: 'Metadata Value',
       dataIndex: 'metadataValue',
       key: 'metadataValue',
-      render: (text: string) => <Text style={{ fontSize: 14 }}>{text}</Text>,
+      render: (text: string) => <Text className="text-sm">{text}</Text>,
     },
     {
       title: 'Conversation Value',
@@ -168,11 +168,7 @@ const mockTranscript: TranscriptEntry[] = [
       key: 'conversationValue',
       render: (text: string, record: MetadataComparison) => (
         <Text 
-          style={{ 
-            fontSize: 14, 
-            color: record.hasMismatch ? '#dc2626' : 'inherit',
-            fontWeight: record.hasMismatch ? 600 : 'normal'
-          }}
+          className={`text-sm ${record.hasMismatch ? 'text-red-600 font-semibold' : ''}`}
         >
           {text}
         </Text>
@@ -219,10 +215,7 @@ export default function CallDetails({ callId }: CallDetailsProps) {
       parts.push(
         <strong
           key={`term-${idx}`}
-          style={{ 
-            color: term.isImportant ? '#dc2626' : 'inherit',
-            fontWeight: term.isImportant ? 700 : 600
-          }}
+          className={term.isImportant ? 'text-red-600 font-bold' : 'font-semibold'}
         >
           {term.text}
         </strong>
@@ -242,8 +235,8 @@ export default function CallDetails({ callId }: CallDetailsProps) {
 
 if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
-        <Skeleton.Input active style={{ width: 200 }} />
+      <div className="flex justify-center py-12">
+        <Skeleton.Input active className="w-[200px]" />
       </div>
     );
   }
@@ -265,21 +258,17 @@ if (loading) {
         },
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="flex flex-col gap-4">
         {/* Violation Types */}
         {violationTypes.length > 0 && (
           <Card
-            style={{ 
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: 8
-            }}
+            className="bg-slate-50 border-slate-200 rounded-lg"
             styles={{ body: { padding: 16 } }}
           >
-            <Text type="secondary" style={{ fontSize: 12, marginBottom: 8 }}>Violation Types</Text>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Text type="secondary" className="text-xs mb-2 block">Violation Types</Text>
+            <div className="flex flex-wrap gap-2">
               {violationTypes.map((type, index) => (
-                <Tag key={index} color="red" style={{ borderRadius: 6 }}>
+                <Tag key={index} color="red" className="rounded-md">
                   {type}
                 </Tag>
               ))}
@@ -290,9 +279,9 @@ if (loading) {
         {/* Metadata Comparison */}
         {metadataComparison.length > 0 && (
           <div>
-            <Title level={5} style={{ marginBottom: 12 }}>Metadata Comparison</Title>
+            <Title level={5} className="mb-3">Metadata Comparison</Title>
             <Card
-              style={{ border: '1px solid #e2e8f0', borderRadius: 8 }}
+              className="border-slate-200 rounded-lg"
               styles={{ body: { padding: 0 } }}
             >
               <Table
@@ -309,46 +298,35 @@ if (loading) {
         {/* Call Transcript */}
         {transcript.length > 0 && (
           <div>
-            <Title level={5} style={{ marginBottom: 12 }}>Call Transcript</Title>
+            <Title level={5} className="mb-3">Call Transcript</Title>
             <Card
-              style={{ 
-                border: '1px solid #e2e8f0',
-                borderRadius: 8,
-                maxHeight: 500,
-                overflow: 'auto'
-              }}
+              className="border-slate-200 rounded-lg max-h-[500px] overflow-auto"
               styles={{ body: { padding: 16 } }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="flex flex-col gap-3">
                 {transcript.map((entry, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    style={{
-                      padding: 12,
-                      borderRadius: 8,
-                      borderLeft: `4px solid ${entry.speaker.toLowerCase() === "agent" ? "#3b82f6" : "#10b981"}`,
-                      backgroundColor: entry.speaker.toLowerCase() === "agent" ? "#dbeafe" : "#d1fae5",
-                      boxShadow: entry.isHighlighted ? "0 0 0 2px rgba(245, 158, 11, 0.3)" : 'none'
-                    }}
+                    className={`p-3 rounded-lg border-l-4 ${entry.speaker.toLowerCase() === "agent" ? "border-l-blue-500 bg-blue-100" : "border-l-emerald-500 bg-emerald-100"} ${entry.isHighlighted ? "ring-2 ring-amber-500/30" : ""}`}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="flex items-center gap-1.5">
                         {entry.speaker.toLowerCase() === "agent" ? (
-                          <UserOutlined style={{ color: '#3b82f6', fontSize: 14 }} />
+                          <IconUser className="text-blue-500 text-sm" />
                         ) : (
-                          <ExclamationCircleOutlined style={{ color: '#10b981', fontSize: 14 }} />
+                          <IconAlertCircle className="text-emerald-500 text-sm" />
                         )}
-                        <Text strong style={{ fontSize: 14 }}>{entry.speaker}</Text>
+                        <Text strong className="text-sm">{entry.speaker}</Text>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
-                        <Text type="secondary" style={{ fontSize: 12 }}>{entry.timestamp}</Text>
+                      <div className="flex items-center gap-1">
+                        <IconClock className="text-slate-400 text-xs" />
+                        <Text type="secondary" className="text-xs">{entry.timestamp}</Text>
                       </div>
                     </div>
-                    <div style={{ fontSize: 14 }}>
+                    <div className="text-sm">
                       {highlightText(entry)}
                     </div>
                   </motion.div>
@@ -359,7 +337,7 @@ if (loading) {
         )}
 
         {transcript.length === 0 && metadataComparison.length === 0 && violationTypes.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <div className="text-center py-12">
             <Text type="secondary">No call details available</Text>
           </div>
         )}

@@ -1,13 +1,13 @@
 import React from 'react';
 import { 
-  Loader2, 
-  SearchX, 
-  Inbox, 
-  FileQuestion, 
-  AlertTriangle, 
-  WifiOff, 
-  FolderPlus 
-} from 'lucide-react';
+  IconLoader2, 
+  IconSearchOff, 
+  IconInbox, 
+  IconFileUnknown, 
+  IconAlertTriangle, 
+  IconWifiOff, 
+  IconFolderPlus 
+} from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -96,14 +96,14 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
     switch (type) {
       case 'loading':
         return {
-          icon: <Loader2 className={cn(baseIconClass, "text-slate-500")} />,
+          icon: <IconLoader2 className={cn(baseIconClass, "text-slate-500")} />,
           containerClass: "bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700",
           animate: true,
           spin: true
         };
       case '200':
         return {
-          icon: <SearchX className={cn(baseIconClass, "text-slate-500")} />,
+          icon: <IconSearchOff className={cn(baseIconClass, "text-slate-500")} />,
           containerClass: "bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700",
           animate: false,
           spin: false
@@ -111,35 +111,35 @@ export const ExceptionHandleView: React.FC<ExceptionHandleViewProps> = ({
       case '204':
       case '203':
         return {
-          icon: <Inbox className={cn(baseIconClass, "text-slate-400")} />,
+          icon: <IconInbox className={cn(baseIconClass, "text-slate-400")} />,
           containerClass: "bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 border border-slate-200 dark:border-slate-700",
           animate: false,
           spin: false
         };
       case '404':
         return {
-          icon: <FileQuestion className={cn(baseIconClass, "text-blue-500")} />,
+          icon: <IconFileUnknown className={cn(baseIconClass, "text-blue-500")} />,
           containerClass: "bg-gradient-to-br from-blue-100 via-blue-50 to-white dark:from-blue-950 dark:via-blue-900/50 dark:to-slate-950 border border-blue-200 dark:border-blue-800",
           animate: false,
           spin: false
         };
       case '500':
         return {
-          icon: <AlertTriangle className={cn(baseIconClass, "text-red-500")} />,
+          icon: <IconAlertTriangle className={cn(baseIconClass, "text-red-500")} />,
           containerClass: "bg-gradient-to-br from-red-100 via-red-50 to-white dark:from-red-950 dark:via-red-900/50 dark:to-slate-950 border border-red-200 dark:border-red-800",
           animate: false,
           spin: false
         };
       case '503':
         return {
-          icon: <WifiOff className={cn(baseIconClass, "text-amber-500")} />,
+          icon: <IconWifiOff className={cn(baseIconClass, "text-amber-500")} />,
           containerClass: "bg-gradient-to-br from-amber-100 via-amber-50 to-white dark:from-amber-950 dark:via-amber-900/50 dark:to-slate-950 border border-amber-200 dark:border-amber-800",
           animate: false,
           spin: false
         };
       case 'no-records':
         return {
-          icon: <FolderPlus className={cn(baseIconClass, "text-emerald-500")} />,
+          icon: <IconFolderPlus className={cn(baseIconClass, "text-emerald-500")} />,
           containerClass: "bg-gradient-to-br from-emerald-100 via-emerald-50 to-white dark:from-emerald-950 dark:via-emerald-900/50 dark:to-slate-950 border border-emerald-200 dark:border-emerald-800",
           animate: true,
           spin: false

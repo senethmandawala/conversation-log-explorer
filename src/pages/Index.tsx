@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Filter, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Sparkles } from "lucide-react";
+import { IconDownload, IconFilter, IconSearch, IconX, IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight, IconSparkles } from "@tabler/icons-react";
 import { FilterDropdown, TextFilterContent, MultiSelectContent } from "@/components/conversation/FilterDropdown";
 import { DateRangeFilter } from "@/components/conversation/DateRangeFilter";
 import { ConversationTable } from "@/components/conversation/ConversationTable";
@@ -199,7 +199,7 @@ export default function ConversationHistory() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Sparkles className="h-5 w-5 text-primary" />
+                      <IconSparkles className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <h1 className="text-xl font-semibold tracking-tight text-foreground">
@@ -224,7 +224,7 @@ export default function ConversationHistory() {
                     onClick={handleExport}
                     className="h-10 px-4 rounded-xl border-border/60 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200"
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <IconDownload className="h-4 w-4 mr-2" />
                     Export CSV
                   </Button>
                   <Button
@@ -238,7 +238,7 @@ export default function ConversationHistory() {
                         : "border-border/60 hover:bg-primary/5 hover:border-primary/50"
                     )}
                   >
-                    <Filter className="h-4 w-4 mr-2" />
+                    <IconFilter className="h-4 w-4 mr-2" />
                     Filters
                     <AnimatePresence>
                       {activeFilterCount > 0 && (
@@ -412,7 +412,7 @@ export default function ConversationHistory() {
                               onClick={handleSearch} 
                               className="flex-1 h-10 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                             >
-                              <Search className="h-4 w-4 mr-2" />
+                              <IconSearch className="h-4 w-4 mr-2" />
                               Search
                             </Button>
                             <AnimatePresence>
@@ -427,7 +427,7 @@ export default function ConversationHistory() {
                                     onClick={handleClearFilters}
                                     className="h-10 w-10 p-0 rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
                                   >
-                                    <X className="h-4 w-4" />
+                                    <IconX className="h-4 w-4" />
                                   </Button>
                                 </motion.div>
                               )}
@@ -476,7 +476,7 @@ export default function ConversationHistory() {
                             disabled={currentPage === 1}
                             className="h-9 w-9 p-0 rounded-lg"
                           >
-                            <ChevronsLeft className="h-4 w-4" />
+                            <IconChevronsLeft className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
@@ -485,7 +485,7 @@ export default function ConversationHistory() {
                             disabled={currentPage === 1}
                             className="h-9 w-9 p-0 rounded-lg"
                           >
-                            <ChevronLeft className="h-4 w-4" />
+                            <IconChevronLeft className="h-4 w-4" />
                           </Button>
                           
                           <div className="flex items-center gap-1 mx-2">
@@ -525,7 +525,7 @@ export default function ConversationHistory() {
                             disabled={currentPage === totalPages}
                             className="h-9 w-9 p-0 rounded-lg"
                           >
-                            <ChevronRight className="h-4 w-4" />
+                            <IconChevronRight className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
@@ -534,7 +534,7 @@ export default function ConversationHistory() {
                             disabled={currentPage === totalPages}
                             className="h-9 w-9 p-0 rounded-lg"
                           >
-                            <ChevronsRight className="h-4 w-4" />
+                            <IconChevronsRight className="h-4 w-4" />
                           </Button>
                         </div>
                       </motion.div>

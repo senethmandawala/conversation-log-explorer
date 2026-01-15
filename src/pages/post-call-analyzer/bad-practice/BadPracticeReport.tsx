@@ -17,22 +17,22 @@ import {
   Pagination
 } from "antd";
 import { 
-  ArrowLeftOutlined,
-  DownloadOutlined,
-  FilterOutlined,
-  SearchOutlined,
-  CalendarOutlined,
-  WarningOutlined,
-  UpOutlined,
-  DownOutlined,
-  LeftOutlined,
-  RightOutlined,
-  DoubleLeftOutlined,
-  DoubleRightOutlined,
-  EyeOutlined,
-  BarChartOutlined,
-  BulbOutlined
-} from "@ant-design/icons";
+  IconArrowLeft,
+  IconDownload,
+  IconFilter,
+  IconSearch,
+  IconCalendar,
+  IconAlertTriangle,
+  IconChevronUp,
+  IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronsLeft,
+  IconChevronsRight,
+  IconEye,
+  IconChartBar,
+  IconBulb
+} from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion, AnimatePresence } from "framer-motion";
@@ -217,7 +217,7 @@ export default function BadPracticeReport() {
       dataIndex: 'violationType',
       key: 'violationType',
       render: (text: string) => (
-        <Tag color="purple" style={{ borderRadius: 6 }}>{text}</Tag>
+        <Tag color="purple" className="rounded-md">{text}</Tag>
       ),
     },
     {
@@ -232,7 +232,7 @@ export default function BadPracticeReport() {
       key: 'score',
       align: 'center' as const,
       render: (score: string, record: BadPracticeRecord) => (
-        <Tag color={getScoreColor(record.scoreValue)} style={{ borderRadius: 12, fontWeight: 600 }}>
+        <Tag color={getScoreColor(record.scoreValue)} className="rounded-xl font-semibold">
           {score}
         </Tag>
       ),
@@ -245,12 +245,12 @@ export default function BadPracticeReport() {
         <Space>
           <Button
             type="text"
-            icon={record.expanded ? <UpOutlined /> : <DownOutlined />}
+            icon={record.expanded ? <IconChevronUp /> : <IconChevronDown />}
             onClick={() => toggleRowExpand(record.id)}
           />
           <Button
             type="text"
-            icon={<EyeOutlined />}
+            icon={<IconEye />}
             onClick={() => handleViewCallLogs(record.agent, record.agentId)}
           />
         </Space>
@@ -272,7 +272,7 @@ export default function BadPracticeReport() {
       >
         <div className="p-6">
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            className="rounded-xl border-slate-200"
             styles={{ body: { padding: 24 } }}
           >
             <AgentCallLogs
@@ -320,7 +320,7 @@ export default function BadPracticeReport() {
           transition={{ duration: 0.3 }}
         >
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            className="rounded-xl border-slate-200"
             styles={{
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
@@ -329,27 +329,16 @@ export default function BadPracticeReport() {
               <div className="flex items-center gap-3">
                 <Button 
                   type="text" 
-                  icon={<ArrowLeftOutlined />} 
+                  icon={<IconArrowLeft />} 
                   onClick={() => setSelectedTab("reports")}
-                  style={{ marginRight: 8 }}
+                  className="mr-2"
                 />
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
-                  }}
-                >
-                  <WarningOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30">
+                  <IconAlertTriangle className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Bad Practice Analysis</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Bad Practice Analysis</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Identify and analyze agent behaviors that deviate from best practices
                   </Text>
                 </div>
@@ -359,12 +348,12 @@ export default function BadPracticeReport() {
               <Space>
                 <Button 
                   type={filtersOpen ? "primary" : "default"}
-                  icon={<FilterOutlined />}
+                  icon={<IconFilter />}
                   onClick={() => setFiltersOpen(!filtersOpen)}
                 >
                   Filters
                   {activeFiltersCount > 0 && (
-                    <Tag color="red" style={{ marginLeft: 8, borderRadius: 10 }}>{activeFiltersCount}</Tag>
+                    <Tag color="red" className="ml-2 rounded-lg">{activeFiltersCount}</Tag>
                   )}
                 </Button>
               </Space>
@@ -378,31 +367,26 @@ export default function BadPracticeReport() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden' }}
+                  className="overflow-hidden"
                 >
                   <Card
                     size="small"
-                    style={{ 
-                      marginBottom: 20, 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12
-                    }}
+                    className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                     styles={{ body: { padding: 16 } }}
                   >
                     <Row gutter={[16, 16]}>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
-                          <RangePicker style={{ width: '100%' }} />
+                          <Text type="secondary" className="text-xs font-medium">Date Range</Text>
+                          <RangePicker className="w-full" />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Agent Name</Text>
+                          <Text type="secondary" className="text-xs font-medium">Agent Name</Text>
                           <Input
                             placeholder="Search agent..."
-                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            prefix={<IconSearch className="text-slate-400" />}
                             value={agentName}
                             onChange={(e) => setAgentName(e.target.value)}
                           />
@@ -410,10 +394,10 @@ export default function BadPracticeReport() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Text type="secondary" className="text-xs font-medium">Call Type</Text>
                           <Select
                             placeholder="All Call Types"
-                            style={{ width: '100%' }}
+                            className="w-full"
                             allowClear
                             value={selectedCallType ? selectedCallType : undefined}
                             onChange={(value) => setSelectedCallType(value === "" ? "" : value)}
@@ -426,7 +410,7 @@ export default function BadPracticeReport() {
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6} className="flex items-end">
-                        <Button type="primary" style={{ width: '100%' }}>Search</Button>
+                        <Button type="primary" className="w-full">Search</Button>
                       </Col>
                     </Row>
                   </Card>
@@ -437,7 +421,7 @@ export default function BadPracticeReport() {
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton.Input key={i} active block style={{ height: 52 }} />
+                  <Skeleton.Input key={i} active block className="h-[52px]" />
                 ))}
               </div>
             ) : (
@@ -447,16 +431,16 @@ export default function BadPracticeReport() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Title level={5} style={{ marginBottom: 16 }}>Agent Wise Analysis</Title>
-                  <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                  <Title level={5} className="mb-4">Agent Wise Analysis</Title>
+                  <div className="rounded-xl overflow-hidden border border-slate-200">
                   {/* Table Header */}
-                  <div style={{ display: 'flex', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569' }}>Agent</div>
-                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Total Calls</div>
-                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569' }}>Most Violation Type</div>
-                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Total Violations</div>
-                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Bad Practice Score</div>
-                    <div style={{ flex: 1, padding: '12px 16px', fontWeight: 600, color: '#475569', textAlign: 'center' }}>Actions</div>
+                  <div className="flex bg-slate-50 border-b border-slate-200">
+                    <div className="flex-1 px-4 py-3 font-semibold text-slate-600">Agent</div>
+                    <div className="flex-1 px-4 py-3 font-semibold text-slate-600 text-center">Total Calls</div>
+                    <div className="flex-1 px-4 py-3 font-semibold text-slate-600">Most Violation Type</div>
+                    <div className="flex-1 px-4 py-3 font-semibold text-slate-600 text-center">Total Violations</div>
+                    <div className="flex-1 px-4 py-3 font-semibold text-slate-600 text-center">Bad Practice Score</div>
+                    <div className="flex-1 px-4 py-3 font-semibold text-slate-600 text-center">Actions</div>
                   </div>
                   
                   {/* Table Body with Expanded Rows */}
@@ -467,41 +451,35 @@ export default function BadPracticeReport() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.03 }}
-                        style={{ 
-                          display: 'flex',
-                          borderBottom: '1px solid #e2e8f0',
-                          backgroundColor: record.expanded ? '#fafafa' : 'transparent'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = record.expanded ? '#fafafa' : '#f8fafc'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = record.expanded ? '#fafafa' : 'transparent'}
+                        className={`flex border-b border-slate-200 hover:bg-slate-50 transition-colors ${record.expanded ? 'bg-slate-50' : ''}`}
                       >
-                        <div style={{ flex: 1, padding: '12px 16px' }}>
+                        <div className="flex-1 px-4 py-3">
                           <Text strong>{record.agent}</Text>
                         </div>
-                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                        <div className="flex-1 px-4 py-3 text-center">
                           {record.totalCalls}
                         </div>
-                        <div style={{ flex: 1, padding: '12px 16px' }}>
-                          <Tag color="purple" style={{ borderRadius: 6 }}>{record.violationType}</Tag>
+                        <div className="flex-1 px-4 py-3">
+                          <Tag color="purple" className="rounded-md">{record.violationType}</Tag>
                         </div>
-                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                        <div className="flex-1 px-4 py-3 text-center">
                           {record.totalViolations}
                         </div>
-                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
-                          <Tag color={getScoreColor(record.scoreValue)} style={{ borderRadius: 12, fontWeight: 600 }}>
+                        <div className="flex-1 px-4 py-3 text-center">
+                          <Tag color={getScoreColor(record.scoreValue)} className="rounded-xl font-semibold">
                             {record.score}
                           </Tag>
                         </div>
-                        <div style={{ flex: 1, padding: '12px 16px', textAlign: 'center' }}>
+                        <div className="flex-1 px-4 py-3 text-center">
                           <Space>
                             <Button
                               type="text"
-                              icon={record.expanded ? <UpOutlined /> : <DownOutlined />}
+                              icon={record.expanded ? <IconChevronUp /> : <IconChevronDown />}
                               onClick={() => toggleRowExpand(record.id)}
                             />
                             <Button
                               type="text"
-                              icon={<EyeOutlined />}
+                              icon={<IconEye />}
                               onClick={() => handleViewCallLogs(record.agent, record.agentId)}
                             />
                           </Space>
@@ -516,35 +494,25 @@ export default function BadPracticeReport() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            style={{ 
-                              borderBottom: '1px solid #e2e8f0',
-                              backgroundColor: '#fafafa'
-                            }}
+                            className="border-b border-slate-200 bg-slate-50"
                           >
-                            <div style={{ padding: '16px 24px', display: 'flex', gap: '24px' }}>
-                                <div style={{ flex: 1 }}>
+                            <div className="p-6 flex gap-6">
+                                <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-4">
-                                    <BarChartOutlined style={{ color: '#f59e0b' }} />
-                                    <Text strong style={{ fontSize: 14 }}>Violation Breakdown</Text>
+                                    <IconChartBar className="text-amber-500" />
+                                    <Text strong className="text-sm">Violation Breakdown</Text>
                                   </div>
                                   <div className="space-y-3">
                                     {record.violationBreakdown.map((violation, vIndex) => (
-                                      <div key={vIndex} style={{ marginLeft: violation.isSubType ? 16 : 0 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                      <div key={vIndex} className={violation.isSubType ? 'ml-4' : ''}>
+                                        <div className="flex justify-between mb-1">
                                           <Text 
-                                            style={{ 
-                                              fontSize: 14,
-                                              fontWeight: violation.isSubType ? 'normal' : 500,
-                                              color: violation.isSubType ? '#94a3b8' : '#1e293b'
-                                            }}
+                                            className={`text-sm ${violation.isSubType ? 'text-slate-400' : 'font-medium text-slate-800'}`}
                                           >
                                             {violation.isSubType ? `└ ${violation.type}` : violation.type}
                                           </Text>
                                           <Text 
-                                            style={{ 
-                                              fontSize: 14,
-                                              color: violation.isSubType ? '#94a3b8' : '#1e293b'
-                                            }}
+                                            className={`text-sm ${violation.isSubType ? 'text-slate-400' : 'text-slate-800'}`}
                                           >
                                             {violation.count} ({violation.percentage}%)
                                           </Text>
@@ -552,7 +520,7 @@ export default function BadPracticeReport() {
                                         <Progress 
                                           percent={violation.percentage} 
                                           size="small"
-                                          style={{ margin: 0 }}
+                                          className="!m-0"
                                         />
                                       </div>
                                     ))}
@@ -560,23 +528,19 @@ export default function BadPracticeReport() {
                                 </div>
 
                                 {/* Vertical Separator */}
-                                <div style={{ 
-                                  width: '2px', 
-                                  background: '#e2e8f0',
-                                  alignSelf: 'stretch'
-                                }} />
+                                <div className="w-0.5 bg-slate-200 self-stretch" />
 
-                                <div style={{ flex: 1 }}>
+                                <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-4">
-                                    <BulbOutlined style={{ color: '#6366f1' }} />
-                                    <Text strong style={{ fontSize: 14 }}>Agent Recommendations</Text>
+                                    <IconBulb className="text-indigo-500" />
+                                    <Text strong className="text-sm">Agent Recommendations</Text>
                                   </div>
                                   <div className="space-y-2">
                                     {record.violationBreakdown
                                       .filter(v => v.suggestions && v.suggestions.length > 0)
                                       .flatMap(v => v.suggestions || [])
                                       .map((suggestion, sIndex) => (
-                                        <div key={sIndex} style={{ display: 'flex', gap: 8, fontSize: 14 }}>
+                                        <div key={sIndex} className="flex gap-2 text-sm">
                                           <Text type="secondary">•</Text>
                                           <Text>{suggestion.text}</Text>
                                         </div>
@@ -593,7 +557,7 @@ export default function BadPracticeReport() {
                 </div>
                 
                 {/* Exact CallInsight Pagination - No Table Wrapper */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                <div className="flex justify-end mt-4">
                   <Pagination
                     total={totalRecords}
                     pageSize={pageSize}

@@ -6,16 +6,16 @@ import {
   Badge
 } from "antd";
 import { 
-  FileTextOutlined, 
-  BarChartOutlined,
-  ClockCircleOutlined,
-  DollarOutlined,
-  ArrowRightOutlined,
-  SafetyOutlined,
-  SettingOutlined,
-  CalendarOutlined,
-  WarningOutlined
-} from "@ant-design/icons";
+  IconFileText, 
+  IconChartBar,
+  IconClock,
+  IconCurrencyDollar,
+  IconArrowRight,
+  IconShield,
+  IconSettings,
+  IconCalendar,
+  IconAlertTriangle
+} from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import ReportTransactionSummary from "./autopilot-transaction-summary/ReportTransactionSummary";
@@ -41,7 +41,7 @@ const reportCards: ReportCard[] = [
     id: "transaction",
     title: "Transaction Summary Report",
     description: "View detailed transaction summaries and patterns across autopilot interactions",
-    icon: <FileTextOutlined style={{ fontSize: 24 }} />,
+    icon: <IconFileText style={{ fontSize: 24 }} />,
     color: "#8b5cf6",
     bgColor: "rgba(139, 92, 246, 0.1)",
     available: true,
@@ -50,7 +50,7 @@ const reportCards: ReportCard[] = [
     id: "document",
     title: "Document Access Frequency",
     description: "Track document access patterns and frequency in autopilot conversations",
-    icon: <BarChartOutlined style={{ fontSize: 24 }} />,
+    icon: <IconChartBar style={{ fontSize: 24 }} />,
     color: "#22c55e",
     bgColor: "rgba(34, 197, 94, 0.1)",
     available: true,
@@ -59,7 +59,7 @@ const reportCards: ReportCard[] = [
     id: "customized",
     title: "Customized Reports",
     description: "View and manage your custom autopilot reports",
-    icon: <SettingOutlined style={{ fontSize: 24 }} />,
+    icon: <IconSettings style={{ fontSize: 24 }} />,
     color: "#f59e0b",
     bgColor: "rgba(245, 158, 11, 0.1)",
     available: true,
@@ -68,7 +68,7 @@ const reportCards: ReportCard[] = [
     id: "weekly-trends",
     title: "Weekly Traffic Trends",
     description: "Analyze weekly traffic patterns and trends in autopilot usage",
-    icon: <CalendarOutlined style={{ fontSize: 24 }} />,
+    icon: <IconCalendar style={{ fontSize: 24 }} />,
     color: "#f97316",
     bgColor: "rgba(249, 115, 22, 0.1)",
     available: true,
@@ -77,7 +77,7 @@ const reportCards: ReportCard[] = [
     id: "success-failure",
     title: "Success/Failure Rate Analysis",
     description: "Monitor success and failure rates over time for autopilot interactions",
-    icon: <BarChartOutlined style={{ fontSize: 24 }} />,
+    icon: <IconChartBar style={{ fontSize: 24 }} />,
     color: "#ec4899",
     bgColor: "rgba(236, 72, 153, 0.1)",
     available: true,
@@ -86,7 +86,7 @@ const reportCards: ReportCard[] = [
     id: "token-usage",
     title: "Token Usage Report",
     description: "Track AI token consumption and costs across autopilot services",
-    icon: <DollarOutlined style={{ fontSize: 24 }} />,
+    icon: <IconCurrencyDollar style={{ fontSize: 24 }} />,
     color: "#06b6d4",
     bgColor: "rgba(6, 182, 212, 0.1)",
     available: true,
@@ -95,7 +95,7 @@ const reportCards: ReportCard[] = [
     id: "average-call-duration",
     title: "Average Call Duration",
     description: "Analyze call duration statistics and trends for autopilot conversations",
-    icon: <ClockCircleOutlined style={{ fontSize: 24 }} />,
+    icon: <IconClock style={{ fontSize: 24 }} />,
     color: "#6366f1",
     bgColor: "rgba(99, 102, 241, 0.1)",
     available: true,
@@ -177,7 +177,7 @@ export default function AutopilotReports() {
                     boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
                   }}
                 >
-                  <FileTextOutlined style={{ color: 'white', fontSize: 20 }} />
+                  <IconFileText style={{ color: 'white', fontSize: 20 }} />
                 </div>
                 <div>
                   <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Autopilot Reports</Title>
@@ -274,13 +274,13 @@ export default function AutopilotReports() {
                       right: 20,
                     }}
                   >
-                    <ArrowRightOutlined style={{ color: report.color, fontSize: 18 }} />
+                    <IconArrowRight style={{ color: report.color, fontSize: 18 }} />
                   </motion.div>
 
                   {/* Not available badge */}
                   {!report.available && (
                     <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                      <SafetyOutlined style={{ color: '#94a3b8', fontSize: 16 }} />
+                      <IconShield style={{ color: '#94a3b8', fontSize: 16 }} />
                     </div>
                   )}
                 </motion.div>

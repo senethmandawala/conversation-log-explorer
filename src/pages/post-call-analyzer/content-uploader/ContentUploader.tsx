@@ -14,17 +14,17 @@ import {
   message
 } from "antd";
 import { 
-  UploadOutlined,
-  CloudUploadOutlined,
-  AudioOutlined,
-  CloseOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  LoadingOutlined,
-  PlayCircleOutlined,
-  DeleteOutlined,
-  ReloadOutlined
-} from "@ant-design/icons";
+  IconUpload,
+  IconCloudUpload,
+  IconMicrophone,
+  IconX,
+  IconCircleCheck,
+  IconAlertCircle,
+  IconLoader2,
+  IconPlayerPlay,
+  IconTrash,
+  IconRefresh
+} from "@tabler/icons-react";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion, AnimatePresence } from "framer-motion";
 import { StatCard } from "@/components/ui/stat-card";
@@ -160,15 +160,15 @@ export default function ContentUploader() {
   const getStatusIcon = (status: UploadedFile["status"]) => {
     switch (status) {
       case "uploading":
-        return <LoadingOutlined className="text-primary" spin />;
+        return <IconLoader2 className="text-primary animate-spin" />;
       case "analyzing":
-        return <ReloadOutlined className="text-amber-500" spin />;
+        return <IconRefresh className="text-amber-500 animate-spin" />;
       case "completed":
-        return <CheckCircleOutlined className="text-green-500" />;
+        return <IconCircleCheck className="text-green-500" />;
       case "failed":
-        return <ExclamationCircleOutlined className="text-red-500" />;
+        return <IconAlertCircle className="text-red-500" />;
       default:
-        return <AudioOutlined className="text-muted-foreground" />;
+        return <IconMicrophone className="text-muted-foreground" />;
     }
   };
 
@@ -206,29 +206,19 @@ export default function ContentUploader() {
       >
         <div className="p-6 space-y-6">
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            className="rounded-xl border-slate-200"
             styles={{
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
             }}
             title={
               <div className="flex items-center gap-3">
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <UploadOutlined style={{ color: '#3b82f6', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-blue-50 flex items-center justify-center">
+                  <IconUpload className="text-blue-500 text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Content Uploader</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Content Uploader</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Upload audio files for analysis and processing
                   </Text>
                 </div>
@@ -271,7 +261,7 @@ export default function ContentUploader() {
                         ${isDragging ? "bg-primary/20" : "bg-muted"}
                       `}
                     >
-                      <CloudUploadOutlined className={`text-6xl ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                      <IconCloudUpload className={`text-6xl ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
                     </motion.div>
                     
                     <div>
@@ -344,17 +334,17 @@ export default function ContentUploader() {
                               {file.status === "pending" && (
                                 <Button
                                   type="text"
-                                  icon={<CloseOutlined />}
+                                  icon={<IconX />}
                                   onClick={() => removeFile(file.id)}
-                                  style={{ height: 32, width: 32 }}
+                                  className="h-8 w-8"
                                 />
                               )}
 
                               {file.status === "completed" && (
                                 <Button 
                                   type="text" 
-                                  icon={<PlayCircleOutlined />}
-                                  style={{ height: 32, width: 32 }}
+                                  icon={<IconPlayerPlay />}
+                                  className="h-8 w-8"
                                 />
                               )}
                             </div>
@@ -372,12 +362,12 @@ export default function ContentUploader() {
                         >
                           {isAnalyzing ? (
                             <>
-                              <LoadingOutlined spin />
+                              <IconLoader2 className="animate-spin" />
                               Processing...
                             </>
                           ) : (
                             <>
-                              <UploadOutlined />
+                              <IconUpload />
                               Upload & Analyze
                             </>
                           )}

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { InstanceSelector } from "@/components/post-call/InstanceSelector";
 import { useModule } from "@/contexts/ModuleContext";
 import { Card, Typography } from "antd";
-import { MessageOutlined } from "@ant-design/icons";
+import { IconMessage } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -37,22 +37,15 @@ const Copilot = () => {
             transition={{ duration: 0.3 }}
           >
             <div className="p-4 md:p-6 max-w-7xl mx-auto">
-              <Card
-                style={{
-                  borderRadius: 12,
-                  border: '1px solid #e2e8f0',
-                  padding: '24px',
-                  textAlign: 'center'
-                }}
-              >
-                <MessageOutlined style={{ fontSize: 48, color: '#10b981', marginBottom: 16 }} />
-                <Title level={3} style={{ color: '#10b981', marginBottom: 8 }}>
+              <Card className="rounded-xl border-slate-200 p-6 text-center">
+                <IconMessage className="text-5xl text-emerald-500 mb-4" />
+                <Title level={3} className="!text-emerald-500 !mb-2">
                   Copilot
                 </Title>
-                <Text type="secondary" style={{ fontSize: '16px' }}>
+                <Text type="secondary" className="text-base">
                   Real-time AI assistance for agents during live calls
                 </Text>
-                <div style={{ marginTop: 16 }}>
+                <div className="mt-4">
                   <Text type="secondary">
                     Please select an instance from the instances page to continue.
                   </Text>
@@ -76,32 +69,16 @@ const Copilot = () => {
           transition={{ duration: 0.2 }}
         >
           <div className="p-4 md:p-6 max-w-7xl mx-auto">
-            <Card
-              style={{
-                borderRadius: 12,
-                border: '1px solid #e2e8f0',
-                padding: '24px'
-              }}
-            >
+            <Card className="rounded-xl border-slate-200 p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div 
-                  style={{ 
-                    width: 40, 
-                    height: 40, 
-                    borderRadius: 8, 
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <MessageOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                  <IconMessage className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={3} style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>
+                  <Title level={3} className="!m-0 !text-xl !font-semibold">
                     Copilot Dashboard
                   </Title>
-                  <Text type="secondary" style={{ fontSize: '14px' }}>
+                  <Text type="secondary" className="text-sm">
                     {selectedProject ? 
                       `Department: ${selectedProject.department_name || selectedProject.name}` : 
                       `Department ID: ${departmentId}`
@@ -110,12 +87,12 @@ const Copilot = () => {
                 </div>
               </div>
               
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <MessageOutlined style={{ fontSize: 64, color: '#10b981', marginBottom: 16 }} />
-                <Title level={2} style={{ color: '#10b981', marginBottom: 8 }}>
+              <div className="text-center py-10">
+                <IconMessage className="text-6xl text-emerald-500 mb-4" />
+                <Title level={2} className="!text-emerald-500 !mb-2">
                   Coming Soon
                 </Title>
-                <Text type="secondary" style={{ fontSize: '16px' }}>
+                <Text type="secondary" className="text-base">
                   Copilot features are currently under development.
                 </Text>
               </div>

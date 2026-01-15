@@ -7,9 +7,9 @@ import {
   Tooltip
 } from "antd";
 import { 
-  PieChartOutlined,
-  InfoCircleOutlined
-} from "@ant-design/icons";
+  IconChartPie,
+  IconInfoCircle
+} from "@tabler/icons-react";
 import {
   PieChart,
   Pie,
@@ -126,7 +126,7 @@ export function CallsHandledByDTMF() {
                   color: 'white'
                 }}
               >
-                <PieChartOutlined style={{ fontSize: 20 }} />
+                <IconChartPie style={{ fontSize: 20 }} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -135,7 +135,7 @@ export function CallsHandledByDTMF() {
                   </Title>
                   <Tooltip title="Distribution of calls handled through DTMF input">
                     <div style={{ marginTop: '-4px' }}>
-                      <InfoCircleOutlined 
+                      <IconInfoCircle 
                         style={{ fontSize: 14, color: '#64748b' }}
                       />
                     </div>

@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Phone, CheckCircle, Clock, FolderOpen, Timer, VolumeX, TrendingUp, TrendingDown } from "lucide-react";
+import { IconPhone, IconCircleCheck, IconClock, IconFolderOpen, IconHourglass, IconVolumeOff, IconTrendingUp, IconTrendingDown } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 
 interface StatCardProps {
@@ -16,12 +16,12 @@ interface StatCardProps {
 }
 
 const iconMap: Record<string, React.ElementType> = {
-  phone: Phone,
-  check: CheckCircle,
-  clock: Clock,
-  folder: FolderOpen,
-  timer: Timer,
-  volume: VolumeX,
+  phone: IconPhone,
+  check: IconCircleCheck,
+  clock: IconClock,
+  folder: IconFolderOpen,
+  timer: IconHourglass,
+  volume: IconVolumeOff,
 };
 
 const colorVariants: Record<string, { bg: string; icon: string; glow: string }> = {
@@ -68,7 +68,7 @@ const getColorKey = (iconColor: string): string => {
 };
 
 export const StatCard = ({ title, value, icon, iconColor, trend }: StatCardProps) => {
-  const Icon = iconMap[icon] || Phone;
+  const Icon = iconMap[icon] || IconPhone;
   const colorKey = getColorKey(iconColor);
   const colors = colorVariants[colorKey];
 
@@ -86,7 +86,7 @@ export const StatCard = ({ title, value, icon, iconColor, trend }: StatCardProps
           
           {trend && (
             <div className={`flex items-center gap-1 text-xs font-medium ${trend.isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-              {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {trend.isPositive ? <IconTrendingUp className="h-3 w-3" /> : <IconTrendingDown className="h-3 w-3" />}
               {trend.value}%
             </div>
           )}

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { InstanceSelector } from "@/components/post-call/InstanceSelector";
 import AutopilotInstanceSelector from "@/pages/autopilot/AutopilotInstanceSelector/AutopilotInstanceSelector";
 import { Card, Typography } from "antd";
-import { DatabaseOutlined, RobotOutlined, MessageOutlined } from "@ant-design/icons";
+import { IconDatabase, IconRobot, IconMessage } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -97,13 +97,13 @@ const Instances = () => {
   const getModuleIcon = () => {
     switch (moduleType) {
       case 'pca':
-        return <DatabaseOutlined />;
+        return <IconDatabase />;
       case 'autopilot':
-        return <RobotOutlined />;
+        return <IconRobot />;
       case 'copilot':
-        return <MessageOutlined />;
+        return <IconMessage />;
       default:
-        return <DatabaseOutlined />;
+        return <IconDatabase />;
     }
   };
 

@@ -64,11 +64,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         ...getColorStyle()
       }}
     >
-      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem' }}>
+      <span className="flex items-center justify-center gap-1.5">
         {icon && (
           <TablerIcon name={icon} size={16} />
         )}
-        <span style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
+        <span className="font-bold capitalize">
           {title}
         </span>
       </span>

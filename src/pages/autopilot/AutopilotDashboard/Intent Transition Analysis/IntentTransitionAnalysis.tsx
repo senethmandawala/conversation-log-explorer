@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info, ArrowRight, GitBranch, Shuffle } from "lucide-react";
+import { IconInfoCircle, IconArrowRight, IconGitBranch, IconArrowsShuffle } from "@tabler/icons-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -24,7 +24,7 @@ import {
   Table as AntTable,
   Tag as AntTag
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { IconInfoCircle as InfoIcon } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -61,47 +61,26 @@ export function IntentTransitionAnalysis() {
   };
 
   return (
-    <AntCard
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <AntCard className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <GitBranch style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconGitBranch className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     Intent Transition Analysis
                   </Title>
                   <AntTooltip title="Shows how callers transition between different intents during a single call">
-                    <div style={{ marginTop: '-4px' }}>
-                      <InfoCircleOutlined 
-                        style={{ fontSize: 14, color: '#64748b' }}
-                      />
+                    <div className="-mt-1">
+                      <InfoIcon className="text-sm text-slate-500" />
                     </div>
                   </AntTooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Analysis of intent transitions during calls
                 </Text>
               </div>
@@ -110,12 +89,12 @@ export function IntentTransitionAnalysis() {
         </div>
         
         {/* Chart Content */}
-        <div style={{ marginTop: 10 }}>
+        <div className="mt-2">
         {/* Total Calls Section */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'hsl(var(--muted) / 0.5)', borderRadius: 8, padding: '8px 16px' }}>
-            <span style={{ fontSize: 14, color: 'hsl(var(--muted-foreground))' }}>Total Multi-Category Calls</span>
-            <AntTag color="default" style={{ fontSize: 14, fontWeight: 'bold', padding: '2px 8px' }}>
+        <div className="mb-4">
+          <div className="inline-flex items-center gap-2 bg-muted/50 rounded-lg px-4 py-2">
+            <span className="text-sm text-muted-foreground">Total Multi-Category Calls</span>
+            <AntTag color="default" className="text-sm font-bold px-2 py-0.5">
               {totalMultiCategoryCalls.toLocaleString()}
             </AntTag>
           </div>
@@ -124,7 +103,7 @@ export function IntentTransitionAnalysis() {
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : intentTransitions.length > 0 ? (
-          <div style={{ maxHeight: 400, overflow: 'auto', borderRadius: 8, border: '1px solid hsl(var(--border))' }}>
+          <div className="max-h-[400px] overflow-auto rounded-lg border border-border">
             <AntTable
               dataSource={intentTransitions.map((item, index) => ({ ...item, key: index }))}
               columns={[
@@ -133,17 +112,17 @@ export function IntentTransitionAnalysis() {
                   dataIndex: 'combination',
                   key: 'combination',
                   render: (combination: string[]) => (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+                    <div className="flex flex-wrap items-center gap-1">
                       {combination.map((intent, i) => (
-                        <span key={i} style={{ display: 'flex', alignItems: 'center' }}>
+                        <span key={i} className="flex items-center">
                           <AntTag 
                             color={COLORS[i % COLORS.length]} 
-                            style={{ fontSize: 11, margin: 0 }}
+                            className="text-[11px] m-0"
                           >
                             {intent}
                           </AntTag>
                           {i < combination.length - 1 && (
-                            <span style={{ margin: '0 4px', color: 'hsl(var(--muted-foreground))' }}>→</span>
+                            <span className="mx-1 text-muted-foreground">→</span>
                           )}
                         </span>
                       ))}
@@ -157,7 +136,7 @@ export function IntentTransitionAnalysis() {
                   width: 120,
                   align: 'center',
                   render: (count: number) => (
-                    <Text strong style={{ fontSize: 14 }}>
+                    <Text strong className="text-sm">
                       {count.toLocaleString()}
                     </Text>
                   ),
@@ -165,15 +144,15 @@ export function IntentTransitionAnalysis() {
               ]}
               pagination={false}
               size="small"
-              style={{ width: '100%' }}
+              className="w-full"
               rowClassName={(record, index) => 
                 index % 2 === 0 ? 'bg-gray-50/50' : ''
               }
             />
           </div>
         ) : (
-          <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p style={{ color: 'hsl(var(--muted-foreground))' }}>No data available</p>
+          <div className="h-[300px] flex items-center justify-center">
+            <p className="text-muted-foreground">No data available</p>
           </div>
         )}
       </div>

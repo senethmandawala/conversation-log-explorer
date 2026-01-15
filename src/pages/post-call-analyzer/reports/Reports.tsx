@@ -6,19 +6,19 @@ import {
   Badge
 } from "antd";
 import { 
-  FileTextOutlined, 
-  FallOutlined,
-  WarningOutlined,
-  BookOutlined,
-  InfoCircleOutlined,
-  PieChartOutlined,
-  TeamOutlined,
-  ArrowRightOutlined,
-  SafetyOutlined,
-  EnvironmentOutlined,
-  AudioMutedOutlined,
-  BarChartOutlined
-} from "@ant-design/icons";
+  IconFileText, 
+  IconTrendingDown,
+  IconAlertTriangle,
+  IconBook,
+  IconInfoCircle,
+  IconChartPie,
+  IconUsers,
+  IconArrowRight,
+  IconShield,
+  IconMapPin,
+  IconVolume3,
+  IconChartBar
+} from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
@@ -40,7 +40,7 @@ const reportCards: ReportCard[] = [
     id: "training-needs",
     title: "Training Needs Analysis Report",
     description: "Identify areas where agents require additional training and development",
-    icon: <BookOutlined style={{ fontSize: 24 }} />,
+    icon: <IconBook className="text-2xl" />,
     color: "#8b5cf6",
     bgColor: "rgba(139, 92, 246, 0.1)",
     available: true,
@@ -49,7 +49,7 @@ const reportCards: ReportCard[] = [
     id: "unresolved-cases",
     title: "Unresolved Cases Analysis Report",
     description: "Monitor and analyze calls requiring escalation or remaining unresolved",
-    icon: <InfoCircleOutlined style={{ fontSize: 24 }} />,
+    icon: <IconInfoCircle className="text-2xl" />,
     color: "#f59e0b",
     bgColor: "rgba(245, 158, 11, 0.1)",
     available: true,
@@ -58,7 +58,7 @@ const reportCards: ReportCard[] = [
     id: "bad-practice",
     title: "Bad Practice Analysis",
     description: "Identify non-compliance with standard procedures and quality guidelines",
-    icon: <WarningOutlined style={{ fontSize: 24 }} />,
+    icon: <IconAlertTriangle className="text-2xl" />,
     color: "#ef4444",
     bgColor: "rgba(239, 68, 68, 0.1)",
     available: true,
@@ -67,7 +67,7 @@ const reportCards: ReportCard[] = [
     id: "category-trend",
     title: "Category Trend Analysis",
     description: "Track how customer inquiry categories change over time. This report helps spot trends in call volumes.",
-    icon: <PieChartOutlined style={{ fontSize: 24 }} />,
+    icon: <IconChartPie className="text-2xl" />,
     color: "#3b82f6",
     bgColor: "rgba(59, 130, 246, 0.1)",
     available: true,
@@ -76,7 +76,7 @@ const reportCards: ReportCard[] = [
     id: "churn-analysis",
     title: "Churn Analysis",
     description: "Track how customer inquiry categories change over time. This report helps spot trends in call volumes.",
-    icon: <FallOutlined style={{ fontSize: 24 }} />,
+    icon: <IconTrendingDown className="text-2xl" />,
     color: "#f43f5e",
     bgColor: "rgba(244, 63, 94, 0.1)",
     available: true,
@@ -85,7 +85,7 @@ const reportCards: ReportCard[] = [
     id: "overall-recommendations",
     title: "Overall Recommendations",
     description: "Our comprehensive analysis of call center operations has identified critical performance gaps affecting customer experience and operational efficiency.",
-    icon: <BarChartOutlined style={{ fontSize: 24 }} />,
+    icon: <IconChartBar className="text-2xl" />,
     color: "#6366f1",
     bgColor: "rgba(99, 102, 241, 0.1)",
     available: true,
@@ -94,7 +94,7 @@ const reportCards: ReportCard[] = [
     id: "geographic-distribution",
     title: "Geographic Distribution Map",
     description: "Visualize customer care issues across different locations with interactive pie charts",
-    icon: <EnvironmentOutlined style={{ fontSize: 24 }} />,
+    icon: <IconMapPin className="text-2xl" />,
     color: "#10b981",
     bgColor: "rgba(16, 185, 129, 0.1)",
     available: true,
@@ -103,7 +103,7 @@ const reportCards: ReportCard[] = [
     id: "silence-reason",
     title: "Silence Reason Report",
     description: "Analyze and view reasons for silence detected in calls",
-    icon: <AudioMutedOutlined style={{ fontSize: 24 }} />,
+    icon: <IconVolume3 className="text-2xl" />,
     color: "#64748b",
     bgColor: "rgba(100, 116, 139, 0.1)",
     available: true,
@@ -112,7 +112,7 @@ const reportCards: ReportCard[] = [
     id: "agent-comparison",
     title: "Agent wise comparison Report",
     description: "Compare performance metrics across different agents",
-    icon: <TeamOutlined style={{ fontSize: 24 }} />,
+    icon: <IconUsers className="text-2xl" />,
     color: "#06b6d4",
     bgColor: "rgba(6, 182, 212, 0.1)",
     available: true,
@@ -145,34 +145,19 @@ export default function Reports() {
           transition={{ duration: 0.3 }}
         >
           <Card
-            style={{ 
-              borderRadius: 12, 
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-            }}
+            className="rounded-xl border-slate-200 shadow-sm"
             styles={{ 
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
             }}
             title={
               <div className="flex items-center gap-3">
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
-                  }}
-                >
-                  <FileTextOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <IconFileText className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Reports</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Reports</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Generate and view detailed analytics reports
                   </Text>
                 </div>
@@ -259,19 +244,15 @@ export default function Reports() {
                       opacity: isHovering === report.id ? 1 : 0, 
                       x: isHovering === report.id ? 0 : -10 
                     }}
-                    style={{
-                      position: 'absolute',
-                      bottom: 20,
-                      right: 20,
-                    }}
+                    className="absolute bottom-5 right-5"
                   >
-                    <ArrowRightOutlined style={{ color: report.color, fontSize: 18 }} />
+                    <IconArrowRight className="text-lg" style={{ color: report.color }} />
                   </motion.div>
 
                   {/* Not available badge */}
                   {!report.available && (
-                    <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                      <SafetyOutlined style={{ color: '#94a3b8', fontSize: 16 }} />
+                    <div className="absolute top-3 right-3">
+                      <IconShield className="text-slate-400 text-base" />
                     </div>
                   )}
                 </motion.div>

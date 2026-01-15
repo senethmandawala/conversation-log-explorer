@@ -91,7 +91,7 @@ const CustomCalendar: React.FC<{
   };
   
   return (
-    <div className="w-full" style={{ fontFamily: 'Geist, sans-serif' }}>
+    <div className="w-full font-sans">
       {/* Month Navigation */}
       <div className="flex justify-between items-center mb-2 px-1">
         <button 
@@ -139,13 +139,12 @@ const DateSelectionCard: React.FC<{
   <div
     onClick={onClick}
     className={`
-      flex-1 p-2 rounded-lg cursor-pointer transition-all duration-200 border
+      flex-1 p-2 rounded-lg cursor-pointer transition-all duration-200 border font-sans
       ${isActive 
         ? 'border-primary bg-primary/5 shadow-sm' 
         : 'border-border hover:border-primary/50 bg-card'
       }
     `}
-    style={{ fontFamily: 'Geist, sans-serif' }}
   >
     <div className="flex items-center gap-1 mb-1">
       <CalendarOutlined className={`text-xs ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
@@ -411,11 +410,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   const dropdownContent = (
     <div 
-      className="bg-popover border border-border rounded-xl shadow-lg overflow-hidden"
-      style={{ 
-        minWidth: customCalendar ? '420px' : '180px',
-        fontFamily: 'Geist, sans-serif'
-      }}
+      className="bg-popover border border-border rounded-xl shadow-lg overflow-hidden font-sans"
+      style={{ minWidth: customCalendar ? '420px' : '180px' }}
     >
       <div className="flex">
         {/* Preset Options Panel */}

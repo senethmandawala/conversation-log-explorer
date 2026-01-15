@@ -2,21 +2,21 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button, Card, Row, Col, Typography, Space, Badge, Tooltip } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  FilterOutlined, 
-  CalendarOutlined, 
-  BarChartOutlined, 
-  FileTextOutlined, 
-  BulbOutlined, 
-  PhoneOutlined, 
-  CheckCircleOutlined, 
-  ClockCircleOutlined, 
-  FolderOpenOutlined, 
-  FieldTimeOutlined, 
-  MinusCircleOutlined, 
-  ArrowUpOutlined, 
-  ArrowDownOutlined 
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconFilter, 
+  IconCalendar, 
+  IconChartBar, 
+  IconFileText, 
+  IconBulb, 
+  IconPhone, 
+  IconCircleCheck, 
+  IconClock, 
+  IconFolderOpen, 
+  IconClockHour4, 
+  IconCircleMinus, 
+  IconArrowUp, 
+  IconArrowDown 
+} from "@tabler/icons-react";
 import { ReportSection } from "./ReportSection";
 import { CaseClassificationReport } from "@/pages/post-call-analyzer/case-classification/CaseClassificationReport";
 import SentimentAnalysisReport from "@/pages/post-call-analyzer/sentiment-analysis/SentimentAnalysisReport";
@@ -59,42 +59,42 @@ const transformStatsToCards = (stats: any) => [
   { 
     label: "Total Calls", 
     value: stats.totalCalls?.value?.toLocaleString() || '0', 
-    icon: <PhoneOutlined />,
+    icon: <IconPhone />,
     color: "#3b82f6",
     gradientColors: ["#3b82f6", "#2563eb"] as [string, string],
   },
   { 
     label: "FCR Rate", 
     value: `${stats.fcrRate?.value || 0}${stats.fcrRate?.unit || '%'}`, 
-    icon: <CheckCircleOutlined />,
+    icon: <IconCircleCheck />,
     color: "#10b981",
     gradientColors: ["#10b981", "#059669"] as [string, string],
   },
   { 
     label: "Avg. Handling Time", 
     value: formatTimeValue(String(stats.avgHandlingTime?.value || "00:00")), 
-    icon: <ClockCircleOutlined />,
+    icon: <IconClock />,
     color: "#8b5cf6",
     gradientColors: ["#8b5cf6", "#7c3aed"] as [string, string],
   },
   { 
     label: "Open Cases", 
     value: stats.openCases?.value?.toLocaleString() || '0', 
-    icon: <FolderOpenOutlined />,
+    icon: <IconFolderOpen />,
     color: "#ef4444",
     gradientColors: ["#ef4444", "#dc2626"] as [string, string],
   },
   { 
     label: "Avg. Waiting Time", 
     value: formatTimeValue(String(stats.avgWaitingTime?.value || "00:00")), 
-    icon: <FieldTimeOutlined />,
+    icon: <IconClockHour4 />,
     color: "#f59e0b",
     gradientColors: ["#f59e0b", "#d97706"] as [string, string],
   },
   { 
     label: "Avg. Silence Time", 
     value: formatTimeValue(String(stats.avgSilenceTime?.value || "00:00")), 
-    icon: <MinusCircleOutlined />,
+    icon: <IconCircleMinus />,
     color: "#f97316",
     gradientColors: ["#f97316", "#ea580c"] as [string, string],
   },
@@ -180,7 +180,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
   ];
 
   return (
-    <div style={{ padding: 24 }}>
+    <div className="p-6">
       {/* Stat Cards Grid */}
       <Row gutter={[16, 16]}>
         {statCards.map((stat, index) => (
@@ -204,7 +204,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
       </Row>
 
       {/* Report Sections */}
-      <div style={{ marginTop: 24 }}>
+      <div className="mt-6">
         {/* Overall Performance Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -223,7 +223,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
-            style={{ marginTop: 16 }}
+            className="mt-4"
           >
             {report.id === "case-classification" ? (
               <CaseClassificationReport {...report} hideAccentLine={true} />
@@ -247,7 +247,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.8 }}
-          style={{ marginTop: 16 }}
+          className="mt-4"
         >
           <SentimentAnalysisReport />
         </motion.div>
@@ -256,7 +256,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.9 }}
-          style={{ marginTop: 16 }}
+          className="mt-4"
         >
           <CallResolutionReport />
         </motion.div>
@@ -265,7 +265,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 1.0 }}
-          style={{ marginTop: 16 }}
+          className="mt-4"
         >
           <FrequentCallersReport />
         </motion.div>
@@ -274,7 +274,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 1.1 }}
-          style={{ marginTop: 16 }}
+          className="mt-4"
         >
           <CallDurationReport />
         </motion.div>
@@ -283,7 +283,7 @@ export const PostCallDashboard = ({ instance, onBack }: PostCallDashboardProps) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 1.2 }}
-          style={{ marginTop: 16 }}
+          className="mt-4"
         >
           <TrafficTrendsReport />
         </motion.div>

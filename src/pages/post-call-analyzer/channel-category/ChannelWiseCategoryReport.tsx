@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
 import { 
-  InfoCircleOutlined, 
-  ReloadOutlined, 
-  CalendarOutlined, 
-  UnorderedListOutlined,
-  PhoneOutlined,
-  MessageOutlined,
-  TeamOutlined,
-  CloseOutlined,
-  PieChartOutlined
-} from "@ant-design/icons";
+  IconInfoCircle, 
+  IconRefresh, 
+  IconCalendar, 
+  IconList,
+  IconPhone,
+  IconMessage,
+  IconUsers,
+  IconX,
+  IconChartPie
+} from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Label, Treemap } from "recharts";
 
@@ -185,10 +185,10 @@ export default function ChannelWiseCategoryReport() {
 
   const getChannelIcon = (iconName: string) => {
     switch (iconName) {
-      case "phone": return <PhoneOutlined style={{ fontSize: 20 }} />;
-      case "message": return <MessageOutlined style={{ fontSize: 20 }} />;
-      case "users": return <TeamOutlined style={{ fontSize: 20 }} />;
-      default: return <MessageOutlined style={{ fontSize: 20 }} />;
+      case "phone": return <IconPhone className="text-xl" />;
+      case "message": return <IconMessage className="text-xl" />;
+      case "users": return <IconUsers className="text-xl" />;
+      default: return <IconMessage className="text-xl" />;
     }
   };
 
@@ -197,40 +197,21 @@ export default function ChannelWiseCategoryReport() {
   const secondColumnLegends = categoryData.slice(Math.ceil(categoryData.length / 2));
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle" orientation="horizontal">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <PieChartOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconChartPie className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     Channel Wise Category Distribution
                   </Title>
                   <Tooltip title="Call distribution across different channels and categories">
-                    <div style={{ marginTop: '-4px' }}>
+                    <div className="-mt-1">
                       <TablerIcon 
                         name="info-circle" 
                         className="wn-tabler-14"
@@ -239,7 +220,7 @@ export default function ChannelWiseCategoryReport() {
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Call distribution by channel
                 </Text>
               </div>
@@ -247,27 +228,24 @@ export default function ChannelWiseCategoryReport() {
             
             <Space size="small" orientation="horizontal">
               <DatePicker 
-                suffixIcon={<CalendarOutlined />}
-                style={{ 
-                  borderRadius: 8,
-                  borderColor: '#d9d9d9'
-                }}
+                suffixIcon={<IconCalendar />}
+                className="rounded-lg"
               />
               <Button 
                 type="text" 
-                icon={<ReloadOutlined />}
+                icon={<IconRefresh />}
                 onClick={handleReload}
-                style={{ width: 36, height: 36 }}
+                className="w-9 h-9"
               />
               <Button 
                 type="text" 
-                icon={<UnorderedListOutlined />}
-                style={{ width: 36, height: 36 }}
+                icon={<IconList />}
+                className="w-9 h-9"
               />
             </Space>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 24 }}>
+        <div className="flex gap-6">
           {/* Channels Card */}
           <Card
             style={{
@@ -279,18 +257,11 @@ export default function ChannelWiseCategoryReport() {
               flex: selectedChannel ? '0 0 50%' : '1 0 0'
             }}
           >
-            <Title level={5} style={{ margin: 0, marginBottom: 16 }}>Channels</Title>
+            <Title level={5} className="!m-0 !mb-4">Channels</Title>
             
             {loading ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-                <div style={{ 
-                  width: 32, 
-                  height: 32, 
-                  border: '2px solid #1890ff', 
-                  borderTop: '2px solid transparent', 
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }}></div>
+              <div className="flex items-center justify-center h-[300px]">
+                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
             ) : channelData.length > 0 ? (
               <>
@@ -335,15 +306,11 @@ export default function ChannelWiseCategoryReport() {
                 </ResponsiveContainer>
 
                 {/* Channel Stats */}
-                <div style={{ 
-                  borderTop: '1px solid #e8e8e8', 
-                  paddingTop: 16, 
-                  marginTop: 16 
-                }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <div className="grid grid-cols-3 gap-4">
                     {channelData.map((channel) => (
-                      <div key={channel.name} style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
+                      <div key={channel.name} className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-2">
                           <div 
                             style={{
                               width: 32,
@@ -358,9 +325,9 @@ export default function ChannelWiseCategoryReport() {
                           >
                             {getChannelIcon(channel.icon)}
                           </div>
-                          <Text type="secondary" style={{ fontSize: 12 }}>{channel.name}</Text>
+                          <Text type="secondary" className="text-xs">{channel.name}</Text>
                         </div>
-                        <div style={{ fontSize: 24, fontWeight: 600, color: channel.color }}>
+                        <div className="text-2xl font-semibold" style={{ color: channel.color as string }}>
                           {channel.value}
                         </div>
                       </div>
@@ -368,12 +335,12 @@ export default function ChannelWiseCategoryReport() {
                   </div>
                 </div>
 
-                <Text type="secondary" style={{ fontSize: 12, textAlign: 'center', marginTop: 16 }}>
-                  <span style={{ fontWeight: 500 }}>Note:</span> Click on a section to view category distribution
+                <Text type="secondary" className="text-xs text-center mt-4 block">
+                  <span className="font-medium">Note:</span> Click on a section to view category distribution
                 </Text>
               </>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: '#666' }}>
+              <div className="flex items-center justify-center h-[300px] text-gray-500">
                 No data available
               </div>
             )}
@@ -392,42 +359,27 @@ export default function ChannelWiseCategoryReport() {
                 animation: 'slideInFromRight 0.5s ease-out'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <Title level={5} style={{ margin: 0 }}>Categories Distribution</Title>
-                  <Text type="secondary" style={{ fontSize: 14 }}>{selectedChannel}</Text>
+                  <Title level={5} className="!m-0">Categories Distribution</Title>
+                  <Text type="secondary" className="text-sm">{selectedChannel}</Text>
                 </div>
                 <Button 
                   type="text" 
-                  icon={<CloseOutlined />}
+                  icon={<IconX />}
                   onClick={handleCloseCategories}
-                  style={{ width: 36, height: 36 }}
+                  className="w-9 h-9"
                 />
               </div>
 
               {loading ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 380 }}>
-                  <div style={{ 
-                    width: 32, 
-                    height: 32, 
-                    border: '2px solid #1890ff', 
-                    borderTop: '2px solid transparent', 
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }}></div>
+                <div className="flex items-center justify-center h-[380px]">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : (
                 <>
                   {/* Recharts Treemap */}
-                  <Card
-                    style={{
-                      borderRadius: 8,
-                      border: '1px solid #e8e8e8',
-                      background: '#ffffff',
-                      padding: 8,
-                      marginBottom: 16
-                    }}
-                  >
+                  <Card className="rounded-lg border-gray-200 bg-white p-2 mb-4">
                     <ResponsiveContainer width="100%" height={280}>
                       <Treemap
                         data={categoryData.map((item, idx) => ({
@@ -447,10 +399,10 @@ export default function ChannelWiseCategoryReport() {
                   </Card>
 
                   {/* Category Legends */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col gap-2">
                       {firstColumnLegends.map((item, index) => (
-                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div key={index} className="flex items-center gap-2">
                           <div 
                             style={{
                               width: 12,
@@ -460,13 +412,13 @@ export default function ChannelWiseCategoryReport() {
                               backgroundColor: COLORS[index % COLORS.length]
                             }}
                           />
-                          <Text type="secondary" style={{ fontSize: 12 }}>{item.category}</Text>
+                          <Text type="secondary" className="text-xs">{item.category}</Text>
                         </div>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div className="flex flex-col gap-2">
                       {secondColumnLegends.map((item, index) => (
-                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div key={index} className="flex items-center gap-2">
                           <div 
                             style={{
                               width: 12,
@@ -476,7 +428,7 @@ export default function ChannelWiseCategoryReport() {
                               backgroundColor: COLORS[(firstColumnLegends.length + index) % COLORS.length]
                             }}
                           />
-                          <Text type="secondary" style={{ fontSize: 12 }}>{item.category}</Text>
+                          <Text type="secondary" className="text-xs">{item.category}</Text>
                         </div>
                       ))}
                     </div>

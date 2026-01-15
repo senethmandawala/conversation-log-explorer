@@ -9,16 +9,16 @@ import {
   Col
 } from "antd";
 import { 
-  FolderOutlined, 
-  UnorderedListOutlined, 
-  CaretRightOutlined, 
-  CaretDownOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
-  PlusOutlined, 
-  MoreOutlined,
-  InfoCircleOutlined
-} from "@ant-design/icons";
+  IconFolder, 
+  IconList, 
+  IconChevronRight, 
+  IconChevronDown, 
+  IconEdit, 
+  IconTrash, 
+  IconPlus, 
+  IconDots,
+  IconInfoCircle
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const { Text } = Typography;
@@ -71,20 +71,20 @@ export default function CategoryStructure({
       {
         key: 'add-child',
         label: 'Add Child Category',
-        icon: <PlusOutlined />,
+        icon: <IconPlus />,
         disabled: !canAddChild,
         onClick: () => onAddChild(node)
       },
       {
         key: 'edit',
         label: 'Edit',
-        icon: <EditOutlined />,
+        icon: <IconEdit />,
         onClick: () => onEdit(node)
       },
       {
         key: 'delete',
         label: 'Delete',
-        icon: <DeleteOutlined />,
+        icon: <IconTrash />,
         onClick: () => onDelete(node),
         danger: true
       }
@@ -105,7 +105,7 @@ export default function CategoryStructure({
                 <Button
                   type="text"
                   size="small"
-                  icon={isExpanded ? <CaretDownOutlined /> : <CaretRightOutlined />}
+                  icon={isExpanded ? <IconChevronDown /> : <IconChevronRight />}
                   onClick={() => toggleNode(node.index)}
                   style={{ 
                     width: 24, 
@@ -118,9 +118,9 @@ export default function CategoryStructure({
                 <div style={{ width: 24 }} />
               )}
               {hasChildren(node) ? (
-                <FolderOutlined style={{ color: '#3b82f6', fontSize: 16 }} />
+                <IconFolder style={{ color: '#3b82f6', fontSize: 16 }} />
               ) : (
-                <UnorderedListOutlined style={{ color: '#6b7280', fontSize: 16 }} />
+                <IconList style={{ color: '#6b7280', fontSize: 16 }} />
               )}
               <Text style={{ fontSize: '14px', fontFamily: 'Geist, sans-serif' }}>{node.name}</Text>
             </Space>
@@ -143,7 +143,7 @@ export default function CategoryStructure({
               <Button
                 type="text"
                 size="small"
-                icon={<MoreOutlined />}
+                icon={<IconDots />}
                 style={{ color: '#6b7280' }}
               />
             </Dropdown>

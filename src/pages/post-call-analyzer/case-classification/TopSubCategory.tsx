@@ -74,12 +74,8 @@ export function TopSubCategory({ category, onSubCategorySelect }: TopSubCategory
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ 
-        flex: 1, 
-        minHeight: 0,
-        marginTop: 16
-      }}>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 min-h-0 mt-4">
         <ResponsiveContainer width="100%" height={250}>
           <BarChart
             data={chartData}
@@ -109,14 +105,7 @@ export function TopSubCategory({ category, onSubCategorySelect }: TopSubCategory
         </ResponsiveContainer>
       </div>
       
-      <div style={{ 
-        fontSize: 12, 
-        textAlign: 'center', 
-        color: '#666', 
-        marginTop: 8 
-      }}>
-        Click on a bar to drill down further
-      </div>
+      <div className="text-xs text-center text-gray-500 mt-2 pt-2 border-t border-gray-100"></div>
     </div>
   );
 }

@@ -107,14 +107,8 @@ export function Category({ onCategorySelect, onTotalCallsChange }: CategoryProps
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ 
-        flex: 1, 
-        minHeight: 0, 
-        backgroundColor: 'white', 
-        borderRadius: 6, 
-        padding: 8 
-      }}>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 min-h-0 bg-white rounded-lg p-8">
         <ResponsiveContainer width="100%" height={250}>
           <Treemap
             data={chartData}
@@ -129,50 +123,21 @@ export function Category({ onCategorySelect, onTotalCallsChange }: CategoryProps
         </ResponsiveContainer>
       </div>
       
-      <div style={{ 
-        marginTop: 12, 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(2, 1fr)', 
-        gap: 8,
-        padding: '4px 0'
-      }}>
+      <div className="mt-3 grid grid-cols-2 gap-1 py-1">
         {chartData.map((item, idx) => (
-          <div key={idx} style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 8,
-            minHeight: 20
-          }}>
+          <div key={idx} className="flex items-center gap-2 min-h-[20px]">
             <div 
-              style={{ 
-                width: 12, 
-                height: 12, 
-                borderRadius: 2, 
-                flexShrink: 0,
-                backgroundColor: item.fill,
-                border: '1px solid #e8e8e8'
-              }}
+              className="w-3 h-3 rounded-sm flex-shrink-0 border border-gray-200"
+              style={{ backgroundColor: item.fill }}
             />
-            <span style={{ 
-              fontSize: 12, 
-              color: '#333', 
-              overflow: 'hidden', 
-              textOverflow: 'ellipsis', 
-              whiteSpace: 'nowrap',
-              lineHeight: 1.2
-            }}>
-              {item.name}
+            <span className="text-xs text-gray-800 overflow-hidden text-ellipsis whitespace-nowrap">
+              {item.name}: {item.value}
             </span>
           </div>
         ))}
       </div>
       
-      <div style={{ 
-        fontSize: 12, 
-        textAlign: 'center', 
-        color: '#666', 
-        marginTop: 12 
-      }}>
+      <div className="text-xs text-center text-gray-500 mt-2 pt-2 border-t border-gray-100">
         Click on a category to drill down
       </div>
     </div>

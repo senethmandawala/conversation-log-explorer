@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PhoneCall, Bot, MessageSquare, ArrowRight, Book, Sparkles } from "lucide-react";
+import { IconPhone, IconRobot, IconMessage, IconArrowRight, IconBook, IconSparkles } from "@tabler/icons-react";
 
 interface ModuleCardProps {
   title: string;
@@ -52,7 +52,7 @@ const ModuleCard = ({ title, description, icon: Icon, gradient, iconBg, enabled,
             ? "bg-primary/10 group-hover:bg-primary group-hover:text-white" 
             : "bg-muted"
         }`}>
-          <ArrowRight className={`h-5 w-5 transition-transform duration-300 ${enabled ? "group-hover:translate-x-1" : ""}`} />
+          <IconArrowRight className={`h-5 w-5 transition-transform duration-300 ${enabled ? "group-hover:translate-x-1" : ""}`} />
         </div>
       </div>
       
@@ -106,7 +106,7 @@ export default function GetStarted() {
     {
       title: "Post Call Analyzer",
       description: "Analyze call recordings with AI-powered insights to improve customer service quality and agent performance.",
-      icon: PhoneCall,
+      icon: IconPhone,
       gradient: "bg-gradient-to-br from-blue-500/10 via-transparent to-transparent",
       iconBg: "bg-gradient-to-br from-blue-500 to-blue-600",
       enabled: true,
@@ -115,7 +115,7 @@ export default function GetStarted() {
     {
       title: "Autopilot",
       description: "Automate customer interactions with intelligent AI agents that handle queries 24/7 with human-like responses.",
-      icon: Bot,
+      icon: IconRobot,
       gradient: "bg-gradient-to-br from-purple-500/10 via-transparent to-transparent",
       iconBg: "bg-gradient-to-br from-purple-500 to-purple-600",
       enabled: true,
@@ -124,7 +124,7 @@ export default function GetStarted() {
     {
       title: "Copilot",
       description: "Real-time AI assistance for agents during live calls, providing suggestions and information on demand.",
-      icon: MessageSquare,
+      icon: IconMessage,
       gradient: "bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent",
       iconBg: "bg-gradient-to-br from-emerald-500 to-emerald-600",
       enabled: false,
@@ -152,7 +152,7 @@ export default function GetStarted() {
         
         <div className="relative flex items-center gap-4">
           <div className="hidden md:flex h-16 w-16 rounded-2xl bg-white/30 backdrop-blur-sm items-center justify-center">
-            <Sparkles className="h-8 w-8 text-white" />
+            <IconSparkles className="h-8 w-8 text-white" />
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">

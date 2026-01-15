@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, X, AlertTriangle } from "lucide-react";
+import { IconInfoCircle, IconX, IconAlertTriangle } from "@tabler/icons-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -26,7 +26,7 @@ import {
   Space, 
   Tooltip as AntTooltip 
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { IconInfoCircle as InfoIcon } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -241,7 +241,7 @@ export function CategoryWiseFailureReason() {
                       color: 'white'
                     }}
                   >
-                    <AlertTriangle style={{ fontSize: 20 }} />
+                    <IconAlertTriangle style={{ fontSize: 20 }} />
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -250,7 +250,7 @@ export function CategoryWiseFailureReason() {
                       </Title>
                       <AntTooltip title="Distribution of failure reasons by category. Click on a category to see detailed breakdown.">
                         <div style={{ marginTop: '-4px' }}>
-                          <InfoCircleOutlined 
+                          <InfoIcon 
                             style={{ fontSize: 14, color: '#64748b' }}
                           />
                         </div>
@@ -311,7 +311,7 @@ export function CategoryWiseFailureReason() {
                         onClick={handleCloseDetails}
                         className="h-8 w-8"
                       >
-                        <X className="h-4 w-4" />
+                        <IconX className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

@@ -7,9 +7,9 @@ import {
   Tooltip
 } from "antd";
 import { 
-  ShareAltOutlined,
-  InfoCircleOutlined
-} from "@ant-design/icons";
+  IconShare,
+  IconInfoCircle
+} from "@tabler/icons-react";
 import {
   Sankey,
   Layer,
@@ -409,47 +409,26 @@ React.useEffect(() => {
   }, [tooltipData, isDragging, draggedNode, handleGlobalMouseMove, handleGlobalMouseUp]);
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <ShareAltOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconShare className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     Call Flow Analysis
                   </Title>
                   <Tooltip title="Visualizes the flow of calls through different stages of the autopilot system">
-                    <div style={{ marginTop: '-4px' }}>
-                      <InfoCircleOutlined 
-                        style={{ fontSize: 14, color: '#64748b' }}
-                      />
+                    <div className="-mt-1">
+                      <IconInfoCircle className="text-sm text-slate-500" />
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Flow of calls through the autopilot system
                 </Text>
               </div>
@@ -458,12 +437,12 @@ React.useEffect(() => {
         </div>
 
         {/* Chart Content */}
-        <div style={{ marginTop: 30 }}>
+        <div className="mt-8">
           {isLoading ? (
             <Skeleton className="h-[400px] w-full" />
           ) : (
             <div className="overflow-x-auto">
-              <div style={{ minWidth: '900px', height: '450px' }}>
+              <div className="min-w-[900px] h-[450px]">
                 <ResponsiveContainer width="100%" height={450}>
                   <Sankey
                     data={sankeyData}

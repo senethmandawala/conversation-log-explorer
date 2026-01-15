@@ -8,7 +8,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ConversationRecord } from "@/types/conversation";
 import { StatusBadge, getResolutionVariant, getVdnSourceVariant } from "./StatusBadge";
-import { Calendar, Clock, Phone, Tag, FileText, Building2, MapPin, Timer, Hash, Radio, PhoneOff } from "lucide-react";
+import { IconCalendar, IconClock, IconPhone, IconTag, IconFileText, IconBuilding, IconMapPin, IconHourglass, IconHash, IconAntenna, IconPhoneOff } from "@tabler/icons-react";
 
 interface ConversationDetailSheetProps {
   record: ConversationRecord | null;
@@ -38,7 +38,7 @@ export function ConversationDetailSheet({ record, open, onClose }: ConversationD
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <SheetTitle className="text-xl font-semibold flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <FileText className="h-5 w-5 text-primary" />
+                <IconFileText className="h-5 w-5 text-primary" />
               </div>
               Conversation Details
             </SheetTitle>
@@ -53,19 +53,19 @@ export function ConversationDetailSheet({ record, open, onClose }: ConversationD
             </div>
           </motion.div>
 
-          <DetailItem icon={<Calendar className="h-5 w-5 text-primary" />} label="Date" value={record.date} delay={0.15} />
-          <DetailItem icon={<Clock className="h-5 w-5 text-primary" />} label="Time" value={record.time} delay={0.2} />
+          <DetailItem icon={<IconCalendar className="h-5 w-5 text-primary" />} label="Date" value={record.date} delay={0.15} />
+          <DetailItem icon={<IconClock className="h-5 w-5 text-primary" />} label="Time" value={record.time} delay={0.2} />
           <Separator className="my-4" />
-          <DetailItem icon={<Phone className="h-5 w-5 text-primary" />} label="MSISDN" value={record.msisdn} delay={0.25} />
-          <DetailItem icon={<Hash className="h-5 w-5 text-primary" />} label="Unique ID" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{record.uniqueID}</code>} delay={0.3} />
+          <DetailItem icon={<IconPhone className="h-5 w-5 text-primary" />} label="MSISDN" value={record.msisdn} delay={0.25} />
+          <DetailItem icon={<IconHash className="h-5 w-5 text-primary" />} label="Unique ID" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{record.uniqueID}</code>} delay={0.3} />
           <Separator className="my-4" />
-          <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Category" value={record.category} delay={0.35} />
-          <DetailItem icon={<Tag className="h-5 w-5 text-primary" />} label="Sub Category" value={record.subCategory} delay={0.4} />
+          <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Category" value={record.category} delay={0.35} />
+          <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Sub Category" value={record.subCategory} delay={0.4} />
           <Separator className="my-4" />
-          <DetailItem icon={<Timer className="h-5 w-5 text-primary" />} label="Duration" value={record.duration} delay={0.45} />
-          <DetailItem icon={<PhoneOff className="h-5 w-5 text-primary" />} label="Disconnect Reason" value={record.callDisReason} delay={0.5} />
-          <DetailItem icon={<Building2 className="h-5 w-5 text-primary" />} label="Department" value={record.department} delay={0.55} />
-          <DetailItem icon={<MapPin className="h-5 w-5 text-primary" />} label="City" value={record.city} delay={0.6} />
+          <DetailItem icon={<IconHourglass className="h-5 w-5 text-primary" />} label="Duration" value={record.duration} delay={0.45} />
+          <DetailItem icon={<IconPhoneOff className="h-5 w-5 text-primary" />} label="Disconnect Reason" value={record.callDisReason} delay={0.5} />
+          <DetailItem icon={<IconBuilding className="h-5 w-5 text-primary" />} label="Department" value={record.department} delay={0.55} />
+          <DetailItem icon={<IconMapPin className="h-5 w-5 text-primary" />} label="City" value={record.city} delay={0.6} />
         </div>
       </SheetContent>
     </Sheet>

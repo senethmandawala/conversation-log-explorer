@@ -11,10 +11,10 @@ import {
   DatePicker
 } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  ClockCircleOutlined, 
-  FilterOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconClock, 
+  IconFilter
+} from "@tabler/icons-react";
 import {
   LineChart,
   Line,
@@ -137,7 +137,7 @@ export default function ReportAverageCallDuration({ onBack }: ReportAverageCallD
                 <div className="flex items-center gap-3">
                   <Button
                     type="text"
-                    icon={<ArrowLeftOutlined />}
+                    icon={<IconArrowLeft />}
                     onClick={onBack}
                     style={{ 
                       borderRadius: 8,
@@ -156,7 +156,7 @@ export default function ReportAverageCallDuration({ onBack }: ReportAverageCallD
                       justifyContent: 'center'
                     }}
                   >
-                    <ClockCircleOutlined style={{ color: 'white', fontSize: 20 }} />
+                    <IconClock style={{ color: 'white', fontSize: 20 }} />
                   </div>
                   <div>
                     <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Average Call Duration Report</Title>
@@ -168,7 +168,7 @@ export default function ReportAverageCallDuration({ onBack }: ReportAverageCallD
                 <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersOpen ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersOpen(!filtersOpen)}
                     style={{ borderRadius: 8 }}
                   />

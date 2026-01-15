@@ -9,17 +9,17 @@ import {
   List
 } from "antd";
 import { 
-  FilterOutlined, 
-  ArrowLeftOutlined,
-  UserOutlined,
-  SettingOutlined,
-  RiseOutlined,
-  DollarOutlined,
-  WarningOutlined,
-  InfoCircleOutlined,
-  CheckCircleOutlined,
-  ArrowRightOutlined
-} from "@ant-design/icons";
+  IconFilter, 
+  IconArrowLeft,
+  IconUser,
+  IconSettings,
+  IconTrendingUp,
+  IconCurrencyDollar,
+  IconAlertTriangle,
+  IconInfoCircle,
+  IconCircleCheck,
+  IconArrowRight
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
@@ -48,9 +48,9 @@ const mockBusinessImpactRecommendations = [
 
 const getSeverityConfig = (severity: string) => {
   switch (severity) {
-    case "high": return { icon: <WarningOutlined />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' };
-    case "medium": return { icon: <InfoCircleOutlined />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' };
-    default: return { icon: <CheckCircleOutlined />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' };
+    case "high": return { icon: <IconAlertTriangle />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' };
+    case "medium": return { icon: <IconInfoCircle />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' };
+    default: return { icon: <IconCircleCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' };
   }
 };
 
@@ -58,17 +58,17 @@ const RecommendationCard = ({ recommendation, index }: { recommendation: any; in
   const config = getSeverityConfig(recommendation.severity);
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
-      <Card size="small" style={{ marginBottom: 16, borderRadius: 12, border: `1px solid ${config.color}30`, background: config.bg }}>
+      <Card size="small" className="mb-4 rounded-xl" style={{ border: `1px solid ${config.color}30`, background: config.bg }}>
         <div className="flex items-start gap-4">
-          <div style={{ width: 40, height: 40, borderRadius: 8, background: config.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: config.color, fontSize: 20 }}>{config.icon}</div>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl" style={{ background: config.bg, color: config.color }}>{config.icon}</div>
           <div className="flex-1">
-            <Title level={5} style={{ margin: 0, marginBottom: 4 }}>{recommendation.title}</Title>
-            <Paragraph type="secondary" style={{ marginBottom: 16, fontSize: 13 }}>{recommendation.description}</Paragraph>
-            <Title level={5} style={{ fontSize: 13, marginBottom: 8 }}>Recommendations:</Title>
+            <Title level={5} className="!m-0 !mb-1">{recommendation.title}</Title>
+            <Paragraph type="secondary" className="!mb-4 text-[13px]">{recommendation.description}</Paragraph>
+            <Title level={5} className="!text-[13px] !mb-2">Recommendations:</Title>
             <List size="small" dataSource={recommendation.recommendations} renderItem={(item: string) => (
-              <List.Item style={{ padding: '4px 0', border: 'none' }}>
-                <ArrowRightOutlined style={{ color: '#6366f1', marginRight: 8, fontSize: 12 }} />
-                <Text style={{ fontSize: 13 }}>{item}</Text>
+              <List.Item className="!py-1 !border-none">
+                <IconArrowRight className="text-indigo-500 mr-2 text-xs" />
+                <Text className="text-[13px]">{item}</Text>
               </List.Item>
             )} />
           </div>
@@ -83,37 +83,37 @@ export default function OverallRecommendations() {
   const [filtersVisible, setFiltersVisible] = useState(false);
 
   const tabItems = [
-    { key: 'agent-performance', label: <><UserOutlined /> Agent Performance</>, children: mockAgentPerformanceRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
-    { key: 'operational-level', label: <><SettingOutlined /> Operational Level</>, children: mockOperationalLevelRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
-    { key: 'specific-issues', label: <><RiseOutlined /> Specific Issues</>, children: mockSpecificIssuesRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
-    { key: 'business-impact', label: <><DollarOutlined /> Business Impact</>, children: mockBusinessImpactRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
+    { key: 'agent-performance', label: <><IconUser /> Agent Performance</>, children: mockAgentPerformanceRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
+    { key: 'operational-level', label: <><IconSettings /> Operational Level</>, children: mockOperationalLevelRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
+    { key: 'specific-issues', label: <><IconTrendingUp /> Specific Issues</>, children: mockSpecificIssuesRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
+    { key: 'business-impact', label: <><IconCurrencyDollar /> Business Impact</>, children: mockBusinessImpactRecommendations.map((r, i) => <RecommendationCard key={r.id} recommendation={r} index={i} />) },
   ];
 
   return (
     <ConfigProvider theme={{ components: { Card: { headerBg: 'transparent' }, Button: { borderRadius: 8 } } }}>
       <div className="p-6 space-y-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' }, body: { padding: 24 } }}
+          <Card className="rounded-xl border-slate-200" styles={{ header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' }, body: { padding: 24 } }}
             title={
               <div className="flex items-center gap-3">
-                <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => setSelectedTab("reports")} style={{ marginRight: 8 }} />
-                <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
-                  <RiseOutlined style={{ color: 'white', fontSize: 20 }} />
+                <Button type="text" icon={<IconArrowLeft />} onClick={() => setSelectedTab("reports")} className="mr-2" />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <IconTrendingUp className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Overall Recommendations Report</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>Comprehensive analysis with actionable recommendations</Text>
+                  <Title level={5} className="!m-0 !font-semibold">Overall Recommendations Report</Title>
+                  <Text type="secondary" className="text-[13px]">Comprehensive analysis with actionable recommendations</Text>
                 </div>
               </div>
             }
-            extra={<Button type={filtersVisible ? "primary" : "default"} icon={<FilterOutlined />} onClick={() => setFiltersVisible(!filtersVisible)}>Filters</Button>}
+            extra={<Button type={filtersVisible ? "primary" : "default"} icon={<IconFilter />} onClick={() => setFiltersVisible(!filtersVisible)}>Filters</Button>}
           >
             <AnimatePresence>
               {filtersVisible && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
-                  <Card size="small" style={{ marginBottom: 20, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12 }}>
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <Card size="small" className="mb-5 bg-slate-50 border-slate-200 rounded-xl">
                     <div className="flex gap-4 items-end">
-                      <div className="flex-1"><Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text><RangePicker style={{ width: '100%' }} /></div>
+                      <div className="flex-1"><Text type="secondary" className="text-xs font-medium">Date Range</Text><RangePicker className="w-full" /></div>
                       <Button type="primary">Search</Button>
                     </div>
                   </Card>

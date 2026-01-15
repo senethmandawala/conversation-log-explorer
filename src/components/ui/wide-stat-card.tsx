@@ -74,16 +74,7 @@ const WideStatCard: React.FC<WideStatCardProps> = ({
 
   return (
     <Card
-      style={{ 
-        position: 'relative',
-        overflow: 'hidden',
-        background: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(12px)',
-        border: config.border,
-        boxShadow: config.glow,
-        transition: 'all 0.3s',
-        cursor: 'pointer'
-      }}
+      className="relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl border border-black/[0.08] shadow-lg transition-all duration-300"
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'scale(1.01)';
       }}
@@ -93,51 +84,29 @@ const WideStatCard: React.FC<WideStatCardProps> = ({
     >
       {/* Background gradient */}
       <div 
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: config.gradient
-        }} 
+        className="absolute inset-0"
+        style={{ background: config.gradient }} 
       />
       
-      <div style={{ position: 'relative', padding: 16 }}>
+      <div className="relative p-4">
         <Row gutter={[16, 12]} align="middle">
           <Col xs={24} lg={12}>
             <Row gutter={[12, 12]} align="middle">
               <Col>
                 <div 
-                  style={{ 
-                    width: 48, 
-                    height: 48, 
-                    borderRadius: 12, 
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: config.iconBg,
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-                  }}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                  style={{ background: config.iconBg }}
                 >
-                  <div style={{ color: 'white', fontSize: 20 }}>
+                  <div className="text-white text-xl">
                     {icon}
                   </div>
                 </div>
               </Col>
               <Col flex="auto">
-                <div style={{ 
-                  fontSize: 14, 
-                  color: config.textColor, 
-                  fontWeight: 600, 
-                  marginBottom: 8 
-                }}>
+                <div className="text-sm font-semibold mb-1" style={{ color: config.textColor }}>
                   {label}
                 </div>
-                <div style={{ 
-                  fontSize: 28, 
-                  fontWeight: 700, 
-                  color: config.textColor,
-                  lineHeight: 1,
-                  whiteSpace: 'nowrap'
-                }}>
+                <div className="text-[28px] font-bold leading-none" style={{ color: config.textColor }}>
                   {value}
                 </div>
               </Col>
@@ -148,18 +117,9 @@ const WideStatCard: React.FC<WideStatCardProps> = ({
               <Row gutter={[12, 12]} justify="end">
                 {rightItems.map((item, index) => (
                   <Col key={index}>
-                    <div 
-                      style={{ 
-                        textAlign: 'center', 
-                        padding: '6px 12px', 
-                        borderRadius: 8, 
-                        background: 'rgba(255, 255, 255, 0.5)',
-                        backdropFilter: 'blur(4px)',
-                        border: '1px solid rgba(0, 0, 0, 0.1)'
-                      }}
-                    >
-                      <Title level={5} style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{item.value}</Title>
-                      <Text type="secondary" style={{ fontSize: 10, fontWeight: 500, marginTop: 2, display: 'block' }}>{item.label}</Text>
+                    <div className="text-center py-1.5 px-3 rounded-lg bg-white/60 backdrop-blur-sm border border-black/10">
+                      <Title level={5} className="!m-0 !text-lg !font-bold">{item.value}</Title>
+                      <Text type="secondary" className="text-[10px] font-medium mt-0.5 block">{item.label}</Text>
                     </div>
                   </Col>
                 ))}

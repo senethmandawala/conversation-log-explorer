@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button, Tooltip, Space } from "antd";
-import { BarChartOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { IconChartBar, IconRefresh, IconEye } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
@@ -323,24 +323,13 @@ export default function OverallPerformanceChart({
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
           {/* Header Section */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 ml-4">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <BarChartOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconChartBar className="text-xl" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -364,7 +353,7 @@ export default function OverallPerformanceChart({
             </div>
             
             {/* Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className="flex items-center gap-2">
               <DatePickerComponent
                 onSelectedRangeValueChange={handleDateRangeChange}
                 toolTipValue="Select date range for performance data"
@@ -374,7 +363,7 @@ export default function OverallPerformanceChart({
               <Tooltip title="Reload data">
                 <Button
                   type="default"
-                  icon={<ReloadOutlined />}
+                  icon={<IconRefresh />}
                   onClick={handleReload}
                   loading={isLoading}
                   className={cn(
@@ -386,7 +375,7 @@ export default function OverallPerformanceChart({
               <Tooltip title="Go to Insights">
                 <Button
                   type="default"
-                  icon={<EyeOutlined />}
+                  icon={<IconEye />}
                   onClick={handleGoToInsights}
                   className={cn(
                     "h-10 rounded-xl border-2 transition-all duration-200",

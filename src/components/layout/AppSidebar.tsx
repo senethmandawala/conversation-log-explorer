@@ -2,13 +2,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
-  Compass, 
-  PhoneCall, 
-  Bot, 
-  Users, 
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
+  IconCompass, 
+  IconPhone, 
+  IconRobot, 
+  IconUsers, 
+  IconChevronLeft,
+  IconChevronRight
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { usePostCall } from "@/contexts/PostCallContext";
@@ -30,20 +30,20 @@ const navigation: NavSection[] = [
   {
     label: "Home",
     items: [
-      { title: "Get Started", icon: Compass, href: "/get-started" },
+      { title: "Get Started", icon: IconCompass, href: "/get-started" },
     ],
   },
   {
     label: "Module",
     items: [
-      { title: "Post Call Analyzer", icon: PhoneCall, href: "/instances?module=pca" },
-      { title: "Autopilot", icon: Bot, href: "/instances?module=autopilot" },
+      { title: "Post Call Analyzer", icon: IconPhone, href: "/instances?module=pca" },
+      { title: "Autopilot", icon: IconRobot, href: "/instances?module=autopilot" },
     ],
   },
   {
     label: "Manage",
     items: [
-      { title: "User Management", icon: Users, href: "/user-management" },
+      { title: "User Management", icon: IconUsers, href: "/user-management" },
     ],
   },
 ];
@@ -95,7 +95,7 @@ export function AppSidebar() {
               <motion.h3
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="px-2 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: 'Geist, sans-serif' }}
+                className="px-2 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider font-sans"
               >
                 {section.label}
               </motion.h3>
@@ -114,7 +114,6 @@ export function AppSidebar() {
                           ? "bg-primary/10 text-primary shadow-sm"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
-                      style={{ fontFamily: 'Geist, sans-serif' }}
                     >
                       <item.icon className={cn(
                         "h-4 w-4 flex-shrink-0",
@@ -139,7 +138,7 @@ export function AppSidebar() {
 
       {/* Footer */}
       <div className="p-3">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground" style={{ fontFamily: 'Geist, sans-serif' }}>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans">
           {!sidebarCollapsed && (
             <motion.div
               initial={{ opacity: 0 }}

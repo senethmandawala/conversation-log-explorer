@@ -14,14 +14,14 @@ import {
   ConfigProvider
 } from "antd";
 import { 
-  SearchOutlined, 
-  FilterOutlined, 
-  ArrowLeftOutlined,
-  TeamOutlined,
-  WarningOutlined,
-  ThunderboltOutlined,
-  PercentageOutlined
-} from "@ant-design/icons";
+  IconSearch, 
+  IconFilter, 
+  IconArrowLeft,
+  IconUsers,
+  IconAlertTriangle,
+  IconBolt,
+  IconPercentage
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
@@ -107,7 +107,7 @@ export default function ChurnAnalysisReport() {
       key: 'status',
       align: 'center' as const,
       render: (status: string) => (
-        <Tag color={getStatusColor(status)} style={{ borderRadius: 12, fontWeight: 600 }}>
+        <Tag color={getStatusColor(status)} className="rounded-full font-semibold">
           {status}
         </Tag>
       ),
@@ -152,7 +152,7 @@ export default function ChurnAnalysisReport() {
           transition={{ duration: 0.3 }}
         >
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            className="rounded-xl border-slate-200"
             styles={{
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
@@ -161,27 +161,16 @@ export default function ChurnAnalysisReport() {
               <div className="flex items-center gap-3">
                 <Button 
                   type="text" 
-                  icon={<ArrowLeftOutlined />} 
+                  icon={<IconArrowLeft />} 
                   onClick={() => setSelectedTab("reports")}
-                  style={{ marginRight: 8 }}
+                  className="mr-2"
                 />
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(244, 63, 94, 0.3)'
-                  }}
-                >
-                  <WarningOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-500/30">
+                  <IconAlertTriangle className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Churn Analysis Report</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Churn Analysis Report</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Analyze customer churn patterns and retention effectiveness
                   </Text>
                 </div>
@@ -190,12 +179,12 @@ export default function ChurnAnalysisReport() {
             extra={
               <Button 
                 type={filtersVisible ? "primary" : "default"}
-                icon={<FilterOutlined />}
+                icon={<IconFilter />}
                 onClick={() => setFiltersVisible(!filtersVisible)}
               >
                 Filters
                 {activeFiltersCount > 0 && (
-                  <Tag color="red" style={{ marginLeft: 8, borderRadius: 10 }}>{activeFiltersCount}</Tag>
+                  <Tag color="red" className="ml-2 rounded-full">{activeFiltersCount}</Tag>
                 )}
               </Button>
             }
@@ -208,35 +197,30 @@ export default function ChurnAnalysisReport() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden' }}
+                  className="overflow-hidden"
                 >
                   <Card
                     size="small"
-                    style={{ 
-                      marginBottom: 20, 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12
-                    }}
+                    className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                     styles={{ body: { padding: 16 } }}
                   >
                     <Row gutter={[16, 16]}>
                       <Col xs={24} sm={12} lg={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
-                          <RangePicker style={{ width: '100%' }} />
+                          <Text type="secondary" className="text-xs font-medium">Date Range</Text>
+                          <RangePicker className="w-full" />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Agent Name</Text>
-                          <Input prefix={<SearchOutlined style={{ color: '#94a3b8' }} />} placeholder="Search agents..." />
+                          <Text type="secondary" className="text-xs font-medium">Agent Name</Text>
+                          <Input prefix={<IconSearch className="text-slate-400" />} placeholder="Search agents..." />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Reason</Text>
-                          <Select placeholder="All Reasons" style={{ width: '100%' }} allowClear options={[
+                          <Text type="secondary" className="text-xs font-medium">Reason</Text>
+                          <Select placeholder="All Reasons" className="w-full" allowClear options={[
                             { value: 'service', label: 'Poor Service Quality' },
                             { value: 'pricing', label: 'High Pricing' },
                             { value: 'technical', label: 'Technical Issues' },
@@ -245,8 +229,8 @@ export default function ChurnAnalysisReport() {
                       </Col>
                       <Col xs={24} sm={12} lg={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Products</Text>
-                          <Select placeholder="All Products" style={{ width: '100%' }} allowClear options={[
+                          <Text type="secondary" className="text-xs font-medium">Products</Text>
+                          <Select placeholder="All Products" className="w-full" allowClear options={[
                             { value: 'premium', label: 'Premium Plan' },
                             { value: 'standard', label: 'Standard Plan' },
                             { value: 'basic', label: 'Basic Plan' },
@@ -255,10 +239,10 @@ export default function ChurnAnalysisReport() {
                       </Col>
                       <Col xs={24} sm={12} lg={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Text type="secondary" className="text-xs font-medium">Call Type</Text>
                           <Select
                             placeholder="All Call Types"
-                            style={{ width: '100%' }}
+                            className="w-full"
                             allowClear
                             value={selectedCallType}
                             onChange={setSelectedCallType}
@@ -267,7 +251,7 @@ export default function ChurnAnalysisReport() {
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={4} className="flex items-end">
-                        <Button type="primary" style={{ width: '100%' }}>Search</Button>
+                        <Button type="primary" className="w-full">Search</Button>
                       </Col>
                     </Row>
                   </Card>
@@ -276,12 +260,12 @@ export default function ChurnAnalysisReport() {
             </AnimatePresence>
 
             {/* Stats Cards */}
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+            <Row gutter={[16, 16]} className="mb-6">
               <Col xs={24} sm={12} lg={6}>
                 <StatCard
                   label="Total Churn Predictions"
                   value="156"
-                  icon={<TeamOutlined />}
+                  icon={<IconUsers />}
                   color="#3b82f6"
                   gradientColors={["#3b82f6", "#2563eb"] as [string, string]}
                   isLoading={loading}
@@ -291,7 +275,7 @@ export default function ChurnAnalysisReport() {
                 <StatCard
                   label="Churned"
                   value="45"
-                  icon={<WarningOutlined />}
+                  icon={<IconAlertTriangle />}
                   color="#ef4444"
                   gradientColors={["#ef4444", "#dc2626"] as [string, string]}
                   isLoading={loading}
@@ -301,7 +285,7 @@ export default function ChurnAnalysisReport() {
                 <StatCard
                   label="Successfully Retained"
                   value="89"
-                  icon={<ThunderboltOutlined />}
+                  icon={<IconBolt />}
                   color="#10b981"
                   gradientColors={["#10b981", "#059669"] as [string, string]}
                   isLoading={loading}
@@ -311,7 +295,7 @@ export default function ChurnAnalysisReport() {
                 <StatCard
                   label="Retention Rate"
                   value="66.4%"
-                  icon={<PercentageOutlined />}
+                  icon={<IconPercentage />}
                   color="#8b5cf6"
                   gradientColors={["#8b5cf6", "#7c3aed"] as [string, string]}
                   isLoading={loading}
@@ -325,17 +309,18 @@ export default function ChurnAnalysisReport() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Title level={5} style={{ marginBottom: 16 }}>Churn Records</Title>
+              <Title level={5} className="mb-4">Churn Records</Title>
               <Table
                 columns={columns}
                 dataSource={mockChurnData}
                 loading={loading}
-                pagination={{ 
-                  pageSize: 10, 
+                pagination={{
+                  current: currentPage,
+                  onChange: setCurrentPage,
                   showSizeChanger: false,
                   showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} records`
                 }}
-                style={{ borderRadius: 12, overflow: 'hidden' }}
+                className="rounded-xl overflow-hidden"
               />
             </motion.div>
           </Card>

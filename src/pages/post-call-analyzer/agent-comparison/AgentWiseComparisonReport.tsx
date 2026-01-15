@@ -15,17 +15,17 @@ import {
   Input
 } from "antd";
 import { 
-  ArrowLeftOutlined,
-  FilterOutlined,
-  CalendarOutlined,
-  PhoneOutlined,
-  ReloadOutlined,
-  ExclamationCircleOutlined,
-  ClockCircleOutlined,
-  HourglassOutlined,
-  CloseOutlined,
-  SearchOutlined
-} from "@ant-design/icons";
+  IconArrowLeft,
+  IconFilter,
+  IconCalendar,
+  IconPhone,
+  IconRefresh,
+  IconAlertCircle,
+  IconClock,
+  IconHourglass,
+  IconX,
+  IconSearch
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
@@ -59,11 +59,11 @@ const { RangePicker } = DatePicker;
 const { Panel } = Collapse;
 
 const metrics = [
-  { id: "dropped_calls", icon: PhoneOutlined, color: "#e53935", label: "Dropped Calls" },
-  { id: "package_churn", icon: ReloadOutlined, color: "#43a047", label: "Package Churn" },
-  { id: "open_calls", icon: ExclamationCircleOutlined, color: "#fb8c00", label: "Open Calls" },
-  { id: "avg_silent_time", icon: ClockCircleOutlined, color: "#1e88e5", label: "Avg. Silence Time" },
-  { id: "avg_waiting_time", icon: HourglassOutlined, color: "#8e24aa", label: "Avg. Waiting Time" },
+  { id: "dropped_calls", icon: IconPhone, color: "#e53935", label: "Dropped Calls" },
+  { id: "package_churn", icon: IconRefresh, color: "#43a047", label: "Package Churn" },
+  { id: "open_calls", icon: IconAlertCircle, color: "#fb8c00", label: "Open Calls" },
+  { id: "avg_silent_time", icon: IconClock, color: "#1e88e5", label: "Avg. Silence Time" },
+  { id: "avg_waiting_time", icon: IconHourglass, color: "#8e24aa", label: "Avg. Waiting Time" },
 ];
 
 const CHART_COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#14b8a6", "#f97316"];
@@ -150,7 +150,7 @@ export default function AgentWiseComparisonReport() {
       >
         <div className="p-6 space-y-6">
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            className="rounded-xl border-slate-200"
             styles={{
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
@@ -159,27 +159,16 @@ export default function AgentWiseComparisonReport() {
               <div className="flex items-center gap-3">
                 <Button 
                   type="text" 
-                  icon={<ArrowLeftOutlined />} 
+                  icon={<IconArrowLeft />} 
                   onClick={() => setSelectedTab("reports")}
-                  style={{ marginRight: 8 }}
+                  className="mr-2"
                 />
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                  }}
-                >
-                  <PhoneOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <IconPhone className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Agent-wise Comparison Report</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Agent-wise Comparison Report</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Compare performance metrics across agents
                   </Text>
                 </div>
@@ -189,12 +178,12 @@ export default function AgentWiseComparisonReport() {
               <Space>
                 <Button 
                   type={panelOpenState ? "primary" : "default"}
-                  icon={<FilterOutlined />}
+                  icon={<IconFilter />}
                   onClick={toggleFilters}
                 >
                   Filters
                   {numberOfFilters > 0 && (
-                    <Tag color="red" style={{ marginLeft: 8, borderRadius: 10 }}>{numberOfFilters}</Tag>
+                    <Tag color="red" className="ml-2 rounded-full">{numberOfFilters}</Tag>
                   )}
                 </Button>
               </Space>
@@ -207,31 +196,26 @@ export default function AgentWiseComparisonReport() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  style={{ overflow: 'hidden' }}
+                  className="overflow-hidden"
                 >
                   <Card
                     size="small"
-                    style={{ 
-                      marginBottom: 20, 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12
-                    }}
+                    className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                     styles={{ body: { padding: 16 } }}
                   >
                     <Row gutter={[16, 16]}>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
-                          <RangePicker style={{ width: '100%' }} />
+                          <Text type="secondary" className="text-xs font-medium">Date Range</Text>
+                          <RangePicker className="w-full" />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Search Agent</Text>
+                          <Text type="secondary" className="text-xs font-medium">Search Agent</Text>
                           <Input
                             placeholder="Search agent..."
-                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            prefix={<IconSearch className="text-slate-400" />}
                             value={selectedAgent}
                             onChange={(e) => setSelectedAgent(e.target.value)}
                           />
@@ -239,10 +223,10 @@ export default function AgentWiseComparisonReport() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Text type="secondary" className="text-xs font-medium">Call Type</Text>
                           <Select
                             placeholder="All Call Types"
-                            style={{ width: '100%' }}
+                            className="w-full"
                             allowClear
                             value={selectedCallType}
                             onChange={setSelectedCallType}
@@ -254,7 +238,7 @@ export default function AgentWiseComparisonReport() {
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6} className="flex items-end">
-                        <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                        <Space className="w-full justify-end">
                           <Button onClick={() => {
                             setSelectedAgent("");
                             setSelectedCallType(undefined);
@@ -281,18 +265,10 @@ export default function AgentWiseComparisonReport() {
                           setSelectedMetric(metric.id);
                           setShowPerformanceTrend(false);
                         }}
-                        style={{ 
-                          height: 'auto', 
-                          padding: '12px 8px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          gap: '8px',
-                          width: '100%'
-                        }}
+                        className="h-auto py-3 px-2 flex flex-col items-center gap-1 w-full"
                       >
-                        <Icon style={{ fontSize: 20, color: selectedMetric === metric.id ? "currentColor" : metric.color }} />
-                        <span style={{ fontSize: 12, textAlign: 'center', lineHeight: 1.2 }}>{metric.label}</span>
+                        <Icon className="text-xl" style={{ color: selectedMetric === metric.id ? "currentColor" : metric.color }} />
+                        <span className="text-xs text-center leading-tight">{metric.label}</span>
                       </Button>
                     </Col>
                   );
@@ -304,9 +280,9 @@ export default function AgentWiseComparisonReport() {
             <Row gutter={[24, 24]}>
               {/* Main Chart */}
               <Col xs={24} lg={showPerformanceTrend ? 12 : 24}>
-                <Card style={{ border: '1px solid #e2e8f0' }}>
+                <Card className="border-slate-200">
                   {loading ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}>
+                    <div className="flex items-center justify-center h-[400px]">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                     </div>
                   ) : (
@@ -356,7 +332,7 @@ export default function AgentWiseComparisonReport() {
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
-                      <p style={{ fontSize: 14, textAlign: 'center', color: '#64748b', marginTop: 16 }}>
+                      <p className="text-sm text-center text-slate-500 mt-4">
                         Click on any bar to see agent details
                       </p>
                     </>
@@ -374,17 +350,17 @@ export default function AgentWiseComparisonReport() {
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <Card style={{ border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                      <Card className="border-slate-200">
+                        <div className="flex items-center justify-between mb-4">
                           <div>
-                            <Text type="secondary" style={{ fontSize: 13 }}>{selectedAgent}</Text>
-                            <Title level={5} style={{ margin: 0, marginTop: 4 }}>Performance Trend</Title>
+                            <Text type="secondary" className="text-[13px]">{selectedAgent}</Text>
+                            <Title level={5} className="!m-0 !mt-1">Performance Trend</Title>
                           </div>
                           <Button
                             type="text"
-                            icon={<CloseOutlined />}
+                            icon={<IconX />}
                             onClick={() => setShowPerformanceTrend(false)}
-                            style={{ height: 32, width: 32 }}
+                            className="h-8 w-8"
                           />
                         </div>
                         <PerformanceTrend

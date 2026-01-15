@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, X, Search } from "lucide-react";
+import { IconChevronDown, IconX, IconSearch } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 interface FilterDropdownProps {
@@ -76,7 +76,7 @@ export function FilterDropdown({
                     onClear();
                   }}
                 >
-                  <X className="h-3 w-3" />
+                  <IconX className="h-3 w-3" />
                 </motion.button>
               )}
             </AnimatePresence>
@@ -84,7 +84,7 @@ export function FilterDropdown({
               animate={{ rotate: open ? 180 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <IconChevronDown className="h-4 w-4 text-muted-foreground" />
             </motion.div>
           </div>
         </Button>
@@ -123,7 +123,7 @@ export function TextFilterContent({
   return (
     <div className="p-4 space-y-4">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={label}
           value={value}
@@ -139,7 +139,7 @@ export function TextFilterContent({
               onClick={onClear}
               className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted-foreground/20 hover:bg-destructive/20 hover:text-destructive flex items-center justify-center transition-colors"
             >
-              <X className="h-3 w-3" />
+              <IconX className="h-3 w-3" />
             </motion.button>
           )}
         </AnimatePresence>
