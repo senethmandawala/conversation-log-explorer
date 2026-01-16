@@ -5,6 +5,7 @@ import { TopHeader } from "./TopHeader";
 import { ModuleTabs } from "./ModuleTabs";
 import { Footer } from "./Footer";
 import { useModule } from "@/contexts/ModuleContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -13,7 +14,8 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const [activeTab, setActiveTab] = useState("dashboard");
   const location = useLocation();
-  const { showModuleTabs, setShowModuleTabs } = useModule();
+  const { showModuleTabs, setShowModuleTabs, sidebarCollapsed, setSidebarCollapsed } = useModule();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const path = location.pathname;
@@ -27,8 +29,22 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
-      <AppSidebar />
+      {/* Mobile overlay backdrop */}
+      {isMobile && !sidebarCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarCollapsed(true)}
+        />
+      )}
+
+      {/* Sidebar - hidden on mobile when collapsed, overlay when open */}
+      <div className={`
+        ${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'}
+        ${isMobile && sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'}
+        transition-transform duration-300 ease-in-out
+      `}>
+        <AppSidebar />
+      </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -42,11 +58,14 @@ export function MainLayout({ children }: MainLayoutProps) {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto bg-muted/30">
-          {children}
+          <div className="min-h-full flex flex-col">
+            <div className="flex-1">
+              {children}
+            </div>
+            {/* Footer - scrolls with content on mobile */}
+            <Footer />
+          </div>
         </main>
-
-        {/* Footer */}
-        <Footer />
       </div>
     </div>
   );

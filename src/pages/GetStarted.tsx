@@ -42,7 +42,7 @@ const ModuleCard = ({ title, description, icon: Icon, gradient, iconBg, enabled,
       {/* Content */}
       <div className="relative">
         <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{description}</p>
+        <p className="text-sm text-muted-foreground mb-4">{description}</p>
       </div>
       
       {/* Arrow */}
@@ -151,9 +151,6 @@ export default function GetStarted() {
         <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20" />
         
         <div className="relative flex items-center gap-4">
-          <div className="hidden md:flex h-16 w-16 rounded-2xl bg-white/30 backdrop-blur-sm items-center justify-center">
-            <IconSparkles className="h-8 w-8 text-white" />
-          </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
               Welcome to Sense AI

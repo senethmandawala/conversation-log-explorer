@@ -1,12 +1,12 @@
 import React from 'react';
 import { Card, Row, Col, Typography } from 'antd';
 import { 
-  PhoneOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined
-} from '@ant-design/icons';
+  IconPhone,
+  IconCircleCheck,
+  IconClock,
+  IconArrowUp,
+  IconArrowDown
+} from '@tabler/icons-react';
 
 const { Title, Text } = Typography;
 

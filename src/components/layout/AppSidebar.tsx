@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { motion } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -54,12 +54,18 @@ export function AppSidebar() {
   const { setSelectedInstance: setPostCallInstance } = usePostCall();
   const { setSelectedInstance: setAutopilotInstance } = useAutopilot();
 
+  const isMobile = useIsMobile();
+
   const handleNavClick = (href: string) => {
     // Clear instance when navigating to module root (instances page)
     if (href === "/pca") {
       setPostCallInstance(null);
     } else if (href === "/autopilot") {
       setAutopilotInstance(null);
+    }
+    // Close sidebar on mobile after clicking a nav item
+    if (isMobile) {
+      setSidebarCollapsed(true);
     }
   };
 
@@ -81,7 +87,7 @@ export function AppSidebar() {
             <img 
               src="/src/assets/images/sense-ai-logo-transparent.svg" 
               alt="Sense AI Logo" 
-              className="h-6 w-auto"
+              className="h-4 w-auto"
             />
           </motion.div>
         )}
@@ -102,7 +108,25 @@ export function AppSidebar() {
             )}
             <ul className="space-y-1">
               {section.items.map((item) => {
-                const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
+                // Check if current route matches this nav item
+                const currentPath = location.pathname;
+                const currentSearch = location.search;
+                const itemUrl = new URL(item.href, window.location.origin);
+                const itemPath = itemUrl.pathname;
+                const itemModule = itemUrl.searchParams.get('module');
+                
+                let isActive = false;
+                if (itemModule) {
+                  // For module links (e.g., /instances?module=pca)
+                  // Active if on instances page with same module OR on module-specific pages
+                  const currentModule = new URLSearchParams(currentSearch).get('module');
+                  isActive = (currentPath === itemPath && currentModule === itemModule) ||
+                             currentPath.startsWith(`/${itemModule}`);
+                } else {
+                  // For regular links
+                  isActive = currentPath === itemPath || currentPath.startsWith(itemPath + "/");
+                }
+                
                 return (
                   <li key={item.title}>
                     <NavLink

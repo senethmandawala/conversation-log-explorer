@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Dropdown, Radio, Space, Typography, Divider, Tag, Tooltip } from 'antd';
-import { CalendarOutlined, LeftOutlined, RightOutlined, ClockCircleOutlined, CheckOutlined } from '@ant-design/icons';
+import { IconCalendar, IconChevronLeft, IconChevronRight, IconClock, IconCheck } from '@tabler/icons-react';
 import { DatePickerProps, DateRangeObject } from './DatePicker';
 import dayjs from 'dayjs';
 
@@ -98,14 +98,14 @@ const CustomCalendar: React.FC<{
           className="h-6 w-6 flex items-center justify-center rounded hover:bg-accent transition-colors"
           onClick={() => changeMonth('prev')}
         >
-          <LeftOutlined className="text-xs text-muted-foreground" />
+          <IconChevronLeft className="text-xs text-muted-foreground" />
         </button>
         <Text className="font-medium text-sm">{currentMonth.format('MMM YYYY')}</Text>
         <button 
           className="h-6 w-6 flex items-center justify-center rounded hover:bg-accent transition-colors"
           onClick={() => changeMonth('next')}
         >
-          <RightOutlined className="text-xs text-muted-foreground" />
+          <IconChevronRight className="text-xs text-muted-foreground" />
         </button>
       </div>
       
@@ -147,7 +147,7 @@ const DateSelectionCard: React.FC<{
     `}
   >
     <div className="flex items-center gap-1 mb-1">
-      <CalendarOutlined className={`text-xs ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+      <IconCalendar className={`text-xs ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
       <Text className={`text-xs font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
         {label}
       </Text>
@@ -434,7 +434,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               >
                 <span className="text-xs font-medium">{option.label}</span>
                 {selectedOption === option.value && (
-                  <CheckOutlined className="text-xs" />
+                  <IconCheck className="text-xs" />
                 )}
               </div>
             ))}
@@ -501,7 +501,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <div>
           <Button
             type="default"
-            icon={<CalendarOutlined />}
+            icon={<IconCalendar />}
             title={toolTipValue || dateOutput?.dateRangeForDisplay}
             className="h-10 rounded-xl border-2 hover:border-primary/50 transition-all duration-200"
           >

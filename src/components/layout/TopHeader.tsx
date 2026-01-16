@@ -12,12 +12,16 @@ import {
   IconUserCircle,
   IconChevronLeft,
   IconChevronRight,
-  IconBuilding
+  IconBuilding,
+  IconLayoutSidebarRightCollapse,
+  IconLayoutSidebarLeftCollapse,
+  IconMenu2
 } from '@tabler/icons-react';
-import { Button, Dropdown, Avatar, Badge } from 'antd';
+import { Button, Dropdown, Avatar, Badge, Divider } from 'antd';
 import type { MenuProps } from 'antd';
 import { motion } from 'framer-motion';
 import { useModule } from '@/contexts/ModuleContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { projectSelectionService } from '@/services/projectSelectionService';
 
 // Types for project/instance data
@@ -33,6 +37,7 @@ interface Project {
 export function TopHeader() {
   const location = useLocation();
   const { sidebarCollapsed, setSidebarCollapsed } = useModule();
+  const isMobile = useIsMobile();
   const isPostCallAnalyzer = location.pathname.startsWith("/pca");
   const isGetStarted = location.pathname === "/" || location.pathname === "/get-started";
   const isInstances = location.pathname === "/instances";
@@ -220,7 +225,7 @@ export function TopHeader() {
     <motion.header
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="h-12 bg-gradient-to-r from-card via-card to-card/95 backdrop-blur-sm border-b border-border/30 px-6 flex items-center justify-between shadow-xs"
+      className="h-12 bg-gradient-to-r from-card via-card to-card/95 backdrop-blur-sm border-b border-border/30 px-2 flex items-center justify-between shadow-xs"
     >
       {/* Left side - Module indicator, Sidebar toggle, and Agent selector */}
       <div className="flex items-center gap-6">
@@ -229,13 +234,15 @@ export function TopHeader() {
           type="default"
           shape="circle"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="h-10 w-10 rounded-xl border-border/60 hover:bg-muted/50 hover:border-border transition-all duration-200"
+          className="h-10 w-10 rounded-xl border-0 hover:bg-muted/50 hover:border-border transition-all duration-200"
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {sidebarCollapsed ? (
-            <IconChevronRight className="h-4 w-4 text-muted-foreground" />
+          {isMobile ? (
+            <IconMenu2 className="h-5 w-5 text-muted-foreground" />
+          ) : sidebarCollapsed ? (
+            <IconLayoutSidebarRightCollapse className="h-5 w-5 text-muted-foreground" />
           ) : (
-            <IconChevronLeft className="h-4 w-4 text-muted-foreground" />
+            <IconLayoutSidebarLeftCollapse className="h-5 w-5 text-muted-foreground" />
           )}
         </Button>
 
@@ -308,7 +315,7 @@ export function TopHeader() {
       </div>
 
       {/* Right side - Language and User */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-0">
         {/* Language selector */}
         <Dropdown
           menu={{
@@ -320,36 +327,38 @@ export function TopHeader() {
           trigger={['click']}
         >
           <Button
-            type="default"
+            type="text"
             className="wn-icon-btn-sm h-10 px-3 rounded-xl border-0 hover:bg-muted/50 hover:border-border transition-all duration-200 flex items-center gap-2"
           >
-            <IconWorld className="h-4 w-4 text-muted-foreground" />
+            <IconWorld className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm font-medium">{language}</span>
             <IconChevronDown className="h-3 w-3 text-muted-foreground" />
           </Button>
         </Dropdown>
+
+        <Divider orientation="vertical" />
 
         {/* User menu */}
         <Dropdown
           dropdownRender={(menu) => (
             <div className="w-56 bg-white rounded-lg shadow-lg border border-border/20">
               <div
-                className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-2 p-3 cursor-pointer hover:bg-muted/50 transition-colors"
               >
-                <IconUserCircle className="h-4 w-4 text-muted-foreground" />
+                <IconUserCircle className="h-5 w-5 text-muted-foreground" />
                 <span>Profile</span>
               </div>
               <div
-                className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-2 p-3 cursor-pointer hover:bg-muted/50 transition-colors"
               >
-                <IconSettings className="h-4 w-4 text-muted-foreground" />
+                <IconSettings className="h-5 w-5 text-muted-foreground" />
                 <span>Settings</span>
               </div>
               <div className="border-t border-border/20" />
               <div
-                className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors text-destructive"
+                className="flex items-center gap-2 p-3 cursor-pointer hover:bg-muted/50 transition-colors text-destructive"
               >
-                <IconLogout className="h-4 w-4" />
+                <IconLogout className="h-5 w-5" />
                 <span>Logout</span>
               </div>
             </div>
@@ -357,7 +366,7 @@ export function TopHeader() {
         >
           <Button
             type="text"
-            className="h-10 px-3 transition-all duration-200 flex items-center gap-2 !border-0 hover:!border-0 active:!border-0 focus:!border-0 focus-visible:!border-0 outline-none hover:outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 rounded-none pe-0 hover:bg-primary/50 py-2"
+            className="h-10 px-3 transition-all duration-200 flex items-center gap-2 !border-0 hover:!border-0 active:!border-0 focus:!border-0 focus-visible:!border-0 outline-none hover:outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 hover:bg-primary/50"
           >
             <Avatar className="h-8 w-8 ring-2 ring-border/50 bg-muted">
               <div className="text-primary text-sm font-semibold flex items-center justify-center h-full w-full">

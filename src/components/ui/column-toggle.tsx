@@ -1,5 +1,5 @@
 import { Button, Checkbox, Popover, Space, Typography } from 'antd';
-import { SettingOutlined } from '@ant-design/icons';
+import { IconSettings } from '@tabler/icons-react';
 import { ColumnDefinition } from '@/utils/envConfig';
 
 const { Text } = Typography;
@@ -43,7 +43,7 @@ export const ColumnToggle = ({ columns, onToggle, onReset }: ColumnToggleProps) 
     >
       <Button 
         type="text"
-        icon={<SettingOutlined />}
+        icon={<IconSettings />}
         className="p-1"
       />
     </Popover>
