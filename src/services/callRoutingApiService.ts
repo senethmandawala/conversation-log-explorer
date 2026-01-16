@@ -187,7 +187,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -207,7 +213,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -226,7 +238,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -246,7 +264,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -265,7 +289,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -277,7 +307,7 @@ export class CallRoutingApiService extends BaseApiService {
 
 
 
-      async CaseClassification(
+    async CaseClassification(
     filters: Filters
   ): Promise<CommonResponse<any>> {
     let queryParams = '';
@@ -285,7 +315,9 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -295,7 +327,24 @@ export class CallRoutingApiService extends BaseApiService {
     return this.get<any>(endpoint);
   }
 
+    async CaseClassificationTopSubCategory(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let params = new URLSearchParams();
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.set(key, value.toString());
+        }
+      });
+    }
+    
+    return this.get<CommonResponse<any>>(
+      `/top_sub_category_by_category?${params}`
+    );
+  }
+
 }
 
-// Create a singleton instance for use throughout the app
 export const callRoutingApiService = new CallRoutingApiService();

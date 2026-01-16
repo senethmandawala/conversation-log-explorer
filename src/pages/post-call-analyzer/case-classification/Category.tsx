@@ -1,6 +1,6 @@
 import React from "react";
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
-import { TreemapTooltip } from "@/components/ui/custom-chart-tooltip";
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CategoryProps {
   onCategorySelect: (category: { name: string; color: string }) => void;
@@ -10,6 +10,30 @@ interface CategoryProps {
 
 // Get colors from env.js
 const categoryColors = (window as any).env_vars?.colors;
+
+// Custom tooltip using RedAlert style
+const TreemapTooltipContent = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground backdrop-blur-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 justify-start">
+            <div 
+              className="w-3 h-3 rounded-full flex-shrink-0" 
+              style={{ backgroundColor: data.fill }}
+            />
+            <p className="font-medium m-0">{data.name}</p>
+          </div>
+          <div className="text-sm ml-5">
+            Value: {data.value}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 const CustomTreemapContent = (props: any) => {
   const { x, y, width, height, name, fill } = props;
@@ -109,7 +133,7 @@ export function Category({ onCategorySelect, onTotalCallsChange, data }: Categor
             content={<CustomTreemapContent />}
             onClick={handleClick}
           >
-            <Tooltip content={<TreemapTooltip />} />
+            <Tooltip content={<TreemapTooltipContent />} />
           </Treemap>
         </ResponsiveContainer>
       </div>

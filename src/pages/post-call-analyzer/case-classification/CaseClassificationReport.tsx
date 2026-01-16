@@ -177,10 +177,16 @@ export const CaseClassificationReport = ({
   // Handle date range change
   const handleDateRangeChange = (dateRange: any) => {
     setLocalDateRange(dateRange);
+    // Close any open slides when date changes
+    setSlides(prev => prev.slice(0, 1));
+    setVisibleStartIndex(0);
   };
 
   // Handle reload
   const handleReload = () => {
+    // Close any open slides when reload is clicked
+    setSlides(prev => prev.slice(0, 1));
+    setVisibleStartIndex(0);
     manualRefreshRef.current.next(effectiveDateRange);
   };
 
@@ -349,6 +355,17 @@ export const CaseClassificationReport = ({
         <TopSubCategory 
           category={selectedCategory}
           onSubCategorySelect={handleSubcategoryClick}
+          fromTime={effectiveDateRange?.fromDate}
+          toTime={effectiveDateRange?.toDate}
+          onClose={() => {
+            // Close the subcategory slide
+            setSlides(prev => prev.slice(0, 1));
+            setVisibleStartIndex(0);
+          }}
+          onReload={() => {
+            // Reload the main data
+            loadData();
+          }}
         />
       );
     }
