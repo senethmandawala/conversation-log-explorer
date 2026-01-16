@@ -1,36 +1,50 @@
 import * as React from "react";
-import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
-import { IconCircle } from "@tabler/icons-react";
+import { Radio } from "antd";
 
 import { cn } from "@/lib/utils";
 
-const RadioGroup = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
->(({ className, ...props }, ref) => {
-  return <RadioGroupPrimitive.Root className={cn("grid gap-2", className)} {...props} ref={ref} />;
-});
-RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
+interface RadioGroupProps {
+  className?: string;
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  disabled?: boolean;
+  children?: React.ReactNode;
+}
 
-const RadioGroupItem = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(({ className, ...props }, ref) => {
-  return (
-    <RadioGroupPrimitive.Item
-      ref={ref}
-      className={cn(
-        "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        className,
-      )}
-      {...props}
+const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
+  ({ className, value, defaultValue, onValueChange, disabled, children, ...props }, ref) => (
+    <Radio.Group
+      ref={ref as any}
+      value={value}
+      defaultValue={defaultValue}
+      onChange={(e) => onValueChange?.(e.target.value)}
+      disabled={disabled}
+      className={cn("grid gap-2", className)}
     >
-      <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <IconCircle className="h-2.5 w-2.5 fill-current text-current" />
-      </RadioGroupPrimitive.Indicator>
-    </RadioGroupPrimitive.Item>
-  );
-});
-RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName;
+      {children}
+    </Radio.Group>
+  )
+);
+RadioGroup.displayName = "RadioGroup";
+
+interface RadioGroupItemProps {
+  className?: string;
+  value: string;
+  disabled?: boolean;
+  id?: string;
+}
+
+const RadioGroupItem = React.forwardRef<HTMLInputElement, RadioGroupItemProps>(
+  ({ className, value, disabled, ...props }, ref) => (
+    <Radio
+      ref={ref as any}
+      value={value}
+      disabled={disabled}
+      className={cn(className)}
+    />
+  )
+);
+RadioGroupItem.displayName = "RadioGroupItem";
 
 export { RadioGroup, RadioGroupItem };

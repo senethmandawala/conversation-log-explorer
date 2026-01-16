@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { IconRefresh } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
@@ -131,9 +131,8 @@ export function CommonTreemapChartReport({ customReport, selectedDateRange }: Co
               </p>
             </div>
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={loadData}
+              type="text"
+                            onClick={loadData}
               className="h-8 w-8"
               title="Reload section"
             >
@@ -152,7 +151,7 @@ export function CommonTreemapChartReport({ customReport, selectedDateRange }: Co
                 </svg>
               </div>
               <p className="text-sm text-muted-foreground mb-2">Error loading data</p>
-              <Button size="sm" onClick={loadData} className="gap-1">
+              <Button size="small" onClick={loadData} className="gap-1">
                 <IconRefresh className="h-3 w-3" />
                 Try Again
               </Button>

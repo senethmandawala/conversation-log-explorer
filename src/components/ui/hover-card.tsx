@@ -1,27 +1,63 @@
 import * as React from "react";
-import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
+import { Popover } from "antd";
 
 import { cn } from "@/lib/utils";
 
-const HoverCard = HoverCardPrimitive.Root;
+interface HoverCardContextValue {
+  content: React.ReactNode;
+  setContent: (content: React.ReactNode) => void;
+}
 
-const HoverCardTrigger = HoverCardPrimitive.Trigger;
+const HoverCardContext = React.createContext<HoverCardContextValue | null>(null);
 
-const HoverCardContent = React.forwardRef<
-  React.ElementRef<typeof HoverCardPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>
->(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-  <HoverCardPrimitive.Content
-    ref={ref}
-    align={align}
-    sideOffset={sideOffset}
-    className={cn(
-      "z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      className,
-    )}
-    {...props}
-  />
-));
-HoverCardContent.displayName = HoverCardPrimitive.Content.displayName;
+const HoverCard = ({ children, open, onOpenChange }: { 
+  children: React.ReactNode; 
+  open?: boolean; 
+  onOpenChange?: (open: boolean) => void;
+}) => {
+  const [content, setContent] = React.useState<React.ReactNode>(null);
+  
+  return (
+    <HoverCardContext.Provider value={{ content, setContent }}>
+      {children}
+    </HoverCardContext.Provider>
+  );
+};
+
+const HoverCardTrigger = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement> & { asChild?: boolean }>(
+  ({ children, asChild, ...props }, ref) => {
+    const context = React.useContext(HoverCardContext);
+    
+    const trigger = asChild && React.isValidElement(children) 
+      ? React.cloneElement(children as React.ReactElement<any>, { ref, ...props })
+      : <span ref={ref as any} {...props}>{children}</span>;
+    
+    return (
+      <Popover content={context?.content} trigger="hover">
+        {trigger}
+      </Popover>
+    );
+  }
+);
+HoverCardTrigger.displayName = "HoverCardTrigger";
+
+const HoverCardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { align?: string; sideOffset?: number }>(
+  ({ className, children, align, sideOffset, ...props }, ref) => {
+    const context = React.useContext(HoverCardContext);
+    
+    React.useEffect(() => {
+      if (context) {
+        context.setContent(
+          <div ref={ref} className={cn("w-64 p-4", className)} {...props}>
+            {children}
+          </div>
+        );
+      }
+    }, [children, className, context, ref, props]);
+    
+    return null;
+  }
+);
+HoverCardContent.displayName = "HoverCardContent";
 
 export { HoverCard, HoverCardTrigger, HoverCardContent };

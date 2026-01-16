@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
@@ -113,8 +113,8 @@ export default function CrossUpsellReport() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Button 
-                  variant="ghost" 
-                  size="icon" 
+                  type="text" 
+                   
                   className="h-9 w-9"
                   onClick={() => setSelectedTab("reports")}
                 >
@@ -133,13 +133,13 @@ export default function CrossUpsellReport() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button type="default" size="small" className="gap-2">
                   <IconDownload className="h-4 w-4" />
                   Export CSV
                 </Button>
                 <Button 
-                  variant={filtersOpen ? "default" : "outline"} 
-                  size="sm" 
+                  type={filtersOpen ? "primary" : "default"} 
+                  size="small" 
                   className="gap-2 relative"
                   onClick={() => setFiltersOpen(!filtersOpen)}
                 >
@@ -166,7 +166,7 @@ export default function CrossUpsellReport() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Date Range</label>
-                      <Button variant="outline" className="w-full justify-start gap-2">
+                      <Button type="default" className="w-full justify-start gap-2">
                         <IconCalendar className="h-4 w-4" />
                         Select dates
                       </Button>
@@ -193,8 +193,8 @@ export default function CrossUpsellReport() {
 
                   <div className="flex justify-end mt-4 gap-2">
                     <Button 
-                      variant="ghost" 
-                      size="sm"
+                      type="text" 
+                      size="small"
                       onClick={() => {
                         setSelectedCallType("");
                       }}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -80,9 +80,8 @@ export default function ReportChannelWiseUsage({ onBack }: ReportChannelWiseUsag
         <CardHeader className="pb-4 border-b border-border/30">
           <div className="flex items-center gap-3">
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={onBack}
+              type="text"
+                            onClick={onBack}
               className="h-10 w-10 rounded-xl"
             >
               <IconArrowLeft className="h-5 w-5" />
@@ -116,7 +115,7 @@ export default function ReportChannelWiseUsage({ onBack }: ReportChannelWiseUsag
               IconSearch
             </Button>
             {searchKeyword && (
-              <Button variant="outline" onClick={handleClear} className="gap-2">
+              <Button type="default" onClick={handleClear} className="gap-2">
                 <IconX className="h-4 w-4" />
                 Clear
               </Button>

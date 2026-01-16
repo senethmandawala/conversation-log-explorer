@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { IconInfoCircle, IconRefresh, IconCalendar, IconList, IconX, IconPhone } from "@tabler/icons-react";
 import {
   Tooltip as UITooltip,
@@ -315,9 +315,8 @@ export function CategoryWiseVDN() {
                     <p className="text-sm text-muted-foreground">VDN performance for selected category</p>
                   </div>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
+                    type="text"
+                                        className="h-7 w-7"
                     onClick={handleCloseTopVDN}
                   >
                     <IconX className="h-3.5 w-3.5" />

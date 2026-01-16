@@ -13,13 +13,13 @@ interface CallLogsSummaryProps {
 }
 
 const callLogsData = [
-  { date: "2024-01-15", time: "09:23 AM", msisdn: "+1234567890", sentiment: "Positive", status: "Resolved" },
-  { date: "2024-01-15", time: "10:45 AM", msisdn: "+1987654321", sentiment: "Negative", status: "Pending" },
-  { date: "2024-01-14", time: "02:30 PM", msisdn: "+1122334455", sentiment: "Neutral", status: "Resolved" },
-  { date: "2024-01-14", time: "04:15 PM", msisdn: "+1555666777", sentiment: "Positive", status: "Escalated" },
-  { date: "2024-01-13", time: "11:00 AM", msisdn: "+1888999000", sentiment: "Negative", status: "Resolved" },
-  { date: "2024-01-13", time: "03:45 PM", msisdn: "+1777888999", sentiment: "Positive", status: "Resolved" },
-  { date: "2024-01-12", time: "08:15 AM", msisdn: "+1666777888", sentiment: "Neutral", status: "Pending" },
+  { date: "2024-01-15", time: "09:23 AM", msisdn: "+1234567890", sentiment: "Positive", status: "Resolved", size: "small", type: "text" },
+  { date: "2024-01-15", time: "10:45 AM", msisdn: "+1987654321", sentiment: "Negative", status: "Pending", size: "small", type: "text" },
+  { date: "2024-01-14", time: "02:30 PM", msisdn: "+1122334455", sentiment: "Neutral", status: "Resolved", size: "small", type: "text" },
+  { date: "2024-01-14", time: "04:15 PM", msisdn: "+1555666777", sentiment: "Positive", status: "Escalated", size: "small", type: "text" },
+  { date: "2024-01-13", time: "11:00 AM", msisdn: "+1888999000", sentiment: "Negative", status: "Resolved", size: "small", type: "text" },
+  { date: "2024-01-13", time: "03:45 PM", msisdn: "+1777888999", sentiment: "Positive", status: "Resolved", size: "small", type: "text" },
+  { date: "2024-01-12", time: "08:15 AM", msisdn: "+1666777888", sentiment: "Neutral", status: "Pending", size: "small", type: "text" },
 ];
 
 const getSentimentColor = (sentiment: string) => {

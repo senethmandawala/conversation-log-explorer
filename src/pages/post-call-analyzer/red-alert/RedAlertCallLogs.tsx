@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IconX, IconRefresh } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { callRoutingApiService } from "@/services/callRoutingApiService";
@@ -168,8 +168,8 @@ export function RedAlertCallLogs({ category, subCategory, fromTime, toTime }: Re
           Showing {callLogs.length} of {pagination.totalElements} calls
         </span>
         <Button 
-          variant="ghost" 
-          size="icon" 
+          type="text" 
+           
           className="h-8 w-8"
           onClick={handleReload}
           disabled={loading}
@@ -251,16 +251,16 @@ export function RedAlertCallLogs({ category, subCategory, fromTime, toTime }: Re
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
-                  size="sm"
+                  type="default"
+                  size="small"
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.first || loading}
                 >
                   Previous
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  type="default"
+                  size="small"
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.last || loading}
                 >

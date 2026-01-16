@@ -4,8 +4,7 @@ import {
   Typography, 
 } from "antd";
 import { 
-  IconPhoto, 
-  IconPhone,
+  IconPhoto,
   IconArrowRight,
 } from "@tabler/icons-react";
 import type { Instance } from "@/pages/PostCallAnalyzer";
@@ -27,10 +26,10 @@ export const InstanceSelector = ({ instances, onSelectInstance }: InstanceSelect
         transition={{ duration: 0.5 }}
         className="flex items-center gap-3"
       >
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <IconPhone className="h-5 w-5 text-primary" />
+        <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center">
+          <img src="/src/assets/images/ai-pca-logo-icon.svg" alt="PCA" className="h-7 w-7" />
         </div>
-        <Title level={3} className="!m-0 !text-xl !font-semibold !text-primary">
+        <Title level={3} className="!m-0 !text-xl !font-semibold !text-heading">
           Post Call Analyzer
         </Title>
       </motion.div>
@@ -41,7 +40,7 @@ export const InstanceSelector = ({ instances, onSelectInstance }: InstanceSelect
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <Title level={4} className="!m-0 !text-lg !font-semibold !text-foreground">
+        <Title level={4} className="!m-0 !text-lg !font-semibold !text-heading">
           Instances
         </Title>
         <Text type="secondary" className="text-sm">
@@ -62,12 +61,12 @@ export const InstanceSelector = ({ instances, onSelectInstance }: InstanceSelect
               whileHover={{ y: -4 }}
             >
               <Card
-                className="rounded-xl border-border cursor-pointer relative overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/15 group"
+                className="rounded-xl border-border cursor-pointer relative overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 group !bg-card"
                 onClick={() => onSelectInstance(instance)}
                 styles={{ body: { padding: 20 } }}
               >
-                {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {/* Gradient Background on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 <div className="relative">
                   <div className="flex items-center justify-between">
@@ -77,7 +76,7 @@ export const InstanceSelector = ({ instances, onSelectInstance }: InstanceSelect
                           <IconPhoto className="h-5 w-5 text-primary" />
                         </div>
                         {/* Status indicator */}
-                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
+                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card" />
                       </div>
                       <div>
                         <Text strong className="text-base text-foreground group-hover:text-primary transition-colors duration-300 block">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -66,8 +66,8 @@ export function DurationCallLogs() {
           <Text type="secondary">Showing {mockCallLogs.length} calls</Text>
         </div>
         <Button 
-          variant="ghost" 
-          size="icon" 
+          type="text" 
+           
           className="h-9 w-9"
           onClick={handleReload}
         >

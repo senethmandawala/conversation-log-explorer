@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { IconArrowLeft, IconInfoCircle, IconRefresh, IconCalendar, IconList, IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
@@ -248,10 +248,10 @@ export default function CallDurationReport() {
               className="rounded-lg"
               placeholder="Select date"
             />
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload}>
+            <Button type="text"  className="h-9 w-9" onClick={handleReload}>
               <IconRefresh className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
+            <Button type="text"  className="h-9 w-9">
               <IconList className="h-4 w-4" />
             </Button>
           </div>
@@ -263,7 +263,7 @@ export default function CallDurationReport() {
           activeKey={activeTab}
           onChange={(value) => setActiveTab(value)}
           className="w-full"
-          size="large"
+          size="small"
           items={[
             {
               key: "duration",
@@ -294,18 +294,16 @@ export default function CallDurationReport() {
                       {slides.length > 1 && (
                         <>
                           <Button
-                            variant="outline"
-                            size="icon"
-                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
+                            type="default"
+                                                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
                             onClick={scrollPrev}
                             disabled={visibleStartIndex === 0}
                           >
                             <IconChevronLeft className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="icon"
-                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
+                            type="default"
+                                                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 h-8 w-8 rounded-full shadow-md"
                             onClick={scrollNext}
                             disabled={visibleStartIndex >= slides.length - 2}
                           >
@@ -337,7 +335,7 @@ export default function CallDurationReport() {
                                   <div className="flex items-center justify-between mb-3">
                                     <h5 className="text-base font-semibold text-foreground">{slide.title}</h5>
                                     {slide.id > 1 && (
-                                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => closeSlide(slide.id)}>
+                                      <Button type="text"  className="h-6 w-6" onClick={() => closeSlide(slide.id)}>
                                         <IconX className="h-3 w-3" />
                                       </Button>
                                     )}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -163,8 +163,8 @@ export default function AutopilotConfiguration() {
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    size="sm"
+                    type="default"
+                    size="small"
                     onClick={handleSync}
                     disabled={isSyncing}
                     className="gap-2"
@@ -174,7 +174,7 @@ export default function AutopilotConfiguration() {
                   </Button>
                   <Dialog open={addDocDialogOpen} onOpenChange={setAddDocDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="gap-2">
+                      <Button size="small" className="gap-2">
                         <IconPlus className="h-4 w-4" />
                         Add Document
                       </Button>
@@ -201,7 +201,7 @@ export default function AutopilotConfiguration() {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setAddDocDialogOpen(false)}>
+                        <Button type="default" onClick={() => setAddDocDialogOpen(false)}>
                           Cancel
                         </Button>
                         <Button onClick={() => setAddDocDialogOpen(false)}>Upload</Button>
@@ -237,7 +237,7 @@ export default function AutopilotConfiguration() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button type="text"  className="h-8 w-8">
                                 <IconDotsVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -266,7 +266,7 @@ export default function AutopilotConfiguration() {
                     Configure prompts used by the AI assistant
                   </p>
                 </div>
-                <Button size="sm" className="gap-2">
+                <Button size="small" className="gap-2">
                   <IconPlus className="h-4 w-4" />
                   Add Prompt
                 </Button>
@@ -282,7 +282,7 @@ export default function AutopilotConfiguration() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button type="text"  className="h-8 w-8">
                             <IconDotsVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -320,7 +320,7 @@ export default function AutopilotConfiguration() {
             </div>
             <Dialog open={addReportDialogOpen} onOpenChange={setAddReportDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="gap-2">
+                <Button size="small" className="gap-2">
                   <IconPlus className="h-4 w-4" />
                   Add Custom Report
                 </Button>
@@ -351,7 +351,7 @@ export default function AutopilotConfiguration() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setAddReportDialogOpen(false)}>
+                  <Button type="default" onClick={() => setAddReportDialogOpen(false)}>
                     Cancel
                   </Button>
                   <Button onClick={() => setAddReportDialogOpen(false)}>Create</Button>
@@ -389,7 +389,7 @@ export default function AutopilotConfiguration() {
                   />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button type="text"  className="h-8 w-8">
                         <IconDotsVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

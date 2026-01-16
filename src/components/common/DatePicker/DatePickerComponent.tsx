@@ -165,7 +165,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   limitCalender = '',
   selectedRangeValue: initialSelectedRangeValue,
   dateInput,
-  onSelectedRangeValueChange
+  onSelectedRangeValueChange,
+  size = 'middle'
 }) => {
   const [selectedOption, setSelectedOption] = useState<string>(initialSelectedOption || 'Today');
   const [customCalendar, setCustomCalendar] = useState<boolean>(false);
@@ -501,11 +502,12 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <div>
           <Button
             type="default"
-            icon={<IconCalendar />}
+            size={size}
+            icon={<IconCalendar className={size === 'small' ? 'h-4 w-4' : 'h-5 w-5'} />}
             title={toolTipValue || dateOutput?.dateRangeForDisplay}
-            className="h-10 rounded-xl border-2 hover:border-primary/50 transition-all duration-200"
+            className={`${size === 'small' ? 'h-8 text-xs' : 'h-10'} border-2 rounded-sm hover:border-primary/50 transition-all duration-200`}
           >
-            <span className="ml-2 font-medium">
+            <span className={`font-medium`}>
               {selectedOption === 'Custom' ? 'Custom' : selectedOption}
             </span>
           </Button>

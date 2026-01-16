@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { IconX } from "@tabler/icons-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
 import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
@@ -69,9 +69,8 @@ export const SentimentTopCategories = ({
             <h5 className="text-lg font-semibold">Top Categories</h5>
           </div>
           <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
+            type="text"
+                        className="h-8 w-8"
             onClick={onClose}
           >
             <IconX className="h-4 w-4" />

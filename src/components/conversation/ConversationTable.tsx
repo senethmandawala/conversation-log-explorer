@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -139,9 +139,8 @@ export function ConversationTable({ data, onView }: ConversationTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                      type="text" 
+                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-center"
                     >
                       <IconSettings2 className="h-4 w-4" />
                     </Button>
@@ -210,10 +209,9 @@ export function ConversationTable({ data, onView }: ConversationTableProps) {
                       whileTap={{ scale: 0.95 }}
                     >
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        type="text"
                         className={cn(
-                          "h-9 w-9 rounded-lg transition-all duration-200",
+                          "h-9 w-9 rounded-lg transition-all duration-200 flex items-center justify-center",
                           "opacity-0 group-hover:opacity-100",
                           "hover:bg-primary hover:text-primary-foreground",
                           "shadow-none hover:shadow-md"

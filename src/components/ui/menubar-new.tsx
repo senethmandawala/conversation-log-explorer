@@ -1,4 +1,6 @@
 import * as React from "react";
+import { Menu } from "antd";
+import type { MenuProps } from "antd";
 import { IconCheck, IconChevronRight, IconCircle } from "@tabler/icons-react";
 
 import { cn } from "@/lib/utils";

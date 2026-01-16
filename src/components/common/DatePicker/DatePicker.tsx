@@ -18,4 +18,5 @@ export interface DatePickerProps {
   selectedRangeValue?: any;
   dateInput?: DateRangeObject;
   onSelectedRangeValueChange?: (dateRange: DateRangeObject) => void;
+  size?: 'small' | 'middle' | 'large';
 }

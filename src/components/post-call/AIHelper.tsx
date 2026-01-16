@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconRobot, IconX, IconSend, IconSparkles } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -58,7 +58,7 @@ export const AIHelper = () => {
         <Button
           onClick={() => setIsOpen(!isOpen)}
           className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-          size="icon"
+          
         >
           <AnimatePresence mode="wait">
             {isOpen ? (
@@ -149,7 +149,7 @@ export const AIHelper = () => {
                     placeholder="Type your message..."
                     className="flex-1 bg-background"
                   />
-                  <Button onClick={handleSend} size="icon" className="shrink-0">
+                  <Button type="primary" onClick={handleSend} className="shrink-0 h-10 w-10 flex items-center justify-center">
                     <IconSend className="h-4 w-4" />
                   </Button>
                 </div>
