@@ -7,7 +7,7 @@ import {
   Spin,
   message
 } from "antd";
-import { EditOutlined, SaveOutlined } from "@ant-design/icons";
+import { IconEdit, IconDeviceFloppy } from "@tabler/icons-react";
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -50,39 +50,37 @@ export default function UpdateAlertMessageTemplate({
     <div className="space-y-4">
       {isEditMode ? (
         <>
-          <Text className="text-sm text-gray-600 block" style={{ fontFamily: 'Geist, sans-serif' }}>
+          <Text className="text-sm text-gray-600 block font-sans">
             Customize the message template for this alert. Use placeholders to insert dynamic values.
           </Text>
 
           <div className="space-y-2">
-            <Text className="text-sm font-medium text-gray-900 block" style={{ fontFamily: 'Geist, sans-serif' }}>Message Header</Text>
+            <Text className="text-sm font-medium text-gray-900 block font-sans">Message Header</Text>
             <Input
               placeholder="Enter Message Header"
               value={messageTemplateHeader}
               onChange={(e) => setMessageTemplateHeader(e.target.value)}
-              className="font-geist"
-              style={{ fontFamily: 'Geist, sans-serif' }}
+              className="font-sans"
             />
           </div>
 
           <div className="space-y-2">
-            <Text className="text-sm font-medium text-gray-900 block" style={{ fontFamily: 'Geist, sans-serif' }}>Message Template</Text>
+            <Text className="text-sm font-medium text-gray-900 block font-sans">Message Template</Text>
             <TextArea
               placeholder="Enter Message Template"
               value={messageTemplate}
               onChange={(e) => setMessageTemplate(e.target.value)}
               rows={10}
-              className="font-geist"
-              style={{ fontFamily: 'Geist, sans-serif' }}
+              className="font-sans"
             />
-            <Text className="text-xs text-gray-500 block" style={{ fontFamily: 'Geist, sans-serif' }}>{messageTemplateHint}</Text>
+            <Text className="text-xs text-gray-500 block font-sans">{messageTemplateHint}</Text>
           </div>
 
           <div className="flex justify-end gap-2">
             <Button onClick={handleCancel}>
               Cancel
             </Button>
-            <Button type="primary" onClick={handleUpdate} icon={<SaveOutlined />}>
+            <Button type="primary" onClick={handleUpdate} icon={<IconDeviceFloppy />}>
               Save
             </Button>
           </div>
@@ -90,20 +88,20 @@ export default function UpdateAlertMessageTemplate({
       ) : (
         <>
           <div className="space-y-2">
-            <Text className="text-sm text-gray-600 block" style={{ fontFamily: 'Geist, sans-serif' }}>Message Header</Text>
-            <Title level={5} className="text-base font-semibold m-0" style={{ fontFamily: 'Geist, sans-serif' }}>{messageTemplateHeader}</Title>
+            <Text className="text-sm text-gray-600 block font-sans">Message Header</Text>
+            <Title level={5} className="text-base font-semibold m-0 font-sans">{messageTemplateHeader}</Title>
           </div>
 
           <Card 
             className="border border-gray-200"
             styles={{ body: { padding: '12px' } }}
           >
-            <Text className="text-sm text-gray-600 block mb-2" style={{ fontFamily: 'Geist, sans-serif' }}>Message Template</Text>
-            <Text className="text-sm whitespace-pre-wrap text-gray-700 block" style={{ fontFamily: 'Geist, sans-serif' }}>{messageTemplate}</Text>
+            <Text className="text-sm text-gray-600 block mb-2 font-sans">Message Template</Text>
+            <Text className="text-sm whitespace-pre-wrap text-gray-700 block font-sans">{messageTemplate}</Text>
           </Card>
 
           <div className="flex justify-end">
-            <Button type="primary" onClick={handleEdit} icon={<EditOutlined />}>
+            <Button type="primary" onClick={handleEdit} icon={<IconEdit />}>
               Edit
             </Button>
           </div>

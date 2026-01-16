@@ -10,12 +10,12 @@ import {
   Tag
 } from "antd";
 import { 
-  PieChartOutlined,
-  InfoCircleOutlined,
-  LeftOutlined,
-  RightOutlined,
-  CloseOutlined
-} from "@ant-design/icons";
+  IconChartPie,
+  IconInfoCircle,
+  IconChevronLeft,
+  IconChevronRight,
+  IconX
+} from "@tabler/icons-react";
 import { 
   PieChart,
   Pie,
@@ -237,32 +237,18 @@ export function HandledCallsAnalysis() {
       const percentage = ((data.value / total) * 100).toFixed(0);
       
       return (
-        <div 
-          style={{ 
-            minWidth: 120, 
-            borderRadius: 6,
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-            border: 'none',
-            overflow: 'hidden'
-          }}
-        >
+        <div className="min-w-[120px] rounded-md shadow-lg overflow-hidden bg-white">
           <div 
-            style={{ 
-              fontSize: 14, 
-              fontWeight: 600, 
-              padding: '8px 12px', 
-              backgroundColor: data.color, 
-              color: 'white' 
-            }}
+            className="text-sm font-semibold py-2 px-3 text-white bg-[${data.color}]"
           >
             {data.name}
           </div>
-          <div style={{ padding: '8px 12px', backgroundColor: '#f5f5f5' }}>
-            <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
-              Count: <span style={{ fontWeight: 600, color: '#333' }}>{data.value}</span>
+          <div className="py-2 px-3 bg-gray-100">
+            <div className="text-xs text-gray-500 mb-0.5">
+              Count: <span className="font-semibold text-gray-800">{data.value}</span>
             </div>
-            <div style={{ fontSize: 12, color: '#666' }}>
-              Percentage: <span style={{ fontWeight: 600, color: '#333' }}>{percentage}%</span>
+            <div className="text-xs text-gray-500">
+              Percentage: <span className="font-semibold text-gray-800">{percentage}%</span>
             </div>
           </div>
         </div>
@@ -331,23 +317,23 @@ export function HandledCallsAnalysis() {
   const renderTable = (data: TableDataItem[], onRowClick?: (label: string) => void) => {
     
     return (
-      <div style={{ border: '1px solid #d9d9d9', borderRadius: 8, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
+        <table className="w-full border-collapse">
           <thead>
-            <tr style={{ backgroundColor: '#fafafa' }}>
-              <th style={{ fontWeight: 600, padding: '12px', textAlign: 'left', borderBottom: '1px solid #d9d9d9' }}>Reason</th>
-              <th style={{ fontWeight: 600, padding: '12px', textAlign: 'right', borderBottom: '1px solid #d9d9d9' }}>Count</th>
+            <tr className="bg-slate-50">
+              <th className="font-semibold p-3 text-left border-b border-gray-300">Reason</th>
+              <th className="font-semibold p-3 text-right border-b border-gray-300">Count</th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
               <tr 
                 key={index} 
-                style={{ cursor: onRowClick ? 'pointer' : 'default', borderBottom: '1px solid #f0f0f0' }}
+                className={`border-b border-gray-100 ${onRowClick ? 'cursor-pointer hover:bg-slate-50' : ''}`}
                 onClick={() => onRowClick?.(item.label)}
               >
-                <td style={{ padding: '12px' }}>{item.label}</td>
-                <td style={{ padding: '12px', textAlign: 'right', fontWeight: 500 }}>{item.count}</td>
+                <td className="p-3">{item.label}</td>
+                <td className="p-3 text-right font-medium">{item.count}</td>
               </tr>
             ))}
           </tbody>
@@ -390,47 +376,26 @@ export function HandledCallsAnalysis() {
   };
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <PieChartOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconChartPie className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     Handled Calls Analysis
                   </Title>
                   <Tooltip title="Click on chart segments to drill down into details">
-                    <div style={{ marginTop: '-4px' }}>
-                      <InfoCircleOutlined 
-                        style={{ fontSize: 14, color: '#64748b' }}
-                      />
+                    <div className="-mt-1">
+                      <IconInfoCircle className="text-sm text-slate-500" />
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Distribution of handled calls by status
                 </Text>
               </div>
@@ -439,7 +404,7 @@ export function HandledCallsAnalysis() {
         </div>
         
         {/* Chart Content */}
-        <div style={{ marginTop: 30 }}>
+        <div className="mt-8">
           {/* Carousel */}
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
@@ -467,9 +432,9 @@ export function HandledCallsAnalysis() {
                         {slide.id > 1 && (
                           <Button
                             type="text"
-                            icon={<CloseOutlined />}
+                            icon={<IconX />}
                             onClick={() => closeSlide(slide.id)}
-                            style={{ height: 32, width: 32 }}
+                            className="h-8 w-8"
                           />
                         )}
                       </div>
@@ -488,14 +453,14 @@ export function HandledCallsAnalysis() {
             <div className="flex justify-between mt-4">
               <Button
                 type="default"
-                icon={<LeftOutlined />}
+                icon={<IconChevronLeft />}
                 onClick={scrollPrev}
               >
                 Prev
               </Button>
               <Button
                 type="default"
-                icon={<RightOutlined />}
+                icon={<IconChevronRight />}
                 onClick={scrollNext}
               >
                 Next

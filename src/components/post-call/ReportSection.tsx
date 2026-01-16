@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Download, Maximize2, Info } from "lucide-react";
+import { IconCalendar, IconDownload, IconMaximize, IconInfoCircle } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, Treemap, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
@@ -179,7 +179,7 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                      <Info className="h-4 w-4" />
+                      <IconInfoCircle className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -199,7 +199,7 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
           
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
-              <Calendar className="h-3.5 w-3.5" />
+              <IconCalendar className="h-3.5 w-3.5" />
               Today
             </Button>
           </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { IconX } from "@tabler/icons-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
 import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
@@ -74,7 +74,7 @@ export const AgentsSentimentTopCategory = ({
             className="h-8 w-8"
             onClick={onClose}
           >
-            <X className="h-4 w-4" />
+            <IconX className="h-4 w-4" />
           </Button>
         </div>
 

@@ -9,12 +9,12 @@ import {
   Tag
 } from "antd";
 import { 
-  RobotOutlined, 
-  MessageOutlined, 
-  PhoneOutlined, 
-  ThunderboltOutlined,
-  SearchOutlined
-} from "@ant-design/icons";
+  IconRobot, 
+  IconMessage, 
+  IconPhone, 
+  IconBolt,
+  IconSearch
+} from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -114,7 +114,7 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
                     justifyContent: 'center'
                   }}
                 >
-                  <RobotOutlined style={{ color: 'white', fontSize: 20 }} />
+                  <IconRobot style={{ color: 'white', fontSize: 20 }} />
                 </div>
                 <div>
                   <Title level={3} style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Instances</Title>
@@ -122,7 +122,7 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <ThunderboltOutlined style={{ color: '#a855f7', fontSize: 16 }} />
+                <IconBolt style={{ color: '#a855f7', fontSize: 16 }} />
                 <Text type="secondary" style={{ fontSize: '14px' }}>{mockInstances.length} active</Text>
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
               placeholder="Search instances..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+              prefix={<IconSearch style={{ color: '#94a3b8' }} />}
               style={{ 
                 height: 44,
                 borderRadius: 8,
@@ -198,7 +198,7 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
                     onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)'}
                   >
-                    <RobotOutlined style={{ color: '#a855f7', fontSize: 24 }} />
+                    <IconRobot style={{ color: '#a855f7', fontSize: 24 }} />
                   </div>
 
                   {/* Title */}
@@ -233,7 +233,7 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
 
                   {/* Channels */}
                   <div className="flex items-center gap-2">
-                    <ThunderboltOutlined style={{ color: '#94a3b8', fontSize: 14 }} />
+                    <IconBolt style={{ color: '#94a3b8', fontSize: 14 }} />
                     <Text type="secondary" style={{ fontSize: '14px' }}>{instance.channels}</Text>
                   </div>
                 </Card>
@@ -248,7 +248,7 @@ export default function AutopilotInstanceSelector({ onSelectInstance }: Autopilo
             animate={{ opacity: 1 }}
             style={{ textAlign: 'center', padding: '48px 0' }}
           >
-            <RobotOutlined style={{ fontSize: 48, color: '#94a3b8', marginBottom: 12 }} />
+            <IconRobot style={{ fontSize: 48, color: '#94a3b8', marginBottom: 12 }} />
             <Text type="secondary">No instances found matching "{search}"</Text>
           </motion.div>
         )}

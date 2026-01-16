@@ -12,10 +12,10 @@ import {
   Statistic
 } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  BarChartOutlined, 
-  FilterOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconChartBar, 
+  IconFilter
+} from "@tabler/icons-react";
 import {
   LineChart,
   Line,
@@ -134,7 +134,7 @@ export default function ReportSuccessFailure({ onBack }: ReportSuccessFailurePro
                 <div className="flex items-center gap-3">
                   <Button
                     type="text"
-                    icon={<ArrowLeftOutlined />}
+                    icon={<IconArrowLeft />}
                     onClick={onBack}
                     style={{ 
                       borderRadius: 8,
@@ -153,7 +153,7 @@ export default function ReportSuccessFailure({ onBack }: ReportSuccessFailurePro
                       justifyContent: 'center'
                     }}
                   >
-                    <BarChartOutlined style={{ color: 'white', fontSize: 20 }} />
+                    <IconChartBar style={{ color: 'white', fontSize: 20 }} />
                   </div>
                   <div>
                     <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Success & Failure Rate Report</Title>
@@ -165,7 +165,7 @@ export default function ReportSuccessFailure({ onBack }: ReportSuccessFailurePro
                 <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersOpen ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersOpen(!filtersOpen)}
                     style={{ borderRadius: 8 }}
                   />

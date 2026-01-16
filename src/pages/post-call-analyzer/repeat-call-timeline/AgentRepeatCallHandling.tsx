@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, Typography, Space, Tooltip } from "antd";
-import { InfoCircleOutlined, UserOutlined } from "@ant-design/icons";
+import { IconInfoCircle, IconUser } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
@@ -20,40 +20,20 @@ export function AgentRepeatCallHandling() {
   const [loading, setLoading] = useState(false);
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: 16,
-        marginTop: 24
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4 mt-6">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="flex justify-between items-center w-full">
           <Space align="center" size="middle" orientation="horizontal">
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white'
-              }}
-            >
-              <UserOutlined style={{ fontSize: 20 }} />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white">
+              <IconUser className="text-xl" />
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Title level={5} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+              <div className="flex items-center gap-1">
+                <Title level={5} className="!m-0 !text-base !font-semibold">
                   Agent Repeat Call Handling
                 </Title>
                 <Tooltip title="Agent performance on handling repeat calls">
-                  <div style={{ marginTop: '-4px' }}>
+                  <div className="-mt-1">
                     <TablerIcon 
                       name="info-circle" 
                       className="wn-tabler-14"
@@ -62,7 +42,7 @@ export function AgentRepeatCallHandling() {
                   </div>
                 </Tooltip>
               </div>
-              <Text type="secondary" style={{ fontSize: 14 }}>
+              <Text type="secondary" className="text-sm">
                 Jun 19 - Jun 25, 2025
               </Text>
             </div>
@@ -70,15 +50,8 @@ export function AgentRepeatCallHandling() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-            <div style={{ 
-              width: 32, 
-              height: 32, 
-              border: '2px solid #1890ff', 
-              borderTop: '2px solid transparent', 
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }}></div>
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : mockData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
@@ -105,7 +78,7 @@ export function AgentRepeatCallHandling() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: '#666' }}>
+          <div className="flex items-center justify-center h-[300px] text-gray-500">
             No data available
           </div>
         )}

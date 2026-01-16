@@ -17,16 +17,16 @@ import {
   DatePicker
 } from "antd";
 import { 
-  SearchOutlined, 
-  DownloadOutlined, 
-  FilterOutlined,
-  CalendarOutlined,
-  MessageOutlined,
-  SettingOutlined,
-  EyeOutlined,
-  ClockCircleOutlined,
-  UserOutlined
-} from "@ant-design/icons";
+  IconSearch, 
+  IconDownload, 
+  IconFilter,
+  IconCalendar,
+  IconMessage,
+  IconSettings,
+  IconEye,
+  IconClock,
+  IconUser
+} from "@tabler/icons-react";
 import { AutopilotSingleChatHistoryView } from "./autopilot-single-chat-history-view/AutopilotSingleChatHistoryView";
 import { mockConversations, filterOptions } from "@/data/mockConversations";
 import { ConversationRecord } from "@/types/conversation";
@@ -93,8 +93,8 @@ export default function AutopilotConversations() {
             align: 'center' as const,
             render: (_, record) => (
               <div>
-                <Text style={{ display: 'block' }}>{record.date}</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+                <Text className="block">{record.date}</Text>
+                <Text type="secondary" className="text-xs">{record.time}</Text>
               </div>
             ),
           };
@@ -117,7 +117,7 @@ export default function AutopilotConversations() {
             key: 'category',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text}</Text>
+              <Text className="font-sans text-black">{text}</Text>
             ),
           };
           
@@ -128,7 +128,7 @@ export default function AutopilotConversations() {
             key: 'subCategory',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text || 'N/A'}</Text>
+              <Text className="font-sans text-black">{text || 'N/A'}</Text>
             ),
           };
           
@@ -170,7 +170,7 @@ export default function AutopilotConversations() {
             align: 'center' as const,
             render: (text: string) => (
               <Space size={4}>
-                <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
+                <IconClock className="text-slate-400 text-xs" />
                 <Text type="secondary">{text}</Text>
               </Space>
             ),
@@ -194,7 +194,7 @@ export default function AutopilotConversations() {
             key: 'vdn',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text || 'N/A'}</Text>
+              <Text className="font-sans text-black">{text || 'N/A'}</Text>
             ),
           };
           
@@ -205,7 +205,7 @@ export default function AutopilotConversations() {
             key: 'uniqueID',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text}</Text>
+              <Text className="text-black font-sans">{text}</Text>
             ),
           };
           
@@ -218,11 +218,7 @@ export default function AutopilotConversations() {
               <Tooltip title={text}>
                 <Text 
                   ellipsis 
-                  style={{ 
-                    maxWidth: 200,
-                    fontFamily: 'Geist, sans-serif', 
-                    color: 'black' 
-                  }}
+                  className="max-w-[200px] font-sans text-black"
                 >
                   {text || 'N/A'}
                 </Text>
@@ -237,7 +233,7 @@ export default function AutopilotConversations() {
             key: 'sttDuration',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text || 'N/A'}</Text>
+              <Text className="font-sans text-black">{text || 'N/A'}</Text>
             ),
           };
           
@@ -248,7 +244,7 @@ export default function AutopilotConversations() {
             key: 'ttsCharCount',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text || 'N/A'}</Text>
+              <Text className="font-sans text-black">{text || 'N/A'}</Text>
             ),
           };
           
@@ -259,7 +255,7 @@ export default function AutopilotConversations() {
             key: 'department',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text || 'N/A'}</Text>
+              <Text className="font-sans text-black">{text || 'N/A'}</Text>
             ),
           };
           
@@ -270,7 +266,7 @@ export default function AutopilotConversations() {
             key: 'city',
             align: 'center' as const,
             render: (text: string) => (
-              <Text style={{ fontFamily: 'Geist, sans-serif', color: 'black' }}>{text || 'N/A'}</Text>
+              <Text className="font-sans text-black">{text || 'N/A'}</Text>
             ),
           };
           
@@ -291,13 +287,9 @@ export default function AutopilotConversations() {
               <Tooltip title="View Details">
                 <Button 
                   type="text" 
-                  icon={<EyeOutlined />}
+                  icon={<IconEye />}
                   onClick={() => handleView(record)}
-                  style={{ 
-                    borderRadius: 8,
-                    transition: 'all 0.2s'
-                  }}
-                  className="hover:bg-primary/10 hover:text-primary"
+                  className="rounded-lg transition-all hover:bg-primary/10 hover:text-primary"
                 />
               </Tooltip>
             ),
@@ -378,23 +370,12 @@ export default function AutopilotConversations() {
             }}
             title={
               <div className="flex items-center gap-3">
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                  }}
-                >
-                  <MessageOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <IconMessage className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Conversation History</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Conversation History</Title>
+                  <Text type="secondary" className="text-[13px]">
                     View and analyze all autopilot conversations
                   </Text>
                 </div>
@@ -402,11 +383,11 @@ export default function AutopilotConversations() {
             }
             extra={
               <Space>
-                <Button icon={<DownloadOutlined />}>Export CSV</Button>
+                <Button icon={<IconDownload />}>Export CSV</Button>
                 <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersOpen ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersOpen(!filtersOpen)}
                   >
                     Filters
@@ -423,27 +404,22 @@ export default function AutopilotConversations() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                style={{ overflow: 'hidden' }}
+                className="overflow-hidden"
               >
                 <Card
                   size="small"
-                  style={{ 
-                    marginBottom: 20, 
-                    background: '#f8fafc', 
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 12
-                  }}
+                  className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                   styles={{ body: { padding: 16 } }}
                 >
                   <Row gutter={[16, 16]}>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1.5">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           Search MSISDN / ID
                         </Text>
                         <Input
                           placeholder="Search..."
-                          prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                          prefix={<IconSearch className="text-slate-400" />}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           allowClear
@@ -452,7 +428,7 @@ export default function AutopilotConversations() {
                     </Col>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1.5">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           VDN Source
                         </Text>
                         <Select
@@ -460,7 +436,7 @@ export default function AutopilotConversations() {
                           value={selectedVdnSource || undefined}
                           onChange={(value) => setSelectedVdnSource(value || "")}
                           allowClear
-                          style={{ width: '100%' }}
+                          className="w-full"
                           options={filterOptions.vdnSources.map((source) => ({
                             label: source.label,
                             value: source.value
@@ -470,7 +446,7 @@ export default function AutopilotConversations() {
                     </Col>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1.5">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           Category
                         </Text>
                         <Select
@@ -478,7 +454,7 @@ export default function AutopilotConversations() {
                           value={selectedCategory || undefined}
                           onChange={(value) => setSelectedCategory(value || "")}
                           allowClear
-                          style={{ width: '100%' }}
+                          className="w-full"
                           options={filterOptions.categories.map((cat) => ({
                             label: cat.label,
                             value: cat.value
@@ -488,7 +464,7 @@ export default function AutopilotConversations() {
                     </Col>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1.5">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           VDN
                         </Text>
                         <Input
@@ -500,10 +476,10 @@ export default function AutopilotConversations() {
                       </div>
                     </Col>
                   </Row>
-                  <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+                  <Row gutter={[16, 16]} className="mt-4">
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           MSISDN
                         </Text>
                         <Input
@@ -516,7 +492,7 @@ export default function AutopilotConversations() {
                     </Col>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           Unique ID
                         </Text>
                         <Input
@@ -529,7 +505,7 @@ export default function AutopilotConversations() {
                     </Col>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           Sub Category
                         </Text>
                         <Input
@@ -542,7 +518,7 @@ export default function AutopilotConversations() {
                     </Col>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-1">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           Resolution
                         </Text>
                         <Select
@@ -550,7 +526,7 @@ export default function AutopilotConversations() {
                           value={selectedResolution || undefined}
                           onChange={(value) => setSelectedResolution(value || "")}
                           allowClear
-                          style={{ width: '100%' }}
+                          className="w-full"
                           options={[
                             { label: 'Resolved', value: 'Resolved' },
                             { label: 'Pending', value: 'Pending' },
@@ -561,12 +537,12 @@ export default function AutopilotConversations() {
                     </Col>
                     <Col xs={24} sm={12} lg={6}>
                       <div className="space-y-">
-                        <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                        <Text type="secondary" className="text-xs font-medium">
                           Date Range
                         </Text>
-                        <Space size="small" style={{ width: '100%' }}>
+                        <Space size="small" className="w-full">
                           <RangePicker 
-                            style={{ flex: 1 }} 
+                            className="flex-1" 
                             value={dateRange}
                             onChange={(dates) => setDateRange(dates)}
                           />
@@ -589,7 +565,7 @@ export default function AutopilotConversations() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            style={{ marginBottom: 16 }}
+            className="mb-4"
           >
             <Text type="secondary">
               Showing <Text strong>{filteredData.length}</Text> conversations
@@ -613,7 +589,7 @@ export default function AutopilotConversations() {
               showSizeChanger: true,
               pageSizeOptions: ['5', '8', '10', '20'],
             }}
-            style={{ borderRadius: 12, overflow: 'hidden' }}
+            className="rounded-xl overflow-hidden"
             rowClassName={() => 
               'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#3b82f6]'
             }

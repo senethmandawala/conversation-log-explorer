@@ -11,11 +11,11 @@ import {
   Tag
 } from "antd";
 import { 
-  PhoneIncoming,
-  PhoneOutgoing,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
+  IconPhoneIncoming,
+  IconPhoneOutgoing,
+  IconArrowUpRight,
+  IconArrowDownRight,
+} from "@tabler/icons-react";
 import WideStatCard from "@/components/ui/wide-stat-card";
 import { HandledCallsAnalysis } from "./Handled Calls Analysis/HandledCallsAnalysis";
 import { CallsHandledByDTMF } from "./autopilot-calls-handled-by-DTMF/CallsHandledByDTMF";
@@ -42,7 +42,7 @@ export default function AutopilotDashboard() {
       >
         <WideStatCard
           color="blue"
-          icon={<PhoneIncoming style={{ color: 'white', fontSize: 20 }} />}
+          icon={<IconPhoneIncoming className="text-white text-xl" />}
           label="Total Incoming Calls"
           value="12,450"
           trend={{ value: "+12.5%", positive: true }}
@@ -60,7 +60,7 @@ export default function AutopilotDashboard() {
       >
         <WideStatCard
           color="green"
-          icon={<PhoneOutgoing style={{ color: 'white', fontSize: 20 }} />}
+          icon={<IconPhoneOutgoing className="text-white text-xl" />}
           label="Transferred to Agent"
           value="2,340"
           trend={{ value: "-5.2%", positive: false }}

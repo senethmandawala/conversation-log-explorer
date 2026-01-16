@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Info, RefreshCw, Calendar, List, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { IconArrowLeft, IconInfoCircle, IconRefresh, IconCalendar, IconList, IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { DurationCallLogs } from "./DurationCallLogs.tsx";
 import { Typography, DatePicker, Tabs as AntTabs, Table as AntTable, Badge as AntBadge, Space, Tooltip as AntTooltip } from "antd";
-import { PhoneOutlined, CalendarOutlined, ReloadOutlined, UnorderedListOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { IconPhone, IconCalendar as IconCalendarAnt, IconRefresh as IconRefreshAnt, IconList as IconListAnt, IconClock } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 
 const { Title, Text } = Typography;
@@ -211,29 +211,18 @@ export default function CallDurationReport() {
       <CardHeader className="pb-4 border-b border-border/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white'
-              }}
-            >
-              <PhoneOutlined style={{ fontSize: 20 }} />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+              <IconPhone className="text-xl" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                <Title level={4} className="!m-0 !text-xl !font-semibold">
                   Call Duration Analysis
                 </Title>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                      <div style={{ marginTop: '-4px' }}>
+                      <div className="-mt-1">
                         <TablerIcon 
                           name="info-circle" 
                           className="wn-tabler-14"
@@ -247,7 +236,7 @@ export default function CallDurationReport() {
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <Text type="secondary" style={{ fontSize: 14 }}>
+              <Text type="secondary" className="text-sm">
                 Duration distribution and long call analysis
               </Text>
             </div>
@@ -255,18 +244,15 @@ export default function CallDurationReport() {
           
           <div className="flex items-center gap-2">
             <DatePicker 
-              suffixIcon={<CalendarOutlined />}
-              style={{ 
-                borderRadius: 8,
-                borderColor: '#d9d9d9'
-              }}
+              suffixIcon={<IconCalendarAnt />}
+              className="rounded-lg"
               placeholder="Select date"
             />
             <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload}>
-              <RefreshCw className="h-4 w-4" />
+              <IconRefresh className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" className="h-9 w-9">
-              <List className="h-4 w-4" />
+              <IconList className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -276,7 +262,7 @@ export default function CallDurationReport() {
         <AntTabs
           activeKey={activeTab}
           onChange={(value) => setActiveTab(value)}
-          style={{ width: '100%' }}
+          className="w-full"
           size="large"
           items={[
             {
@@ -284,21 +270,14 @@ export default function CallDurationReport() {
               label: "Call Duration",
               children: (
                 <>
-                  <div style={{ marginBottom: 16 }}>
-                    <Card
-                      style={{
-                        borderRadius: 12,
-                        border: '1px solid #e8e8e8',
-                        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                        padding: '16px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div className="mb-4">
+                    <Card className="rounded-xl border-gray-200 bg-gradient-to-br from-blue-500 to-blue-600 p-4">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Call Time</p>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageCallTime}</h2>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCallCount} Calls</span>
+                          <p className="text-white/80 text-sm mb-1">Average Call Time</p>
+                          <div className="flex items-baseline gap-2">
+                            <h2 className="text-3xl font-bold text-white m-0">{averageCallTime}</h2>
+                            <span className="text-white/80 text-sm">from {totalCallCount} Calls</span>
                           </div>
                         </div>
                       </div>
@@ -321,7 +300,7 @@ export default function CallDurationReport() {
                             onClick={scrollPrev}
                             disabled={visibleStartIndex === 0}
                           >
-                            <ChevronLeft className="h-4 w-4" />
+                            <IconChevronLeft className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
@@ -330,7 +309,7 @@ export default function CallDurationReport() {
                             onClick={scrollNext}
                             disabled={visibleStartIndex >= slides.length - 2}
                           >
-                            <ChevronRight className="h-4 w-4" />
+                            <IconChevronRight className="h-4 w-4" />
                           </Button>
                         </>
                       )}
@@ -359,7 +338,7 @@ export default function CallDurationReport() {
                                     <h5 className="text-base font-semibold text-foreground">{slide.title}</h5>
                                     {slide.id > 1 && (
                                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => closeSlide(slide.id)}>
-                                        <X className="h-3 w-3" />
+                                        <IconX className="h-3 w-3" />
                                       </Button>
                                     )}
                                   </div>
@@ -428,8 +407,8 @@ export default function CallDurationReport() {
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
                   ) : (
-                    <Card style={{ border: '1px solid #e8e8e8', borderRadius: 12 }}>
-                      <div style={{ padding: '24px' }}>
+                    <Card className="border-gray-200 rounded-xl">
+                      <div className="p-6">
                         <h5 className="text-lg font-semibold mb-4">Long Calls Overview</h5>
                         
                         <div className="grid grid-cols-3 gap-4 mb-6">

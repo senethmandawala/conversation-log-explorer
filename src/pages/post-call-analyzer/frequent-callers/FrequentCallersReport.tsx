@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
 import { 
-  LeftOutlined, 
-  InfoCircleOutlined, 
-  ReloadOutlined, 
-  CalendarOutlined, 
-  UnorderedListOutlined,
-  PhoneOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconInfoCircle, 
+  IconRefresh, 
+  IconCalendar, 
+  IconList,
+  IconPhone
+} from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { TablerIcon } from "@/components/ui/tabler-icon";
@@ -85,40 +85,21 @@ export default function FrequentCallersReport() {
   };
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space direction="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle" orientation="horizontal">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <PhoneOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconPhone className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-xl !font-semibold">
                     Frequent Callers
                   </Title>
                   <Tooltip title="Top callers by call frequency">
-                    <div style={{ marginTop: '-4px' }}>
+                    <div className="-mt-1">
                       <TablerIcon 
                         name="info-circle" 
                         className="wn-tabler-14"
@@ -127,7 +108,7 @@ export default function FrequentCallersReport() {
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Jun 19 - Jun 25, 2025
                 </Text>
               </div>
@@ -135,46 +116,36 @@ export default function FrequentCallersReport() {
             
             <Space size="small" orientation="horizontal">
               <DatePicker 
-                suffixIcon={<CalendarOutlined />}
-                style={{ 
-                  borderRadius: 8,
-                  borderColor: '#d9d9d9'
-                }}
-                placeholder="Select date"
+                suffixIcon={<IconCalendar />}
+                className="rounded-lg"
               />
               <Button 
                 type="text" 
-                icon={<ReloadOutlined />}
+                icon={<IconRefresh />}
                 onClick={handleReload}
-                style={{ width: 36, height: 36 }}
+                className="w-9 h-9"
               />
               <Button 
                 type="text" 
-                icon={<UnorderedListOutlined />}
-                style={{ width: 36, height: 36 }}
+                icon={<IconList />}
+                className="w-9 h-9"
               />
             </Space>
           </div>
         </div>
         
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-4">
           {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
-              <div style={{ 
-                animation: 'spin 1s linear infinite',
-                borderRadius: '50%',
-                height: '32px',
-                width: '32px',
-                borderBottom: '2px solid #1890ff'
-              }}></div>
+            <div className="flex items-center justify-center h-[400px]">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : chartData.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '400px', color: '#8c8c8c' }}>
-              <p style={{ fontSize: '18px', fontWeight: 500, marginBottom: 8 }}>No Data Available</p>
-              <p style={{ fontSize: '14px' }}>No frequent callers found for the selected period</p>
+            <div className="flex flex-col items-center justify-center h-[400px] text-gray-400">
+              <p className="text-lg font-medium mb-2">No Data Available</p>
+              <p className="text-sm">No frequent callers found for the selected period</p>
             </div>
           ) : (
-            <div style={{ marginTop: 16 }}>
+            <div className="mt-4">
             <ResponsiveContainer width="100%" height={450}>
               <BarChart 
                 data={chartData} 

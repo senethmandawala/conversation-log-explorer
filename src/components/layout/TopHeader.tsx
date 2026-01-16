@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { 
-  ChevronDown, 
-  Image as ImageIcon,
-  Globe,
-  User,
-  Bot,
-  PhoneCall,
-  Settings,
-  LogOut,
-  UserCircle,
-  ChevronLeft,
-  ChevronRight,
-  Building2
-} from 'lucide-react';
-import { Button, Dropdown, Avatar, Badge, Space } from 'antd';
+  IconChevronDown, 
+  IconPhoto,
+  IconWorld,
+  IconUser,
+  IconRobot,
+  IconPhone,
+  IconSettings,
+  IconLogout,
+  IconUserCircle,
+  IconChevronLeft,
+  IconChevronRight,
+  IconBuilding
+} from '@tabler/icons-react';
+import { Button, Dropdown, Avatar, Badge } from 'antd';
+import type { MenuProps } from 'antd';
 import { motion } from 'framer-motion';
 import { useModule } from '@/contexts/ModuleContext';
 import { projectSelectionService } from '@/services/projectSelectionService';
@@ -35,6 +36,8 @@ export function TopHeader() {
   const isPostCallAnalyzer = location.pathname.startsWith("/pca");
   const isGetStarted = location.pathname === "/" || location.pathname === "/get-started";
   const isInstances = location.pathname === "/instances";
+
+  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'EN');
   
   // Hide instance selector on getstarted and instances pages
   const shouldHideInstanceSelector = isGetStarted || isInstances;
@@ -45,7 +48,19 @@ export function TopHeader() {
   const [isLoading, setIsLoading] = useState(false);
   
   const moduleTitle = isPostCallAnalyzer ? "Post Call Analyzer" : "Autopilot";
-  const ModuleIcon = isPostCallAnalyzer ? PhoneCall : Bot;
+  const ModuleIcon = isPostCallAnalyzer ? IconPhone : IconRobot;
+
+  const languageItems: MenuProps['items'] = [
+    { key: 'EN', label: 'English' },
+    { key: 'HI', label: 'Hindi' },
+  ];
+
+  const onLanguageClick: MenuProps['onClick'] = ({ key }) => {
+    const next = String(key);
+    setLanguage(next);
+    localStorage.setItem('language', next);
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: next } }));
+  };
 
   // Load projects based on current module
   useEffect(() => {
@@ -205,22 +220,22 @@ export function TopHeader() {
     <motion.header
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="h-16 bg-gradient-to-r from-card via-card to-card/95 backdrop-blur-sm border-b border-border/30 px-6 flex items-center justify-between shadow-sm"
+      className="h-12 bg-gradient-to-r from-card via-card to-card/95 backdrop-blur-sm border-b border-border/30 px-6 flex items-center justify-between shadow-xs"
     >
       {/* Left side - Module indicator, Sidebar toggle, and Agent selector */}
       <div className="flex items-center gap-6">
         {/* Sidebar toggle */}
         <Button
-          variant="outlined"
+          type="default"
           shape="circle"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="h-10 w-10 rounded-xl border-border/60 hover:bg-muted/50 hover:border-border transition-all duration-200"
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {sidebarCollapsed ? (
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            <IconChevronRight className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+            <IconChevronLeft className="h-4 w-4 text-muted-foreground" />
           )}
         </Button>
 
@@ -236,7 +251,7 @@ export function TopHeader() {
                     onClick={() => changeProject(project)}
                   >
                     <div className="project-image h-8 w-8 rounded bg-muted/50 flex items-center justify-center">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <IconBuilding className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="flex-1">
                       <div className="font-medium text-sm">
@@ -270,11 +285,11 @@ export function TopHeader() {
             )}
           >
             <Button
-              variant="outlined"
+              type="default"
               className="h-10 px-4 rounded-xl border-border/60 hover:bg-muted/50 hover:border-border transition-all duration-200"
             >
               <div className="project-image h-6 w-6 rounded bg-muted/50 flex items-center justify-center mr-2">
-                <Building2 className="h-3 w-3 text-muted-foreground" />
+                <IconBuilding className="h-3 w-3 text-muted-foreground" />
               </div>
               <div className="text-content hidden md:block">
                 <div className="project-name font-medium text-sm truncate">
@@ -286,7 +301,7 @@ export function TopHeader() {
                   </div>
                 )}
               </div>
-              <ChevronDown className="h-4 w-4 ml-2 text-muted-foreground" />
+              <IconChevronDown className="h-4 w-4 ml-2 text-muted-foreground" />
             </Button>
           </Dropdown>
         )}
@@ -295,14 +310,24 @@ export function TopHeader() {
       {/* Right side - Language and User */}
       <div className="flex items-center gap-3">
         {/* Language selector */}
-        <Button
-          variant="outlined"
-          className="h-10 px-3 rounded-xl border-border/60 hover:bg-muted/50 hover:border-border transition-all duration-200 flex items-center gap-2"
+        <Dropdown
+          menu={{
+            items: languageItems,
+            selectable: true,
+            selectedKeys: [language],
+            onClick: onLanguageClick,
+          }}
+          trigger={['click']}
         >
-          <Globe className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">EN</span>
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </Button>
+          <Button
+            type="default"
+            className="wn-icon-btn-sm h-10 px-3 rounded-xl border-0 hover:bg-muted/50 hover:border-border transition-all duration-200 flex items-center gap-2"
+          >
+            <IconWorld className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">{language}</span>
+            <IconChevronDown className="h-3 w-3 text-muted-foreground" />
+          </Button>
+        </Dropdown>
 
         {/* User menu */}
         <Dropdown
@@ -311,39 +336,39 @@ export function TopHeader() {
               <div
                 className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors"
               >
-                <UserCircle className="h-4 w-4 text-muted-foreground" />
+                <IconUserCircle className="h-4 w-4 text-muted-foreground" />
                 <span>Profile</span>
               </div>
               <div
                 className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors"
               >
-                <Settings className="h-4 w-4 text-muted-foreground" />
+                <IconSettings className="h-4 w-4 text-muted-foreground" />
                 <span>Settings</span>
               </div>
               <div className="border-t border-border/20" />
               <div
                 className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/50 transition-colors text-destructive"
               >
-                <LogOut className="h-4 w-4" />
+                <IconLogout className="h-4 w-4" />
                 <span>Logout</span>
               </div>
             </div>
           )}
         >
           <Button
-            variant="text"
-            className="h-10 px-3 rounded-xl hover:bg-muted/50 transition-all duration-200 flex items-center gap-3"
+            type="text"
+            className="h-10 px-3 transition-all duration-200 flex items-center gap-2 !border-0 hover:!border-0 active:!border-0 focus:!border-0 focus-visible:!border-0 outline-none hover:outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 rounded-none pe-0 hover:bg-primary/50 py-2"
           >
-            <Avatar className="h-8 w-8 ring-2 ring-border/50">
-              <div className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-sm font-semibold flex items-center justify-center h-full w-full">
+            <Avatar className="h-8 w-8 ring-2 ring-border/50 bg-muted">
+              <div className="text-primary text-sm font-semibold flex items-center justify-center h-full w-full">
                 SA
               </div>
             </Avatar>
             <div className="hidden sm:block text-left">
-              <p className="font-medium text-sm">super_admin</p>
+              <p className="font-medium text-sm">John Doe</p>
               <p className="text-xs text-muted-foreground">Administrator</p>
             </div>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            <IconChevronDown className="h-4 w-4 text-muted-foreground" />
           </Button>
         </Dropdown>
       </div>

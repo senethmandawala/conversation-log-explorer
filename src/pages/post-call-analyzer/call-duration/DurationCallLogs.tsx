@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Info, RefreshCw } from "lucide-react";
+import { IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Typography, Table as AntTable, Badge as AntBadge, Space, Tooltip as AntTooltip } from "antd";
-import { ClockCircleOutlined, UserOutlined } from "@ant-design/icons";
+import { IconClock, IconUser } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { StatusBadge } from "@/components/ui/status-badge";
 import "@/components/ui/status-badge.css";
@@ -71,7 +71,7 @@ export function DurationCallLogs() {
           className="h-9 w-9"
           onClick={handleReload}
         >
-          <RefreshCw className="h-4 w-4" />
+          <IconRefresh className="h-4 w-4" />
         </Button>
       </div>
 
@@ -93,7 +93,7 @@ export function DurationCallLogs() {
             showSizeChanger: true,
             pageSizeOptions: ['5', '8', '10', '20'],
           }}
-          style={{ borderRadius: 12, overflow: 'hidden' }}
+          className="rounded-xl overflow-hidden"
           rowClassName={() => 
             'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#6366f1]'
           }
@@ -104,8 +104,8 @@ export function DurationCallLogs() {
               align: 'center',
               render: (_, record) => (
                 <div>
-                  <Text style={{ display: 'block' }}>{record.date}</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+                  <Text className="block">{record.date}</Text>
+                  <Text type="secondary" className="text-xs">{record.time}</Text>
                 </div>
               ),
             },
@@ -133,18 +133,8 @@ export function DurationCallLogs() {
               key: 'agent',
               render: (text: string) => (
                 <Space>
-                  <div 
-                    style={{ 
-                      width: 32, 
-                      height: 32, 
-                      borderRadius: '50%', 
-                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <UserOutlined style={{ color: 'white', fontSize: 14 }} />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+                    <IconUser className="text-white text-sm" />
                   </div>
                   <Text strong>{text}</Text>
                 </Space>

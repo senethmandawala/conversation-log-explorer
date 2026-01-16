@@ -34,70 +34,29 @@ export const AntdChartTooltip = ({
   if (!active || !payload || !payload.length) return null;
 
   return (
-    <div 
-      style={{
-        background: 'rgba(255, 255, 255, 0.98)',
-        backdropFilter: 'blur(8px)',
-        border: '1px solid #e2e8f0',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)',
-        minWidth: '160px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-      }}
-    >
+    <div className="bg-white/[0.98] backdrop-blur-sm border border-slate-200 rounded-lg py-3 px-4 shadow-lg min-w-[140px]">
       {showLabel && label && (
-        <p 
-          style={{
-            fontSize: '12px',
-            fontWeight: 500,
-            color: '#64748b',
-            marginBottom: '8px',
-            paddingBottom: '8px',
-            borderBottom: '1px solid #f1f5f9',
-          }}
-        >
+        <p className="text-xs font-medium text-slate-500 mb-2 pb-2 border-b border-slate-200">
           {labelFormatter(label)}
         </p>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div className="flex flex-col gap-1.5">
         {payload.map((item, index) => {
           const color = item.color || item.fill || item.stroke || '#6366f1';
           const name = item.name || item.dataKey || 'Value';
           const value = item.value;
 
           return (
-            <div 
-              key={index} 
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '16px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div key={index} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
                 <div 
-                  style={{ 
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    flexShrink: 0,
-                    backgroundColor: color,
-                    boxShadow: `0 0 4px ${color}40`,
-                  }}
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: color, boxShadow: `0 0 4px ${color}40` }}
                 />
-                <span style={{ fontSize: '13px', color: '#475569' }}>{name}</span>
+                <span className="text-[13px] text-slate-600">{name}</span>
               </div>
-              <span 
-                style={{ 
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: '#1e293b',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {valueFormatter(value ?? 0)}
+              <span className="text-[13px] font-semibold text-slate-800">
+                {valueFormatter(value)}
               </span>
             </div>
           );

@@ -12,10 +12,10 @@ import {
   Statistic
 } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  DollarOutlined, 
-  FilterOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconCurrencyDollar, 
+  IconFilter
+} from "@tabler/icons-react";
 import {
   LineChart,
   Line,
@@ -134,7 +134,7 @@ export default function ReportTokenUsage({ onBack }: ReportTokenUsageProps) {
                 <div className="flex items-center gap-3">
                   <Button
                     type="text"
-                    icon={<ArrowLeftOutlined />}
+                    icon={<IconArrowLeft />}
                     onClick={onBack}
                     style={{ 
                       borderRadius: 8,
@@ -153,7 +153,7 @@ export default function ReportTokenUsage({ onBack }: ReportTokenUsageProps) {
                       justifyContent: 'center'
                     }}
                   >
-                    <DollarOutlined style={{ color: 'white', fontSize: 20 }} />
+                    <IconCurrencyDollar style={{ color: 'white', fontSize: 20 }} />
                   </div>
                   <div>
                     <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Token Usage Report</Title>
@@ -165,7 +165,7 @@ export default function ReportTokenUsage({ onBack }: ReportTokenUsageProps) {
                 <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersOpen ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersOpen(!filtersOpen)}
                     style={{ borderRadius: 8 }}
                   />

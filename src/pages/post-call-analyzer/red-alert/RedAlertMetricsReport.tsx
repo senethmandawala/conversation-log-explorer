@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
-import { ReloadOutlined, CloseOutlined, BarChartOutlined, CalendarOutlined, ApartmentOutlined, EyeOutlined } from "@ant-design/icons";
+import { IconRefresh, IconX, IconChartBar, IconCalendar, IconBuildingCommunity, IconEye } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { callRoutingApiService, type CommonResponse } from "@/services/callRoutingApiService";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
@@ -69,6 +69,30 @@ const TreemapTooltipContent = ({ active, payload }: TooltipProps) => {
   }
   return null;
 };
+
+const BarChartTooltipContent = ({ active, payload }: TooltipProps) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 justify-start">
+            <div 
+              className="w-3 h-3 rounded-full flex-shrink-0" 
+              style={{ backgroundColor: data.fill }}
+            />
+            <p className="font-medium m-0">{data.name}</p>
+          </div>
+          <div className="text-sm ml-5">
+            Value: {data.value}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 
 // Colors from env.js
 const COLORS = (window as any).env_vars?.colors || [
@@ -499,41 +523,23 @@ export default function RedAlertMetricsReport({
   };
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <ApartmentOutlined style={{ fontSize: 20 }} />
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-start w-full">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconBuildingCommunity className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="flex justify-between items-start">
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    <div className="flex items-center gap-1">
+                      <Title level={4} className="!m-0 !text-lg !font-semibold">
                         Red Alert Metrics
                       </Title>
                       <Tooltip title="Highlighting key areas that require immediate attention">
-                        <div style={{ marginTop: '-4px' }}>
+                        <div className="-mt-1">
                           <TablerIcon 
                             name="info-circle" 
                             className="wn-tabler-14"
@@ -542,15 +548,15 @@ export default function RedAlertMetricsReport({
                         </div>
                       </Tooltip>
                     </div>
-                    <Text type="secondary" style={{ fontSize: 14 }}>
-                      {effectiveDateRange?.dateRangeForDisplay || ''}
+                    <Text type="secondary" className="text-sm">
+                      Highlighting key areas that require immediate attention
                     </Text>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className="flex items-center gap-2">
               <DatePickerComponent
                 onSelectedRangeValueChange={handleDateRangeChange}
                 toolTipValue="Select date range for red alert metrics"
@@ -560,7 +566,7 @@ export default function RedAlertMetricsReport({
               <Tooltip title="Reload data">
                 <Button
                   type="default"
-                  icon={<ReloadOutlined />}
+                  icon={<IconRefresh />}
                   onClick={handleReload}
                   loading={loading}
                   className={cn(
@@ -572,7 +578,7 @@ export default function RedAlertMetricsReport({
               <Tooltip title="Go to Insights">
                 <Button
                   type="default"
-                  icon={<EyeOutlined />}
+                  icon={<IconEye />}
                   onClick={handleGoToInsights}
                   className={cn(
                     "h-10 rounded-xl border-2 transition-all duration-200",
@@ -626,9 +632,9 @@ export default function RedAlertMetricsReport({
               </div>
                 
                 {/* Legend */}
-                <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                <div className="mt-3 grid grid-cols-2 gap-2">
                   {treemapData.filter(item => item.value > 0).map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div key={idx} className="flex items-center gap-2">
                       <div 
                         style={{ 
                           width: 12, 
@@ -638,63 +644,44 @@ export default function RedAlertMetricsReport({
                           backgroundColor: item.fill 
                         }}
                       />
-                      <span style={{ fontSize: 12, color: '#666', fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                      <span className="text-xs text-gray-500 font-normal truncate">{item.name}</span>
                     </div>
                   ))}
                 </div>
                 
-                <div style={{ 
-                  fontSize: 14, 
-                  color: '#666', 
-                  textAlign: 'center', 
-                  marginTop: 12, 
-                  padding: 8, 
-                  backgroundColor: '#fafafa', 
-                  borderRadius: 8 
-                }}>
-                  <span style={{ fontWeight: 500, color: '#1890ff' }}>Note:</span> Data is based on the selected date range
+                <div className="text-sm text-gray-500 text-center mt-3 p-2 bg-slate-50 rounded-lg">
+                  <span className="font-medium text-blue-500">Note:</span> Data is based on the selected date range
                 </div>
               </Card>
             </div>
 
             {/* Bar Chart - Second Level */}
             {showSecondChart && (
-              <div className={showThirdChart ? "col-span-4" : "col-span-6"}>
-                <div className="border border-border rounded-xl p-4">
+              <div style={{ 
+                gridColumn: showThirdChart ? 'span 4' : 'span 6'
+              }}>
+                <div className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">{selectedCategory}</p>
-                      <h3 className="text-base font-semibold leading-tight">
-                        {selectedCategory === 'Open Cases' && 'Top Agents Handling Open Cases'}
-                        {selectedCategory === 'Drop calls' && 'Top Agents Handling Dropped Calls'}
-                        {selectedCategory === 'Bad Practices' && 'Violation Breakdown'}
-                        {selectedCategory !== 'Open Cases' && selectedCategory !== 'Drop calls' && selectedCategory !== 'Bad Practices' && `Reasons for ${selectedCategory}`}
-                      </h3>
+                      <Text type="secondary" className="text-sm">{selectedCategory}</Text>
+                      <Title level={5} className="!m-0 !text-base !font-semibold">
+                        {selectedCategory === 'Open Cases' || selectedCategory === 'Drop calls' 
+                          ? 'Top Agents' 
+                          : 'Reasons for ' + selectedCategory}
+                      </Title>
                     </div>
                     <Button 
                       type="text"
-                      icon={<CloseOutlined />}
+                      icon={<IconX />}
                       onClick={closeSecondChart}
                       className="rounded-lg"
                     />
                   </div>
 
                   {secondChartLoading ? (
-                    <ExceptionHandleView type="loading" />
-                  ) : secondChartError ? (
-                    <ExceptionHandleView 
-                      type="500" 
-                      title="Error Loading Data"
-                      content="reasons for red alert"
-                      onTryAgain={() => loadSecondChartData(selectedCategory)}
-                    />
-                  ) : !hasSecondChartData ? (
-                    <ExceptionHandleView 
-                      type="204" 
-                      title="No Data Available"
-                      content={`reasons for ${selectedCategory}`}
-                      onTryAgain={() => loadSecondChartData(selectedCategory)}
-                    />
+                    <div className="flex items-center justify-center h-[300px]">
+                      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                   ) : (
                     <>
                       <div className="h-[300px] w-full">
@@ -735,16 +722,8 @@ export default function RedAlertMetricsReport({
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
-                      <div style={{ 
-                        fontSize: 14, 
-                        color: '#666', 
-                        textAlign: 'center', 
-                        marginTop: 8, 
-                        padding: 8, 
-                        backgroundColor: '#fafafa', 
-                        borderRadius: 8 
-                      }}>
-                        <span style={{ fontWeight: 500, color: '#1890ff' }}>Note:</span> Data is based on the selected date range
+                      <div className="text-sm text-gray-500 text-center mt-2 p-2 bg-slate-50 rounded-lg">
+                        <span className="font-medium text-blue-500">Note:</span> Data is based on the selected date range
                       </div>
                     </>
                   )}
@@ -755,35 +734,23 @@ export default function RedAlertMetricsReport({
             {/* Call Logs - Third Level */}
             {showThirdChart && (
               <div className="col-span-4">
-                <div className="border border-border rounded-xl p-4">
+                <div className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">{selectedCategory} / {selectedSubCategory}</p>
-                      <h3 className="text-base font-semibold leading-tight">Call Logs</h3>
+                      <Text type="secondary" className="text-sm">{selectedCategory} / {selectedSubCategory}</Text>
+                      <Title level={5} className="!m-0 !text-base !font-semibold">Call Logs</Title>
                     </div>
                     <Button 
                       type="text"
-                      icon={<CloseOutlined />}
+                      icon={<IconX />}
                       onClick={closeThirdChart}
                       className="rounded-lg"
                     />
                   </div>
 
                   {thirdChartLoading ? (
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      height: 300 
-                    }}>
-                      <div style={{
-                        width: 32,
-                        height: 32,
-                        border: '2px solid #1890ff',
-                        borderTop: '2px solid transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
+                    <div className="flex items-center justify-center h-[300px]">
+                      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   ) : (
                     <RedAlertCallLogs 

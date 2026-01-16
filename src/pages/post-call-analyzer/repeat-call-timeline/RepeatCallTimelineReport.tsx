@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip, Row, Col } from "antd";
 import { 
-  InfoCircleOutlined, 
-  ReloadOutlined, 
-  CalendarOutlined, 
-  UnorderedListOutlined,
-  LineChartOutlined,
-  PhoneOutlined,
-  ClockCircleOutlined,
-  AimOutlined,
-  UserOutlined
-} from "@ant-design/icons";
+  IconInfoCircle, 
+  IconRefresh, 
+  IconCalendar, 
+  IconList,
+  IconChartLine,
+  IconPhone,
+  IconClock,
+  IconTarget,
+  IconUser
+} from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { StatCard } from "@/components/ui/stat-card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from "recharts";
@@ -48,40 +48,21 @@ export default function RepeatCallTimelineReport() {
   };
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle" orientation="horizontal">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <LineChartOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconChartLine className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     7 Day Repeat Call Timeline
                   </Title>
                   <Tooltip title="Track repeat callers over the past 7 days">
-                    <div style={{ marginTop: '-4px' }}>
+                    <div className="-mt-1">
                       <TablerIcon 
                         name="info-circle" 
                         className="wn-tabler-14"
@@ -90,7 +71,7 @@ export default function RepeatCallTimelineReport() {
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Jun 19 - Jun 25, 2025
                 </Text>
               </div>
@@ -98,33 +79,30 @@ export default function RepeatCallTimelineReport() {
             
             <Space size="small" orientation="horizontal">
               <DatePicker 
-                suffixIcon={<CalendarOutlined />}
-                style={{ 
-                  borderRadius: 8,
-                  borderColor: '#d9d9d9'
-                }}
+                suffixIcon={<IconCalendar />}
+                className="rounded-lg"
               />
               <Button 
                 type="text" 
-                icon={<ReloadOutlined />}
+                icon={<IconRefresh />}
                 onClick={handleReload}
-                style={{ width: 36, height: 36 }}
+                className="w-9 h-9"
               />
               <Button 
                 type="text" 
-                icon={<UnorderedListOutlined />}
-                style={{ width: 36, height: 36 }}
+                icon={<IconList />}
+                className="w-9 h-9"
               />
             </Space>
           </div>
         </div>
         {/* Stat Cards */}
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Row gutter={[16, 16]} className="mb-6">
           <Col xs={24} sm={12} lg={8}>
             <StatCard
               label="Daily Repeat Rate"
               value={`${dailyRepeatRate}%`}
-              icon={<AimOutlined />}
+              icon={<IconTarget />}
               color="#3b82f6"
               gradientColors={["#3b82f6", "#2563eb"] as [string, string]}
               isLoading={loading}
@@ -134,7 +112,7 @@ export default function RepeatCallTimelineReport() {
             <StatCard
               label="Most Affected Category"
               value={mostAffectedCategory}
-              icon={<PhoneOutlined />}
+              icon={<IconPhone />}
               color="#ef4444"
               gradientColors={["#ef4444", "#dc2626"] as [string, string]}
               isLoading={loading}
@@ -144,7 +122,7 @@ export default function RepeatCallTimelineReport() {
             <StatCard
               label="Total Repeat Calls"
               value={timelineData.reduce((sum, day) => sum + day.repeatCalls, 0).toString()}
-              icon={<ClockCircleOutlined />}
+              icon={<IconClock />}
               color="#f59e0b"
               gradientColors={["#f59e0b", "#d97706"] as [string, string]}
               isLoading={loading}
@@ -153,17 +131,10 @@ export default function RepeatCallTimelineReport() {
         </Row>
 
         {/* Main Timeline Chart */}
-        <div style={{ marginBottom: 24 }}>
+        <div className="mb-6">
           {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 350 }}>
-              <div style={{ 
-                width: 32, 
-                height: 32, 
-                border: '2px solid #1890ff', 
-                borderTop: '2px solid transparent', 
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
+            <div className="flex items-center justify-center h-[350px]">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={350}>
@@ -212,7 +183,7 @@ export default function RepeatCallTimelineReport() {
         </div>
 
         {/* Sub-reports */}
-        <div style={{ marginTop: 32 }}>
+        <div className="mt-8">
           <ReasonWiseRepeatCall />
           <CategoryWiseRepeatCall />
           <AgentRepeatCallHandling />

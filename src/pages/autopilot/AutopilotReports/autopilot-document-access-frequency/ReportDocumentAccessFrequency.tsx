@@ -13,12 +13,12 @@ import {
   Progress
 } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  BarChartOutlined, 
-  SearchOutlined, 
-  ReloadOutlined, 
-  FilterOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconChartBar, 
+  IconSearch, 
+  IconRefresh, 
+  IconFilter
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ColumnsType } from "antd/es/table";
 
@@ -211,7 +211,7 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
                 <div className="flex items-center gap-3">
                   <Button
                     type="text"
-                    icon={<ArrowLeftOutlined />}
+                    icon={<IconArrowLeft />}
                     onClick={onBack}
                     style={{ 
                       borderRadius: 8,
@@ -230,7 +230,7 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
                       justifyContent: 'center'
                     }}
                   >
-                    <BarChartOutlined style={{ color: 'white', fontSize: 20 }} />
+                    <IconChartBar style={{ color: 'white', fontSize: 20 }} />
                   </div>
                   <div>
                     <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Document Access Frequency</Title>
@@ -242,7 +242,7 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
                 <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersOpen ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersOpen(!filtersOpen)}
                     style={{ borderRadius: 8 }}
                   />
@@ -280,17 +280,17 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
                           placeholder="Search..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                          prefix={<IconSearch style={{ color: '#94a3b8' }} />}
                           allowClear
                           style={{ width: 200 }}
                         />
-                        <Button onClick={handleSearch} icon={<SearchOutlined />}>
+                        <Button onClick={handleSearch} icon={<IconSearch />}>
                           Search
                         </Button>
                         {searchTerm && (
                           <Button 
                             onClick={handleClear} 
-                            icon={<ReloadOutlined />}
+                            icon={<IconRefresh />}
                           >
                             Clear
                           </Button>

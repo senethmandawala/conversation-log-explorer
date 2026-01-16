@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, X, Users } from "lucide-react";
+import { IconInfoCircle, IconX, IconUsers } from "@tabler/icons-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -28,7 +28,7 @@ import {
   Space, 
   Tooltip as AntTooltip
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { IconInfoCircle as InfoIcon } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -199,47 +199,26 @@ export function FrequentCallers() {
         layout
         transition={{ duration: 0.3 }}
       >
-        <AntCard
-          style={{
-            borderRadius: 12,
-            border: '1px solid #e8e8e8',
-            background: '#ffffff',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            padding: '16px 16px 16px 16px'
-          }}
-        >
-          <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-            <div style={{ marginTop: -12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <AntCard className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+          <Space orientation="vertical" size="middle" className="w-full">
+            <div className="-mt-3">
+              <div className="flex justify-between items-center w-full">
                 <Space align="center" size="middle">
-                  <div
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white'
-                    }}
-                  >
-                    <Users style={{ fontSize: 20 }} />
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white">
+                    <IconUsers className="text-xl" />
                   </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                    <div className="flex items-center gap-1">
+                      <Title level={4} className="!m-0 !text-lg !font-semibold">
                         Frequent Callers
                       </Title>
                       <AntTooltip title="Analysis of most frequent callers. Click on any bar to view detailed category breakdown.">
-                        <div style={{ marginTop: '-4px' }}>
-                          <InfoCircleOutlined 
-                            style={{ fontSize: 14, color: '#64748b' }}
-                          />
+                        <div className="-mt-1">
+                          <InfoIcon className="text-sm text-slate-500" />
                         </div>
                       </AntTooltip>
                     </div>
-                    <Text type="secondary" style={{ fontSize: 14 }}>
+                    <Text type="secondary" className="text-sm">
                       Top callers by call volume
                     </Text>
                   </div>
@@ -248,7 +227,7 @@ export function FrequentCallers() {
             </div>
             
             {/* Chart Content */}
-            <div style={{ marginTop: 30 }}>
+            <div className="mt-8">
             {isLoading ? (
               <Skeleton className="h-[300px] w-full" />
             ) : (
@@ -310,7 +289,7 @@ export function FrequentCallers() {
                         onClick={handleCloseDetails}
                         className="h-8 w-8"
                       >
-                        <X className="h-4 w-4" />
+                        <IconX className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

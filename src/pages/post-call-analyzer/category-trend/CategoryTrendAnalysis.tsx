@@ -10,10 +10,10 @@ import {
   ConfigProvider
 } from "antd";
 import { 
-  FilterOutlined, 
-  ArrowLeftOutlined,
-  LineChartOutlined
-} from "@ant-design/icons";
+  IconFilter, 
+  IconArrowLeft,
+  IconChartLine
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
@@ -99,7 +99,7 @@ export default function CategoryTrendAnalysis() {
           transition={{ duration: 0.3 }}
         >
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            className="rounded-xl border-slate-200"
             styles={{
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
@@ -108,27 +108,16 @@ export default function CategoryTrendAnalysis() {
               <div className="flex items-center gap-3">
                 <Button 
                   type="text" 
-                  icon={<ArrowLeftOutlined />} 
+                  icon={<IconArrowLeft />} 
                   onClick={() => setSelectedTab("reports")}
-                  style={{ marginRight: 8 }}
+                  className="mr-2"
                 />
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                  }}
-                >
-                  <LineChartOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <IconChartLine className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Category Trend Analysis</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Category Trend Analysis</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Track call volume trends across different categories over time
                   </Text>
                 </div>
@@ -137,19 +126,12 @@ export default function CategoryTrendAnalysis() {
             extra={
               <Button 
                 type={filtersVisible ? "primary" : "default"}
-                icon={<FilterOutlined />}
+                icon={<IconFilter />}
                 onClick={() => setFiltersVisible(!filtersVisible)}
               >
                 Filters
                 {activeFiltersCount > 0 && (
-                  <span style={{ 
-                    marginLeft: 8, 
-                    background: '#ef4444', 
-                    color: 'white', 
-                    borderRadius: 10, 
-                    padding: '2px 8px',
-                    fontSize: 12 
-                  }}>
+                  <span className="ml-2 bg-red-500 text-white rounded-full w-[18px] h-[18px] inline-flex items-center justify-center text-[11px]">
                     {activeFiltersCount}
                   </span>
                 )}
@@ -164,31 +146,25 @@ export default function CategoryTrendAnalysis() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden' }}
+                  className="overflow-hidden"
                 >
                   <Card
                     size="small"
-                    style={{ 
-                      marginBottom: 20, 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12
-                    }}
-                    styles={{ body: { padding: 16 } }}
+                    className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                   >
                     <Row gutter={[16, 16]}>
                       <Col xs={24} sm={12} lg={8}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
-                          <RangePicker style={{ width: '100%' }} />
+                          <Text type="secondary" className="text-xs font-medium">Date Range</Text>
+                          <RangePicker className="w-full" />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={8}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Text type="secondary" className="text-xs font-medium">Call Type</Text>
                           <Select
                             placeholder="All Call Types"
-                            style={{ width: '100%' }}
+                            className="w-full"
                             allowClear
                             value={selectedCallType}
                             onChange={setSelectedCallType}
@@ -197,7 +173,7 @@ export default function CategoryTrendAnalysis() {
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={8} className="flex items-end">
-                        <Button type="primary" onClick={handleSearch} style={{ width: '100%' }}>
+                        <Button type="primary" onClick={handleSearch} className="w-full">
                           Search
                         </Button>
                       </Col>
@@ -220,10 +196,7 @@ export default function CategoryTrendAnalysis() {
               >
                 <Card
                   size="small"
-                  style={{ 
-                    borderRadius: 12, 
-                    border: '1px solid #e2e8f0',
-                  }}
+                  className="rounded-xl border-slate-200"
                   styles={{ body: { padding: 24 } }}
                 >
                   <ResponsiveContainer width="100%" height={400}>

@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { Info, X, PieChartIcon } from "lucide-react";
+import { IconInfoCircle, IconX, IconChartPie } from "@tabler/icons-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -25,7 +25,7 @@ import {
   Tooltip as AntTooltip,
   Button as AntButton
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { IconInfoCircle as InfoIcon } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -223,7 +223,7 @@ export function CategoryDistribution() {
                       color: 'white'
                     }}
                   >
-                    <PieChartIcon style={{ fontSize: 20 }} />
+                    <IconChartPie style={{ fontSize: 20 }} />
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -232,7 +232,7 @@ export function CategoryDistribution() {
                       </Title>
                       <AntTooltip title="Distribution of calls across different categories. Click on a segment to view subcategories.">
                         <div style={{ marginTop: '-4px' }}>
-                          <InfoCircleOutlined 
+                          <InfoIcon 
                             style={{ fontSize: 14, color: '#64748b' }}
                           />
                         </div>
@@ -314,7 +314,7 @@ export function CategoryDistribution() {
                         onClick={handleCloseSubcategory}
                         className="h-8 w-8"
                       >
-                        <X className="h-4 w-4" />
+                        <IconX className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FileX, AlertCircle, RefreshCw, Inbox } from "lucide-react";
+import { IconFileOff, IconAlertCircle, IconRefresh, IconInbox } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -37,9 +37,9 @@ export function EmptyState({ type, message, onRetry }: EmptyStateProps) {
         )} />
         
         {isError ? (
-          <AlertCircle className="h-10 w-10 relative z-10" />
+          <IconAlertCircle className="h-10 w-10 relative z-10" />
         ) : (
-          <Inbox className="h-10 w-10 relative z-10" />
+          <IconInbox className="h-10 w-10 relative z-10" />
         )}
       </motion.div>
       
@@ -73,7 +73,7 @@ export function EmptyState({ type, message, onRetry }: EmptyStateProps) {
             size="sm"
             className="rounded-full px-6 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <IconRefresh className="h-4 w-4 mr-2" />
             Try Again
           </Button>
         </motion.div>

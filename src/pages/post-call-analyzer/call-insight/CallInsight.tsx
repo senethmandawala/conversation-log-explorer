@@ -17,19 +17,19 @@ import {
   ConfigProvider
 } from "antd";
 import { 
-  SearchOutlined, 
-  FilterOutlined, 
-  DownloadOutlined,
-  EyeOutlined,
-  PhoneOutlined,
-  UserOutlined,
-  ClockCircleOutlined,
-  RiseOutlined,
-  FallOutlined,
-  MinusOutlined,
-  ClearOutlined,
-  SettingOutlined
-} from "@ant-design/icons";
+  IconSearch, 
+  IconFilter, 
+  IconDownload,
+  IconEye,
+  IconPhone,
+  IconUser,
+  IconClock,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconMinus,
+  IconClearAll,
+  IconSettings
+} from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { StatusBadge } from "@/components/ui/status-badge";
 import "@/components/ui/status-badge.css";
@@ -72,11 +72,11 @@ const mockCalls: CallRecord[] = [
 const SentimentIcon = ({ sentiment }: { sentiment: CallRecord["sentiment"] }) => {
   switch (sentiment) {
     case "positive":
-      return <RiseOutlined style={{ color: '#10b981', fontSize: 14 }} />;
+      return <IconTrendingUp className="text-emerald-500 text-sm" />;
     case "negative":
-      return <FallOutlined style={{ color: '#ef4444', fontSize: 14 }} />;
+      return <IconTrendingDown className="text-red-500 text-sm" />;
     default:
-      return <MinusOutlined style={{ color: '#f59e0b', fontSize: 14 }} />;
+      return <IconMinus className="text-amber-500 text-sm" />;
   }
 };
 
@@ -168,7 +168,7 @@ export default function CallInsight() {
             key: 'agent',
             align: 'center' as const,
             render: (text: string) => (
-              <Text strong style={{ fontFamily: 'Geist, sans-serif' }}>{text}</Text>
+              <Text strong className="font-sans">{text}</Text>
             ),
           };
           
@@ -218,7 +218,7 @@ export default function CallInsight() {
             align: 'center' as const,
             render: (text: string) => (
               <Space size={4}>
-                <ClockCircleOutlined style={{ color: '#94a3b8', fontSize: 12 }} />
+                <IconClock className="text-slate-400 text-xs" />
                 <Text type="secondary">{text}</Text>
               </Space>
             ),
@@ -231,8 +231,8 @@ export default function CallInsight() {
             align: 'center' as const,
             render: (_, record) => (
               <div>
-                <Text style={{ display: 'block' }}>{record.date}</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
+                <Text className="block">{record.date}</Text>
+                <Text type="secondary" className="text-xs">{record.time}</Text>
               </div>
             ),
           };
@@ -317,13 +317,9 @@ export default function CallInsight() {
               <Tooltip title="View Details">
                 <Button 
                   type="text" 
-                  icon={<EyeOutlined />}
+                  icon={<IconEye />}
                   onClick={() => setSelectedCall(record)}
-                  style={{ 
-                    borderRadius: 8,
-                    transition: 'all 0.2s'
-                  }}
-                  className="hover:bg-primary/10 hover:text-primary"
+                  className="rounded-lg transition-all hover:bg-primary/10 hover:text-primary"
                 />
               </Tooltip>
             ),
@@ -385,23 +381,12 @@ export default function CallInsight() {
             }}
             title={
               <div className="flex items-center gap-3">
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
-                  }}
-                >
-                  <PhoneOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <IconPhone className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Call Insights</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Call Insights</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Analyze and explore individual call recordings and transcripts
                   </Text>
                 </div>
@@ -409,11 +394,11 @@ export default function CallInsight() {
             }
             extra={
               <Space>
-                <Button icon={<DownloadOutlined />}>Export CSV</Button>
+                <Button icon={<IconDownload />}>Export CSV</Button>
                 <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersVisible ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersVisible(!filtersVisible)}
                   >
                     Filters
@@ -430,27 +415,22 @@ export default function CallInsight() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden' }}
+                  className="overflow-hidden"
                 >
                   <Card
                     size="small"
-                    style={{ 
-                      marginBottom: 20, 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12
-                    }}
+                    className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                     styles={{ body: { padding: 16 } }}
                   >
                     <Row gutter={[16, 16]}>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Search MSISDN / Agent
                           </Text>
                           <Input
                             placeholder="Search..."
-                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            prefix={<IconSearch className="text-slate-400" />}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             allowClear
@@ -459,7 +439,7 @@ export default function CallInsight() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Agent
                           </Text>
                           <Select
@@ -467,14 +447,14 @@ export default function CallInsight() {
                             value={selectedAgent}
                             onChange={setSelectedAgent}
                             allowClear
-                            style={{ width: '100%' }}
+                            className="w-full"
                             options={uniqueAgents.map(a => ({ label: a, value: a }))}
                           />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Category
                           </Text>
                           <Select
@@ -482,14 +462,14 @@ export default function CallInsight() {
                             value={selectedCategory}
                             onChange={setSelectedCategory}
                             allowClear
-                            style={{ width: '100%' }}
+                            className="w-full"
                             options={uniqueCategories.map(c => ({ label: c, value: c }))}
                           />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Sentiment
                           </Text>
                           <Select
@@ -497,7 +477,7 @@ export default function CallInsight() {
                             value={selectedSentiment}
                             onChange={setSelectedSentiment}
                             allowClear
-                            style={{ width: '100%' }}
+                            className="w-full"
                             options={[
                               { label: 'Positive', value: 'positive' },
                               { label: 'Neutral', value: 'neutral' },
@@ -508,7 +488,7 @@ export default function CallInsight() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Status
                           </Text>
                           <Select
@@ -516,7 +496,7 @@ export default function CallInsight() {
                             value={selectedStatus}
                             onChange={setSelectedStatus}
                             allowClear
-                            style={{ width: '100%' }}
+                            className="w-full"
                             options={[
                               { label: 'Completed', value: 'completed' },
                               { label: 'Pending', value: 'pending' },
@@ -527,16 +507,16 @@ export default function CallInsight() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Date Range
                           </Text>
-                          <RangePicker style={{ width: '100%' }} />
+                          <RangePicker className="w-full" />
                         </div>
                       </Col>
                       <Col xs={24} lg={12} className="flex items-end justify-end">
                         <Space>
                           <Button 
-                            icon={<ClearOutlined />} 
+                            icon={<IconClearAll />} 
                             onClick={clearAllFilters}
                           >
                             Clear All
@@ -554,7 +534,7 @@ export default function CallInsight() {
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton.Input key={i} active block style={{ height: 52 }} />
+                  <Skeleton.Input key={i} active block className="h-[52px]" />
                 ))}
               </div>
             ) : (
@@ -574,7 +554,7 @@ export default function CallInsight() {
                   showSizeChanger: true,
                   pageSizeOptions: ['5', '8', '10', '20'],
                 }}
-                style={{ borderRadius: 12, overflow: 'hidden' }}
+                className="rounded-xl overflow-hidden"
                 rowClassName={() => 
                   'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#6366f1]'
                 }

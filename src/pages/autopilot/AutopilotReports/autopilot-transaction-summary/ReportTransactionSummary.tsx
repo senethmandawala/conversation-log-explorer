@@ -12,13 +12,13 @@ import {
   DatePicker
 } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  SearchOutlined, 
-  CloseOutlined, 
-  FileTextOutlined, 
-  LoadingOutlined, 
-  FilterOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconSearch, 
+  IconX, 
+  IconFileText, 
+  IconLoader2, 
+  IconFilter
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ColumnsType } from "antd/es/table";
 
@@ -208,7 +208,7 @@ export default function ReportTransactionSummary({ onBack }: ReportTransactionSu
                 <div className="flex items-center gap-3">
                   <Button
                     type="text"
-                    icon={<ArrowLeftOutlined />}
+                    icon={<IconArrowLeft />}
                     onClick={onBack}
                     style={{ 
                       borderRadius: 8,
@@ -228,7 +228,7 @@ export default function ReportTransactionSummary({ onBack }: ReportTransactionSu
                       boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
                     }}
                   >
-                    <FileTextOutlined style={{ color: 'white', fontSize: 20 }} />
+                    <IconFileText style={{ color: 'white', fontSize: 20 }} />
                   </div>
                   <div>
                     <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Transaction Summary Report</Title>
@@ -240,7 +240,7 @@ export default function ReportTransactionSummary({ onBack }: ReportTransactionSu
                 <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersOpen ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersOpen(!filtersOpen)}
                     style={{ borderRadius: 8 }}
                   />
@@ -278,17 +278,17 @@ export default function ReportTransactionSummary({ onBack }: ReportTransactionSu
                           placeholder="Search..."
                           value={searchKeyword}
                           onChange={(e) => setSearchKeyword(e.target.value)}
-                          prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                          prefix={<IconSearch style={{ color: '#94a3b8' }} />}
                           allowClear
                           style={{ width: 200 }}
                         />
-                        <Button onClick={handleSearch} icon={<SearchOutlined />}>
+                        <Button onClick={handleSearch} icon={<IconSearch />}>
                           Search
                         </Button>
                         {searchKeyword && (
                           <Button 
                             onClick={handleClear} 
-                            icon={<CloseOutlined />}
+                            icon={<IconX />}
                           >
                             Clear
                           </Button>
@@ -315,7 +315,7 @@ export default function ReportTransactionSummary({ onBack }: ReportTransactionSu
                 </Space>
               ) : filteredData.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                  <FileTextOutlined style={{ fontSize: 48, color: '#94a3b8', marginBottom: 16 }} />
+                  <IconFileText style={{ fontSize: 48, color: '#94a3b8', marginBottom: 16 }} />
                   <Text type="secondary">No matching data found</Text>
                 </div>
               ) : (

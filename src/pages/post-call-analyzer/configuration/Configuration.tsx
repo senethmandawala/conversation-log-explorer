@@ -20,28 +20,28 @@ import {
   message
 } from "antd";
 import { 
-  SettingOutlined, 
-  SaveOutlined,
-  QuestionCircleOutlined,
-  AudioOutlined,
-  FolderOutlined,
-  TagOutlined,
-  PlusOutlined,
-  CloseOutlined,
-  DragOutlined,
-  GlobalOutlined,
-  BellOutlined,
-  SafetyOutlined,
-  UploadOutlined,
-  EyeOutlined,
-  EditOutlined,
-  SyncOutlined,
-  FrownOutlined,
-  DislikeOutlined,
-  DashboardOutlined,
-  FallOutlined,
-  HolderOutlined
-} from "@ant-design/icons";
+  IconSettings, 
+  IconDeviceFloppy,
+  IconQuestionMark,
+  IconMicrophone,
+  IconFolder,
+  IconTag,
+  IconPlus,
+  IconX,
+  IconGripVertical,
+  IconWorld,
+  IconBell,
+  IconShield,
+  IconUpload,
+  IconEye,
+  IconEdit,
+  IconRefresh,
+  IconMoodSad,
+  IconThumbDown,
+  IconDashboard,
+  IconTrendingDown,
+  IconGripHorizontal
+} from "@tabler/icons-react";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { toast } from "sonner";
 import CategoryStructure, { CategoryNode } from "./CategoryStructure";
@@ -110,12 +110,11 @@ function SortableTag({ tag, onRemove }: SortableTagProps) {
       {...attributes}
       {...listeners}
     >
-      <HolderOutlined 
+      <IconGripHorizontal 
         className={`text-xs ${tag.mandatory ? 'text-white/70' : 'text-gray-400'}`}
       />
       <Text 
-        className={`${tag.mandatory ? 'text-white' : 'text-gray-700'} text-sm font-medium`}
-        style={{ fontFamily: 'Geist, sans-serif' }}
+        className={`${tag.mandatory ? 'text-white' : 'text-gray-700'} text-sm font-medium font-sans`}
       >
         {tag.name}
       </Text>
@@ -123,7 +122,7 @@ function SortableTag({ tag, onRemove }: SortableTagProps) {
         <span className="text-white/90 text-xs font-bold">*</span>
       )}
       {!tag.mandatory && (
-        <CloseOutlined
+        <IconX
           className="text-xs text-gray-400 cursor-pointer p-1 hover:text-red-500 hover:bg-red-50 rounded-full transition-all duration-200"
           onClick={(e) => {
             e.stopPropagation();
@@ -196,7 +195,7 @@ const defaultCategories: CategoryNode[] = [
 
 const ALERT_CONFIG: AlertConfig[] = [
   {
-    icon: SyncOutlined,
+    icon: IconRefresh,
     name: "Agent Repeat Call Alert",
     description: "Notify when an agent's repeat calls rate exceeds threshold",
     threshold: 15,
@@ -207,7 +206,7 @@ const ALERT_CONFIG: AlertConfig[] = [
     editThreshold: false,
   },
   {
-    icon: FrownOutlined,
+    icon: IconMoodSad,
     name: "Negative Sentiment Alert",
     description: "Alert when agent receives consistently negative sentiment count",
     threshold: 10,
@@ -218,7 +217,7 @@ const ALERT_CONFIG: AlertConfig[] = [
     editThreshold: false,
   },
   {
-    icon: DislikeOutlined,
+    icon: IconThumbDown,
     name: "Bad Practices Alert",
     description: "Notify when agent's bad practice score exceeds the threshold",
     threshold: 5,
@@ -229,7 +228,7 @@ const ALERT_CONFIG: AlertConfig[] = [
     editThreshold: false,
   },
   {
-    icon: DashboardOutlined,
+    icon: IconDashboard,
     name: "Performance Metrics Alert",
     description: "Notify when overall agent performance score is below target",
     threshold: 5,
@@ -240,7 +239,7 @@ const ALERT_CONFIG: AlertConfig[] = [
     editThreshold: false,
   },
   {
-    icon: FallOutlined,
+    icon: IconTrendingDown,
     name: "FCR Alert",
     description: "Notifies when an agent's first call resolution rate falls below the defined threshold",
     threshold: 5,
@@ -460,31 +459,21 @@ export default function Configuration() {
             title={
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div 
-                    style={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: 8, 
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <SettingOutlined style={{ color: 'white', fontSize: 20 }} />
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center">
+                    <IconSettings className="text-white text-xl" />
                   </div>
                   <div>
-                    <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Configuration</Title>
-                    <Text type="secondary" style={{ fontSize: 13 }}>
+                    <Title level={5} className="!m-0 !font-semibold">Configuration</Title>
+                    <Text type="secondary" className="text-[13px]">
                       Configure application settings and preferences
                     </Text>
                   </div>
                 </div>
                 <Button 
                   type="primary" 
-                  icon={<SaveOutlined />}
+                  icon={<IconDeviceFloppy />}
                   onClick={handleSave}
-                  style={{ fontFamily: 'Geist, sans-serif' }}
+                  className="font-sans"
                 >
                   Save Changes
                 </Button>
@@ -502,16 +491,13 @@ export default function Configuration() {
               transition={{ duration: 0.5, delay: 0.1 }}
             >
               <Card
-                style={{ 
-                  borderRadius: 12, 
-                  border: '1px solid #e2e8f0'
-                }}
+                className="rounded-xl border-slate-200"
                 title={
                   <div className="flex items-center gap-2">
-                    <AudioOutlined style={{ color: '#3b82f6', fontSize: 16 }} />
-                    <Text strong className="text-base font-semibold" style={{ fontFamily: 'Geist, sans-serif' }}>File Upload Format</Text>
+                    <IconMicrophone className="text-blue-500 text-base" />
+                    <Text strong className="text-base font-semibold font-sans">File Upload Format</Text>
                     <Tooltip title="Define the naming convention for uploaded files">
-                      <QuestionCircleOutlined style={{ color: '#94a3b8', fontSize: 14 }} />
+                      <IconQuestionMark className="text-slate-400 text-sm" />
                     </Tooltip>
                   </div>
                 }
@@ -521,7 +507,7 @@ export default function Configuration() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <Text type="secondary" className="text-sm mb-2 block text-gray-600" style={{ fontFamily: 'Geist, sans-serif' }}>Name Format Tags</Text>
+                      <Text type="secondary" className="text-sm mb-2 block text-gray-600 font-sans">Name Format Tags</Text>
                       <div 
                         className="p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-slate-50 border-2 border-dashed border-gray-200 rounded-xl min-h-[100px] relative"
                       >
@@ -534,7 +520,7 @@ export default function Configuration() {
                             items={nameTags.map(t => t.id)}
                             strategy={horizontalListSortingStrategy}
                           >
-                            <div className="flex flex-wrap gap-2 sm:gap-3" style={{ minHeight: '56px' }}>
+                            <div className="flex flex-wrap gap-2 sm:gap-3 min-h-14">
                               {nameTags.map(tag => (
                                 <SortableTag key={tag.id} tag={tag} onRemove={removeNameTag} />
                               ))}
@@ -543,8 +529,7 @@ export default function Configuration() {
                         </DndContext>
                         {nameTags.length === 0 && (
                           <div 
-                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-400 text-sm"
-                            style={{ fontFamily: 'Geist, sans-serif' }}
+                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-400 text-sm font-sans"
                           >
                             Drag tags here or add custom tags below
                           </div>
@@ -558,23 +543,21 @@ export default function Configuration() {
                         value={newTagName}
                         onChange={(e) => setNewTagName(e.target.value)}
                         onPressEnter={addNameTag}
-                        className="font-geist text-sm"
-                        style={{ fontFamily: 'Geist, sans-serif' }}
+                        className="font-sans text-sm"
                       />
                       <Button 
                         type="default" 
-                        icon={<PlusOutlined />}
+                        icon={<IconPlus />}
                         onClick={addNameTag}
                       />
                     </Space.Compact>
 
                     <div className="space-y-2">
-                      <Text strong className="text-sm font-semibold text-gray-900" style={{ fontFamily: 'Geist, sans-serif' }}>Separator</Text>
+                      <Text strong className="text-sm font-semibold text-gray-900 font-sans">Separator</Text>
                       <Select 
                         value={separator} 
                         onChange={setSeparator}
-                        className="w-full font-geist text-sm"
-                        style={{ width: '100%', fontFamily: 'Geist, sans-serif' }}
+                        className="w-full font-sans text-sm"
                       >
                         <Option value="_">Underscore (_)</Option>
                         <Option value="-">Hyphen (-)</Option>
@@ -598,21 +581,18 @@ export default function Configuration() {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <Card
-                style={{ 
-                  borderRadius: 12, 
-                  border: '1px solid #e2e8f0'
-                }}
+                className="rounded-xl border-slate-200"
                 title={
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <FolderOutlined style={{ color: '#3b82f6', fontSize: 16 }} />
-                      <Text strong style={{ fontSize: '16px' }}>Category Structure</Text>
+                      <IconFolder className="text-blue-500 text-base" />
+                      <Text strong className="text-base">Category Structure</Text>
                     </div>
                     <Space>
                       <Button 
                         type="default" 
                         size="small" 
-                        icon={<UploadOutlined />}
+                        icon={<IconUpload />}
                         onClick={() => setImportCategoriesOpen(true)}
                       >
                         Import
@@ -620,7 +600,7 @@ export default function Configuration() {
                       <Button 
                         type="default" 
                         size="small" 
-                        icon={<PlusOutlined />}
+                        icon={<IconPlus />}
                         onClick={handleAddMainCategory}
                       >
                         Add Category
@@ -652,16 +632,13 @@ export default function Configuration() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <Card
-                style={{ 
-                  borderRadius: 12, 
-                  border: '1px solid #e2e8f0'
-                }}
+                className="rounded-xl border-slate-200"
                 title={
                   <div className="flex items-center gap-2">
-                    <SettingOutlined style={{ color: '#3b82f6', fontSize: 16 }} />
-                    <Text strong style={{ fontSize: '16px' }}>Settings</Text>
+                    <IconSettings className="text-blue-500 text-base" />
+                    <Text strong className="text-base">Settings</Text>
                     <Tooltip title="Configure file size limits and call thresholds">
-                      <QuestionCircleOutlined style={{ color: '#94a3b8', fontSize: 14 }} />
+                      <IconQuestionMark className="text-slate-400 text-sm" />
                     </Tooltip>
                   </div>
                 }
@@ -681,10 +658,10 @@ export default function Configuration() {
                             onChange={(e) => setMaxFileSize(e.target.value)}
                             suffix={
                               <Tooltip title="Maximum file size allowed for upload in MB">
-                                <QuestionCircleOutlined style={{ color: '#94a3b8' }} />
+                                <IconQuestionMark className="text-slate-400" />
                               </Tooltip>
                             }
-                            style={{ fontFamily: 'Geist, sans-serif' }}
+                            className="font-sans"
                           />
                         </div>
                       </Col>
@@ -699,17 +676,17 @@ export default function Configuration() {
                             onChange={(e) => setLongCallThreshold(e.target.value)}
                             suffix={
                               <Tooltip title="Threshold in minutes to classify a call as long">
-                                <QuestionCircleOutlined style={{ color: '#94a3b8' }} />
+                                <IconQuestionMark className="text-slate-400" />
                               </Tooltip>
                             }
-                            style={{ fontFamily: 'Geist, sans-serif' }}
+                            className="font-sans"
                           />
                         </div>
                       </Col>
                     </Row>
 
                     <div>
-                      <Text strong style={{ marginBottom: 16, display: 'block' }}>Select the Language</Text>
+                      <Text strong className="mb-4 block">Select the Language</Text>
                       <Row gutter={[16, 16]}>
                         <Col xs={24} md={12}>
                           <div className="space-y-2">
@@ -717,10 +694,10 @@ export default function Configuration() {
                             <Select 
                               value={callRecordingLanguage} 
                               onChange={setCallRecordingLanguage}
-                              style={{ width: '100%', fontFamily: 'Geist, sans-serif' }}
+                              className="w-full font-sans"
                               suffix={
                                 <Tooltip title="Language used in call recordings">
-                                  <QuestionCircleOutlined style={{ color: '#94a3b8' }} />
+                                  <IconQuestionMark className="text-slate-400" />
                                 </Tooltip>
                               }
                             >
@@ -741,10 +718,10 @@ export default function Configuration() {
                             <Select 
                               value={callSummaryLanguage} 
                               onChange={setCallSummaryLanguage}
-                              style={{ width: '100%', fontFamily: 'Geist, sans-serif' }}
+                              className="w-full font-sans"
                               suffix={
                                 <Tooltip title="Language for generated call summaries">
-                                  <QuestionCircleOutlined style={{ color: '#94a3b8' }} />
+                                  <IconQuestionMark className="text-slate-400" />
                                 </Tooltip>
                               }
                             >
@@ -774,17 +751,14 @@ export default function Configuration() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Card
-                style={{ 
-                  borderRadius: 12, 
-                  border: '1px solid #e2e8f0'
-                }}
+                className="rounded-xl border-slate-200"
                 title={
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <SettingOutlined style={{ color: '#3b82f6', fontSize: 16 }} />
-                      <Text strong style={{ fontSize: '16px' }}>Dashboard</Text>
+                      <IconSettings className="text-blue-500 text-base" />
+                      <Text strong className="text-base">Dashboard</Text>
                       <Tooltip title="Configure which widgets are visible on the dashboard">
-                        <QuestionCircleOutlined style={{ color: '#94a3b8', fontSize: 14 }} />
+                        <IconQuestionMark className="text-slate-400 text-sm" />
                       </Tooltip>
                     </div>
                     <div className="flex items-center gap-2">
@@ -793,7 +767,7 @@ export default function Configuration() {
                         onChange={toggleAllDashboard}
                       />
                       <Text 
-                        style={{ cursor: 'pointer', fontFamily: 'Geist, sans-serif' }} 
+                        className="cursor-pointer font-sans" 
                         onClick={() => toggleAllDashboard(!Object.values(dashboardToggles).every(v => v))}
                       >
                         Select All
@@ -815,7 +789,7 @@ export default function Configuration() {
                               setDashboardToggles({ ...dashboardToggles, [key]: checked })
                             }
                           />
-                          <Text style={{ cursor: 'pointer', fontFamily: 'Geist, sans-serif' }}>
+                          <Text className="cursor-pointer font-sans">
                             {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                           </Text>
                         </div>
@@ -835,17 +809,14 @@ export default function Configuration() {
               transition={{ duration: 0.5, delay: 0.5 }}
             >
               <Card
-                style={{ 
-                  borderRadius: 12, 
-                  border: '1px solid #e2e8f0'
-                }}
+                className="rounded-xl border-slate-200"
                 title={
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <AudioOutlined style={{ color: '#3b82f6', fontSize: 16 }} />
-                      <Text strong style={{ fontSize: '16px' }}>Reports</Text>
+                      <IconMicrophone className="text-blue-500 text-base" />
+                      <Text strong className="text-base">Reports</Text>
                       <Tooltip title="Configure which reports are available in the reports section">
-                        <QuestionCircleOutlined style={{ color: '#94a3b8', fontSize: 14 }} />
+                        <IconQuestionMark className="text-slate-400 text-sm" />
                       </Tooltip>
                     </div>
                     <div className="flex items-center gap-2">
@@ -854,7 +825,7 @@ export default function Configuration() {
                         onChange={toggleAllReports}
                       />
                       <Text 
-                        style={{ cursor: 'pointer', fontFamily: 'Geist, sans-serif' }} 
+                        className="cursor-pointer font-sans" 
                         onClick={() => toggleAllReports(!Object.values(reportsToggles).every(v => v))}
                       >
                         Select All
@@ -876,7 +847,7 @@ export default function Configuration() {
                               setReportsToggles({ ...reportsToggles, [key]: checked })
                             }
                           />
-                          <Text style={{ cursor: 'pointer', fontFamily: 'Geist, sans-serif' }}>
+                          <Text className="cursor-pointer font-sans">
                             {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('Report', '')}
                           </Text>
                         </div>
@@ -896,16 +867,13 @@ export default function Configuration() {
               transition={{ duration: 0.5, delay: 0.6 }}
             >
               <Card
-                style={{ 
-                  borderRadius: 12, 
-                  border: '1px solid #e2e8f0'
-                }}
+                className="rounded-xl border-slate-200"
                 title={
                   <div className="flex items-center gap-2">
-                    <BellOutlined style={{ color: '#56b3fa', fontSize: 16 }} />
-                    <Text strong style={{ fontSize: '16px' }}>Alert Configurations</Text>
+                    <IconBell className="text-blue-400 text-base" />
+                    <Text strong className="text-base">Alert Configurations</Text>
                     <Tooltip title="Configure alert thresholds and recipient email addresses">
-                      <QuestionCircleOutlined style={{ color: '#94a3b8', fontSize: 14 }} />
+                      <IconQuestionMark className="text-slate-400 text-sm" />
                     </Tooltip>
                   </div>
                 }
@@ -928,23 +896,12 @@ export default function Configuration() {
                           const IconComponent = record.icon;
                           return (
                             <div className="flex items-start gap-3">
-                              <div 
-                                style={{ 
-                                  width: 40, 
-                                  height: 40, 
-                                  borderRadius: '50%', 
-                                  background: '#3b82f610',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0
-                                }}
-                              >
-                                <IconComponent style={{ color: '#3b82f6', fontSize: 20 }} />
+                              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                                <IconComponent className="text-blue-500 text-xl" />
                               </div>
                               <div>
-                                <div style={{ fontWeight: 500, fontFamily: 'Geist, sans-serif' }}>{text}</div>
-                                <div style={{ fontSize: '14px', color: '#6b7280', fontFamily: 'Geist, sans-serif' }}>{record.description}</div>
+                                <div className="font-medium font-sans">{text}</div>
+                                <div className="text-sm text-gray-500 font-sans">{record.description}</div>
                               </div>
                             </div>
                           );
@@ -962,16 +919,16 @@ export default function Configuration() {
                               <Input
                                 type="number"
                                 value={threshold}
-                                style={{ width: 60, height: 32, textAlign: 'right' }}
+                                className="w-15 h-8 text-right"
                               />
-                              <span style={{ fontSize: '14px' }}>{record.thresholdType}</span>
+                              <span className="text-sm">{record.thresholdType}</span>
                               <Button
                                 type="text"
                                 size="small"
-                                style={{ color: '#10b981', height: 24, width: 24 }}
+                                className="text-emerald-500 h-6 w-6"
                                 onClick={() => handleSaveThreshold(record)}
                               >
-                                <EditOutlined style={{ fontSize: 12 }} />
+                                <IconEdit className="text-xs" />
                               </Button>
                             </div>
                           ) : (
@@ -980,10 +937,10 @@ export default function Configuration() {
                               <Button
                                 type="text"
                                 size="small"
-                                style={{ height: 24, width: 24 }}
+                                className="h-6 w-6"
                                 onClick={() => handleEditThreshold(record)}
                               >
-                                <EditOutlined style={{ fontSize: 12 }} />
+                                <IconEdit className="text-xs" />
                               </Button>
                             </div>
                           )
@@ -1001,10 +958,10 @@ export default function Configuration() {
                             <Button
                               type="text"
                               size="small"
-                              style={{ height: 24, width: 24 }}
+                              className="h-6 w-6"
                               onClick={() => handleEditRecipients(record)}
                             >
-                              <EditOutlined style={{ fontSize: 12 }} />
+                              <IconEdit className="text-xs" />
                             </Button>
                           </div>
                         )
@@ -1018,7 +975,7 @@ export default function Configuration() {
                           <Button
                             type="default"
                             size="small"
-                            icon={<EyeOutlined style={{ fontSize: 12 }} />}
+                            icon={<IconEye className="text-xs" />}
                             onClick={() => handleViewMessageTemplate(record)}
                           >
                             View
@@ -1027,7 +984,7 @@ export default function Configuration() {
                       }
                     ]}
                     pagination={false}
-                    style={{ fontFamily: 'Geist, sans-serif' }}
+                    className="font-sans"
                   />
                 )}
               </Card>

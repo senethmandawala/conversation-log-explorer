@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext } from "react";
 import { Card, Typography, Space, DatePicker, Tooltip, Tabs } from "antd";
 import { 
-  LineChartOutlined, 
-  InfoCircleOutlined, 
-  ReloadOutlined, 
-  CalendarOutlined, 
-  UnorderedListOutlined
-} from "@ant-design/icons";
+  IconChartLine, 
+  IconInfoCircle, 
+  IconRefresh, 
+  IconCalendar, 
+  IconList
+} from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 
@@ -116,10 +116,10 @@ interface HeatmapCellProps {
 const HeatmapCell = ({ value, maxValue, label, hour, categoryIndex }: HeatmapCellProps) => {
   return (
     <Tooltip title={
-      <div style={{ fontSize: 12, backgroundColor: 'white', padding: 8, borderRadius: 4 }}>
-        <div style={{ fontWeight: 600, marginBottom: 2 }}>{label}</div>
-        <div style={{ color: '#666', marginBottom: 2 }}>{hour}</div>
-        <div style={{ fontWeight: 700, color: '#1890ff' }}>{value} calls</div>
+      <div className="text-xs bg-white p-2 rounded">
+        <div className="font-semibold mb-0.5">{label}</div>
+        <div className="text-gray-500 mb-0.5">{hour}</div>
+        <div className="font-bold text-blue-500">{value} calls</div>
       </div>
     }>
       <div
@@ -177,40 +177,21 @@ export default function TrafficTrendsReport() {
   const maxCategoryValue = Math.max(...categoryData.map(d => d.value), 1);
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <LineChartOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconChartLine className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     Traffic Trends
                   </Title>
                   <Tooltip title="Visualize traffic trends across time periods">
-                    <div style={{ marginTop: '-4px' }}>
+                    <div className="-mt-1">
                       <TablerIcon 
                         name="info-circle" 
                         className="wn-tabler-14"
@@ -219,28 +200,25 @@ export default function TrafficTrendsReport() {
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Visualize traffic trends across time periods
                 </Text>
               </div>
             </Space>
             
             <DatePicker 
-              suffixIcon={<CalendarOutlined />}
-              style={{ 
-                borderRadius: 8,
-                borderColor: '#d9d9d9'
-              }}
+              suffixIcon={<IconCalendar />}
+              className="rounded-lg"
             />
           </div>
         </div>
         
         {/* Chart Content */}
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-4">
           <Tabs
             activeKey={activeTab}
             onChange={setActiveTab}
-            style={{ width: '100%' }}
+            className="w-full"
             size="large"
             items={[
               {
@@ -255,16 +233,9 @@ export default function TrafficTrendsReport() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}
+                        className="flex items-center justify-center h-[400px]"
                       >
-                        <div style={{ 
-                          width: 32, 
-                          height: 32, 
-                          border: '2px solid #1890ff', 
-                          borderTop: '2px solid transparent', 
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }}></div>
+                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                       </motion.div>
                     ) : (
                       <motion.div
@@ -273,14 +244,14 @@ export default function TrafficTrendsReport() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
-                        style={{ overflowX: 'auto' }}
+                        className="overflow-x-auto"
                       >
-                        <div style={{ display: 'inline-block', minWidth: '100%' }}>
+                        <div className="inline-block min-w-full">
                           {/* Hour labels */}
-                          <div style={{ display: 'flex', marginBottom: 12 }}>
-                            <div style={{ width: 96, flexShrink: 0 }}></div>
+                          <div className="flex mb-3">
+                            <div className="w-24 shrink-0"></div>
                             {Array.from({ length: 24 }, (_, i) => (
-                              <div key={i} style={{ width: 48, fontSize: 11, textAlign: 'center', fontWeight: 500, color: '#666' }}>
+                              <div key={i} className="w-12 text-[11px] text-center font-medium text-gray-500">
                                 {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
                               </div>
                             ))}
@@ -288,9 +259,9 @@ export default function TrafficTrendsReport() {
                           
                           {/* Heatmap grid */}
                           {['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'].map((day, dayIndex) => (
-                            <div key={day} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                              <div style={{ width: 96, fontSize: 12, fontWeight: 600, textAlign: 'right', paddingRight: 12, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={day}>{day}</div>
-                              <div style={{ display: 'flex', gap: 4 }}>
+                            <div key={day} className="flex items-center mb-2">
+                              <div className="w-24 text-xs font-semibold text-right pr-3 shrink-0 truncate" title={day}>{day}</div>
+                              <div className="flex gap-1">
                                 {Array.from({ length: 24 }, (_, hour) => {
                                   const dataPoint = generalData.find(d => d.y === dayIndex && d.x === hour);
                                   return (
@@ -324,16 +295,9 @@ export default function TrafficTrendsReport() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}
+                        className="flex items-center justify-center h-[400px]"
                       >
-                        <div style={{ 
-                          width: 32, 
-                          height: 32, 
-                          border: '2px solid #1890ff', 
-                          borderTop: '2px solid transparent', 
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }}></div>
+                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                       </motion.div>
                     ) : (
                       <motion.div
@@ -342,14 +306,14 @@ export default function TrafficTrendsReport() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
-                        style={{ overflowX: 'auto' }}
+                        className="overflow-x-auto"
                       >
-                        <div style={{ display: 'inline-block', minWidth: '100%' }}>
+                        <div className="inline-block min-w-full">
                           {/* Hour labels */}
-                          <div style={{ display: 'flex', marginBottom: 12 }}>
-                            <div style={{ width: 160, flexShrink: 0 }}></div>
+                          <div className="flex mb-3">
+                            <div className="w-40 shrink-0"></div>
                             {Array.from({ length: 24 }, (_, i) => (
-                              <div key={i} style={{ width: 48, fontSize: 11, textAlign: 'center', fontWeight: 500, color: '#666' }}>
+                              <div key={i} className="w-12 text-[11px] text-center font-medium text-gray-500">
                                 {i % 2 === 0 ? `${i.toString().padStart(2, '0')}` : ''}
                               </div>
                             ))}
@@ -357,9 +321,9 @@ export default function TrafficTrendsReport() {
                           
                           {/* Heatmap grid */}
                           {['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'].map((category, catIndex) => (
-                            <div key={category} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                              <div style={{ width: 160, fontSize: 12, fontWeight: 600, textAlign: 'right', paddingRight: 12, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={category}>{category}</div>
-                              <div style={{ display: 'flex', gap: 4 }}>
+                            <div key={category} className="flex items-center mb-2">
+                              <div className="w-40 text-xs font-semibold text-right pr-3 shrink-0 truncate" title={category}>{category}</div>
+                              <div className="flex gap-1">
                                 {Array.from({ length: 24 }, (_, hour) => {
                                   const dataPoint = categoryData.find(d => d.y === catIndex && d.x === hour);
                                   return (

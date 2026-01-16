@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Phone, Cpu, Play, Pause } from "lucide-react";
+import { IconPhone, IconCpu, IconPlayerPlay, IconPlayerPause } from "@tabler/icons-react";
 
 interface MessageItem {
   content: string;
@@ -59,9 +59,9 @@ export function ConversationView({
                             onClick={() => onPlayAudio(index, getAudioUrls(message.audioUrls || [])[0])}
                           >
                             {message.isPlaying ? (
-                              <Pause className="h-4 w-4 text-white" />
+                              <IconPlayerPause className="h-4 w-4 text-white" />
                             ) : (
-                              <Play className="h-4 w-4 text-white" />
+                              <IconPlayerPlay className="h-4 w-4 text-white" />
                             )}
                           </button>
                           <div className="flex-1">
@@ -86,7 +86,7 @@ export function ConversationView({
                   </div>
                   <div className="profile-img flex-shrink-0">
                     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <Phone className="h-4 w-4 text-gray-600" />
+                      <IconPhone className="h-4 w-4 text-gray-600" />
                     </div>
                   </div>
                 </>
@@ -94,7 +94,7 @@ export function ConversationView({
                 <>
                   <div className="profile-img flex-shrink-0">
                     <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                      <Cpu className="h-4 w-4 text-green-600" />
+                      <IconCpu className="h-4 w-4 text-green-600" />
                     </div>
                   </div>
                   <div className="flex-1">

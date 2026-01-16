@@ -14,12 +14,12 @@ import {
   ConfigProvider
 } from "antd";
 import { 
-  ArrowLeftOutlined,
-  FilterOutlined,
-  CalendarOutlined,
-  GlobalOutlined,
-  SearchOutlined
-} from "@ant-design/icons";
+  IconArrowLeft,
+  IconFilter,
+  IconCalendar,
+  IconWorld,
+  IconSearch
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
@@ -328,7 +328,7 @@ export default function GeographicDistributionMap() {
           transition={{ duration: 0.3 }}
         >
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            className="rounded-xl border-slate-200"
             styles={{
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
@@ -337,27 +337,16 @@ export default function GeographicDistributionMap() {
               <div className="flex items-center gap-3">
                 <Button 
                   type="text" 
-                  icon={<ArrowLeftOutlined />} 
+                  icon={<IconArrowLeft />} 
                   onClick={() => setSelectedTab("reports")}
-                  style={{ marginRight: 8 }}
+                  className="mr-2"
                 />
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                  }}
-                >
-                  <GlobalOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <IconWorld className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Geographic Distribution Map</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Geographic Distribution Map</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Visualize call volume and issue distribution across different geographic locations
                   </Text>
                 </div>
@@ -367,12 +356,12 @@ export default function GeographicDistributionMap() {
               <Space>
                 <Button 
                   type={filtersVisible ? "primary" : "default"}
-                  icon={<FilterOutlined />}
+                  icon={<IconFilter />}
                   onClick={() => setFiltersVisible(!filtersVisible)}
                 >
                   Filters
                   {activeFiltersCount > 0 && (
-                    <Tag color="red" style={{ marginLeft: 8, borderRadius: 10 }}>{activeFiltersCount}</Tag>
+                    <Tag color="red" className="ml-2 rounded-full">{activeFiltersCount}</Tag>
                   )}
                 </Button>
               </Space>
@@ -386,31 +375,25 @@ export default function GeographicDistributionMap() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden' }}
+                  className="overflow-hidden"
                 >
                   <Card
                     size="small"
-                    style={{ 
-                      marginBottom: 20, 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12
-                    }}
-                    styles={{ body: { padding: 16 } }}
+                    className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                   >
                     <Row gutter={[16, 16]}>
                       <Col xs={24} sm={12} lg={8}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Date Range</Text>
-                          <RangePicker style={{ width: '100%' }} />
+                          <Text type="secondary" className="text-xs font-medium">Date Range</Text>
+                          <RangePicker className="w-full" />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={8}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>Call Type</Text>
+                          <Text type="secondary" className="text-xs font-medium">Call Type</Text>
                           <Select
                             placeholder="All Call Types"
-                            style={{ width: '100%' }}
+                            className="w-full"
                             allowClear
                             value={selectedCallType}
                             onChange={setSelectedCallType}
@@ -419,7 +402,7 @@ export default function GeographicDistributionMap() {
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={8} className="flex items-end">
-                        <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                        <Space className="w-full justify-end">
                           <Button onClick={clearAllFilters}>Clear</Button>
                           <Button type="primary" onClick={searchFilterData}>Search</Button>
                         </Space>
@@ -460,7 +443,7 @@ export default function GeographicDistributionMap() {
               ) : emptyData ? (
                 <div className="flex items-center justify-center h-[600px] border border-border/50 rounded-lg bg-muted/20">
                   <div className="text-center text-muted-foreground">
-                    <GlobalOutlined className="h-12 w-12 mx-auto mb-4 opacity-50" style={{ fontSize: 48, color: '#94a3b8' }} />
+                    <IconWorld className="text-5xl mx-auto mb-4 text-slate-400 opacity-50" />
                     <p className="text-lg font-medium mb-2">No data available</p>
                     <p className="text-sm">There is no geographic data available for the selected filters.</p>
                   </div>

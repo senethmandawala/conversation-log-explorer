@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { IconRefresh } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BarChart,
@@ -217,7 +217,7 @@ export function CommonBarChartReport({ customReport, selectedDateRange }: Common
               className="h-8 w-8"
               title="Reload section"
             >
-              <RefreshCw className="h-4 w-4" />
+              <IconRefresh className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
@@ -233,7 +233,7 @@ export function CommonBarChartReport({ customReport, selectedDateRange }: Common
               </div>
               <p className="text-sm text-muted-foreground mb-2">Error loading data</p>
               <Button size="sm" onClick={loadData} className="gap-1">
-                <RefreshCw className="h-3 w-3" />
+                <IconRefresh className="h-3 w-3" />
                 Try Again
               </Button>
             </div>

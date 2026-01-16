@@ -100,11 +100,11 @@ export const CaseStatusOverall = ({ onCaseSelect }: CaseStatusOverallProps) => {
               <p className="text-xs text-muted-foreground mb-1">Total</p>
               <h3 className="text-2xl font-bold">{statusData.total}</h3>
             </div>
-            <div className="text-center" style={{ color: COLORS.Open }}>
+            <div className="text-center text-amber-500">
               <p className="text-xs text-muted-foreground mb-1">Open</p>
               <h3 className="text-2xl font-bold">{statusData.open}</h3>
             </div>
-            <div className="text-center" style={{ color: COLORS.Close }}>
+            <div className="text-center text-emerald-500">
               <p className="text-xs text-muted-foreground mb-1">Close</p>
               <h3 className="text-2xl font-bold">{statusData.close}</h3>
             </div>

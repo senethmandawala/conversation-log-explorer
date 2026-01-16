@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, X, AlertTriangle } from "lucide-react";
+import { IconInfoCircle, IconX, IconAlertTriangle } from "@tabler/icons-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -31,7 +31,7 @@ import {
   Table as AntTable,
   Tag as AntTag
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { IconInfoCircle as InfoIcon } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -249,7 +249,7 @@ export function CategoryWiseFailureReasonAttempt() {
                       color: 'white'
                     }}
                   >
-                    <AlertTriangle style={{ fontSize: 20 }} />
+                    <IconAlertTriangle style={{ fontSize: 20 }} />
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -258,7 +258,7 @@ export function CategoryWiseFailureReasonAttempt() {
                       </Title>
                       <AntTooltip title="Distribution of failure reasons by category with attempt analysis. Click on a category to see detailed breakdown.">
                         <div style={{ marginTop: '-4px' }}>
-                          <InfoCircleOutlined 
+                          <InfoIcon 
                             style={{ fontSize: 14, color: '#64748b' }}
                           />
                         </div>
@@ -319,7 +319,7 @@ export function CategoryWiseFailureReasonAttempt() {
                         onClick={handleCloseDetails}
                         className="h-8 w-8"
                       >
-                        <X className="h-4 w-4" />
+                        <IconX className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -349,7 +349,7 @@ export function CategoryWiseFailureReasonAttempt() {
                             <Space>
                               First Attempt
                               <AntTooltip title="Number of successful calls on first attempt">
-                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                                <InfoIcon style={{ fontSize: 12, color: '#94a3b8' }} />
                               </AntTooltip>
                             </Space>
                           ),
@@ -368,7 +368,7 @@ export function CategoryWiseFailureReasonAttempt() {
                             <Space>
                               Second Attempt
                               <AntTooltip title="Number of successful calls on second attempt">
-                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                                <InfoIcon style={{ fontSize: 12, color: '#94a3b8' }} />
                               </AntTooltip>
                             </Space>
                           ),
@@ -387,7 +387,7 @@ export function CategoryWiseFailureReasonAttempt() {
                             <Space>
                               Third Attempt
                               <AntTooltip title="Number of successful calls on third attempt">
-                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                                <InfoIcon style={{ fontSize: 12, color: '#94a3b8' }} />
                               </AntTooltip>
                             </Space>
                           ),
@@ -406,7 +406,7 @@ export function CategoryWiseFailureReasonAttempt() {
                             <Space>
                               Failed
                               <AntTooltip title="Number of failed calls after all attempts">
-                                <InfoCircleOutlined style={{ fontSize: 12, color: '#94a3b8' }} />
+                                <InfoIcon style={{ fontSize: 12, color: '#94a3b8' }} />
                               </AntTooltip>
                             </Space>
                           ),

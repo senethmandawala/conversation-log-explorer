@@ -4,7 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CalendarDays, X } from "lucide-react";
+import { IconCalendarEvent, IconX } from "@tabler/icons-react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subMonths } from "date-fns";
 import { DateRangeValue } from "@/types/conversation";
 import { cn } from "@/lib/utils";
@@ -90,12 +90,12 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
           )}
         >
           <span className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4" />
+            <IconCalendarEvent className="h-4 w-4" />
             <span className="truncate">{value?.displayValue || 'Date Range'}</span>
           </span>
           <div className="flex items-center gap-1 ml-2">
             {value && (
-              <X
+              <IconX
                 className="h-3 w-3 opacity-50 hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card, Typography, Space, DatePicker, Button, Tooltip, Tabs } from "antd";
 import { 
-  LeftOutlined, 
-  InfoCircleOutlined, 
-  ReloadOutlined, 
-  CalendarOutlined, 
-  UnorderedListOutlined,
-  PhoneOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconInfoCircle, 
+  IconRefresh, 
+  IconCalendar, 
+  IconList,
+  IconPhone
+} from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { TablerIcon } from "@/components/ui/tabler-icon";
@@ -126,40 +126,21 @@ export default function CallResolutionReport() {
   };
 
   return (
-    <Card
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle" orientation="horizontal">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <PhoneOutlined style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconPhone className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-xl !font-semibold">
                     Call Resolution
                   </Title>
                   <Tooltip title="Track resolution rates and handling times">
-                    <div style={{ marginTop: '-4px' }}>
+                    <div className="-mt-1">
                       <TablerIcon 
                         name="info-circle" 
                         className="wn-tabler-14"
@@ -168,7 +149,7 @@ export default function CallResolutionReport() {
                     </div>
                   </Tooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Resolution status and average handling time analysis
                 </Text>
               </div>
@@ -176,42 +157,38 @@ export default function CallResolutionReport() {
             
             <Space size="small" orientation="horizontal">
               <DatePicker 
-                suffixIcon={<CalendarOutlined />}
-                style={{ 
-                  borderRadius: 8,
-                  borderColor: '#d9d9d9'
-                }}
-                placeholder="Select date"
+                suffixIcon={<IconCalendar />}
+                className="rounded-lg"
               />
               <Button 
                 type="text" 
-                icon={<ReloadOutlined />}
+                icon={<IconRefresh />}
                 onClick={handleReload}
-                style={{ width: 36, height: 36 }}
+                className="w-9 h-9"
               />
               <Button 
                 type="text" 
-                icon={<UnorderedListOutlined />}
-                style={{ width: 36, height: 36 }}
+                icon={<IconList />}
+                className="w-9 h-9"
               />
             </Space>
           </div>
         </div>
 
         
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-4">
         <Tabs
           activeKey={activeTab}
           onChange={handleTabChange}
-          style={{ width: '100%' }}
+          className="w-full"
           size="large"
           items={[
             {
               key: "resolution-status",
               label: "Resolution Status",
               children: (
-                <div style={{ marginTop: 24 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                <div className="mt-6">
+                  <div className="grid grid-cols-12 gap-4">
                     <AnimatePresence mode="sync">
                       {col1Visible && (
                         <motion.div
@@ -268,29 +245,22 @@ export default function CallResolutionReport() {
               key: "average-time",
               label: "Average Resolution Time",
               children: (
-                <div style={{ marginTop: 24 }}>
-                  <div style={{ marginBottom: 16 }}>
-                    <Card
-                      style={{
-                        borderRadius: 12,
-                        border: '1px solid #e8e8e8',
-                        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                        padding: '16px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div className="mt-6">
+                  <div className="mb-4">
+                    <Card className="rounded-xl border-gray-200 bg-gradient-to-br from-blue-500 to-blue-600 p-4">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Resolution Time</p>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageTime}</h2>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {callCount} calls</span>
+                          <p className="text-white/80 text-sm mb-1">Average Resolution Time</p>
+                          <div className="flex items-baseline gap-2">
+                            <h2 className="text-3xl font-bold text-white m-0">{averageTime}</h2>
+                            <span className="text-white/80 text-sm">from {callCount} calls</span>
                           </div>
                         </div>
                       </div>
                     </Card>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+                  <div className="grid grid-cols-12 gap-4">
                     <AnimatePresence mode="sync">
                       {col1Visible && (
                         <motion.div

@@ -13,11 +13,11 @@ import {
   Tooltip
 } from "antd";
 import { 
-  ArrowLeftOutlined, 
-  CalendarOutlined, 
-  FilterOutlined, 
-  InfoCircleOutlined
-} from "@ant-design/icons";
+  IconArrowLeft, 
+  IconCalendar, 
+  IconFilter, 
+  IconInfoCircle
+} from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -202,10 +202,7 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
           transition={{ duration: 0.5 }}
         >
           <Card
-            style={{ 
-              borderRadius: 12, 
-              border: '1px solid #e2e8f0'
-            }}
+            className="rounded-xl border-slate-200"
             styles={{ 
               header: { borderBottom: '1px solid #e2e8f0', padding: '16px 24px' },
               body: { padding: 24 }
@@ -215,30 +212,16 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
                 <div className="flex items-center gap-3">
                   <Button
                     type="text"
-                    icon={<ArrowLeftOutlined />}
+                    icon={<IconArrowLeft />}
                     onClick={onBack}
-                    style={{ 
-                      borderRadius: 8,
-                      height: 40,
-                      width: 40
-                    }}
+                    className="rounded-lg h-10 w-10"
                   />
-                  <div 
-                    style={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: 8, 
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <CalendarOutlined style={{ color: 'white', fontSize: 20 }} />
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                    <IconCalendar className="text-white text-xl" />
                   </div>
                   <div>
-                    <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Weekly Traffic Trends</Title>
-                    <Text type="secondary" style={{ fontSize: 13 }}>
+                    <Title level={5} className="!m-0 !font-semibold">Weekly Traffic Trends</Title>
+                    <Text type="secondary" className="text-[13px]">
                       Analyze weekly traffic patterns and trends
                     </Text>
                   </div>
@@ -246,15 +229,15 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
                 <Badge count={numberOfFilters} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersOpen ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersOpen(!filtersOpen)}
-                    style={{ borderRadius: 8 }}
+                    className="rounded-lg"
                   />
                 </Badge>
               </div>
             }
           >
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Space direction="vertical" size="large" className="w-full">
               {/* Collapsible Filters */}
               <AnimatePresence>
                 {filtersOpen && (
@@ -263,19 +246,15 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    style={{ overflow: 'hidden' }}
+                    className="overflow-hidden"
                   >
                     <Card
                       size="small"
-                      style={{ 
-                        background: '#f8fafc', 
-                        border: '1px solid #e2e8f0',
-                        borderRadius: 12
-                      }}
+                      className="bg-slate-50 border-slate-200 rounded-xl"
                       styles={{ body: { padding: 16 } }}
                     >
                       <RangePicker 
-                        style={{ minWidth: 200 }}
+                        className="min-w-[200px]"
                         value={dateRange}
                         onChange={(dates) => setDateRange(dates)}
                       />
@@ -288,7 +267,7 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
               <Tabs
                 activeKey={activeTab}
                 onChange={setActiveTab}
-                style={{ width: '100%' }}
+                className="w-full"
                 size="large"
               >
                 <TabPane 
@@ -296,7 +275,7 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
                     <Space>
                       <span>General</span>
                       <Tooltip title="Overall traffic trends for the week">
-                        <InfoCircleOutlined style={{ fontSize: 14, color: '#6b7280' }} />
+                        <IconInfoCircle className="text-sm text-gray-500" />
                       </Tooltip>
                     </Space>
                   } 
@@ -397,7 +376,7 @@ export default function ReportWeeklyTrends({ onBack }: ReportWeeklyTrendsProps) 
                     <Space>
                       <span>Categories</span>
                       <Tooltip title="Traffic breakdown by category">
-                        <InfoCircleOutlined style={{ fontSize: 14, color: '#6b7280' }} />
+                        <IconInfoCircle className="text-sm text-gray-500" />
                       </Tooltip>
                     </Space>
                   } 

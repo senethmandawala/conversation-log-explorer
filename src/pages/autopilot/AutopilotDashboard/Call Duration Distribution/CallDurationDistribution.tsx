@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Info, RefreshCw, Calendar, List, Clock } from "lucide-react";
+import { IconInfoCircle, IconRefresh, IconCalendar, IconList, IconClock } from "@tabler/icons-react";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -33,7 +33,7 @@ import {
   Tag as AntTag,
   Tabs as AntTabs
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { IconInfoCircle as InfoIcon } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -131,10 +131,10 @@ const CustomTooltip = ({ active, payload }: any) => {
     const percentage = ((data.value / total) * 100).toFixed(0);
     
     return (
-      <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+      <div className="overflow-hidden rounded-md shadow-lg border-0 min-w-[120px]">
         <div 
-          className="text-sm font-semibold px-3 py-2" 
-          style={{ backgroundColor: data.fill, color: "white" }}
+          className="text-sm font-semibold px-3 py-2 text-white"
+          style={{ backgroundColor: data.fill }}
         >
           {data.name}
         </div>
@@ -155,10 +155,10 @@ const LongCallsTooltip = ({ active, payload }: any) => {
     const percentage = ((data.value / total) * 100).toFixed(0);
     
     return (
-      <div className="overflow-hidden rounded-md shadow-lg border-0" style={{ minWidth: 120 }}>
+      <div className="overflow-hidden rounded-md shadow-lg border-0 min-w-[120px]">
         <div 
-          className="text-sm font-semibold px-3 py-2" 
-          style={{ backgroundColor: data.fill, color: "white" }}
+          className="text-sm font-semibold px-3 py-2 text-white"
+          style={{ backgroundColor: data.fill }}
         >
           {data.name}
         </div>
@@ -215,61 +215,39 @@ export function CallDurationDistribution() {
   };
 
   return (
-    <AntCard
-      style={{
-        borderRadius: 12,
-        border: '1px solid #e8e8e8',
-        background: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '16px 16px 16px 16px'
-      }}
-    >
-      <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
-        <div style={{ marginTop: -12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+    <AntCard className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
+      <Space orientation="vertical" size="middle" className="w-full">
+        <div className="-mt-3">
+          <div className="flex justify-between items-center w-full">
             <Space align="center" size="middle">
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white'
-                }}
-              >
-                <Clock style={{ fontSize: 20 }} />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                <IconClock className="text-xl" />
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Title level={4} style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <div className="flex items-center gap-1">
+                  <Title level={4} className="!m-0 !text-lg !font-semibold">
                     Call Duration Analysis
                   </Title>
                   <AntTooltip title="Analyze call duration patterns and identify long calls">
-                    <div style={{ marginTop: '-4px' }}>
-                      <InfoCircleOutlined 
-                        style={{ fontSize: 14, color: '#64748b' }}
-                      />
+                    <div className="-mt-1">
+                      <InfoIcon className="text-sm text-slate-500" />
                     </div>
                   </AntTooltip>
                 </div>
-                <Text type="secondary" style={{ fontSize: 14 }}>
+                <Text type="secondary" className="text-sm">
                   Duration distribution and long call analysis
                 </Text>
               </div>
             </Space>
-            
           </div>
         </div>
         
         {/* Chart Content */}
-        <div style={{ marginTop: 3 }}>
+        <div className="mt-1">
         <AntTabs
           activeKey={activeTab}
           onChange={(value) => setActiveTab(value)}
-          style={{ width: '100%' }}
+          className="w-full"
           size="large"
           items={[
             {
@@ -277,21 +255,14 @@ export function CallDurationDistribution() {
               label: "Call Duration",
               children: (
                 <>
-                  <div style={{ marginBottom: 16 }}>
-                    <Card
-                      style={{
-                        borderRadius: 12,
-                        border: '1px solid #e8e8e8',
-                        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
-                        padding: '16px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div className="mb-4">
+                    <Card className="rounded-xl border-gray-200 bg-gradient-to-br from-blue-500 to-blue-600 p-4">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Average Call Time</p>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{averageCallTime}</h2>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCallCount} Calls</span>
+                          <p className="text-white/80 text-sm mb-1">Average Call Time</p>
+                          <div className="flex items-baseline gap-2">
+                            <h2 className="text-3xl font-bold text-white m-0">{averageCallTime}</h2>
+                            <span className="text-white/80 text-sm">from {totalCallCount} Calls</span>
                           </div>
                         </div>
                       </div>
@@ -328,21 +299,14 @@ export function CallDurationDistribution() {
               label: "Long Calls",
               children: (
                 <>
-                  <div style={{ marginBottom: 16 }}>
-                    <Card
-                      style={{
-                        borderRadius: 12,
-                        border: '1px solid #e8e8e8',
-                        background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                        padding: '16px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div className="mb-4">
+                    <Card className="rounded-xl border-gray-200 bg-gradient-to-br from-orange-500 to-orange-600 p-4">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginBottom: 4 }}>Long Calls</p>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                            <h2 style={{ fontSize: 32, fontWeight: 'bold', color: 'white', margin: 0 }}>{totalLongCalls}</h2>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>from {totalCalls} Calls</span>
+                          <p className="text-white/80 text-sm mb-1">Long Calls</p>
+                          <div className="flex items-baseline gap-2">
+                            <h2 className="text-3xl font-bold text-white m-0">{totalLongCalls}</h2>
+                            <span className="text-white/80 text-sm">from {totalCalls} Calls</span>
                           </div>
                         </div>
                       </div>

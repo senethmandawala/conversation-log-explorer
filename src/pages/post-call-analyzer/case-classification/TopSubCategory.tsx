@@ -267,7 +267,7 @@ export function TopSubCategory({ category, onSubCategorySelect, fromTime, toTime
         fontSize: 12, 
         textAlign: 'center', 
         color: '#666', 
-        marginTop: 12 
+        marginTop: 8 
       }}>
         Click on a bar to drill down further
       </div>

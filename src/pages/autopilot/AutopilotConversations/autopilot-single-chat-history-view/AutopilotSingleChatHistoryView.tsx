@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ConversationRecord } from "@/types/conversation";
 import { StatusBadge, getResolutionVariant, getVdnSourceVariant } from "@/components/conversation/StatusBadge";
-import { Calendar, Clock, Phone, Tag, FileText, Building2, MapPin, Timer, Hash, Radio, PhoneOff, Cpu, Mic, Volume2, Globe, ChevronDown, ChevronUp, Play, Pause } from "lucide-react";
+import { IconCalendar, IconClock, IconPhone, IconTag, IconFileText, IconBuilding, IconMapPin, IconHourglass, IconHash, IconAntenna, IconPhoneOff, IconCpu, IconMicrophone, IconVolume, IconWorld, IconChevronDown, IconChevronUp, IconPlayerPlay, IconPlayerPause } from "@tabler/icons-react";
 import { useState, useRef, useEffect } from "react";
 import { ConversationView } from "./conversation-view/ConversationView";
 

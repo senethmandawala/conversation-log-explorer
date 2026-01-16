@@ -31,20 +31,20 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Plus,
-  MoreVertical,
-  FileText,
-  Edit,
-  Trash2,
-  RefreshCw,
-  Eye,
-  BarChart3,
-  PieChart,
-  LineChart,
-  AreaChart,
-  TableIcon,
-  LayoutGrid,
-} from "lucide-react";
+  IconPlus,
+  IconDotsVertical,
+  IconFileText,
+  IconEdit,
+  IconTrash,
+  IconRefresh,
+  IconEye,
+  IconChartBar,
+  IconChartPie,
+  IconChartLine,
+  IconChartArea,
+  IconTable,
+  IconLayoutGrid,
+} from "@tabler/icons-react";
 
 interface TrainingDoc {
   id: string;
@@ -78,13 +78,13 @@ const mockPrompts = [
 ];
 
 const reportIcons: Record<string, React.ReactNode> = {
-  Bar: <BarChart3 className="h-4 w-4" />,
-  Pie: <PieChart className="h-4 w-4" />,
-  Line: <LineChart className="h-4 w-4" />,
-  Area: <AreaChart className="h-4 w-4" />,
-  Donut: <PieChart className="h-4 w-4" />,
-  Treemap: <LayoutGrid className="h-4 w-4" />,
-  Table: <TableIcon className="h-4 w-4" />,
+  Bar: <IconChartBar className="h-4 w-4" />,
+  Pie: <IconChartPie className="h-4 w-4" />,
+  Line: <IconChartLine className="h-4 w-4" />,
+  Area: <IconChartArea className="h-4 w-4" />,
+  Donut: <IconChartPie className="h-4 w-4" />,
+  Treemap: <IconLayoutGrid className="h-4 w-4" />,
+  Table: <IconTable className="h-4 w-4" />,
 };
 
 const reportColorClasses: Record<string, string> = {
@@ -169,13 +169,13 @@ export default function AutopilotConfiguration() {
                     disabled={isSyncing}
                     className="gap-2"
                   >
-                    <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+                    <IconRefresh className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
                     Sync
                   </Button>
                   <Dialog open={addDocDialogOpen} onOpenChange={setAddDocDialogOpen}>
                     <DialogTrigger asChild>
                       <Button size="sm" className="gap-2">
-                        <Plus className="h-4 w-4" />
+                        <IconPlus className="h-4 w-4" />
                         Add Document
                       </Button>
                     </DialogTrigger>
@@ -238,15 +238,15 @@ export default function AutopilotConfiguration() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="h-4 w-4" />
+                                <IconDotsVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem className="gap-2">
-                                <Edit className="h-4 w-4" /> Edit
+                                <IconEdit className="h-4 w-4" /> Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem className="gap-2 text-destructive">
-                                <Trash2 className="h-4 w-4" /> Delete
+                                <IconTrash className="h-4 w-4" /> Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -267,7 +267,7 @@ export default function AutopilotConfiguration() {
                   </p>
                 </div>
                 <Button size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
+                  <IconPlus className="h-4 w-4" />
                   Add Prompt
                 </Button>
               </div>
@@ -283,15 +283,15 @@ export default function AutopilotConfiguration() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="h-4 w-4" />
+                            <IconDotsVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem className="gap-2">
-                            <Edit className="h-4 w-4" /> Edit
+                            <IconEdit className="h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem className="gap-2 text-destructive">
-                            <Trash2 className="h-4 w-4" /> Delete
+                            <IconTrash className="h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -321,7 +321,7 @@ export default function AutopilotConfiguration() {
             <Dialog open={addReportDialogOpen} onOpenChange={setAddReportDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
+                  <IconPlus className="h-4 w-4" />
                   Add Custom Report
                 </Button>
               </DialogTrigger>
@@ -390,18 +390,18 @@ export default function AutopilotConfiguration() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
+                        <IconDotsVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem className="gap-2">
-                        <Eye className="h-4 w-4" /> View
+                        <IconEye className="h-4 w-4" /> View
                       </DropdownMenuItem>
                       <DropdownMenuItem className="gap-2">
-                        <Edit className="h-4 w-4" /> Edit
+                        <IconEdit className="h-4 w-4" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem className="gap-2 text-destructive">
-                        <Trash2 className="h-4 w-4" /> Delete
+                        <IconTrash className="h-4 w-4" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

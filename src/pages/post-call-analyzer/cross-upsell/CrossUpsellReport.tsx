@@ -4,21 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  ArrowLeft,
-  Download,
-  Filter,
-  Search,
-  Calendar,
-  TrendingUp,
-  Target,
-  Award,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight
-} from "lucide-react";
+  IconArrowLeft,
+  IconDownload,
+  IconFilter,
+  IconSearch,
+  IconCalendar,
+  IconTrendingUp,
+  IconTarget,
+  IconAward,
+  IconChevronDown,
+  IconChevronUp,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronsLeft,
+  IconChevronsRight
+} from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { motion } from "framer-motion";
@@ -118,10 +118,10 @@ export default function CrossUpsellReport() {
                   className="h-9 w-9"
                   onClick={() => setSelectedTab("reports")}
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <IconArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  <IconTrendingUp className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
                   <CardTitle className="text-xl font-semibold tracking-tight">
@@ -134,7 +134,7 @@ export default function CrossUpsellReport() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
+                  <IconDownload className="h-4 w-4" />
                   Export CSV
                 </Button>
                 <Button 
@@ -143,7 +143,7 @@ export default function CrossUpsellReport() {
                   className="gap-2 relative"
                   onClick={() => setFiltersOpen(!filtersOpen)}
                 >
-                  <Filter className="h-4 w-4" />
+                  <IconFilter className="h-4 w-4" />
                   Filters
                   {activeFiltersCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
@@ -167,7 +167,7 @@ export default function CrossUpsellReport() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Date Range</label>
                       <Button variant="outline" className="w-full justify-start gap-2">
-                        <Calendar className="h-4 w-4" />
+                        <IconCalendar className="h-4 w-4" />
                         Select dates
                       </Button>
                     </div>
@@ -226,7 +226,7 @@ export default function CrossUpsellReport() {
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 rounded-lg bg-green-500/20">
-                        <TrendingUp className="h-5 w-5 text-green-500" />
+                        <IconTrendingUp className="h-5 w-5 text-green-500" />
                       </div>
                       <span className="text-sm text-muted-foreground">Total Successful Upsells</span>
                     </div>
@@ -241,7 +241,7 @@ export default function CrossUpsellReport() {
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 rounded-lg bg-blue-500/20">
-                        <Award className="h-5 w-5 text-blue-500" />
+                        <IconAward className="h-5 w-5 text-blue-500" />
                       </div>
                       <span className="text-sm text-muted-foreground">Average Success Rate</span>
                     </div>
@@ -256,7 +256,7 @@ export default function CrossUpsellReport() {
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 rounded-lg bg-purple-500/20">
-                        <Target className="h-5 w-5 text-purple-500" />
+                        <IconTarget className="h-5 w-5 text-purple-500" />
                       </div>
                       <span className="text-sm text-muted-foreground">Total Opportunities</span>
                     </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, RefreshCw, Calendar, List, CalendarDays } from "lucide-react";
+import { IconInfoCircle, IconRefresh, IconCalendar, IconList, IconCalendarEvent } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -11,7 +11,7 @@ import {
   Tooltip as AntTooltip,
   Tabs as AntTabs
 } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { IconInfoCircle as InfoIcon } from "@tabler/icons-react";
 
 const { Title, Text } = Typography;
 
@@ -175,7 +175,7 @@ export function WeeklyTrendsAndPatterns() {
                   color: 'white'
                 }}
               >
-                <CalendarDays style={{ fontSize: 20 }} />
+                <IconCalendarEvent style={{ fontSize: 20 }} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -184,7 +184,7 @@ export function WeeklyTrendsAndPatterns() {
                   </Title>
                   <AntTooltip title="Visualize traffic trends across time periods">
                     <div style={{ marginTop: '-4px' }}>
-                      <InfoCircleOutlined 
+                      <InfoIcon 
                         style={{ fontSize: 14, color: '#64748b' }}
                       />
                     </div>
@@ -202,7 +202,7 @@ export function WeeklyTrendsAndPatterns() {
                 size="sm"
                 className="gap-1.5"
               >
-                <Calendar className="h-4 w-4" />
+                <IconCalendar className="h-4 w-4" />
                 Week
               </Button>
             </Space>

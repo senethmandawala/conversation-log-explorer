@@ -15,7 +15,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, Columns3, Settings2 } from "lucide-react";
+import { IconEye, IconColumns3, IconSettings2 } from "@tabler/icons-react";
 import { ConversationRecord, ColumnDefinition } from "@/types/conversation";
 import { StatusBadge, getResolutionVariant, getVdnSourceVariant } from "./StatusBadge";
 import { cn } from "@/lib/utils";
@@ -143,7 +143,7 @@ export function ConversationTable({ data, onView }: ConversationTableProps) {
                       size="icon" 
                       className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
                     >
-                      <Settings2 className="h-4 w-4" />
+                      <IconSettings2 className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
@@ -152,7 +152,7 @@ export function ConversationTable({ data, onView }: ConversationTableProps) {
                   >
                     <div className="p-3">
                       <h4 className="mb-3 text-sm font-semibold flex items-center gap-2">
-                        <Columns3 className="h-4 w-4 text-primary" />
+                        <IconColumns3 className="h-4 w-4 text-primary" />
                         Configure Columns
                       </h4>
                       <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
@@ -220,7 +220,7 @@ export function ConversationTable({ data, onView }: ConversationTableProps) {
                         )}
                         onClick={() => onView(record)}
                       >
-                        <Eye className="h-4 w-4" />
+                        <IconEye className="h-4 w-4" />
                       </Button>
                     </motion.div>
                   </TableCell>

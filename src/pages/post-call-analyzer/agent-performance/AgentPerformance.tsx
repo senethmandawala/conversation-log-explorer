@@ -18,21 +18,21 @@ import {
   Badge
 } from "antd";
 import { 
-  SearchOutlined, 
-  FilterOutlined, 
-  DownloadOutlined,
-  EyeOutlined,
-  TeamOutlined,
-  UserOutlined,
-  PhoneOutlined,
-  ClockCircleOutlined,
-  TrophyOutlined,
-  StarOutlined,
-  RiseOutlined,
-  FallOutlined,
-  ClearOutlined,
-  AimOutlined
-} from "@ant-design/icons";
+  IconSearch, 
+  IconFilter, 
+  IconDownload,
+  IconEye,
+  IconUsers,
+  IconUser,
+  IconPhone,
+  IconClock,
+  IconTrophy,
+  IconStar,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconClearAll,
+  IconTarget
+} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIHelper } from "@/components/post-call/AIHelper";
 import { usePostCall } from "@/contexts/PostCallContext";
@@ -84,9 +84,9 @@ const getPerformanceConfig = (performance: AgentMetric["performance"]) => {
 
 const getTrendIcon = (trend: AgentMetric["trend"]) => {
   switch (trend) {
-    case "up": return <RiseOutlined style={{ color: '#10b981', fontSize: 14 }} />;
-    case "down": return <FallOutlined style={{ color: '#ef4444', fontSize: 14 }} />;
-    default: return <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>;
+    case "up": return <IconTrendingUp className="text-emerald-500 text-sm" />;
+    case "down": return <IconTrendingDown className="text-red-500 text-sm" />;
+    default: return <span className="text-slate-400 text-xs">—</span>;
   }
 };
 
@@ -194,12 +194,12 @@ export default function AgentPerformance() {
                     justifyContent: 'center'
                   }}
                 >
-                  <span style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{record.avatar}</span>
+                  <span className="text-white text-sm font-semibold">{record.avatar}</span>
                 </div>
                 <div>
                   <Text strong>{record.name}</Text>
                   <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>{record.agentId}</Text>
+                  <Text type="secondary" className="text-xs">{record.agentId}</Text>
                 </div>
               </Space>
             ),
@@ -287,10 +287,9 @@ export default function AgentPerformance() {
         <Tooltip title="View Details">
           <Button 
             type="text" 
-            icon={<EyeOutlined />}
+            icon={<IconEye />}
             onClick={() => handleViewAgent(record)}
-            style={{ borderRadius: 8 }}
-            className="hover:bg-primary/10 hover:text-primary"
+            className="rounded-lg hover:bg-primary/10 hover:text-primary"
           />
         </Tooltip>
       ),
@@ -335,12 +334,12 @@ export default function AgentPerformance() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Row gutter={[16, 16]} className="mb-6">
             <Col xs={24} sm={12} lg={6}>
               <StatCard
                 label="Total Agents"
                 value={totalAgents.toString()}
-                icon={<TeamOutlined />}
+                icon={<IconUsers />}
                 color="#3b82f6"
                 gradientColors={["#3b82f6", "#2563eb"] as [string, string]}
                 isLoading={isLoading}
@@ -350,7 +349,7 @@ export default function AgentPerformance() {
               <StatCard
                 label="Active Agents"
                 value={activeAgents.toString()}
-                icon={<UserOutlined />}
+                icon={<IconUser />}
                 color="#10b981"
                 gradientColors={["#10b981", "#059669"] as [string, string]}
                 isLoading={isLoading}
@@ -360,7 +359,7 @@ export default function AgentPerformance() {
               <StatCard
                 label="Avg FCR Rate"
                 value={`${avgFCR}%`}
-                icon={<AimOutlined />}
+                icon={<IconTarget />}
                 color="#f59e0b"
                 gradientColors={["#f59e0b", "#d97706"] as [string, string]}
                 isLoading={isLoading}
@@ -370,7 +369,7 @@ export default function AgentPerformance() {
               <StatCard
                 label="Avg CSAT Score"
                 value={avgCSAT}
-                icon={<StarOutlined />}
+                icon={<IconStar />}
                 color="#8b5cf6"
                 gradientColors={["#8b5cf6", "#7c3aed"] as [string, string]}
                 isLoading={isLoading}
@@ -390,11 +389,11 @@ export default function AgentPerformance() {
             >
               <Card
                 size="small"
-                style={{ borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 16 }}
+                className="rounded-xl border-slate-200 mb-4"
                 styles={{ body: { padding: 16 } }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <TrophyOutlined style={{ color: '#10b981', fontSize: 18 }} />
+                  <IconTrophy className="text-emerald-500 text-lg" />
                   <Text strong>Best Performing Agents</Text>
                 </div>
                 {isLoading ? (
@@ -407,16 +406,11 @@ export default function AgentPerformance() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          style={{
-                            background: '#10b98115',
-                            border: '1px solid #10b98130',
-                            borderRadius: 8,
-                            padding: '8px 12px'
-                          }}
+                          className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2"
                         >
                           <div className="flex justify-between items-center">
-                            <Text style={{ fontSize: 13 }} className="truncate mr-2">{agent.name}</Text>
-                            <Text strong style={{ color: '#10b981', fontSize: 13 }}>{agent.score}%</Text>
+                            <Text className="text-[13px] truncate mr-2">{agent.name}</Text>
+                            <Text strong className="text-emerald-500 text-[13px]">{agent.score}%</Text>
                           </div>
                         </motion.div>
                       </Col>
@@ -436,11 +430,11 @@ export default function AgentPerformance() {
             >
               <Card
                 size="small"
-                style={{ borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 16 }}
+                className="rounded-xl border-slate-200 mb-4"
                 styles={{ body: { padding: 16 } }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <FallOutlined style={{ color: '#f59e0b', fontSize: 18 }} />
+                  <IconTrendingDown className="text-amber-500 text-lg" />
                   <Text strong>Agents Requiring Attention</Text>
                 </div>
                 {isLoading ? (
@@ -453,16 +447,11 @@ export default function AgentPerformance() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          style={{
-                            background: '#f59e0b15',
-                            border: '1px solid #f59e0b30',
-                            borderRadius: 8,
-                            padding: '8px 12px'
-                          }}
+                          className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2"
                         >
                           <div className="flex justify-between items-center">
-                            <Text style={{ fontSize: 13 }} className="truncate mr-2">{agent.name}</Text>
-                            <Text strong style={{ color: '#f59e0b', fontSize: 13 }}>{agent.score}%</Text>
+                            <Text className="text-[13px] truncate mr-2">{agent.name}</Text>
+                            <Text strong className="text-amber-500 text-[13px]">{agent.score}%</Text>
                           </div>
                         </motion.div>
                       </Col>
@@ -487,23 +476,12 @@ export default function AgentPerformance() {
             }}
             title={
               <div className="flex items-center gap-3">
-                <div 
-                  style={{ 
-                    width: 42, 
-                    height: 42, 
-                    borderRadius: 12, 
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
-                  }}
-                >
-                  <TeamOutlined style={{ color: 'white', fontSize: 20 }} />
+                <div className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <IconUsers className="text-white text-xl" />
                 </div>
                 <div>
-                  <Title level={5} style={{ margin: 0, fontWeight: 600 }}>Agent Performance Summary</Title>
-                  <Text type="secondary" style={{ fontSize: 13 }}>
+                  <Title level={5} className="!m-0 !font-semibold">Agent Performance Summary</Title>
+                  <Text type="secondary" className="text-[13px]">
                     Monitor and evaluate agent performance metrics
                   </Text>
                 </div>
@@ -511,7 +489,7 @@ export default function AgentPerformance() {
             }
             extra={
               <Space>
-                <Button icon={<DownloadOutlined />}>Export</Button>
+                <Button icon={<IconDownload />}>Export</Button>
                 <ColumnToggle 
                   columns={columnConfig} 
                   onToggle={toggleColumnVisibility} 
@@ -520,7 +498,7 @@ export default function AgentPerformance() {
                 <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersVisible ? "primary" : "default"}
-                    icon={<FilterOutlined />}
+                    icon={<IconFilter />}
                     onClick={() => setFiltersVisible(!filtersVisible)}
                   >
                     Filters
@@ -537,27 +515,22 @@ export default function AgentPerformance() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden' }}
+                  className="overflow-hidden"
                 >
                   <Card
                     size="small"
-                    style={{ 
-                      marginBottom: 20, 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12
-                    }}
+                    className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                     styles={{ body: { padding: 16 } }}
                   >
                     <Row gutter={[16, 16]}>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Search Agent
                           </Text>
                           <Input
                             placeholder="Name or ID..."
-                            prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                            prefix={<IconSearch className="text-slate-400" />}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             allowClear
@@ -566,7 +539,7 @@ export default function AgentPerformance() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Department
                           </Text>
                           <Select
@@ -574,14 +547,14 @@ export default function AgentPerformance() {
                             value={selectedDepartment}
                             onChange={setSelectedDepartment}
                             allowClear
-                            style={{ width: '100%' }}
+                            className="w-full"
                             options={uniqueDepartments.map(d => ({ label: d, value: d }))}
                           />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Performance
                           </Text>
                           <Select
@@ -589,7 +562,7 @@ export default function AgentPerformance() {
                             value={selectedPerformance}
                             onChange={setSelectedPerformance}
                             allowClear
-                            style={{ width: '100%' }}
+                            className="w-full"
                             options={[
                               { label: 'Excellent', value: 'excellent' },
                               { label: 'Good', value: 'good' },
@@ -601,15 +574,15 @@ export default function AgentPerformance() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Status
                           </Text>
                           <Select
-                            placeholder="All Statuses"
+                            placeholder="All Status"
                             value={selectedStatus}
                             onChange={setSelectedStatus}
                             allowClear
-                            style={{ width: '100%' }}
+                            className="w-full"
                             options={[
                               { label: 'Active', value: 'active' },
                               { label: 'Inactive', value: 'inactive' },
@@ -619,16 +592,16 @@ export default function AgentPerformance() {
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                          <Text type="secondary" className="text-xs font-medium">
                             Date Range
                           </Text>
-                          <RangePicker style={{ width: '100%' }} />
+                          <RangePicker className="w-full" />
                         </div>
                       </Col>
                       <Col xs={24} lg={18} className="flex items-end justify-end">
                         <Space>
                           <Button 
-                            icon={<ClearOutlined />} 
+                            icon={<IconClearAll />} 
                             onClick={clearAllFilters}
                           >
                             Clear All
@@ -646,7 +619,7 @@ export default function AgentPerformance() {
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton.Input key={i} active block style={{ height: 52 }} />
+                  <Skeleton.Input key={i} active block className="h-[52px]" />
                 ))}
               </div>
             ) : (
@@ -666,7 +639,7 @@ export default function AgentPerformance() {
                   showSizeChanger: true,
                   pageSizeOptions: ['5', '8', '10', '20'],
                 }}
-                style={{ borderRadius: 12, overflow: 'hidden' }}
+                className="rounded-xl overflow-hidden"
                 rowClassName={() => 
                   'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#10b981]'
                 }
