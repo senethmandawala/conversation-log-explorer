@@ -335,7 +335,7 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -354,7 +354,7 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
         .join('&');
       
       queryParams = params ? `?${params}` : '';
