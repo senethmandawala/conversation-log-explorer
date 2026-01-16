@@ -345,6 +345,27 @@ export class CallRoutingApiService extends BaseApiService {
     );
   }
 
+
+    async CaseClassificationSubCategoryList(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let params = new URLSearchParams();
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.set(key, value.toString());
+        }
+      });
+    }
+    
+    return this.get<CommonResponse<any>>(
+      `/dynamic_top_sub_category_by_category_subcategory?${params}`
+    );
+  }
+
+
+
 }
 
 export const callRoutingApiService = new CallRoutingApiService();
