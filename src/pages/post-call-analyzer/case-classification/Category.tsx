@@ -1,31 +1,39 @@
 import React from "react";
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
-import { TreemapTooltip } from "@/components/ui/custom-chart-tooltip";
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CategoryProps {
   onCategorySelect: (category: { name: string; color: string }) => void;
   onTotalCallsChange: (count: number) => void;
+  data: any[];
 }
 
-const COLORS = [
-  "hsl(226, 70%, 55%)",
-  "hsl(142, 71%, 45%)",
-  "hsl(38, 92%, 50%)",
-  "hsl(0, 84%, 60%)",
-  "hsl(270, 70%, 55%)",
-  "hsl(199, 89%, 48%)",
-  "hsl(330, 70%, 55%)",
-  "hsl(180, 70%, 45%)",
-];
+// Get colors from env.js
+const categoryColors = (window as any).env_vars?.colors;
 
-const categoryData = [
-  { name: "Billing Issues", value: 350 },
-  { name: "Technical Issues", value: 280 },
-  { name: "Account Closure", value: 180 },
-  { name: "Refund Requests", value: 120 },
-  { name: "General Inquiry", value: 90 },
-  { name: "Others", value: 60 },
-];
+// Custom tooltip using RedAlert style
+const TreemapTooltipContent = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground backdrop-blur-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 justify-start">
+            <div 
+              className="w-3 h-3 rounded-full flex-shrink-0" 
+              style={{ backgroundColor: data.fill }}
+            />
+            <p className="font-medium m-0">{data.name}</p>
+          </div>
+          <div className="text-sm ml-5">
+            Value: {data.value}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 const CustomTreemapContent = (props: any) => {
   const { x, y, width, height, name, fill } = props;
@@ -85,13 +93,14 @@ const CustomTreemapContent = (props: any) => {
   );
 };
 
-export function Category({ onCategorySelect, onTotalCallsChange }: CategoryProps) {
-  const chartData = categoryData.map((item, idx) => ({
-    ...item,
-    fill: COLORS[idx % COLORS.length],
+export function Category({ onCategorySelect, onTotalCallsChange, data }: CategoryProps) {
+  const chartData = data.map((item, idx) => ({
+    name: item.category,
+    value: item.count,
+    fill: categoryColors?.[idx % categoryColors.length] || `hsl(${idx * 30}, 70%, 50%)`,
   }));
 
-  const totalCalls = categoryData.reduce((sum, item) => sum + item.value, 0);
+  const totalCalls = data.reduce((sum, item) => sum + item.count, 0);
   
   React.useEffect(() => {
     onTotalCallsChange(totalCalls);
@@ -118,7 +127,7 @@ export function Category({ onCategorySelect, onTotalCallsChange }: CategoryProps
             content={<CustomTreemapContent />}
             onClick={handleClick}
           >
-            <Tooltip content={<TreemapTooltip />} />
+            <Tooltip content={<TreemapTooltipContent />} />
           </Treemap>
         </ResponsiveContainer>
       </div>

@@ -1,4 +1,9 @@
+import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import { useDate } from "@/contexts/DateContext";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
 interface SubCategoryListProps {
   category: { name: string; color: string };
@@ -7,57 +12,6 @@ interface SubCategoryListProps {
   onSubCategorySelect: (subCategory: string) => void;
 }
 
-const level3Data: Record<string, { name: string; value: number }[]> = {
-  "Invoice Disputes": [
-    { name: "Incorrect Amount", value: 45 },
-    { name: "Missing Discount", value: 35 },
-    { name: "Duplicate Charge", value: 25 },
-    { name: "Late Fee Issues", value: 15 },
-  ],
-  "Payment Failed": [
-    { name: "Card Declined", value: 40 },
-    { name: "Bank Error", value: 30 },
-    { name: "Invalid Details", value: 15 },
-    { name: "Expired Card", value: 10 },
-  ],
-  "Login Problems": [
-    { name: "Forgot Password", value: 35 },
-    { name: "Account Locked", value: 30 },
-    { name: "2FA Issues", value: 20 },
-    { name: "Session Expired", value: 10 },
-  ],
-};
-
-const level4Data: Record<string, { name: string; value: number }[]> = {
-  "Incorrect Amount": [
-    { name: "Overcharged", value: 20 },
-    { name: "Undercharged", value: 15 },
-    { name: "Wrong Rate", value: 10 },
-  ],
-  "Card Declined": [
-    { name: "Insufficient Funds", value: 18 },
-    { name: "Card Expired", value: 12 },
-    { name: "Bank Block", value: 10 },
-  ],
-  "Forgot Password": [
-    { name: "Email Not Received", value: 15 },
-    { name: "Link Expired", value: 12 },
-    { name: "Wrong Email", value: 8 },
-  ],
-};
-
-const level5Data: Record<string, { name: string; value: number }[]> = {
-  "Overcharged": [
-    { name: "Tax Error", value: 10 },
-    { name: "Promo Not Applied", value: 7 },
-    { name: "System Glitch", value: 3 },
-  ],
-  "Insufficient Funds": [
-    { name: "Account Empty", value: 10 },
-    { name: "Hold on Funds", value: 5 },
-    { name: "Pending Transactions", value: 3 },
-  ],
-};
 
 function generateShades(baseColor: string, count: number): string[] {
   const hslMatch = baseColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
@@ -73,28 +27,64 @@ function generateShades(baseColor: string, count: number): string[] {
 }
 
 export function SubCategoryList({ category, level, breadcrumb, onSubCategorySelect }: SubCategoryListProps) {
+  const [data, setData] = useState<{ name: string; value: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const { selectedProject } = useProjectSelection();
+  const { globalDateRange } = useDate();
   const lastItem = breadcrumb[breadcrumb.length - 1];
-  
-  let data: { name: string; value: number }[] = [];
-  if (level === 3) {
-    data = level3Data[lastItem] || [
-      { name: "Type A", value: 30 },
-      { name: "Type B", value: 25 },
-      { name: "Type C", value: 15 },
-    ];
-  } else if (level === 4) {
-    data = level4Data[lastItem] || [
-      { name: "Detail A", value: 15 },
-      { name: "Detail B", value: 10 },
-      { name: "Detail C", value: 5 },
-    ];
-  } else if (level === 5) {
-    data = level5Data[lastItem] || [
-      { name: "Sub-detail A", value: 8 },
-      { name: "Sub-detail B", value: 5 },
-      { name: "Sub-detail C", value: 3 },
-    ];
-  }
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!selectedProject || !globalDateRange || !lastItem) {
+        return;
+      }
+
+      setIsLoading(true);
+      setHasError(false);
+
+      try {
+        const tenantId = parseInt(selectedProject.tenant_id);
+        const subtenantId = parseInt(selectedProject.sub_tenant_id);
+        const companyId = parseInt(selectedProject.company_id);
+        const departmentId = parseInt(selectedProject.department_id);
+
+        const filters = {
+          tenantId,
+          subtenantId,
+          companyId,
+          departmentId,
+          fromTime: globalDateRange.fromDate,
+          toTime: globalDateRange.toDate,
+          category: category.name,
+          subcategory: lastItem,
+          limit: 10,
+        };
+
+        const response = await callRoutingApiService.CaseClassificationSubCategoryList(filters);
+
+        // Handle the correct response structure
+        if (response?.data?.limitedSubCategoryData && Array.isArray(response.data.limitedSubCategoryData)) {
+          const transformedData = response.data.limitedSubCategoryData.map((item: any) => ({
+            name: item.subcategoryData || item.name || 'Unknown',
+            value: typeof item.count === 'string' ? parseInt(item.count) || 0 : (item.count || 0),
+          })).filter((item: any) => item.value > 0);
+          
+          setData(transformedData);
+        } else {
+          setData([]);
+        }
+      } catch (err) {
+        console.error('Error loading subcategory data:', err);
+        setHasError(true);
+        setData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [category, level, breadcrumb, selectedProject, globalDateRange]);
   
   const colors = generateShades(category.color, data.length);
   
@@ -108,6 +98,38 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
       onSubCategorySelect(data.activePayload[0].payload.name);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <ExceptionHandleView type="loading" />
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <ExceptionHandleView 
+          type="500" 
+          title="Error Loading Data"
+          content="subcategory data"
+        />
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <ExceptionHandleView 
+          type="204" 
+          title="No Data Available"
+          content="subcategory data for the selected category"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">

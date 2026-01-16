@@ -43,11 +43,9 @@ export class BaseApiService {
   }
 
   private getAuthToken(): string {
-    // TODO: Uncomment this when you have proper authentication flow
-    // return localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '';
-    
-    // FOR NOW: Use hardcoded token
-    return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IkdJOXhxdXZtc29nOXdXbUVULXR4TV9wYURTUSJ9.eyJpc3MiOiJodHRwczovL3ZvZGFjb21jYW0uY29tcG9zZWFwaS5pbyIsInN1YiI6InN1cGVyX2FkbWluQGdsb2JhbHdhdmVuZXQuY29tIiwiYXVkIjoiaHR0cDovL2dsb2JhbHdhdmVuZXQuY29tL3dhdmVuZXRfcmVzdF9hcGkvIiwiY2lkIjoiaW50ZXJuYWwiLCJleHAiOjE3NjgzMjM1ODMsImF1dGhfdGltZSI6MTc2ODMxNjM4MywiaWF0IjoxNzY4MzE2MzgzLCJqdGkiOiI2Q2ZfMXBxSVR0QjdYN1V5Y3BCUVRfbWV2OGNPQk5nYk40VlVYNzVLUVdvIiwic2NwIjpbXX0.GQPoExzILpuD5bm3xd-kW0db0Oty4Nw_q_2qJ4jgOL_DS_5gV6d8-76zepfe4_n0jsuQvdFvAqASdm5mI933b7QLBiKSJx_xWaBSLMvBl8oWzjSrR6w5AQP_xDNNTn4dB2WDMz-x7ApAnE8N3dwGyquSXmBcz2t_tw46cc6N_a_bfCQFP35dtueqVEH6mGNTPGOm9fdE-UeG1cpbxG62oB2MshVCb9GrqCRxRuzd_Yu7Yt5SXstX29oZXBysk9BgUmqdxIv9Bb-2X0tSL-srbV_6Sy-_0QBCnv8hUa5r0ObNE8SCFpxJQJqW1UStUa4fIdX4hFk7jG-hGotirIFUgA'
+
+    return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IkdJOXhxdXZtc29nOXdXbUVULXR4TV9wYURTUSJ9.eyJpc3MiOiJodHRwczovL3ZvZGFjb21jYW0uY29tcG9zZWFwaS5pbyIsInN1YiI6InN1cGVyX2FkbWluQGdsb2JhbHdhdmVuZXQuY29tIiwiYXVkIjoiaHR0cDovL2dsb2JhbHdhdmVuZXQuY29tL3dhdmVuZXRfcmVzdF9hcGkvIiwiY2lkIjoiaW50ZXJuYWwiLCJleHAiOjE3NjgzOTMyNDgsImF1dGhfdGltZSI6MTc2ODM4NjA0OCwiaWF0IjoxNzY4Mzg2MDQ4LCJqdGkiOiI3cndlMlB6OEx6NVVjQ20yYnoxVVR4OHRkUW50SXBBUFVFa3p4dVE0VFVRIiwic2NwIjpbXX0.qV7Fg48cCKPpcX_woBlblwIhJqSPK-5v8Vj76HQuD6XYDiBzqxt9-Htyt9ZVGgHm1yN2zbG1hWpcuDi0FtUYB-zLUy5Fl2lLNt9xZQYptzs3vqDJL-9CXumdLys84jHFW4oY51imRNBq2pwgOKn3D-3yeihgJx4UYwj1VwqRQ4f9CTtuY_qko86QmCYvLG6C9aAilNm6xqcT4bAZTbJ9kv8b59f1RubUQUUrdGhOjn2Qw5mzNt9vf4Nhq3afhalcrQyxxN254OIjdje2UwV_QLx9_i3r0SQLX6TO06oHLsLQAfG_e-x7RKZeSpVwlMgEuMnJNCMuBa27bFt6WuST_w'
+
   }
 
   protected setAuthToken(token: string): void {
@@ -189,7 +187,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -209,7 +213,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -228,7 +238,13 @@ export class CallRoutingApiService extends BaseApiService {
     if (filters) {
       const params = Object.entries(filters)
         .filter(([key, value]) => value !== undefined && value !== null && value !== '')
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
         .join('&');
       
       queryParams = params ? `?${params}` : '';
@@ -237,7 +253,119 @@ export class CallRoutingApiService extends BaseApiService {
     const endpoint = `/call_statistics${queryParams}`;
     return this.get<any>(endpoint);
   }
+
+
+  
+    async redAlertReasons(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/redalert_reasons${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+    
+    async redalertCallLogs(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => {
+          // Only encode string values that might contain special characters
+          if (typeof value === 'string' && (key.includes('name') || key.includes('category') || key.includes('type'))) {
+            return `${key}=${encodeURIComponent(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/redalert_call_logs${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+
+
+    async CaseClassification(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => {
+          return `${key}=${value}`;
+        })
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/category_percentage${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+    async CaseClassificationTopSubCategory(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/top_sub_category_by_category${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+
+    async CaseClassificationSubCategoryList(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/dynamic_top_sub_category_by_category_subcategory${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+
+
 }
 
-// Create a singleton instance for use throughout the app
 export const callRoutingApiService = new CallRoutingApiService();

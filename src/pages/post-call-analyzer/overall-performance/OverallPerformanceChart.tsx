@@ -146,12 +146,12 @@ export default function OverallPerformanceChart({
   isLoading: propIsLoading 
 }: OverallPerformanceChartProps = {}) {
   const [performanceData, setPerformanceData] = useState(initialData || []);
-  const [isLoading, setIsLoading] = useState(propIsLoading !== undefined ? propIsLoading : false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading = true by default
   const [hasData, setHasData] = useState(!!initialData);
   const [hasError, setHasError] = useState(false);
   const [localDateRange, setLocalDateRange] = useState<any>(null);
   const { globalDateRange } = useDate();
-  const { selectedProject } = useProjectSelection();
+  const { selectedProject, changeSelectedProject } = useProjectSelection();
   const navigate = useNavigate();
 
   // Use local date range if user has set it, otherwise use global
@@ -164,16 +164,61 @@ export default function OverallPerformanceChart({
   const destroyRef = useRef(false);
   const manualRefreshRef = useRef<SimpleSubject<any>>(new SimpleSubject<any>());
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const projectCheckTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Timeout to check if project is available after component mount
+  useEffect(() => {
+    if (destroyRef.current) return;
+    
+    projectCheckTimerRef.current = setTimeout(() => {
+      if (!selectedProject) {
+        console.log('OverallPerformanceChart: Project selection timeout - checking localStorage');
+        // Try to get project directly from localStorage as fallback
+        const storedProject = localStorage.getItem('selectedProject');
+        if (storedProject) {
+          try {
+            const project = JSON.parse(storedProject);
+            console.log('OverallPerformanceChart: Found project in localStorage', project);
+            // This will trigger the project selection service to update
+            changeSelectedProject(project);
+          } catch (error) {
+            console.error('OverallPerformanceChart: Error parsing stored project', error);
+          }
+        } else {
+          console.log('OverallPerformanceChart: No project found in localStorage');
+        }
+      }
+    }, 1000); // Check after 1 second
+
+    return () => {
+      if (projectCheckTimerRef.current) {
+        clearTimeout(projectCheckTimerRef.current);
+      }
+    };
+  }, [selectedProject, changeSelectedProject]);
 
   // Debounced refresh function
   const debouncedRefresh = useCallback((overrideDateRange?: any) => {
+    console.log('OverallPerformanceChart: debouncedRefresh called', {
+      hasSelectedProject: !!selectedProject,
+      isDestroyed: destroyRef.current,
+      overrideDateRange
+    });
+    
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     
     debounceTimerRef.current = setTimeout(() => {
+      console.log('OverallPerformanceChart: Debounce timer fired', {
+        hasSelectedProject: !!selectedProject,
+        isDestroyed: destroyRef.current
+      });
+      
       if (selectedProject && !destroyRef.current) {
         loadData(overrideDateRange);
+      } else {
+        console.log('OverallPerformanceChart: Debounce callback skipped - no project or destroyed');
       }
     }, 300);
   }, [selectedProject]);
@@ -210,6 +255,7 @@ export default function OverallPerformanceChart({
   // Single debounced stream for ALL refresh triggers
   useEffect(() => {
     const subscription = manualRefreshRef.current.subscribe((dateRange) => {
+      console.log('OverallPerformanceChart: Manual refresh triggered', { dateRange });
       // Use the date range passed through the Subject
       debouncedRefresh(dateRange);
     });
@@ -219,23 +265,43 @@ export default function OverallPerformanceChart({
     };
   }, [debouncedRefresh]);
 
-  // Initial data handling
-  useEffect(() => {
-    if (initialData && initialData.length > 0) {
-      setPerformanceData(initialData);
-      setHasData(true);
-      setIsLoading(false);
-    }
-  }, [initialData]);
-
+  // Initial data and API trigger effect
   useEffect(() => {
     if (destroyRef.current) return;
 
-    // Trigger initial API call if we have project and date range but no actual initial data
-    if (selectedProject && effectiveDateRange && (!initialData || initialData.length === 0)) {
-      manualRefreshRef.current.next(effectiveDateRange);
+    console.log('OverallPerformanceChart: Checking dependencies', {
+      selectedProject: !!selectedProject,
+      effectiveDateRange: !!effectiveDateRange,
+      initialDataLength: initialData?.length || 0,
+      isLoading
+    });
+
+    // Always set loading state when component mounts or dependencies change
+    if (selectedProject && effectiveDateRange) {
+      console.log('OverallPerformanceChart: Dependencies ready, checking data...');
+      // If we have initial data, use it, otherwise trigger API call
+      if (initialData && initialData.length > 0) {
+        console.log('OverallPerformanceChart: Using initial data');
+        setPerformanceData(initialData);
+        setHasData(true);
+        setIsLoading(false);
+      } else {
+        console.log('OverallPerformanceChart: Triggering API call for fresh data');
+        // Trigger API call for fresh data
+        manualRefreshRef.current.next(effectiveDateRange);
+      }
+    } else {
+      console.log('OverallPerformanceChart: Waiting for dependencies...', {
+        hasProject: !!selectedProject,
+        hasDateRange: !!effectiveDateRange
+      });
+      
+      // Set loading to true while waiting for dependencies
+      if (!selectedProject || !effectiveDateRange) {
+        setIsLoading(true);
+      }
     }
-  }, [selectedProject, effectiveDateRange, initialData]);
+  }, [selectedProject, effectiveDateRange]);
 
   // Cleanup
   useEffect(() => {
@@ -243,6 +309,9 @@ export default function OverallPerformanceChart({
       destroyRef.current = true;
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+      }
+      if (projectCheckTimerRef.current) {
+        clearTimeout(projectCheckTimerRef.current);
       }
     };
   }, []);
@@ -267,10 +336,18 @@ export default function OverallPerformanceChart({
     // Use override date range if provided, otherwise use effective date range
     const dateRangeToUse = overrideDateRange || effectiveDateRange;
     
+    console.log('OverallPerformanceChart: loadData called', {
+      hasSelectedProject: !!selectedProject,
+      dateRangeToUse,
+      overrideDateRange
+    });
+    
     if (!selectedProject || !dateRangeToUse) {
+      console.log('OverallPerformanceChart: loadData aborted - missing dependencies');
       return;
     }
 
+    console.log('OverallPerformanceChart: Starting API call');
     setIsLoading(true);
     setHasError(false);
 
@@ -388,7 +465,7 @@ export default function OverallPerformanceChart({
         </div>
         
         {/* Chart Section */}
-        <div className="mt-8">
+        <div className="mt-12">
           {isLoading ? (
             <ExceptionHandleView type="loading" />
           ) : hasError ? (

@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { Treemap, ResponsiveContainer, Tooltip as RechartTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { RedAlertCallLogs } from "./RedAlertCallLogs";
 
 // Simple Subject implementation for reactive pattern
 class SimpleSubject<T> {
@@ -47,7 +48,7 @@ const TreemapTooltipContent = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground shadow-xl backdrop-blur-sm">
+      <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground backdrop-blur-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2 justify-start">
             <div 
@@ -92,46 +93,6 @@ const BarChartTooltipContent = ({ active, payload }: TooltipProps) => {
   return null;
 };
 
-// Call Logs Component - will be populated with real data
-const RedAlertCallLogs = ({ category, subCategory }: { category: string; subCategory: string }) => {
-  const [logs, setLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // TODO: Fetch real call logs based on category and subCategory
-    setLoading(false);
-  }, [category, subCategory]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[300px]">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (logs.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-[300px] text-gray-500">
-        No call logs available
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2 max-h-[300px] overflow-y-auto">
-      {logs.map((log) => (
-        <div key={log.id} className="p-2 bg-slate-50 rounded-lg text-sm">
-          <div className="flex justify-between mb-1">
-            <span>{log.time}</span>
-            <span className="text-gray-500">{log.duration}</span>
-          </div>
-          <div className="text-gray-500">{log.status}</div>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 // Colors from env.js
 const COLORS = (window as any).env_vars?.colors || [
@@ -191,6 +152,8 @@ export default function RedAlertMetricsReport({
   const [loading, setLoading] = useState(propIsLoading !== undefined ? propIsLoading : false);
   const [secondChartLoading, setSecondChartLoading] = useState(false);
   const [thirdChartLoading, setThirdChartLoading] = useState(false);
+  const [secondChartError, setSecondChartError] = useState(false);
+  const [hasSecondChartData, setHasSecondChartData] = useState(false);
   const [hasData, setHasData] = useState(!!initialData);
   const [hasError, setHasError] = useState(false);
   
@@ -302,6 +265,11 @@ export default function RedAlertMetricsReport({
   // Handle date range change
   const handleDateRangeChange = (dateRange: any) => {
     setLocalDateRange(dateRange);
+    // Close all tabs/charts when date range changes
+    setShowSecondChart(false);
+    setShowThirdChart(false);
+    setSelectedCategory("");
+    setSelectedSubCategory("");
     // The combineLatest effect will trigger automatically
   };
 
@@ -405,15 +373,69 @@ export default function RedAlertMetricsReport({
     }
   };
 
-  const loadSecondChartData = (category: string) => {
+  const loadSecondChartData = async (category: string) => {
     setSecondChartLoading(true);
+    setSecondChartError(false);
+    setHasSecondChartData(false);
     
-    // TODO: Fetch real bar chart data based on category
-    setTimeout(() => {
-      // Placeholder for real API call
+    try {
+      // Use the same filters as the first API call
+      const dateRangeToUse = effectiveDateRange;
+      
+      if (!selectedProject || !dateRangeToUse) {
+        setBarChartData([]);
+        setSecondChartLoading(false);
+        return;
+      }
+
+      // Get IDs from selected project
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      // Use the date range
+      const fromTime = dateRangeToUse.fromDate;
+      const toTime = dateRangeToUse.toDate;
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime,
+        toTime,
+        alert: category, // Add the selected category as alert parameter
+      };
+
+      const response = await callRoutingApiService.redAlertReasons(filters);
+
+      // Check if response has data and transform it for the bar chart
+      if (response?.data?.reasons_elements && Array.isArray(response.data.reasons_elements)) {
+        const transformedData = response.data.reasons_elements.map(item => ({
+          name: item.reason,
+          value: typeof item.call_count === 'string' ? parseInt(item.call_count) || 0 : (item.call_count || 0),
+        })).filter(item => item.value > 0); // Only include items with values > 0
+
+        if (transformedData.length > 0) {
+          setBarChartData(transformedData);
+          setHasSecondChartData(true);
+        } else {
+          setBarChartData([]);
+          setHasSecondChartData(false);
+        }
+      } else {
+        setBarChartData([]);
+        setHasSecondChartData(false);
+      }
+    } catch (error) {
+      console.error('Error loading second chart data:', error);
+      setSecondChartError(true);
       setBarChartData([]);
-      setSecondChartLoading(false);
-    }, 300);
+      setHasSecondChartData(false);
+    }
+    
+    setSecondChartLoading(false);
   };
 
   const handleBarClick = (data: any) => {
@@ -462,6 +484,42 @@ export default function RedAlertMetricsReport({
       const factor = 1 - (idx * 0.08);
       return baseColor + Math.round(Math.max(0.5, factor) * 255).toString(16).padStart(2, '0');
     });
+  };
+
+  // Bar Chart Tooltip Component with access to component state
+  const BarChartTooltipContent = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const barChartColors = getBarChartColors();
+      
+      // Remove duplicate entries by name
+      const uniquePayload = payload.reduce((acc: any[], entry: any) => {
+        const existingIndex = acc.findIndex(item => item.name === entry.name);
+        if (existingIndex === -1) {
+          acc.push(entry);
+        }
+        return acc;
+      }, []);
+      
+      return (
+        <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground backdrop-blur-sm">
+          <div className="space-y-1">
+            <p className="font-medium">{label}</p>
+            {uniquePayload.map((entry: any, index: number) => (
+              <div key={index} className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: barChartColors[index] }}
+                />
+                <span className="text-sm">
+                  {entry.name}: {Math.round(entry.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -550,17 +608,9 @@ export default function RedAlertMetricsReport({
         ) : (
           <div className="grid grid-cols-12 gap-4">
             {/* Treemap Chart - First Level */}
-            <div style={{ 
-              gridColumn: showThirdChart ? 'span 4' : showSecondChart ? 'span 6' : 'span 12'
-            }}>
+            <div className={showThirdChart ? "col-span-4" : showSecondChart ? "col-span-6" : "col-span-12"}>
               <Card
-                style={{
-                  borderRadius: 12,
-                  border: '1px solid #e8e8e8',
-                  background: '#ffffff',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                  padding: 16
-                }}
+                className="rounded-xl border border-border bg-card p-4"
               >
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -650,6 +700,9 @@ export default function RedAlertMetricsReport({
                               axisLine={false} 
                               tickLine={false}
                               tickFormatter={(value) => Math.round(value).toString()}
+                              domain={[0, 'dataMax']}
+                              ticks={barChartData.length > 0 ? [0, Math.max(...barChartData.map(d => d.value))] : [0, 1]}
+                              allowDecimals={false}
                             />
                             <RechartTooltip 
                               content={<BarChartTooltipContent />} 
@@ -703,6 +756,8 @@ export default function RedAlertMetricsReport({
                     <RedAlertCallLogs 
                       category={selectedCategory}
                       subCategory={selectedSubCategory}
+                      fromTime={effectiveDateRange?.fromDate || ''}
+                      toTime={effectiveDateRange?.toDate || ''}
                     />
                   )}
                 </div>

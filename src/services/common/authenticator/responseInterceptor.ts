@@ -55,15 +55,15 @@ export const responseInterceptor = (): ResponseInterceptorConfig => {
         errorResponse = error as ErrorResponse;
       }
       
-      if (
-        errorResponse?.status === "ERROR" && 
-        (errorResponse.message === "token_expired" || 
-         errorResponse.message === "token_not_exists" || 
-         errorResponse.message === 'invalid_user' || 
-         errorResponse.message === 'token_invalid')
-      ) {
-        handleLogout();
-      }
+      // if (
+      //   errorResponse?.status === "ERROR" && 
+      //   (errorResponse.message === "token_expired" || 
+      //    errorResponse.message === "token_not_exists" || 
+      //    errorResponse.message === 'invalid_user' || 
+      //    errorResponse.message === 'token_invalid')
+      // ) {
+      //   handleLogout();
+      // }
       
       return Promise.reject(error);
     },
