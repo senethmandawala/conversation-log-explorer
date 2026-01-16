@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ConversationRecord } from "@/types/conversation";
 import { StatusBadge, getResolutionVariant, getVdnSourceVariant } from "@/components/conversation/StatusBadge";
-import { IconCalendar, IconClock, IconPhone, IconTag, IconFileText, IconBuilding, IconMapPin, IconHourglass, IconHash, IconAntenna, IconPhoneOff, IconCpu, IconMicrophone, IconVolume, IconWorld, IconChevronDown, IconChevronUp, IconPlayerPlay, IconPlayerPause } from "@tabler/icons-react";
+import { IconCalendar, IconClock, IconPhone, IconTag, IconFileText, IconBuilding, IconMapPin, IconHourglass, IconHash, IconAntenna, IconPhoneOff, IconCpu, IconMicrophone, IconVolume, IconWorld, IconChevronDown, IconChevronUp, IconPlayerPlay, IconPlayerPause, IconFile } from "@tabler/icons-react";
 import { useState, useRef, useEffect } from "react";
 import { ConversationView } from "./conversation-view/ConversationView";
 
@@ -290,7 +290,7 @@ export function AutopilotSingleChatHistoryView({ record, open, onClose }: Autopi
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <SheetTitle className="text-xl font-semibold flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <FileText className="h-5 w-5 text-primary" />
+                <IconFileText className="h-5 w-5 text-primary" />
               </div>
               Conversation Details
             </SheetTitle>

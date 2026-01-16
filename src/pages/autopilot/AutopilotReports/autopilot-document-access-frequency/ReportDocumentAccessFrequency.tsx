@@ -310,7 +310,7 @@ export default function ReportDocumentAccessFrequency({ onBack }: ReportDocument
                 </Space>
               ) : filteredData.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                  <BarChartOutlined style={{ fontSize: 48, color: '#94a3b8', marginBottom: 16 }} />
+                  <IconChartBar style={{ fontSize: 48, color: '#94a3b8', marginBottom: 16 }} />
                   <Text type="secondary">No matching data found</Text>
                 </div>
               ) : (

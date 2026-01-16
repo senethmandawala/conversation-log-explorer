@@ -330,38 +330,38 @@ export class CallRoutingApiService extends BaseApiService {
     async CaseClassificationTopSubCategory(
     filters: Filters
   ): Promise<CommonResponse<any>> {
-    let params = new URLSearchParams();
-    
+    let queryParams = '';
+
     if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.set(key, value.toString());
-        }
-      });
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
     }
-    
-    return this.get<CommonResponse<any>>(
-      `/top_sub_category_by_category?${params}`
-    );
+
+    const endpoint = `/top_sub_category_by_category${queryParams}`;
+    return this.get<any>(endpoint);
   }
 
 
     async CaseClassificationSubCategoryList(
     filters: Filters
   ): Promise<CommonResponse<any>> {
-    let params = new URLSearchParams();
-    
+    let queryParams = '';
+
     if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.set(key, value.toString());
-        }
-      });
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${value}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
     }
-    
-    return this.get<CommonResponse<any>>(
-      `/dynamic_top_sub_category_by_category_subcategory?${params}`
-    );
+
+    const endpoint = `/dynamic_top_sub_category_by_category_subcategory${queryParams}`;
+    return this.get<any>(endpoint);
   }
 
 
