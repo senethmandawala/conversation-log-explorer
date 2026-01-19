@@ -620,6 +620,118 @@ export class CallRoutingApiService extends BaseApiService {
     return this.get<any>(endpoint);
   }
 
+  
+  async CallResolutionStatus(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/case_status${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+
+  async CallResolutionCategoryPercentage(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/category_percentage${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+  async CallResolutionTopAgents(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/agents${queryParams}`;
+    return this.get<any>(endpoint);
+  }  
+
+  async CallResolutionAverageResoltuionTime(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/call_resolution_average_time${queryParams}`;
+    return this.get<any>(endpoint);
+  }  
+
+
+  async CallResolutionTime(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/call_resolution_time${queryParams}`;
+    return this.get<any>(endpoint);
+  }    
+
+  async CallResolutionTimeTopAgents(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/agents${queryParams}`;
+    return this.get<any>(endpoint);
+  }    
+
+
 }
 
 export const callRoutingApiService = new CallRoutingApiService();
