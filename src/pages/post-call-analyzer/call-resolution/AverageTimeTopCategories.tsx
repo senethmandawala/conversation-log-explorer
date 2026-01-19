@@ -1,43 +1,80 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
+
+// Get colors from environment config
+const COLORS = window.env_vars?.colors || ['#4285F4', '#34A853', '#FBBC04', '#EA4335', '#9C27B0', '#FF6F00', '#00ACC1', '#7CB342'];
 
 interface AverageTimeTopCategoriesProps {
   onCategorySelect: (category: { name: string; color: string }) => void;
+  data: any[];
+  loading?: boolean;
+  hasError?: boolean;
+  onRetry?: () => void;
 }
 
-const COLORS = ['#4285F4', '#34A853', '#FBBC04', '#EA4335', '#9C27B0', '#FF6F00', '#00ACC1', '#7CB342'];
+// Custom tooltip for category time charts
+const CategoryTimeTooltip = ({ active, payload }: any) => {
+  if (!active || !payload || !payload.length) return null;
 
-const mockCategoryData = [
-  { name: 'Billing Issues', avgTime: 12.5 },
-  { name: 'Technical Support', avgTime: 18.3 },
-  { name: 'Account Management', avgTime: 8.7 },
-  { name: 'Product Inquiry', avgTime: 6.2 },
-  { name: 'Service Complaint', avgTime: 15.8 },
-  { name: 'Refund Request', avgTime: 10.4 },
-  { name: 'General Query', avgTime: 5.1 },
-  { name: 'Feature Request', avgTime: 14.6 },
-];
+  return (
+    <div className="bg-popover/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl min-w-[180px]">
+      <div className="space-y-1.5">
+        {payload.map((item: any, index: number) => {
+          const color = item.payload?.color || item.color || item.fill || "hsl(var(--primary))";
+          const name = item.payload?.name || item.name || "Category";
+          const avgDuration = item.payload?.averageCallDuration || '--';
+          const callCount = item.payload?.callCount || 0;
+
+          return (
+            <div key={index} className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm" 
+                  style={{ backgroundColor: color }}
+                />
+                <span className="text-sm font-medium text-foreground">{name}</span>
+              </div>
+              <div className="pl-4 space-y-0.5">
+                <div className="flex justify-between text-xs">
+                  <span className="text-foreground/70">Avg Time:</span>
+                  <span className="font-medium">{avgDuration}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-foreground/70">Calls:</span>
+                  <span className="font-medium">{callCount}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 export const AverageTimeTopCategories = ({ 
-  onCategorySelect
+  onCategorySelect,
+  data,
+  loading = false,
+  hasError = false,
+  onRetry
 }: AverageTimeTopCategoriesProps) => {
-  const [loading, setLoading] = useState(true);
-  const [categoryData, setCategoryData] = useState(mockCategoryData);
-
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setCategoryData(mockCategoryData);
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Transform API data to chart format
+  const categoryData = data.map((item: any, index: number) => ({
+    name: item.category || 'Unknown',
+    avgTime: item.averageCallDurationInSec ? item.averageCallDurationInSec / 60 : 0, // Convert to minutes
+    averageCallDuration: item.averageCallDuration || '--',
+    callCount: item.callCount || 0,
+    callDuration: item.callDuration || '--',
+    color: COLORS[index % COLORS.length]
+  })).sort((a, b) => b.avgTime - a.avgTime);
 
   const handleBarClick = (data: any, index: number) => {
     onCategorySelect({
       name: data.name,
-      color: COLORS[index % COLORS.length]
+      color: data.color
     });
   };
 
@@ -46,7 +83,41 @@ export const AverageTimeTopCategories = ({
       <Card className="border-border/50">
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-[400px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <ExceptionHandleView type="loading" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  if (hasError) {
+    return (
+      <Card className="border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-[400px]">
+            <ExceptionHandleView 
+              type="500" 
+              title="Error Loading Categories"
+              content="category time data"
+              onTryAgain={onRetry}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  if (!categoryData.length) {
+    return (
+      <Card className="border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-[400px]">
+            <ExceptionHandleView 
+              type="204" 
+              title="No Categories Found"
+              content="category time data for the selected period"
+              onTryAgain={onRetry}
+            />
           </div>
         </CardContent>
       </Card>
@@ -76,13 +147,8 @@ export const AverageTimeTopCategories = ({
               label={{ value: 'Avg Time (min)', angle: -90, position: 'insideLeft', style: { fontWeight: 700 } }}
             />
             <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))', 
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px'
-              }}
+              content={<CategoryTimeTooltip />}
               cursor={{ fill: 'hsl(var(--muted))' }}
-              formatter={(value: number) => [`${value.toFixed(1)} min`, 'Avg Time']}
             />
             <Bar 
               dataKey="avgTime" 
@@ -91,7 +157,7 @@ export const AverageTimeTopCategories = ({
               style={{ cursor: 'pointer' }}
             >
               {categoryData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>
@@ -102,7 +168,7 @@ export const AverageTimeTopCategories = ({
             <div key={index} className="flex items-center gap-2 text-xs">
               <div 
                 className="w-3 h-3 rounded-sm" 
-                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                style={{ backgroundColor: item.color }}
               />
               <span className="text-muted-foreground truncate">{item.name}</span>
             </div>
