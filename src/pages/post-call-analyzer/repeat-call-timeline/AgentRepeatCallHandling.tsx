@@ -1,23 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, Typography, Space, Tooltip } from "antd";
 import { IconInfoCircle, IconUser } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
 const { Title, Text } = Typography;
 
-const mockData = [
-  { agent: "Agent A", handled: 45, resolved: 38 },
-  { agent: "Agent B", handled: 42, resolved: 35 },
-  { agent: "Agent C", handled: 38, resolved: 32 },
-  { agent: "Lisa Anderson", handled: 32, resolved: 28 },
-  { agent: "Agent E", handled: 32, resolved: 26 },
-  { agent: "Agent F", handled: 28, resolved: 22 },
-];
+// Get colors from env.js
+const COLORS = (window as any).env_vars?.colors || ['#8b5cf6'];
 
-export function AgentRepeatCallHandling() {
-  const [loading, setLoading] = useState(false);
+interface AgentRepeatCallHandlingProps {
+  data?: any[];
+  loading?: boolean;
+  hasError?: boolean;
+  dateRangeForDisplay?: string;
+  onReload?: () => void;
+}
+
+export function AgentRepeatCallHandling({ data = [], loading = false, hasError = false, dateRangeForDisplay, onReload }: AgentRepeatCallHandlingProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [internalHasError, setInternalHasError] = useState(false);
+  const [internalData, setInternalData] = useState<any[]>([]);
+
+  // Use parent data if provided, otherwise use internal state
+  const currentData = data.length > 0 ? data : internalData;
+  const currentLoading = loading || internalLoading;
+  const currentHasError = hasError || internalHasError;
+
+  const loadData = async () => {
+    // Only load if no parent data provided
+    if (data.length > 0) return;
+    
+    setInternalLoading(true);
+    setInternalHasError(false);
+    try {
+      // This would be the original API call logic if needed
+      // For now, we'll rely on parent data
+    } catch (error) {
+      console.error('Error loading agent repeat call handling data:', error);
+      setInternalHasError(true);
+    } finally {
+      setInternalLoading(false);
+    }
+  };
+
+  // Watch for external reload trigger
+  useEffect(() => {
+    if (onReload) {
+      loadData();
+    }
+  }, [onReload]);
 
   return (
     <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4 mt-6">
@@ -43,29 +79,36 @@ export function AgentRepeatCallHandling() {
                 </Tooltip>
               </div>
               <Text type="secondary" className="text-sm">
-                Jun 19 - Jun 25, 2025
+                {dateRangeForDisplay || 'Select date range'}
               </Text>
             </div>
           </Space>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center h-[300px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : mockData.length > 0 ? (
+        {currentLoading ? (
+          <ExceptionHandleView type="loading" />
+        ) : currentHasError ? (
+          <ExceptionHandleView 
+            type="500" 
+            title="Error Loading Data"
+            content="agent repeat call handling data"
+            onTryAgain={onReload || loadData}
+          />
+        ) : currentData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart 
-              data={mockData} 
+              data={currentData} 
               margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
-              layout="horizontal"
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" vertical={false} />
               <XAxis 
-                dataKey="agent" 
+                dataKey="agentName" 
                 style={{ fontSize: 12 }} 
                 axisLine={false} 
                 tickLine={false}
+                angle={-45}
+                textAnchor="end"
+                height={80}
               />
               <YAxis 
                 style={{ fontSize: 12 }} 
@@ -73,14 +116,16 @@ export function AgentRepeatCallHandling() {
                 tickLine={false}
               />
               <RechartsTooltip content={<BarChartTooltip />} />
-              <Bar dataKey="handled" fill="#f59e0b" radius={[6, 6, 0, 0]} name="Handled" />
-              <Bar dataKey="resolved" fill="#10b981" radius={[6, 6, 0, 0]} name="Resolved" />
+              <Bar dataKey="repeatCalls" fill={COLORS[0]} radius={[6, 6, 0, 0]} name="Repeat Calls" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-[300px] text-gray-500">
-            No data available
-          </div>
+          <ExceptionHandleView 
+            type="204" 
+            title="No Data Available"
+            content="agent repeat call handling data for the selected period"
+            onTryAgain={onReload || loadData}
+          />
         )}
       </Space>
     </Card>

@@ -1,74 +1,254 @@
+import { useEffect, useState } from "react";
+import { IconX, IconRefresh } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import { TablerIcon } from "@/components/ui/tabler-icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
 interface CallLogsSummaryProps {
   breadcrumb: string[];
+  fromTime?: string;
+  toTime?: string;
 }
 
-const callLogsData = [
-  { date: "2024-01-15", time: "09:23 AM", msisdn: "+1234567890", sentiment: "Positive", status: "Resolved" },
-  { date: "2024-01-15", time: "10:45 AM", msisdn: "+1987654321", sentiment: "Negative", status: "Pending" },
-  { date: "2024-01-14", time: "02:30 PM", msisdn: "+1122334455", sentiment: "Neutral", status: "Resolved" },
-  { date: "2024-01-14", time: "04:15 PM", msisdn: "+1555666777", sentiment: "Positive", status: "Escalated" },
-  { date: "2024-01-13", time: "11:00 AM", msisdn: "+1888999000", sentiment: "Negative", status: "Resolved" },
-  { date: "2024-01-13", time: "03:45 PM", msisdn: "+1777888999", sentiment: "Positive", status: "Resolved" },
-  { date: "2024-01-12", time: "08:15 AM", msisdn: "+1666777888", sentiment: "Neutral", status: "Pending" },
-];
+export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummaryProps) {
+  const [loading, setLoading] = useState(false);
+  const [callLogs, setCallLogs] = useState<any[]>([]);
+  const [error, setError] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 5,
+    totalElements: 0,
+    totalPages: 0,
+    last: true,
+    first: true
+  });
+  const { selectedProject } = useProjectSelection();
 
-const getSentimentColor = (sentiment: string) => {
-  switch (sentiment.toLowerCase()) {
-    case "positive": return "text-emerald-500";
-    case "negative": return "text-red-500";
-    default: return "text-amber-500";
-  }
-};
+  const loadCallLogs = async (page: number = 1, size: number = 5) => {
+    if (!selectedProject || !fromTime || !toTime) {
+      return;
+    }
 
-const getStatusBadge = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "resolved": return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Resolved</Badge>;
-    case "pending": return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">Pending</Badge>;
-    case "escalated": return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Escalated</Badge>;
-    default: return <Badge variant="outline">{status}</Badge>;
-  }
-};
+    setLoading(true);
+    setError(false);
 
-export function CallLogsSummary({ breadcrumb }: CallLogsSummaryProps) {
+    try {
+      // Get IDs from selected project
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime,
+        toTime,
+        category: breadcrumb[0] || '',
+        subcategory: breadcrumb[1] || '',
+        second_subcategory: breadcrumb[2] || '',
+        page,
+        size,
+        sort: 'id',
+        sortOrder: 'DESC'
+      };
+
+      const response = await callRoutingApiService.CaseClassificationCallLogs(filters);
+
+      // Check if response has paginated data and transform it
+      if (response?.data?.content && Array.isArray(response.data.content)) {
+        setCallLogs(response.data.content);
+        setPagination({
+          page: (response.data.number || 0) + 1, // Convert 0-based to 1-based
+          size: response.data.size || size,
+          totalElements: response.data.totalElements || 0,
+          totalPages: response.data.totalPages || 0,
+          last: response.data.last || true,
+          first: response.data.first || true
+        });
+      } else {
+        setCallLogs([]);
+        setPagination({
+          page: 1,
+          size: 5,
+          totalElements: 0,
+          totalPages: 0,
+          last: true,
+          first: true
+        });
+      }
+    } catch (error) {
+      console.error('Error loading call logs:', error);
+      setError(true);
+      setCallLogs([]);
+    }
+    
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadCallLogs();
+  }, [breadcrumb, fromTime, toTime, selectedProject]);
+
+  const handleReload = () => {
+    loadCallLogs(pagination.page, pagination.size);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    loadCallLogs(newPage, pagination.size);
+  };
+
+  const getSentimentIcon = (sentiment: number) => {
+    switch (sentiment) {
+      case 2: // Positive
+        return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={20} />, title: "Positive" };
+      case 1: // Neutral
+        return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
+      case 0: // Negative
+        return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={20} />, title: "Negative" };
+      default:
+        return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
+    }
+  };
+
+  const getStatusBadge = (statusType: string, status: string) => {
+    switch (statusType.toLowerCase()) {
+      case "success":
+        return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">{status}</Badge>;
+      case "warning":
+        return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">{status}</Badge>;
+      case "danger":
+        return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">{status}</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[120px]">Date/Time</TableHead>
-              <TableHead>MSISDN</TableHead>
-              <TableHead className="text-center">Sentiment</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {callLogsData.map((log, i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <div className="text-sm">{log.date}</div>
-                  <div className="text-xs text-muted-foreground">{log.time}</div>
-                </TableCell>
-                <TableCell className="font-mono text-sm">{log.msisdn}</TableCell>
-                <TableCell className={`text-center font-medium ${getSentimentColor(log.sentiment)}`}>
-                  {log.sentiment}
-                </TableCell>
-                <TableCell className="text-center">{getStatusBadge(log.status)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+    <div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">
+          Showing {callLogs.length} of {pagination.totalElements} calls
+        </span>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8"
+          onClick={handleReload}
+          disabled={loading}
+        >
+          <IconRefresh className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
+
+      {loading ? (
+        <ExceptionHandleView 
+          type="loading" 
+          justLoading={false}
+          className="!p-0"
+        />
+      ) : error ? (
+        <ExceptionHandleView 
+          type="500" 
+          title="Error loading call logs"
+          content="case classification call logs"
+          onTryAgain={handleReload}
+          className="!p-0"
+        />
+      ) : callLogs.length > 0 ? (
+        <div className="border border-border/50 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted/50 backdrop-blur-sm z-10">
+                <TableRow>
+                  <TableHead className="font-semibold">Date/Time</TableHead>
+                  <TableHead className="font-semibold">MSISDN</TableHead>
+                  <TableHead className="font-semibold text-center">Agent Sentiment</TableHead>
+                  <TableHead className="font-semibold text-center">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {callLogs.map((call) => (
+                  <TableRow 
+                    key={call.id} 
+                    className="hover:bg-muted/50 cursor-pointer transition-colors"
+                  >
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {new Date(call.call_at).toLocaleDateString()}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(call.call_at).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{call.mobile_no}</TableCell>
+                    <TableCell className="text-center">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="inline-flex cursor-help">
+                            {getSentimentIcon(call.agent_sentiment).icon}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getSentimentIcon(call.agent_sentiment).title}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getStatusBadge(call.case_status === 0 ? 'warning' : call.case_status === 1 ? 'success' : 'danger', 
+                        call.case_status === 0 ? 'Pending' : call.case_status === 1 ? 'Resolved' : 'Escalated')}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          
+          {/* Pagination Controls */}
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between p-4 border-t border-border/50">
+              <div className="text-sm text-muted-foreground">
+                Page {pagination.page} of {pagination.totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.first || loading}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.last || loading}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <ExceptionHandleView 
+          type="204" 
+          title="No Call Data"
+          content="call logs for this category"
+          onTryAgain={handleReload}
+          className="!p-0"
+        />
+      )}
     </div>
   );
 }

@@ -316,6 +316,18 @@ export const CaseClassificationReport = ({
     setVisibleStartIndex(4);
   };
 
+  const handleShowCallLogs = (level: number) => {
+    setSlides(prev => {
+      const updatedSlides = [...prev];
+      updatedSlides[level] = {
+        ...updatedSlides[level],
+        type: "callLogs",
+        title: "Call Logs",
+      };
+      return updatedSlides;
+    });
+  };
+
   const closeSlide = (slideId: number) => {
     const slideIndex = slides.findIndex(s => s.id === slideId);
     if (slideIndex > 0) {
@@ -376,6 +388,9 @@ export const CaseClassificationReport = ({
           level={3}
           breadcrumb={slide.breadcrumb}
           onSubCategorySelect={handleLevel3Click}
+          onShowCallLogs={() => handleShowCallLogs(2)}
+          fromTime={effectiveDateRange?.fromDate}
+          toTime={effectiveDateRange?.toDate}
         />
       );
     }
@@ -387,6 +402,9 @@ export const CaseClassificationReport = ({
           level={4}
           breadcrumb={slide.breadcrumb}
           onSubCategorySelect={handleLevel4Click}
+          onShowCallLogs={() => handleShowCallLogs(3)}
+          fromTime={effectiveDateRange?.fromDate}
+          toTime={effectiveDateRange?.toDate}
         />
       );
     }
@@ -398,12 +416,15 @@ export const CaseClassificationReport = ({
           level={5}
           breadcrumb={slide.breadcrumb}
           onSubCategorySelect={handleLevel5Click}
+          onShowCallLogs={() => handleShowCallLogs(4)}
+          fromTime={effectiveDateRange?.fromDate}
+          toTime={effectiveDateRange?.toDate}
         />
       );
     }
 
     if (slide.type === "callLogs") {
-      return <CallLogsSummary breadcrumb={slide.breadcrumb} />;
+      return <CallLogsSummary breadcrumb={slide.breadcrumb} fromTime={effectiveDateRange?.fromDate} toTime={effectiveDateRange?.toDate} />;
     }
 
     return null;
@@ -475,10 +496,7 @@ export const CaseClassificationReport = ({
                 />
               </Tooltip>
             </div>
-            <DatePicker 
-              suffixIcon={<IconCalendar />}
-              className="rounded-lg"
-            />
+
           </div>
           
           {hasFilter && (
