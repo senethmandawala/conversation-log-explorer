@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { 
   Card, 
   Table, 
@@ -40,55 +40,54 @@ import { useColumnConfig } from "@/hooks/useColumnConfig";
 import { ColumnToggle } from "@/components/ui/column-toggle";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatCard } from "@/components/ui/stat-card";
+import { ExceptionHandleView } from "@/components/ui/ExceptionHandleView";
+import { TablerIcon } from "@/components/ui/tabler-icon";
+import { callRoutingApiService, type Filters } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
 import type { ColumnsType } from "antd/es/table";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 interface AgentMetric {
-  id: string;
-  agentId: string;
-  name: string;
-  avatar: string;
-  department: string;
+  agentID: number;
+  agentName: string;
   totalCalls: number;
-  avgHandleTime: string;
-  fcr: number;
-  csat: number;
-  sentiment: number;
-  trend: "up" | "down" | "stable";
-  performance: "excellent" | "good" | "average" | "poor";
-  status: "active" | "inactive";
-  qualityScore?: number;
+  openCases: number;
+  agentGroup: string[];
+  firstCallResolution: string;
+  avgHandlingTime: string;
+  averageSilent: string;
+  averageWaitingTime: string;
+  qualityScore: string;
+  overallSentiment: string;
+  selfManagement: number;
+  assistantKindnessRating: number;
+  assistantEmpathyRating: number;
+  negativeCommentsTowardsTheBrand: number;
+  satisfaction: number;
+  callConfidently: number;
+  upselling: number;
+  droppedCall: number;
+  escalation: number;
+  transfer: number;
+  requestWaiting: number;
+  thankingForWaiting: number;
+  welcomeMsg: number;
+  satisfactionScore: number;
+  [key: string]: any;
 }
 
-const mockAgents: AgentMetric[] = [
-  { id: "1", agentId: "AGT-001", name: "John Smith", avatar: "JS", department: "Customer Support", totalCalls: 245, avgHandleTime: "4:32", fcr: 92, csat: 4.8, sentiment: 85, trend: "up", performance: "excellent", status: "active", qualityScore: 95 },
-  { id: "2", agentId: "AGT-002", name: "Sarah Johnson", avatar: "SJ", department: "Technical Support", totalCalls: 230, avgHandleTime: "5:15", fcr: 88, csat: 4.6, sentiment: 78, trend: "up", performance: "good", status: "active", qualityScore: 87 },
-  { id: "3", agentId: "AGT-003", name: "Mike Wilson", avatar: "MW", department: "Sales", totalCalls: 198, avgHandleTime: "4:45", fcr: 85, csat: 4.5, sentiment: 72, trend: "stable", performance: "good", status: "active", qualityScore: 82 },
-  { id: "4", agentId: "AGT-004", name: "Emily Davis", avatar: "ED", department: "Customer Support", totalCalls: 210, avgHandleTime: "6:10", fcr: 78, csat: 4.2, sentiment: 65, trend: "down", performance: "average", status: "active", qualityScore: 73 },
-  { id: "5", agentId: "AGT-005", name: "David Brown", avatar: "DB", department: "Billing", totalCalls: 175, avgHandleTime: "5:30", fcr: 82, csat: 4.4, sentiment: 70, trend: "up", performance: "good", status: "active", qualityScore: 79 },
-  { id: "6", agentId: "AGT-006", name: "Lisa Chen", avatar: "LC", department: "Technical Support", totalCalls: 221, avgHandleTime: "5:45", fcr: 80, csat: 4.1, sentiment: 68, trend: "stable", performance: "average", status: "active", qualityScore: 76 },
-  { id: "7", agentId: "AGT-007", name: "Robert Taylor", avatar: "RT", department: "Customer Support", totalCalls: 134, avgHandleTime: "4:55", fcr: 75, csat: 3.7, sentiment: 55, trend: "down", performance: "poor", status: "inactive", qualityScore: 68 },
-  { id: "8", agentId: "AGT-008", name: "Jennifer Lee", avatar: "JL", department: "Sales", totalCalls: 278, avgHandleTime: "3:30", fcr: 89, csat: 4.4, sentiment: 76, trend: "up", performance: "good", status: "active", qualityScore: 91 },
-];
 
-const getPerformanceConfig = (performance: AgentMetric["performance"]) => {
-  switch (performance) {
-    case "excellent": return { color: '#10b981', bg: '#10b98115', label: 'Excellent' };
-    case "good": return { color: '#3b82f6', bg: '#3b82f615', label: 'Good' };
-    case "average": return { color: '#f59e0b', bg: '#f59e0b15', label: 'Average' };
-    case "poor": return { color: '#ef4444', bg: '#ef444415', label: 'Poor' };
+const getSentimentColor = (sentiment: string) => {
+  switch (sentiment?.toLowerCase()) {
+    case "positive": return { color: '#10b981', bg: '#10b98115', label: 'Positive' };
+    case "neutral": return { color: '#f59e0b', bg: '#f59e0b15', label: 'Neutral' };
+    case "negative": return { color: '#ef4444', bg: '#ef444415', label: 'Negative' };
+    default: return { color: '#94a3b8', bg: '#94a3b815', label: 'Unknown' };
   }
 };
 
-const getTrendIcon = (trend: AgentMetric["trend"]) => {
-  switch (trend) {
-    case "up": return <IconTrendingUp className="text-emerald-500 text-sm" />;
-    case "down": return <IconTrendingDown className="text-red-500 text-sm" />;
-    default: return <span className="text-slate-400 text-xs">—</span>;
-  }
-};
 
 const getProgressColor = (value: number) => {
   if (value >= 90) return '#10b981';
@@ -97,70 +96,248 @@ const getProgressColor = (value: number) => {
   return '#ef4444';
 };
 
-interface PerformingAgent {
-  name: string;
-  score: number;
-}
-
-const topPerformingAgents: PerformingAgent[] = [
-  { name: "John Smith", score: 92 },
-  { name: "Sarah Johnson", score: 88 },
-  { name: "Mike Wilson", score: 85 },
-  { name: "David Brown", score: 82 },
-];
-
-const agentsNeedAttention: PerformingAgent[] = [
-  { name: "Emily Davis", score: 65 },
-  { name: "Robert Taylor", score: 62 },
-  { name: "Lisa Anderson", score: 58 },
-  { name: "James Martinez", score: 55 },
-];
 
 export default function AgentPerformance() {
   const { setSelectedAgentId, setSelectedTab } = usePostCall();
   const { columns: columnConfig, visibleColumns, toggleColumnVisibility, resetToDefault } = useColumnConfig('agent');
+  const { selectedProject } = useProjectSelection();
   const [isLoading, setIsLoading] = useState(true);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState<string | undefined>(undefined);
-  const [selectedPerformance, setSelectedPerformance] = useState<string | undefined>(undefined);
-  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const filteredAgents = mockAgents.filter(agent => {
-    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         agent.agentId.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDepartment = !selectedDepartment || agent.department === selectedDepartment;
-    const matchesPerformance = !selectedPerformance || agent.performance === selectedPerformance;
-    const matchesStatus = !selectedStatus || agent.status === selectedStatus;
-    return matchesSearch && matchesDepartment && matchesPerformance && matchesStatus;
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
+  const [dateRange, setDateRange] = useState<[any, any] | null>(null);
+  
+  // API Data
+  const [agentData, setAgentData] = useState<AgentMetric[]>([]);
+  const [groupOptions, setGroupOptions] = useState<string[]>([]);
+  const [summaryData, setSummaryData] = useState<any>(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
   });
+  const [error, setError] = useState<string | null>(null);
+  const [exceptionType, setExceptionType] = useState<'loading' | '200' | '204' | '500' | '503' | 'no-records' | ''>('loading');
 
-  const activeFiltersCount = [selectedDepartment, selectedPerformance, selectedStatus].filter(Boolean).length;
+  // Get project IDs
+  const getProjectFilters = useCallback((): Filters => {
+    if (!selectedProject) return {};
+    return {
+      tenantId: parseInt(selectedProject.tenant_id),
+      subtenantId: parseInt(selectedProject.sub_tenant_id),
+      companyId: parseInt(selectedProject.company_id),
+      departmentId: parseInt(selectedProject.department_id),
+    };
+  }, [selectedProject]);
+
+  // Fetch group filter options
+  const fetchGroupFilters = useCallback(async () => {
+    const projectFilters = getProjectFilters();
+    if (!selectedProject) return;
+    
+    try {
+      const response = await callRoutingApiService.AgentPerformanceGroupFilter(projectFilters);
+      if (response.status === 'SUCCESS' || response.status === 'success') {
+        const groups = response.data?.agentGroups || [];
+        setGroupOptions(groups);
+      }
+    } catch (err) {
+      console.error('Failed to fetch group filters:', err);
+    }
+  }, [getProjectFilters, selectedProject]);
+
+  // Fetch agent performance data
+  const fetchAgentPerformance = useCallback(async (page = 1, pageSize = 10, filters: Filters = {}) => {
+    const projectFilters = getProjectFilters();
+    if (!selectedProject) return;
+    
+    setIsLoading(true);
+    setError(null);
+    setExceptionType('loading');
+    
+    try {
+      const response = await callRoutingApiService.AgentPerformance({
+        page: page,
+        size: pageSize,
+        sort: 'agent_id',
+        sortOrder: 'asc',
+        ...projectFilters,
+        ...filters
+      });
+
+      if (response.status === 'SUCCESS' || response.status === 'success') {
+        const data = response.data;
+        const content = Array.isArray(data?.content) ? data.content : [];
+        const totalElements = data?.totalElements || 0;
+        
+        // Set summary data
+        setSummaryData({
+          average_kindness: data.average_kindness || 0,
+          average_empathy: data.average_empathy || 0,
+          average_dropped_call_rate: data.average_dropped_call_rate || 0,
+          average_waiting_time: data.average_waiting_time || '0min 0sec',
+          average_silence_time: data.average_silence_time || '0min 0sec',
+          average_fcr_rate: data.average_fcr_rate || 0,
+          attention_need_agents: data.attention_need_agents || '',
+          top_performing_agents: data.top_performing_agents || '',
+          high_score_percentage: data.high_score_percentage || '0%'
+        });
+        
+        if (!content || content.length === 0) {
+          if (Object.keys(filters).length > 0) {
+            setExceptionType('200');
+          } else {
+            setExceptionType('no-records');
+          }
+        } else {
+          setExceptionType('');
+        }
+        
+        setAgentData(content);
+        setPagination(prev => ({
+          ...prev,
+          total: totalElements,
+          current: page,
+          pageSize: pageSize
+        }));
+      } else {
+        throw new Error(response.message || 'Failed to fetch agent performance data');
+      }
+    } catch (err) {
+      console.error('Failed to fetch agent performance:', err);
+      setError('Failed to load agent performance data. Please try again.');
+      setExceptionType('500');
+      setAgentData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getProjectFilters, selectedProject]);
+
+  // Initialize data on component mount and when project changes
+  useEffect(() => {
+    if (!selectedProject) return;
+    
+    const initializeData = async () => {
+      await Promise.all([
+        fetchGroupFilters(),
+        fetchAgentPerformance(1, pagination.pageSize, {})
+      ]);
+    };
+    
+    initializeData();
+  }, [selectedProject]);
+
+  // Build filters object for API calls
+  const buildApiFilters = useCallback((): Filters => {
+    const filters: Filters = {};
+    
+    if (searchQuery) filters.agentName = searchQuery;
+    if (selectedGroup) filters.agentGroup = selectedGroup;
+    
+    // Add date range
+    if (dateRange && dateRange[0] && dateRange[1]) {
+      filters.fromTime = dateRange[0].format('YYYY-MM-DD');
+      filters.toTime = dateRange[1].format('YYYY-MM-DD');
+    }
+    
+    return filters;
+  }, [searchQuery, selectedGroup, dateRange]);
+
+  // Handle filter application
+  const applyFilters = useCallback(() => {
+    setExceptionType('loading');
+    fetchAgentPerformance(1, pagination.pageSize, buildApiFilters());
+  }, [fetchAgentPerformance, pagination.pageSize, buildApiFilters]);
+
+  // Handle pagination change
+  const handleTableChange = useCallback((paginationInfo: any) => {
+    fetchAgentPerformance(paginationInfo.current, paginationInfo.pageSize, buildApiFilters());
+  }, [fetchAgentPerformance, buildApiFilters]);
+
+  // Count active filters
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchQuery) count++;
+    if (selectedGroup) count++;
+    if (dateRange) count++;
+    return count;
+  }, [searchQuery, selectedGroup, dateRange]);
 
   const clearAllFilters = () => {
     setSearchQuery("");
-    setSelectedDepartment(undefined);
-    setSelectedPerformance(undefined);
-    setSelectedStatus(undefined);
+    setSelectedGroup("");
+    setDateRange(null);
+    setExceptionType('loading');
+    fetchAgentPerformance(1, pagination.pageSize, {});
   };
 
-  const uniqueDepartments = [...new Set(mockAgents.map(a => a.department))];
+  // Export to CSV
+  const exportToCSV = useCallback(async () => {
+    const projectFilters = getProjectFilters();
+    const currentFilters = buildApiFilters();
+    const exportFilters = { 
+      ...projectFilters,
+      ...currentFilters, 
+      format: 'csv' 
+    };
+    
+    console.log('Starting CSV export with filters:', exportFilters);
+    
+    try {
+      const csvContent = await callRoutingApiService.getAgentPerformanceAsCSV(
+        1, 
+        pagination.pageSize, 
+        'agent_id', 
+        'asc', 
+        exportFilters
+      );
+      
+      console.log('Received CSV content length:', csvContent.length);
+      
+      if (!csvContent) {
+        console.error('No CSV content received from API');
+        setError('Failed to export CSV. No data received.');
+        return;
+      }
+
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
+      console.log('Created blob:', blob.size, 'bytes');
+      
+      const url = window.URL.createObjectURL(blob);
+      console.log('Created object URL:', url);
+      
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.download = `agent_performance_${new Date().toISOString().split('T')[0]}.csv`;
+      
+      document.body.appendChild(link);
+      console.log('Triggering download...');
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        console.log('Download cleanup completed');
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error in CSV export:', error);
+      setError('Failed to export CSV. Please try again.');
+    }
+  }, [getProjectFilters, buildApiFilters, pagination.pageSize]);
 
   const handleViewAgent = (agent: AgentMetric) => {
-    setSelectedAgentId(agent.agentId);
+    setSelectedAgentId(agent.agentID.toString());
     setSelectedTab("agent-insights");
   };
 
-  // Summary stats
-  const totalAgents = mockAgents.length;
-  const activeAgents = mockAgents.filter(a => a.status === 'active').length;
-  const avgFCR = Math.round(mockAgents.reduce((sum, a) => sum + a.fcr, 0) / mockAgents.length);
-  const avgCSAT = (mockAgents.reduce((sum, a) => sum + a.csat, 0) / mockAgents.length).toFixed(1);
+  // Summary stats from API
+  const totalAgents = pagination.total;
+  const avgFCR = summaryData?.average_fcr_rate || 0;
+  const avgKindness = summaryData?.average_kindness || 0;
+  const avgEmpathy = summaryData?.average_empathy || 0;
 
   // Check if a column should be visible based on env config
   const isColVisible = (key: string): boolean => {
@@ -194,12 +371,12 @@ export default function AgentPerformance() {
                     justifyContent: 'center'
                   }}
                 >
-                  <span className="text-white text-sm font-semibold">{record.avatar}</span>
+                  <span className="text-white text-sm font-semibold">{record.agentName?.substring(0, 2).toUpperCase() || 'NA'}</span>
                 </div>
                 <div>
-                  <Text strong>{record.name}</Text>
+                  <Text strong>{record.agentName || 'N/A'}</Text>
                   <br />
-                  <Text type="secondary" className="text-xs">{record.agentId}</Text>
+                  <Text type="secondary" className="text-xs">{record.agentID}</Text>
                 </div>
               </Space>
             ),
@@ -211,8 +388,8 @@ export default function AgentPerformance() {
             dataIndex: 'qualityScore',
             key: 'qualityScore',
             align: 'center' as const,
-            render: (value: number) => (
-              <StatusBadge title={`${value || 0}%`} color="success" size="xs" />
+            render: (value: string) => (
+              <StatusBadge title={value || '0'} color="success" size="xs" />
             ),
           };
           
@@ -222,20 +399,19 @@ export default function AgentPerformance() {
             dataIndex: 'totalCalls',
             key: 'totalCalls',
             align: 'center' as const,
-            sorter: (a, b) => a.totalCalls - b.totalCalls,
             render: (value: number) => (
-              <StatusBadge title={value.toString()} color="primary" size="xs" />
+              <StatusBadge title={value?.toString() || '0'} color="primary" size="xs" />
             ),
           };
           
-        case 'fcr':
+        case 'fcrRate':
           return {
             title: col.label,
-            dataIndex: 'fcr',
-            key: 'fcr',
+            dataIndex: 'firstCallResolution',
+            key: 'fcrRate',
             align: 'center' as const,
-            sorter: (a, b) => a.fcr - b.fcr,
-            render: (value: number) => {
+            render: (value: string) => {
+              const numValue = parseFloat(value || '0');
               const getColor = (val: number) => {
                 if (val >= 90) return 'success';
                 if (val >= 80) return 'primary';
@@ -243,21 +419,106 @@ export default function AgentPerformance() {
                 return 'warn';
               };
               return (
-                <StatusBadge title={`${value}%`} color={getColor(value)} size="xs" />
+                <StatusBadge title={value || '0%'} color={getColor(numValue)} size="xs" />
               );
             },
           };
           
-        case 'csat':
+        case 'sentiment':
           return {
             title: col.label,
-            dataIndex: 'csat',
-            key: 'csat',
+            dataIndex: 'overallSentiment',
+            key: 'sentiment',
             align: 'center' as const,
-            sorter: (a, b) => a.csat - b.csat,
-            render: (value: number) => (
-              <StatusBadge title={value.toString()} color="accent" size="xs" />
+            render: (value: string) => {
+              const getSentimentIcon = (sentiment: string) => {
+                switch (sentiment?.toLowerCase()) {
+                  case 'positive':
+                    return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={24} />, title: "Positive" };
+                  case 'negative':
+                    return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={24} />, title: "Negative" };
+                  default:
+                    return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={24} />, title: "Neutral" };
+                }
+              };
+
+              const sentimentConfig = getSentimentIcon(value);
+              return (
+                <Tooltip title={sentimentConfig.title}>
+                  {sentimentConfig.icon}
+                </Tooltip>
+              );
+            },
+          };
+          
+        case 'actions':
+          return {
+            title: (
+              <ColumnToggle 
+                columns={columnConfig} 
+                onToggle={toggleColumnVisibility} 
+                onReset={resetToDefault}
+              />
             ),
+            key: 'actions',
+            width: 60,
+            fixed: 'right' as const,
+            align: 'center' as const,
+            render: (_: any, record: AgentMetric) => (
+              <Tooltip title="View Details">
+                <Button 
+                  type="text" 
+                  icon={<IconEye />}
+                  onClick={() => handleViewAgent(record)}
+                  className="rounded-lg transition-all hover:bg-primary/10 hover:text-primary"
+                />
+              </Tooltip>
+            ),
+          };
+          
+        case 'averageSilent':
+          return {
+            title: col.label,
+            dataIndex: 'averageSilent',
+            key: 'averageSilent',
+            align: 'center' as const,
+            render: (value: string) => <Text>{value || '0 sec'}</Text>,
+          };
+          
+        case 'averageWaitingTime':
+          return {
+            title: col.label,
+            dataIndex: 'averageWaitingTime',
+            key: 'averageWaitingTime',
+            align: 'center' as const,
+            render: (value: string) => <Text>{value || '0 sec'}</Text>,
+          };
+          
+        case 'avgHandlingTime':
+          return {
+            title: col.label,
+            dataIndex: 'avgHandlingTime',
+            key: 'avgHandlingTime',
+            align: 'center' as const,
+            render: (value: string) => <Text>{value || '0min 0sec'}</Text>,
+          };
+          
+        case 'openCases':
+          return {
+            title: col.label,
+            dataIndex: 'openCases',
+            key: 'openCases',
+            align: 'center' as const,
+            render: (value: number) => <StatusBadge title={value?.toString() || '0'} color="warn" size="xs" />,
+          };
+          
+        case 'group':
+          return {
+            title: col.label,
+            dataIndex: 'agentGroup',
+            key: 'group',
+            align: 'center' as const,
+            render: (value: string[]) => <Text>{value?.join(', ') || 'N/A'}</Text>,
           };
           
         default:
@@ -269,30 +530,6 @@ export default function AgentPerformance() {
             render: (text: any) => <StatusBadge title={text?.toString() || 'N/A'} color="basic" size="xs" />,
           };
       }
-    });
-    
-    // Add actions column at the end
-    baseColumns.push({
-      title: (
-        <ColumnToggle 
-          columns={columnConfig} 
-          onToggle={toggleColumnVisibility} 
-          onReset={resetToDefault}
-        />
-      ),
-      key: 'actions',
-      width: 60,
-      fixed: 'right' as const,
-      render: (_, record) => (
-        <Tooltip title="View Details">
-          <Button 
-            type="text" 
-            icon={<IconEye />}
-            onClick={() => handleViewAgent(record)}
-            className="rounded-lg hover:bg-primary/10 hover:text-primary"
-          />
-        </Tooltip>
-      ),
     });
     
     return baseColumns;
@@ -347,8 +584,8 @@ export default function AgentPerformance() {
             </Col>
             <Col xs={24} sm={12} lg={6}>
               <StatCard
-                label="Active Agents"
-                value={activeAgents.toString()}
+                label="Avg Kindness"
+                value={`${avgKindness.toFixed(1)}%`}
                 icon={<IconUser />}
                 color="#10b981"
                 gradientColors={["#10b981", "#059669"] as [string, string]}
@@ -367,8 +604,8 @@ export default function AgentPerformance() {
             </Col>
             <Col xs={24} sm={12} lg={6}>
               <StatCard
-                label="Avg CSAT Score"
-                value={avgCSAT}
+                label="Avg Empathy"
+                value={`${avgEmpathy.toFixed(1)}%`}
                 icon={<IconStar />}
                 color="#8b5cf6"
                 gradientColors={["#8b5cf6", "#7c3aed"] as [string, string]}
@@ -399,23 +636,13 @@ export default function AgentPerformance() {
                 {isLoading ? (
                   <Skeleton active paragraph={{ rows: 2 }} />
                 ) : (
-                  <Row gutter={[8, 8]}>
-                    {topPerformingAgents.map((agent, index) => (
-                      <Col xs={12} key={agent.name}>
-                        <motion.div
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2"
-                        >
-                          <div className="flex justify-between items-center">
-                            <Text className="text-[13px] truncate mr-2">{agent.name}</Text>
-                            <Text strong className="text-emerald-500 text-[13px]">{agent.score}%</Text>
-                          </div>
-                        </motion.div>
-                      </Col>
-                    ))}
-                  </Row>
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                    <Text className="text-[13px]">
+                      {summaryData?.top_performing_agents 
+                        ? summaryData.top_performing_agents.replace(/[\[\]]/g, '') 
+                        : 'No data available'}
+                    </Text>
+                  </div>
                 )}
               </Card>
             </motion.div>
@@ -440,23 +667,13 @@ export default function AgentPerformance() {
                 {isLoading ? (
                   <Skeleton active paragraph={{ rows: 2 }} />
                 ) : (
-                  <Row gutter={[8, 8]}>
-                    {agentsNeedAttention.map((agent, index) => (
-                      <Col xs={12} key={agent.name}>
-                        <motion.div
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2"
-                        >
-                          <div className="flex justify-between items-center">
-                            <Text className="text-[13px] truncate mr-2">{agent.name}</Text>
-                            <Text strong className="text-amber-500 text-[13px]">{agent.score}%</Text>
-                          </div>
-                        </motion.div>
-                      </Col>
-                    ))}
-                  </Row>
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+                    <Text className="text-[13px]">
+                      {summaryData?.attention_need_agents 
+                        ? summaryData.attention_need_agents.replace(/[\[\]]/g, '') 
+                        : 'No data available'}
+                    </Text>
+                  </div>
                 )}
               </Card>
             </motion.div>
@@ -489,12 +706,7 @@ export default function AgentPerformance() {
             }
             extra={
               <Space>
-                <Button icon={<IconDownload />}>Export</Button>
-                <ColumnToggle 
-                  columns={columnConfig} 
-                  onToggle={toggleColumnVisibility} 
-                  onReset={resetToDefault} 
-                />
+                <Button icon={<IconDownload />} onClick={exportToCSV}>Export CSV</Button>
                 <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersVisible ? "primary" : "default"}
@@ -534,59 +746,22 @@ export default function AgentPerformance() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             allowClear
+                            className="bg-white"
                           />
                         </div>
                       </Col>
                       <Col xs={24} sm={12} lg={6}>
                         <div className="space-y-1.5">
                           <Text type="secondary" className="text-xs font-medium">
-                            Department
+                            Agent Group
                           </Text>
                           <Select
-                            placeholder="All Departments"
-                            value={selectedDepartment}
-                            onChange={setSelectedDepartment}
+                            placeholder="Select Group"
+                            value={selectedGroup || undefined}
+                            onChange={(val) => setSelectedGroup(val || "")}
                             allowClear
                             className="w-full"
-                            options={uniqueDepartments.map(d => ({ label: d, value: d }))}
-                          />
-                        </div>
-                      </Col>
-                      <Col xs={24} sm={12} lg={6}>
-                        <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Performance
-                          </Text>
-                          <Select
-                            placeholder="All Levels"
-                            value={selectedPerformance}
-                            onChange={setSelectedPerformance}
-                            allowClear
-                            className="w-full"
-                            options={[
-                              { label: 'Excellent', value: 'excellent' },
-                              { label: 'Good', value: 'good' },
-                              { label: 'Average', value: 'average' },
-                              { label: 'Poor', value: 'poor' },
-                            ]}
-                          />
-                        </div>
-                      </Col>
-                      <Col xs={24} sm={12} lg={6}>
-                        <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Status
-                          </Text>
-                          <Select
-                            placeholder="All Status"
-                            value={selectedStatus}
-                            onChange={setSelectedStatus}
-                            allowClear
-                            className="w-full"
-                            options={[
-                              { label: 'Active', value: 'active' },
-                              { label: 'Inactive', value: 'inactive' },
-                            ]}
+                            options={groupOptions.map(g => ({ label: g, value: g }))}
                           />
                         </div>
                       </Col>
@@ -595,7 +770,11 @@ export default function AgentPerformance() {
                           <Text type="secondary" className="text-xs font-medium">
                             Date Range
                           </Text>
-                          <RangePicker className="w-full" />
+                          <RangePicker 
+                            className="w-full" 
+                            value={dateRange}
+                            onChange={(dates) => setDateRange(dates as [any, any])}
+                          />
                         </div>
                       </Col>
                       <Col xs={24} lg={18} className="flex items-end justify-end">
@@ -606,7 +785,7 @@ export default function AgentPerformance() {
                           >
                             Clear All
                           </Button>
-                          <Button type="primary">Apply Filters</Button>
+                          <Button type="primary" onClick={applyFilters}>Apply Filters</Button>
                         </Space>
                       </Col>
                     </Row>
@@ -616,32 +795,34 @@ export default function AgentPerformance() {
             </AnimatePresence>
 
             {/* Data Table */}
-            {isLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton.Input key={i} active block className="h-[52px]" />
-                ))}
-              </div>
+            {exceptionType || isLoading ? (
+              <ExceptionHandleView
+                type={exceptionType || 'loading'}
+                content={searchQuery}
+                onTryAgain={() => fetchAgentPerformance(1, pagination.pageSize, buildApiFilters())}
+              />
             ) : (
               <Table
                 columns={columns}
-                dataSource={filteredAgents}
-                rowKey="id"
+                dataSource={Array.isArray(agentData) ? agentData : []}
+                rowKey={(record) => record.agentID?.toString() || Math.random().toString()}
                 scroll={{ x: 'max-content' }}
                 pagination={{
-                  total: filteredAgents.length,
-                  pageSize: 8,
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: pagination.total,
                   showTotal: (total, range) => (
                     <Text type="secondary">
                       Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> agents
                     </Text>
                   ),
                   showSizeChanger: true,
-                  pageSizeOptions: ['5', '8', '10', '20'],
+                  pageSizeOptions: ['10', '20', '50', '100'],
+                  onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
                 }}
                 className="rounded-xl overflow-hidden"
                 rowClassName={() => 
-                  'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#10b981]'
+                  'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#6366f1]'
                 }
               />
             )}
