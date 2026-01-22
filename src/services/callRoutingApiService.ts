@@ -729,9 +729,170 @@ export class CallRoutingApiService extends BaseApiService {
 
     const endpoint = `/agents${queryParams}`;
     return this.get<any>(endpoint);
-  }    
+  }  
+  
+  async FrequentCallers(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
 
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
 
+    const endpoint = `/frequent_callers${queryParams}`;
+    return this.get<any>(endpoint);
+  }   
+  
+  async TopCategoryCallDuration(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/top_category_call_duration${queryParams}`;
+    return this.get<any>(endpoint);
+  } 
+
+  async TopCategoryCallDurationCallLogs(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/call_logs${queryParams}`;
+    return this.get<any>(endpoint);
+  }      
+
+  async LongCallDuration(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/long_calls${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+  async TrafficTrendsGeneral(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/traffic_trends_general${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+  async TrafficTrendsCategories(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/category_traffic_trends_report${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+  async CallInsight(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/call_logs${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+  async CallInsightCustomFields(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/custom_fields${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+  async CallInsightDynamicLevelsFilter(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/dynamic_category_subcategory_level_filter${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+  
 }
 
 export const callRoutingApiService = new CallRoutingApiService();

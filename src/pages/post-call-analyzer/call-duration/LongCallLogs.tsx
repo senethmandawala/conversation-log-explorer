@@ -9,19 +9,18 @@ import { TablerIcon } from "@/components/ui/tabler-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
-interface DurationCallLogsProps {
-  category?: string;
+interface LongCallLogsProps {
   fromTime?: string;
   toTime?: string;
 }
 
-export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLogsProps) {
+export function LongCallLogs({ fromTime, toTime }: LongCallLogsProps) {
   const [loading, setLoading] = useState(false);
   const [callLogs, setCallLogs] = useState<any[]>([]);
   const [error, setError] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
-    size: 7,
+    size: 5,
     totalElements: 0,
     totalPages: 0,
     last: true,
@@ -29,7 +28,7 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
   });
   const { selectedProject } = useProjectSelection();
 
-  const loadCallLogs = async (page: number = 1, size: number = 7) => {
+  const loadCallLogs = async (page: number = 1, size: number = 5) => {
     if (!selectedProject || !fromTime || !toTime) {
       return;
     }
@@ -50,11 +49,11 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
         departmentId,
         fromTime,
         toTime,
-        category: category || '',
+        longCall: 1,
         page,
         size,
         sort: 'id',
-        sortOrder: 'DESC'
+        sortOrder: 'desc'
       };
 
       const response = await callRoutingApiService.TopCategoryCallDurationCallLogs(filters);
@@ -73,7 +72,7 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
         setCallLogs([]);
         setPagination({
           page: 1,
-          size: 7,
+          size: 5,
           totalElements: 0,
           totalPages: 0,
           last: true,
@@ -81,7 +80,7 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
         });
       }
     } catch (error) {
-      console.error('Error loading call logs:', error);
+      console.error('Error loading long call logs:', error);
       setError(true);
       setCallLogs([]);
     }
@@ -90,10 +89,10 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
   };
 
   useEffect(() => {
-    if (category && fromTime && toTime) {
+    if (fromTime && toTime) {
       loadCallLogs();
     }
-  }, [category, fromTime, toTime, selectedProject]);
+  }, [fromTime, toTime, selectedProject]);
 
   const handleReload = () => {
     loadCallLogs(pagination.page, pagination.size);
@@ -113,17 +112,6 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
         return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={20} />, title: "Negative" };
       default:
         return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
-    }
-  };
-
-  const getGenderBadge = (gender: number) => {
-    switch (gender) {
-      case 1:
-        return <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30">Male</Badge>;
-      case 2:
-        return <Badge variant="outline" className="bg-pink-500/10 text-pink-600 border-pink-500/30">Female</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
@@ -150,7 +138,7 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
     <div>
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
-          Showing {callLogs.length} of {pagination.totalElements} calls
+          Showing {callLogs.length} of {pagination.totalElements} long calls
         </span>
         <Button 
           variant="ghost" 
@@ -172,8 +160,8 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
       ) : error ? (
         <ExceptionHandleView 
           type="500" 
-          title="Error loading call logs"
-          content="duration call logs"
+          title="Error loading long call logs"
+          content="long call logs"
           onTryAgain={handleReload}
           className="!p-0"
         />
@@ -185,6 +173,7 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
                 <TableRow>
                   <TableHead className="font-semibold">Date/Time</TableHead>
                   <TableHead className="font-semibold">MSISDN</TableHead>
+                  <TableHead className="font-semibold">Duration</TableHead>
                   <TableHead className="font-semibold text-center">Sentiment</TableHead>
                   <TableHead className="font-semibold text-center">Status</TableHead>
                 </TableRow>
@@ -206,6 +195,7 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">{call.mobile_no}</TableCell>
+                    <TableCell className="font-medium">{formatDuration(call.call_duration)}</TableCell>
                     <TableCell className="text-center">
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -258,8 +248,8 @@ export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLog
       ) : (
         <ExceptionHandleView 
           type="204" 
-          title="No Call Logs Data"
-          content="duration call logs"
+          title="No Long Call Data"
+          content="long call logs"
           onTryAgain={handleReload}
           className="!p-0"
         />

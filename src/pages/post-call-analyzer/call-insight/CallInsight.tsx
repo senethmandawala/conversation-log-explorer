@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { 
   Card, 
   Table, 
@@ -6,29 +6,23 @@ import {
   Select, 
   DatePicker, 
   Button, 
-  Tag, 
   Space, 
   Row, 
   Col, 
   Typography, 
-  Skeleton,
   Badge,
   Tooltip,
   ConfigProvider
 } from "antd";
 import { 
-  IconSearch, 
   IconFilter, 
   IconDownload,
   IconEye,
   IconPhone,
-  IconUser,
   IconClock,
-  IconTrendingUp,
-  IconTrendingDown,
   IconMinus,
-  IconClearAll,
-  IconSettings
+  IconTrendingDown,
+  IconTrendingUp
 } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -38,102 +32,378 @@ import { AIHelper } from "@/components/post-call/AIHelper";
 import { CallLogDetails } from "./CallLogDetails";
 import { useColumnConfig } from "@/hooks/useColumnConfig";
 import { ColumnToggle } from "@/components/ui/column-toggle";
+import { ExceptionHandleView } from "@/components/ui/ExceptionHandleView";
+import { callRoutingApiService, type Filters } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
 import type { ColumnsType } from "antd/es/table";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 interface CallRecord {
-  id: string;
-  msisdn: string;
-  agentName: string;
-  category: string;
-  sentiment: "positive" | "negative" | "neutral";
-  duration: string;
-  date: string;
-  time: string;
-  status: "completed" | "pending" | "failed";
+  id?: string;
+  msisdn?: string;
+  agentName?: string;
+  category?: string;
+  subCategory?: string;
+  sentiment?: "positive" | "negative" | "neutral";
+  duration?: string;
+  date?: string;
+  time?: string;
+  status?: "completed" | "pending" | "failed";
   callDisposition?: string;
+  userSentiment?: string;
+  agentSentiment?: string;
+  summary?: string;
+  transcription?: Array<{
+    speaker: string;
+    text: string;
+    timestamp: string;
+  }>;
+  [key: string]: any; // Allow for dynamic custom fields
 }
 
-const mockCalls: CallRecord[] = [
-  { id: "1", msisdn: "+1234567890", agentName: "John Smith", category: "Billing", sentiment: "positive", duration: "5:23", date: "2024-01-15", time: "09:30", status: "completed", callDisposition: "Completed" },
-  { id: "2", msisdn: "+1234567891", agentName: "Sarah Johnson", category: "Technical Support", sentiment: "negative", duration: "12:45", date: "2024-01-15", time: "10:15", status: "completed", callDisposition: "Transferred" },
-  { id: "3", msisdn: "+1234567892", agentName: "Mike Wilson", category: "Sales", sentiment: "neutral", duration: "8:10", date: "2024-01-15", time: "11:00", status: "completed", callDisposition: "Success" },
-  { id: "4", msisdn: "+1234567893", agentName: "Emily Davis", category: "Complaints", sentiment: "negative", duration: "15:30", date: "2024-01-15", time: "11:45", status: "pending", callDisposition: "Pending" },
-  { id: "5", msisdn: "+1234567894", agentName: "John Smith", category: "General Inquiry", sentiment: "positive", duration: "3:15", date: "2024-01-15", time: "12:30", status: "completed", callDisposition: "Completed" },
-  { id: "6", msisdn: "+1234567895", agentName: "Sarah Johnson", category: "Billing", sentiment: "neutral", duration: "6:45", date: "2024-01-15", time: "14:00", status: "completed", callDisposition: "Success" },
-  { id: "7", msisdn: "+1234567896", agentName: "Mike Wilson", category: "Technical Support", sentiment: "positive", duration: "9:20", date: "2024-01-15", time: "14:45", status: "failed", callDisposition: "Failed" },
-  { id: "8", msisdn: "+1234567897", agentName: "Emily Davis", category: "Sales", sentiment: "positive", duration: "7:00", date: "2024-01-15", time: "15:30", status: "completed", callDisposition: "Completed" },
-  { id: "9", msisdn: "+1234567898", agentName: "John Smith", category: "Billing", sentiment: "neutral", duration: "4:50", date: "2024-01-16", time: "09:00", status: "completed", callDisposition: "Success" },
-  { id: "10", msisdn: "+1234567899", agentName: "Sarah Johnson", category: "Technical Support", sentiment: "negative", duration: "18:20", date: "2024-01-16", time: "10:30", status: "completed", callDisposition: "Cancelled" },
-];
+interface CustomField {
+  fieldName: string;
+  fieldType: string;
+  displayName: string;
+  isVisible: boolean;
+  isFilterable: boolean;
+  isSortable: boolean;
+}
 
-const SentimentIcon = ({ sentiment }: { sentiment: CallRecord["sentiment"] }) => {
-  switch (sentiment) {
-    case "positive":
-      return <IconTrendingUp className="text-emerald-500 text-sm" />;
-    case "negative":
-      return <IconTrendingDown className="text-red-500 text-sm" />;
-    default:
-      return <IconMinus className="text-amber-500 text-sm" />;
-  }
-};
-
-const getSentimentColor = (sentiment: CallRecord["sentiment"]) => {
-  switch (sentiment) {
-    case "positive": return { bg: '#10b98115', border: '#10b981', text: '#10b981' };
-    case "negative": return { bg: '#ef444415', border: '#ef4444', text: '#ef4444' };
-    default: return { bg: '#f59e0b15', border: '#f59e0b', text: '#f59e0b' };
-  }
-};
-
-const getStatusConfig = (status: CallRecord["status"]) => {
-  switch (status) {
-    case "completed": return { color: 'success' as const, text: 'Completed' };
-    case "pending": return { color: 'processing' as const, text: 'Pending' };
-    case "failed": return { color: 'error' as const, text: 'Failed' };
-  }
-};
+interface DynamicFilter {
+  category?: string[];
+  subCategory?: string[];
+  agent?: string[];
+  sentiment?: string[];
+  status?: string[];
+  [key: string]: any[]; // Allow for dynamic filter options
+}
 
 export default function CallInsight() {
   const { columns: columnConfig, visibleColumns, toggleColumnVisibility, resetToDefault } = useColumnConfig('callInsight');
+  const { selectedProject } = useProjectSelection();
   const [isLoading, setIsLoading] = useState(true);
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
-  const [selectedSentiment, setSelectedSentiment] = useState<string | undefined>(undefined);
-  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
-  const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
+  
+  // Filter states matching Angular version
+  const [msisdn, setMsisdn] = useState("");
+  const [agentName, setAgentName] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[][]>([[], [], [], [], []]); // Multi-level categories
+  const [selectedCaseStatus, setSelectedCaseStatus] = useState<string>("");
+  const [selectedUserSentiments, setSelectedUserSentiments] = useState<string[]>([]);
+  const [selectedAgentSentiments, setSelectedAgentSentiments] = useState<string[]>([]);
+  const [selectedCallType, setSelectedCallType] = useState<string>("");
+  const [selectedDroppedCall, setSelectedDroppedCall] = useState<string>("");
+  const [selectedRepeatCall, setSelectedRepeatCall] = useState<string>("");
+  const [dateRange, setDateRange] = useState<[any, any] | null>(null);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  
   const [selectedCall, setSelectedCall] = useState<CallRecord | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const filteredCalls = mockCalls.filter(call => {
-    const matchesSearch = call.msisdn.includes(searchQuery) || 
-                         call.agentName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || call.category === selectedCategory;
-    const matchesSentiment = !selectedSentiment || call.sentiment === selectedSentiment;
-    const matchesStatus = !selectedStatus || call.status === selectedStatus;
-    const matchesAgent = !selectedAgent || call.agentName === selectedAgent;
-    return matchesSearch && matchesCategory && matchesSentiment && matchesStatus && matchesAgent;
+  const [callData, setCallData] = useState<CallRecord[]>([]);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [dynamicFilters, setDynamicFilters] = useState<DynamicFilter>({});
+  const [categorySubCategoryLevels, setCategorySubCategoryLevels] = useState<Record<string, any>>({}); // Nested category structure from API
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
   });
+  const [error, setError] = useState<string | null>(null);
+  const [exceptionType, setExceptionType] = useState<'loading' | '200' | '204' | '500' | '503' | 'no-records' | ''>('loading');
 
-  const activeFiltersCount = [selectedCategory, selectedSentiment, selectedStatus, selectedAgent].filter(Boolean).length;
+  // Static filter options
+  const caseStatusOptions = [
+    { label: 'Open', value: '0' },
+    { label: 'Resolved', value: '1' },
+    { label: 'Pending', value: '2' },
+  ];
+  
+  const sentimentOptions = [
+    { label: 'Positive', value: '2' },
+    { label: 'Neutral', value: '1' },
+    { label: 'Negative', value: '0' },
+  ];
+  
+  const callTypeOptions = [
+    { label: 'Inbound', value: 'inbound' },
+    { label: 'Outbound', value: 'outbound' },
+  ];
+  
+  const yesNoOptions = [
+    { label: 'Yes', value: '1' },
+    { label: 'No', value: '0' },
+  ];
+
+  // Get project IDs
+  const getProjectFilters = useCallback((): Filters => {
+    if (!selectedProject) return {};
+    return {
+      tenantId: parseInt(selectedProject.tenant_id),
+      subtenantId: parseInt(selectedProject.sub_tenant_id),
+      companyId: parseInt(selectedProject.company_id),
+      departmentId: parseInt(selectedProject.department_id),
+    };
+  }, [selectedProject]);
+
+  // Fetch custom fields configuration
+  const fetchCustomFields = useCallback(async () => {
+    const projectFilters = getProjectFilters();
+    if (!selectedProject) return;
+    
+    try {
+      const response = await callRoutingApiService.CallInsightCustomFields(projectFilters);
+      if (response.status === 'success') {
+        setCustomFields(response.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch custom fields:', err);
+    }
+  }, [getProjectFilters, selectedProject]);
+
+  // Fetch dynamic filter options
+  const fetchDynamicFilters = useCallback(async () => {
+    const projectFilters = getProjectFilters();
+    if (!selectedProject) return;
+    
+    try {
+      const response = await callRoutingApiService.CallInsightDynamicLevelsFilter(projectFilters);
+      if (response.status === 'SUCCESS' || response.status === 'success') {
+        const data = response.data || {};
+        setCategorySubCategoryLevels(data.categorySubCategoryLevels || {});
+      }
+    } catch (err) {
+      console.error('Failed to fetch dynamic filters:', err);
+    }
+  }, [getProjectFilters, selectedProject]);
+
+  // Get category options from the nested structure
+  const categoryOptions = useMemo(() => {
+    return Object.keys(categorySubCategoryLevels).map(cat => ({ label: cat, value: cat }));
+  }, [categorySubCategoryLevels]);
+
+  // Get sub-category level 1 options based on selected category
+  const subCategoryLevel1Options = useMemo(() => {
+    if (selectedCategories[0].length === 0) return [];
+    
+    const options: { label: string; value: string }[] = [];
+    selectedCategories[0].forEach(cat => {
+      const subCats = categorySubCategoryLevels[cat];
+      if (subCats) {
+        Object.keys(subCats).forEach(subCat => {
+          if (!options.find(o => o.value === subCat)) {
+            options.push({ label: subCat, value: subCat });
+          }
+        });
+      }
+    });
+    return options;
+  }, [selectedCategories, categorySubCategoryLevels]);
+
+  // Get sub-category level 2 options based on selected category and level 1
+  const subCategoryLevel2Options = useMemo(() => {
+    if (selectedCategories[0].length === 0 || selectedCategories[1].length === 0) return [];
+    
+    const options: { label: string; value: string }[] = [];
+    selectedCategories[0].forEach(cat => {
+      const level1 = categorySubCategoryLevels[cat];
+      if (level1) {
+        selectedCategories[1].forEach(subCat1 => {
+          const level2 = level1[subCat1];
+          if (level2) {
+            Object.keys(level2).forEach(subCat2 => {
+              if (!options.find(o => o.value === subCat2)) {
+                options.push({ label: subCat2, value: subCat2 });
+              }
+            });
+          }
+        });
+      }
+    });
+    return options;
+  }, [selectedCategories, categorySubCategoryLevels]);
+
+  // Fetch call logs data
+  const fetchCallLogs = useCallback(async (page = 1, pageSize = 10, filters: Filters = {}) => {
+    const projectFilters = getProjectFilters();
+    if (!selectedProject) return;
+    
+    setIsLoading(true);
+    setError(null);
+    setExceptionType('loading');
+    
+    try {
+      const response = await callRoutingApiService.CallInsight({
+        page: page,
+        size: pageSize,
+        sort: 'call_at',
+        sortOrder: 'asc',
+        ...projectFilters,
+        ...filters
+      });
+
+      if (response.status === 'SUCCESS' || response.status === 'success' || response.data) {
+        const data = response.data;
+        const content = Array.isArray(data?.content) ? data.content : [];
+        const totalElements = data?.totalElements || 0;
+        
+        if (!content || content.length === 0) {
+          if (Object.keys(filters).length > 0) {
+            setExceptionType('200'); // No results for search/filters
+          } else {
+            setExceptionType('no-records'); // No records at all
+          }
+        } else {
+          setExceptionType(''); // Success - no exception
+        }
+        
+        setCallData(content);
+        setPagination(prev => ({
+          ...prev,
+          total: totalElements,
+          current: page,
+          pageSize: pageSize
+        }));
+      } else {
+        throw new Error(response.message || 'Failed to fetch call logs');
+      }
+    } catch (err) {
+      console.error('Failed to fetch call logs:', err);
+      setError('Failed to load call logs. Please try again.');
+      setExceptionType('500'); // Server error
+      setCallData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getProjectFilters, selectedProject]);
+
+  // Initialize data on component mount and when project changes
+  useEffect(() => {
+    if (!selectedProject) return;
+    
+    const initializeData = async () => {
+      await Promise.all([
+        fetchCustomFields(),
+        fetchDynamicFilters(),
+        fetchCallLogs(1, pagination.pageSize, {})
+      ]);
+    };
+    
+    initializeData();
+  }, [selectedProject]);
+
+  // Build filters object for API calls
+  const buildApiFilters = useCallback((): Filters => {
+    const filters: Filters = {};
+    
+    if (msisdn) filters.msisdn = msisdn;
+    if (agentName) filters.agentName = agentName;
+    if (keyword) filters.keyword = keyword;
+    if (selectedCaseStatus) filters.caseStatus = selectedCaseStatus;
+    if (selectedUserSentiments.length > 0) filters.userSentiment = selectedUserSentiments.join(',');
+    if (selectedAgentSentiments.length > 0) filters.agentSentiment = selectedAgentSentiments.join(',');
+    if (selectedCallType) filters.callType = selectedCallType;
+    if (selectedDroppedCall) filters.droppedCall = selectedDroppedCall;
+    if (selectedRepeatCall) filters.repeatCall = selectedRepeatCall;
+    
+    // Add category levels
+    selectedCategories.forEach((cats, index) => {
+      if (cats.length > 0) {
+        if (index === 0) filters.category = cats.join(',');
+        else filters[`subCategoryLevel${index}`] = cats.join(',');
+      }
+    });
+    
+    // Add date range
+    if (dateRange && dateRange[0] && dateRange[1]) {
+      filters.fromTime = dateRange[0].format('YYYY-MM-DD');
+      filters.toTime = dateRange[1].format('YYYY-MM-DD');
+    }
+    
+    // Add custom field values
+    Object.entries(customFieldValues).forEach(([key, value]) => {
+      if (value) filters[key] = value;
+    });
+    
+    return filters;
+  }, [msisdn, agentName, keyword, selectedCaseStatus, selectedUserSentiments, selectedAgentSentiments, selectedCallType, selectedDroppedCall, selectedRepeatCall, selectedCategories, dateRange, customFieldValues]);
+
+  // Handle filter application
+  const applyFilters = useCallback(() => {
+    setExceptionType('loading');
+    fetchCallLogs(1, pagination.pageSize, buildApiFilters());
+  }, [fetchCallLogs, pagination.pageSize, buildApiFilters]);
+
+  // Handle pagination change
+  const handleTableChange = useCallback((paginationInfo: any) => {
+    fetchCallLogs(paginationInfo.current, paginationInfo.pageSize, buildApiFilters());
+  }, [fetchCallLogs, buildApiFilters]);
+
+  // Count active filters
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (msisdn) count++;
+    if (agentName) count++;
+    if (keyword) count++;
+    if (selectedCaseStatus) count++;
+    if (selectedUserSentiments.length > 0) count++;
+    if (selectedAgentSentiments.length > 0) count++;
+    if (selectedCallType) count++;
+    if (selectedDroppedCall) count++;
+    if (selectedRepeatCall) count++;
+    if (dateRange) count++;
+    selectedCategories.forEach(cats => { if (cats.length > 0) count++; });
+    Object.values(customFieldValues).forEach(v => { if (v) count++; });
+    return count;
+  }, [msisdn, agentName, keyword, selectedCaseStatus, selectedUserSentiments, selectedAgentSentiments, selectedCallType, selectedDroppedCall, selectedRepeatCall, dateRange, selectedCategories, customFieldValues]);
 
   const clearAllFilters = () => {
-    setSearchQuery("");
-    setSelectedCategory(undefined);
-    setSelectedSentiment(undefined);
-    setSelectedStatus(undefined);
-    setSelectedAgent(undefined);
+    setMsisdn("");
+    setAgentName("");
+    setKeyword("");
+    setSelectedCategories([[], [], [], [], []]);
+    setSelectedCaseStatus("");
+    setSelectedUserSentiments([]);
+    setSelectedAgentSentiments([]);
+    setSelectedCallType("");
+    setSelectedDroppedCall("");
+    setSelectedRepeatCall("");
+    setDateRange(null);
+    setCustomFieldValues({});
+    setExceptionType('loading');
+    fetchCallLogs(1, pagination.pageSize, {});
   };
 
-  const uniqueAgents = [...new Set(mockCalls.map(c => c.agentName))];
-  const uniqueCategories = [...new Set(mockCalls.map(c => c.category))];
+  // Helper functions
+  const SentimentIcon = ({ sentiment }: { sentiment?: CallRecord["sentiment"] }) => {
+    switch (sentiment) {
+      case "positive":
+        return <IconTrendingUp className="text-emerald-500 text-sm" />;
+      case "negative":
+        return <IconTrendingDown className="text-red-500 text-sm" />;
+      default:
+        return <IconMinus className="text-amber-500 text-sm" />;
+    }
+  };
+
+  const getSentimentColor = (sentiment?: CallRecord["sentiment"]) => {
+    switch (sentiment) {
+      case "positive": return { bg: '#10b98115', border: '#10b981', text: '#10b981' };
+      case "negative": return { bg: '#ef444415', border: '#ef4444', text: '#ef4444' };
+      default: return { bg: '#f59e0b15', border: '#f59e0b', text: '#f59e0b' };
+    }
+  };
+
+  const getStatusConfig = (status?: CallRecord["status"]) => {
+    switch (status) {
+      case "completed": return { color: 'success' as const, text: 'Completed' };
+      case "pending": return { color: 'processing' as const, text: 'Pending' };
+      case "failed": return { color: 'error' as const, text: 'Failed' };
+      default: return { color: 'basic' as const, text: status || 'Unknown' };
+    }
+  };
 
   // Check if a column should be visible based on env config
   const isColVisible = (key: string): boolean => {
@@ -148,53 +418,58 @@ export default function CallInsight() {
     const baseColumns: ColumnsType<CallRecord> = envColumns.map(col => {
       const columnKey = col.def;
       
-      // Map env column definitions to actual table columns
+      // Map env column definitions to actual table columns using API field names
       switch (columnKey) {
         case 'msisdn':
           return {
             title: col.label,
-            dataIndex: 'msisdn',
+            dataIndex: 'mobile_no',
             key: 'msisdn',
             align: 'center' as const,
             render: (text: string) => (
-              <StatusBadge title={text} color="primary" size="xs" />
+              <StatusBadge title={text || 'N/A'} color="primary" size="xs" />
             ),
           };
           
         case 'agent':
           return {
             title: col.label,
-            dataIndex: 'agentName',
+            dataIndex: 'agent_name',
             key: 'agent',
             align: 'center' as const,
             render: (text: string) => (
-              <Text strong className="font-sans">{text}</Text>
+              <Text strong className="font-sans">{text || 'N/A'}</Text>
             ),
           };
           
         case 'catSubCat':
           return {
             title: col.label,
-            dataIndex: 'category',
             key: 'catSubCat',
             align: 'center' as const,
-            render: (text: string) => (
-              <StatusBadge title={text} color="basic" size="xs" />
+            render: (_: any, record: any) => (
+              <div className="flex flex-col gap-1">
+                <StatusBadge title={record.category || 'N/A'} color="basic" size="xs" />
+                {record.subcategory && (
+                  <Text type="secondary" className="text-xs">{record.subcategory}</Text>
+                )}
+              </div>
             ),
           };
           
         case 'userSentiment':
           return {
             title: col.label,
-            dataIndex: 'sentiment',
+            dataIndex: 'user_sentiment',
             key: 'userSentiment',
             align: 'center' as const,
-            render: (sentiment: CallRecord["sentiment"]) => {
-              const getSentimentIcon = (sentiment: CallRecord["sentiment"]) => {
-                switch (sentiment) {
-                  case "positive":
+            render: (sentiment: number) => {
+              // API returns 0, 1, 2 for sentiment (0=negative, 1=neutral, 2=positive)
+              const getSentimentIcon = (val: number) => {
+                switch (val) {
+                  case 2:
                     return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={24} />, title: "Positive" };
-                  case "negative":
+                  case 0:
                     return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={24} />, title: "Negative" };
                   default:
                     return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={24} />, title: "Neutral" };
@@ -213,53 +488,76 @@ export default function CallInsight() {
         case 'callDuration':
           return {
             title: col.label,
-            dataIndex: 'duration',
+            dataIndex: 'call_duration',
             key: 'callDuration',
             align: 'center' as const,
-            render: (text: string) => (
-              <Space size={4}>
-                <IconClock className="text-slate-400 text-xs" />
-                <Text type="secondary">{text}</Text>
-              </Space>
-            ),
+            render: (seconds: number) => {
+              // Convert seconds to mm:ss format
+              const mins = Math.floor((seconds || 0) / 60);
+              const secs = (seconds || 0) % 60;
+              const formatted = `${mins}:${secs.toString().padStart(2, '0')}`;
+              return (
+                <Space size={4}>
+                  <IconClock className="text-slate-400 text-xs" />
+                  <Text type="secondary">{formatted}</Text>
+                </Space>
+              );
+            },
           };
           
         case 'dateTime':
           return {
             title: col.label,
+            dataIndex: 'call_at',
             key: 'dateTime',
             align: 'center' as const,
-            render: (_, record) => (
-              <div>
-                <Text className="block">{record.date}</Text>
-                <Text type="secondary" className="text-xs">{record.time}</Text>
-              </div>
-            ),
+            render: (callAt: string) => {
+              if (!callAt) return <Text type="secondary">N/A</Text>;
+              const date = new Date(callAt);
+              const dateStr = date.toLocaleDateString();
+              const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              return (
+                <div>
+                  <Text className="block">{dateStr}</Text>
+                  <Text type="secondary" className="text-xs">{timeStr}</Text>
+                </div>
+              );
+            },
           };
           
         case 'caseStatus':
           return {
             title: col.label,
-            dataIndex: 'status',
+            dataIndex: 'case_status',
             key: 'caseStatus',
             align: 'center' as const,
-            render: (status: CallRecord["status"]) => {
-              const getStatusColor = (status: string) => {
-                switch (status?.toLowerCase()) {
-                  case 'completed':
+            render: (status: number) => {
+              // API returns 0, 1, 2 for case_status
+              const getStatusColor = (val: number): "success" | "basic" | "warn" => {
+                switch (val) {
+                  case 1:
                     return 'success';
-                  case 'pending':
-                    return 'amber';
-                  case 'failed':
+                  case 2:
                     return 'warn';
                   default:
                     return 'basic';
                 }
               };
               
+              const getStatusText = (val: number): string => {
+                switch (val) {
+                  case 1:
+                    return 'Resolved';
+                  case 2:
+                    return 'Pending';
+                  default:
+                    return 'Open';
+                }
+              };
+              
               return (
                 <StatusBadge 
-                  title={status} 
+                  title={getStatusText(status)} 
                   color={getStatusColor(status)} 
                   size="xs" 
                 />
@@ -270,30 +568,15 @@ export default function CallInsight() {
         case 'calldisposition':
           return {
             title: col.label,
-            dataIndex: 'callDisposition',
+            dataIndex: 'dropped_call',
             key: 'calldisposition',
             align: 'center' as const,
-            render: (text: string) => {
-              const getDispositionColor = (disposition: string) => {
-                switch (disposition?.toLowerCase()) {
-                  case 'completed':
-                  case 'success':
-                    return 'success';
-                  case 'pending':
-                  case 'in progress':
-                    return 'amber';
-                  case 'failed':
-                  case 'cancelled':
-                    return 'warn';
-                  default:
-                    return 'basic';
-                }
-              };
-              
+            render: (droppedCall: number) => {
+              const isDropped = droppedCall === 1;
               return (
                 <StatusBadge 
-                  title={text || 'N/A'} 
-                  color={getDispositionColor(text)} 
+                  title={isDropped ? 'Dropped' : 'Completed'} 
+                  color={isDropped ? 'warn' : 'success'} 
                   size="xs" 
                 />
               );
@@ -313,7 +596,7 @@ export default function CallInsight() {
             width: 60,
             fixed: 'right' as const,
             align: 'center' as const,
-            render: (_, record) => (
+            render: (_: any, record: any) => (
               <Tooltip title="View Details">
                 <Button 
                   type="text" 
@@ -422,107 +705,251 @@ export default function CallInsight() {
                     className="mb-5 bg-slate-50 border-slate-200 rounded-xl"
                     styles={{ body: { padding: 16 } }}
                   >
-                    <Row gutter={[16, 16]}>
-                      <Col xs={24} sm={12} lg={6}>
+                    <Row gutter={[12, 12]}>
+                      {/* MSISDN */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Search MSISDN / Agent
-                          </Text>
+                          <Text type="secondary" className="text-xs font-medium">MSISDN</Text>
                           <Input
-                            placeholder="Search..."
-                            prefix={<IconSearch className="text-slate-400" />}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Enter MSISDN"
+                            value={msisdn}
+                            onChange={(e) => setMsisdn(e.target.value)}
                             allowClear
                           />
                         </div>
                       </Col>
-                      <Col xs={24} sm={12} lg={6}>
+
+                      {/* Agent Name */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Agent
-                          </Text>
+                          <Text type="secondary" className="text-xs font-medium">Agent Name</Text>
+                          <Input
+                            placeholder="Enter Agent Name"
+                            value={agentName}
+                            onChange={(e) => setAgentName(e.target.value)}
+                            allowClear
+                          />
+                        </div>
+                      </Col>
+
+                      {/* Category */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" className="text-xs font-medium">Category</Text>
                           <Select
-                            placeholder="All Agents"
-                            value={selectedAgent}
-                            onChange={setSelectedAgent}
+                            mode="multiple"
+                            placeholder="Select Category"
+                            value={selectedCategories[0]}
+                            onChange={(val) => {
+                              const newCats = [...selectedCategories];
+                              newCats[0] = val;
+                              // Clear sub-categories when parent changes
+                              for (let i = 1; i < newCats.length; i++) newCats[i] = [];
+                              setSelectedCategories(newCats);
+                            }}
                             allowClear
                             className="w-full"
-                            options={uniqueAgents.map(a => ({ label: a, value: a }))}
+                            maxTagCount={1}
+                            options={categoryOptions}
                           />
                         </div>
                       </Col>
-                      <Col xs={24} sm={12} lg={6}>
+
+                      {/* Sub Category Level 1 - Shows when Category is selected */}
+                      {selectedCategories[0].length > 0 && subCategoryLevel1Options.length > 0 && (
+                        <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                          <div className="space-y-1.5">
+                            <Text type="secondary" className="text-xs font-medium">Sub Category Level 1</Text>
+                            <Select
+                              mode="multiple"
+                              placeholder="Select Sub Category"
+                              value={selectedCategories[1]}
+                              onChange={(val) => {
+                                const newCats = [...selectedCategories];
+                                newCats[1] = val;
+                                // Clear level 2 when level 1 changes
+                                newCats[2] = [];
+                                setSelectedCategories(newCats);
+                              }}
+                              allowClear
+                              className="w-full"
+                              maxTagCount={1}
+                              options={subCategoryLevel1Options}
+                            />
+                          </div>
+                        </Col>
+                      )}
+
+                      {/* Sub Category Level 2 - Shows when Level 1 is selected */}
+                      {selectedCategories[1].length > 0 && subCategoryLevel2Options.length > 0 && (
+                        <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                          <div className="space-y-1.5">
+                            <Text type="secondary" className="text-xs font-medium">Sub Category Level 2</Text>
+                            <Select
+                              mode="multiple"
+                              placeholder="Select Sub Category"
+                              value={selectedCategories[2]}
+                              onChange={(val) => {
+                                const newCats = [...selectedCategories];
+                                newCats[2] = val;
+                                setSelectedCategories(newCats);
+                              }}
+                              allowClear
+                              className="w-full"
+                              maxTagCount={1}
+                              options={subCategoryLevel2Options}
+                            />
+                          </div>
+                        </Col>
+                      )}
+
+                      {/* Case Status */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Category
-                          </Text>
+                          <Text type="secondary" className="text-xs font-medium">Case Status</Text>
                           <Select
-                            placeholder="All Categories"
-                            value={selectedCategory}
-                            onChange={setSelectedCategory}
+                            placeholder="Select Status"
+                            value={selectedCaseStatus || undefined}
+                            onChange={(val) => setSelectedCaseStatus(val || "")}
                             allowClear
                             className="w-full"
-                            options={uniqueCategories.map(c => ({ label: c, value: c }))}
+                            options={caseStatusOptions}
                           />
                         </div>
                       </Col>
-                      <Col xs={24} sm={12} lg={6}>
+
+                      {/* User Sentiment */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Sentiment
-                          </Text>
+                          <Text type="secondary" className="text-xs font-medium">User Sentiment</Text>
                           <Select
-                            placeholder="All Sentiments"
-                            value={selectedSentiment}
-                            onChange={setSelectedSentiment}
+                            mode="multiple"
+                            placeholder="Select Sentiment"
+                            value={selectedUserSentiments}
+                            onChange={setSelectedUserSentiments}
                             allowClear
                             className="w-full"
-                            options={[
-                              { label: 'Positive', value: 'positive' },
-                              { label: 'Neutral', value: 'neutral' },
-                              { label: 'Negative', value: 'negative' },
-                            ]}
+                            maxTagCount={1}
+                            options={sentimentOptions}
                           />
                         </div>
                       </Col>
-                      <Col xs={24} sm={12} lg={6}>
+
+                      {/* Agent Sentiment */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Status
-                          </Text>
+                          <Text type="secondary" className="text-xs font-medium">Agent Sentiment</Text>
                           <Select
-                            placeholder="All Statuses"
-                            value={selectedStatus}
-                            onChange={setSelectedStatus}
+                            mode="multiple"
+                            placeholder="Select Sentiment"
+                            value={selectedAgentSentiments}
+                            onChange={setSelectedAgentSentiments}
                             allowClear
                             className="w-full"
-                            options={[
-                              { label: 'Completed', value: 'completed' },
-                              { label: 'Pending', value: 'pending' },
-                              { label: 'Failed', value: 'failed' },
-                            ]}
+                            maxTagCount={1}
+                            options={sentimentOptions}
                           />
                         </div>
                       </Col>
-                      <Col xs={24} sm={12} lg={6}>
+
+                      {/* Date Range */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                         <div className="space-y-1.5">
-                          <Text type="secondary" className="text-xs font-medium">
-                            Date Range
-                          </Text>
-                          <RangePicker className="w-full" />
+                          <Text type="secondary" className="text-xs font-medium">Date Range</Text>
+                          <RangePicker 
+                            className="w-full" 
+                            value={dateRange}
+                            onChange={(dates) => setDateRange(dates as [any, any])}
+                          />
                         </div>
                       </Col>
-                      <Col xs={24} lg={12} className="flex items-end justify-end">
-                        <Space>
-                          <Button 
-                            icon={<IconClearAll />} 
-                            onClick={clearAllFilters}
-                          >
-                            Clear All
+
+                      {/* Search Keyword */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" className="text-xs font-medium">Search Keyword</Text>
+                          <Input
+                            placeholder="Enter keyword"
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            allowClear
+                          />
+                        </div>
+                      </Col>
+
+                      {/* Call Type */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" className="text-xs font-medium">Call Type</Text>
+                          <Select
+                            placeholder="Select Type"
+                            value={selectedCallType || undefined}
+                            onChange={(val) => setSelectedCallType(val || "")}
+                            allowClear
+                            className="w-full"
+                            options={callTypeOptions}
+                          />
+                        </div>
+                      </Col>
+
+                      {/* Dropped Call */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" className="text-xs font-medium">Dropped Call</Text>
+                          <Select
+                            placeholder="Select"
+                            value={selectedDroppedCall || undefined}
+                            onChange={(val) => setSelectedDroppedCall(val || "")}
+                            allowClear
+                            className="w-full"
+                            options={yesNoOptions}
+                          />
+                        </div>
+                      </Col>
+
+                      {/* Repeat Call */}
+                      <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                        <div className="space-y-1.5">
+                          <Text type="secondary" className="text-xs font-medium">Repeat Call</Text>
+                          <Select
+                            placeholder="Select"
+                            value={selectedRepeatCall || undefined}
+                            onChange={(val) => setSelectedRepeatCall(val || "")}
+                            allowClear
+                            className="w-full"
+                            options={yesNoOptions}
+                          />
+                        </div>
+                      </Col>
+
+                      {/* Custom Fields - Dynamic */}
+                      {customFields.filter(f => f.isFilterable).map((field) => (
+                        <Col key={field.fieldName} xs={24} sm={12} md={8} lg={6} xl={4}>
+                          <div className="space-y-1.5">
+                            <Text type="secondary" className="text-xs font-medium">{field.displayName}</Text>
+                            <Input
+                              placeholder={`Enter ${field.displayName}`}
+                              value={customFieldValues[field.fieldName] || ""}
+                              onChange={(e) => setCustomFieldValues(prev => ({
+                                ...prev,
+                                [field.fieldName]: e.target.value
+                              }))}
+                              allowClear
+                            />
+                          </div>
+                        </Col>
+                      ))}
+
+                      {/* Action Buttons */}
+                      <Col xs={24} className="flex items-end justify-end gap-2 mt-2">
+                        <Button type="primary" onClick={applyFilters}>
+                          Search
+                        </Button>
+                        {activeFiltersCount > 0 && (
+                          <Button onClick={clearAllFilters}>
+                            Clear
                           </Button>
-                          <Button type="primary">Apply Filters</Button>
-                        </Space>
+                        )}
                       </Col>
                     </Row>
                   </Card>
@@ -531,28 +958,30 @@ export default function CallInsight() {
             </AnimatePresence>
 
             {/* Data Table */}
-            {isLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton.Input key={i} active block className="h-[52px]" />
-                ))}
-              </div>
+            {exceptionType || isLoading ? (
+              <ExceptionHandleView
+                type={exceptionType || 'loading'}
+                content={keyword}
+                onTryAgain={() => fetchCallLogs(1, pagination.pageSize, buildApiFilters())}
+              />
             ) : (
               <Table
                 columns={columns}
-                dataSource={filteredCalls}
-                rowKey="id"
+                dataSource={Array.isArray(callData) ? callData : []}
+                rowKey={(record) => record.id || Math.random().toString()}
                 scroll={{ x: 'max-content' }}
                 pagination={{
-                  total: filteredCalls.length,
-                  pageSize: 8,
+                  current: pagination.current,
+                  pageSize: pagination.pageSize,
+                  total: pagination.total,
                   showTotal: (total, range) => (
                     <Text type="secondary">
                       Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
                     </Text>
                   ),
                   showSizeChanger: true,
-                  pageSizeOptions: ['5', '8', '10', '20'],
+                  pageSizeOptions: ['10', '20', '50', '100'],
+                  onChange: (page, pageSize) => handleTableChange({ current: page, pageSize }),
                 }}
                 className="rounded-xl overflow-hidden"
                 rowClassName={() => 

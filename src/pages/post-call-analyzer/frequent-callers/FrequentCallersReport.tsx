@@ -1,193 +1,359 @@
-import { useState, useEffect } from "react";
-import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
-import { 
-  IconArrowLeft, 
-  IconInfoCircle, 
-  IconRefresh, 
-  IconCalendar, 
-  IconList,
-  IconPhone
-} from "@tabler/icons-react";
-import { usePostCall } from "@/contexts/PostCallContext";
-import { AIHelper } from "@/components/post-call/AIHelper";
-import { TablerIcon } from "@/components/ui/tabler-icon";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Tooltip as RechartsTooltip } from "recharts";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { IconPhone, IconRefresh, IconEye, IconInfoCircle } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
+import type { DateRangeObject } from "@/components/common/DatePicker/DatePicker";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  Cell,
+  Tooltip as RechartsTooltip,
+} from "recharts";
+import { cn } from "@/lib/utils";
+import { Typography } from "antd";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import { useDate } from "@/contexts/DateContext";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
-const mockFrequentCallersData = [
-  { msisdn: "+94771234567", callCount: 28 },
-  { msisdn: "+94772345678", callCount: 22 },
-  { msisdn: "+94773456789", callCount: 22 },
-  { msisdn: "+94774567890", callCount: 19 },
-  { msisdn: "+94775678901", callCount: 16 },
-  { msisdn: "+94776789012", callCount: 14 },
-  { msisdn: "+94777890123", callCount: 12 },
-  { msisdn: "+94778901234", callCount: 11 },
-  { msisdn: "+94779012345", callCount: 10 },
-  { msisdn: "+94770123456", callCount: 10 },
-];
+interface FrequentCallerData {
+  msisdn: string;
+  callCount: number;
+}
 
 const PURPLE_GRADIENT_COLORS = [
-  '#311B92',
-  '#4527A0',
-  '#512DA8',
-  '#5E35B1',
-  '#673AB7',
-  '#7E57C2',
-  '#9575CD',
-  '#B39DDB',
-  '#D1C4E9',
-  '#EDE7F6',
+  "#311B92",
+  "#4527A0",
+  "#512DA8",
+  "#5E35B1",
+  "#673AB7",
+  "#7E57C2",
+  "#9575CD",
+  "#B39DDB",
+  "#D1C4E9",
+  "#EDE7F6",
 ];
 
-const getAdjustedColors = (data: { callCount: number }[]) => {
-  const adjustedColors: string[] = [];
+const getAdjustedColors = (data: FrequentCallerData[]) => {
   let colorIndex = 0;
-  
-  data.forEach((item, index) => {
-    if (index === 0) {
-      adjustedColors.push(PURPLE_GRADIENT_COLORS[0]);
-    } else {
-      if (data[index].callCount === data[index - 1].callCount) {
-        adjustedColors.push(PURPLE_GRADIENT_COLORS[colorIndex]);
-      } else {
-        colorIndex++;
-        adjustedColors.push(PURPLE_GRADIENT_COLORS[colorIndex]);
-      }
+
+  return data.map((item, index) => {
+    if (index === 0) return PURPLE_GRADIENT_COLORS[0];
+
+    if (item.callCount !== data[index - 1].callCount) {
+      colorIndex++;
     }
+
+    return PURPLE_GRADIENT_COLORS[
+      Math.min(colorIndex, PURPLE_GRADIENT_COLORS.length - 1)
+    ];
   });
-  
-  return adjustedColors;
+};
+
+const CustomBarTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="z-50 rounded-lg border bg-card px-4 py-2.5 text-sm shadow-xl">
+      <p className="font-medium mb-1">{label}</p>
+      <div className="flex items-center gap-2">
+        <div
+          className="w-3 h-3 rounded-full"
+          style={{ backgroundColor: payload[0].color }}
+        />
+        <span>Call Count: {payload[0].value}</span>
+      </div>
+    </div>
+  );
 };
 
 export default function FrequentCallersReport() {
-  const [loading, setLoading] = useState(true);
-  const [chartData, setChartData] = useState(mockFrequentCallersData);
-  const [colors, setColors] = useState<string[]>([]);
+  const { selectedProject } = useProjectSelection();
+  const { globalDateRange } = useDate();
 
+  const [loading, setLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [chartData, setChartData] = useState<FrequentCallerData[]>([]);
+  const [colors, setColors] = useState<string[]>([]);
+  const [dateRange, setDateRange] = useState<DateRangeObject | null>(null);
+  const [localDateRange, setLocalDateRange] = useState<DateRangeObject | null>(null);
+
+  // Use local date range if user has set it, otherwise use global
+  const effectiveDateRange = localDateRange || globalDateRange || dateRange;
+  
+  // Force new reference when global date range changes to trigger DatePickerComponent update
+  const dateInputForPicker = effectiveDateRange ? { ...effectiveDateRange } : null;
+
+  // Reactive state management
+  const destroyRef = useRef(false);
+  const manualRefreshRef = useRef<SimpleSubject<any>>(new SimpleSubject<any>());
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced refresh function
+  const debouncedRefresh = useCallback((overrideDateRange?: DateRangeObject) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (selectedProject && !destroyRef.current) {
+        loadData(overrideDateRange);
+      }
+    }, 300);
+  }, [selectedProject]);
+
+  // Watch for global date range changes (from ModuleTabs.tsx)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setChartData(mockFrequentCallersData);
-      setColors(getAdjustedColors(mockFrequentCallersData));
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    if (destroyRef.current) return;
+
+    // If global date range changes, clear local selection to allow global to take precedence
+    if (globalDateRange) {
+      setLocalDateRange(null); // Clear local selection
+      // Trigger refresh with global date range
+      manualRefreshRef.current.next(globalDateRange);
+    }
+  }, [globalDateRange]);
+
+  // Combine date and project changes
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    if (effectiveDateRange && selectedProject) {
+      // Trigger refresh through the unified debounced stream
+      manualRefreshRef.current.next(effectiveDateRange);
+    }
+  }, [effectiveDateRange, selectedProject]);
+
+  // Single debounced stream for ALL refresh triggers
+  useEffect(() => {
+    const subscription = manualRefreshRef.current.subscribe((dateRange) => {
+      // Use the date range passed through the Subject
+      debouncedRefresh(dateRange);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [debouncedRefresh]);
+
+  // Initial data and API trigger effect
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // Always set loading state when component mounts or dependencies change
+    if (selectedProject && effectiveDateRange) {
+      // Trigger API call for fresh data
+      manualRefreshRef.current.next(effectiveDateRange);
+    } else {
+      // Set loading to true while waiting for dependencies
+      if (!selectedProject || !effectiveDateRange) {
+        setLoading(true);
+      }
+    }
+  }, [selectedProject, effectiveDateRange]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      destroyRef.current = true;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
-  const handleReload = () => {
+  const loadData = async (range?: DateRangeObject) => {
+    const dateRangeToUse = range || effectiveDateRange;
+    if (!selectedProject || !dateRangeToUse) return;
+
     setLoading(true);
-    const timer = setTimeout(() => {
-      setChartData(mockFrequentCallersData);
-      setColors(getAdjustedColors(mockFrequentCallersData));
+    setHasError(false);
+
+    try {
+      const filters = {
+        tenantId: Number(selectedProject.tenant_id),
+        subtenantId: Number(selectedProject.sub_tenant_id),
+        companyId: Number(selectedProject.company_id),
+        departmentId: Number(selectedProject.department_id),
+        fromTime: dateRangeToUse.fromDate,
+        toTime: dateRangeToUse.toDate,
+      };
+
+      const response = await callRoutingApiService.FrequentCallers(filters);
+
+      const apiData = response?.data;
+
+      if (Array.isArray(apiData) && apiData.length > 0) {
+        setChartData(apiData);
+        setColors(getAdjustedColors(apiData));
+      } else {
+        setChartData([]);
+      }
+
       setLoading(false);
-    }, 500);
+    } catch (error) {
+      setHasError(true);
+      setChartData([]);
+      setLoading(false);
+    }
+  };
+
+  const handleDateRangeChange = (range: DateRangeObject) => {
+    setLocalDateRange(range);
+  };
+
+  const handleReload = () => {
+    // Only reload if we have a date range and project
+    if (effectiveDateRange && selectedProject) {
+      manualRefreshRef.current.next(effectiveDateRange);
+    }
   };
 
   return (
-    <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
-      <Space direction="vertical" size="middle" className="w-full">
-        <div className="-mt-3">
-          <div className="flex justify-between items-center w-full">
-            <Space align="center" size="middle" orientation="horizontal">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
-                <IconPhone className="text-xl" />
-              </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  <Title level={4} className="!m-0 !text-xl !font-semibold">
-                    Frequent Callers
-                  </Title>
-                  <Tooltip title="Top callers by call frequency">
-                    <div className="-mt-1">
-                      <TablerIcon 
-                        name="info-circle" 
-                        className="wn-tabler-14"
-                        size={14}
-                      />
-                    </div>
+    <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex flex-col gap-4">
+        {/* HEADER */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 ml-5">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+              <IconPhone />
+            </div>
+            <div>
+              <div className="flex items-center gap-1">
+                <Title level={4} className="!m-0">
+                  Frequent Callers
+                </Title>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <IconInfoCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Top callers by call frequency
+                    </TooltipContent>
                   </Tooltip>
-                </div>
-                <Text type="secondary" className="text-sm">
-                  Jun 19 - Jun 25, 2025
-                </Text>
+                </TooltipProvider>
               </div>
-            </Space>
-            
-            <Space size="small" orientation="horizontal">
-              <DatePicker 
-                suffixIcon={<IconCalendar />}
-                className="rounded-lg"
-              />
-              <Button 
-                type="text" 
-                icon={<IconRefresh />}
-                onClick={handleReload}
-                className="w-9 h-9"
-              />
-              <Button 
-                type="text" 
-                icon={<IconList />}
-                className="w-9 h-9"
-              />
-            </Space>
+              <p className="text-sm text-muted-foreground">
+                {effectiveDateRange?.dateRangeForDisplay || "Select a date range"}
+              </p>
+            </div>
+          </div>
+
+          {/* ACTIONS */}
+          <div className="flex items-center gap-2">
+            <DatePickerComponent
+              onSelectedRangeValueChange={handleDateRangeChange}
+              toolTipValue="Select date range for frequent callers"
+              calenderType=""
+              dateInput={dateInputForPicker}
+            />
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleReload}
+                    disabled={loading || !effectiveDateRange}
+                    className="h-10 w-10 rounded-xl"
+                  >
+                    <IconRefresh className={cn(loading && "animate-spin")} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Reload data</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl">
+                    <IconEye />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>View list</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
-        
-        <div className="mt-4">
-          {loading ? (
-            <div className="flex items-center justify-center h-[400px]">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : chartData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[400px] text-gray-400">
-              <p className="text-lg font-medium mb-2">No Data Available</p>
-              <p className="text-sm">No frequent callers found for the selected period</p>
-            </div>
-          ) : (
-            <div className="mt-4">
-            <ResponsiveContainer width="100%" height={450}>
-              <BarChart 
-                data={chartData} 
-                layout="vertical" 
-                margin={{ top: 5, right: 30, left: 100, bottom: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  type="number"
-                  stroke="hsl(var(--muted-foreground))" 
-                  fontSize={12}
-                  tickFormatter={(value) => Math.floor(value).toString()}
-                />
-                <YAxis 
-                  type="category"
-                  dataKey="msisdn" 
-                  stroke="hsl(var(--muted-foreground))" 
-                  fontSize={11}
-                  width={100}
-                />
-                <RechartsTooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                  formatter={(value: number) => [value, 'Call Count']}
-                />
-                <Bar 
-                  dataKey="callCount" 
-                  radius={[0, 4, 4, 0]}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={colors[index]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-      </Space>
-    </Card>
+
+        {/* CHART */}
+        {loading ? (
+          <ExceptionHandleView type="loading" />
+        ) : hasError ? (
+          <ExceptionHandleView
+            type="500"
+            title="Error Loading Data"
+            content="frequent callers"
+            onTryAgain={handleReload}
+          />
+        ) : chartData.length === 0 ? (
+          <ExceptionHandleView
+            type="204"
+            title="No Frequent Callers"
+            content="frequent callers"
+          />
+        ) : (
+          <ResponsiveContainer width="100%" height={450}>
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 40, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal vertical={false} />
+              <XAxis type="number" axisLine={false} tickLine={false} />
+              <YAxis
+                type="category"
+                dataKey="msisdn"
+                axisLine={false}
+                tickLine={false}
+                width={80}
+              />
+              <RechartsTooltip content={<CustomBarTooltip />} />
+              <Bar dataKey="callCount" radius={[0, 6, 6, 0]}>
+                {chartData.map((_, index) => (
+                  <Cell key={index} fill={colors[index]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+    </div>
   );
+};
+
+// Simple Subject implementation for reactive pattern
+class SimpleSubject<T> {
+  private observers: ((value: T) => void)[] = [];
+  
+  next(value: T) {
+    this.observers.forEach(observer => observer(value));
+  }
+  
+  subscribe(observer: (value: T) => void) {
+    this.observers.push(observer);
+    return {
+      unsubscribe: () => {
+        const index = this.observers.indexOf(observer);
+        if (index > -1) {
+          this.observers.splice(index, 1);
+        }
+      }
+    };
+  }
 }

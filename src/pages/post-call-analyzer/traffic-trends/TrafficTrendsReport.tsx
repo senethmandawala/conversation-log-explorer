@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from "react";
-import { Card, Typography, Space, DatePicker, Tooltip, Tabs } from "antd";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Card, Typography, Space, DatePicker, Tooltip, Tabs, Button } from "antd";
 import { 
   IconChartLine, 
   IconInfoCircle, 
@@ -8,10 +8,38 @@ import {
   IconList
 } from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import { useDate } from "@/contexts/DateContext";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
 import { TablerIcon } from "@/components/ui/tabler-icon";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
+import type { DateRangeObject } from "@/components/common/DatePicker/DatePicker";
+import { cn } from "@/lib/utils";
 
 const { Title, Text } = Typography;
 import { motion, AnimatePresence } from "framer-motion";
+
+// SimpleSubject for reactive state management
+class SimpleSubject<T> {
+  private observers: ((value: T) => void)[] = [];
+  
+  next(value: T) {
+    this.observers.forEach(observer => observer(value));
+  }
+  
+  subscribe(observer: (value: T) => void) {
+    this.observers.push(observer);
+    return {
+      unsubscribe: () => {
+        const index = this.observers.indexOf(observer);
+        if (index > -1) {
+          this.observers.splice(index, 1);
+        }
+      }
+    };
+  }
+}
 
 // Generate mock heatmap data for General tab (Date x Hour)
 const generateGeneralHeatmapData = () => {
@@ -150,31 +178,183 @@ const HeatmapCell = ({ value, maxValue, label, hour, categoryIndex }: HeatmapCel
 };
 
 export default function TrafficTrendsReport() {
+  const { setSelectedTab } = usePostCall();
+  const { selectedProject } = useProjectSelection();
+  const { globalDateRange } = useDate();
+
   const [activeTab, setActiveTab] = useState("general");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [generalData, setGeneralData] = useState<any[]>([]);
   const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [localDateRange, setLocalDateRange] = useState<DateRangeObject | null>(null);
+
+  const effectiveDateRange = localDateRange || globalDateRange;
+  const dateInputForPicker = effectiveDateRange ? { ...effectiveDateRange } : null;
+
+  const destroyRef = useRef(false);
+  const manualRefreshRef = useRef<SimpleSubject<any>>(new SimpleSubject<any>());
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedRefresh = useCallback((overrideDateRange?: DateRangeObject, tabType?: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (selectedProject && !destroyRef.current) {
+        loadData(overrideDateRange, tabType);
+      }
+    }, 300);
+  }, [selectedProject]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setGeneralData(generateGeneralHeatmapData());
-      setCategoryData(generateCategoryHeatmapData());
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    if (destroyRef.current) return;
+
+    if (globalDateRange) {
+      setLocalDateRange(null);
+      manualRefreshRef.current.next({ dateRange: globalDateRange, tabType: activeTab });
+    }
+  }, [globalDateRange]);
+
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    if (selectedProject && effectiveDateRange) {
+      manualRefreshRef.current.next({ dateRange: effectiveDateRange, tabType: activeTab });
+    } else {
+      if (!selectedProject || !effectiveDateRange) {
+        setLoading(true);
+      }
+    }
+  }, [selectedProject, effectiveDateRange]);
+
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    if ((activeTab === "general" || activeTab === "categories") && selectedProject && effectiveDateRange) {
+      setLoading(true);
+      manualRefreshRef.current.next({ dateRange: effectiveDateRange, tabType: activeTab });
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    const subscription = manualRefreshRef.current.subscribe((data: any) => {
+      debouncedRefresh(data.dateRange, data.tabType);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [debouncedRefresh]);
+
+  useEffect(() => {
+    return () => {
+      destroyRef.current = true;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
-  const handleReload = () => {
+  const loadData = async (range?: DateRangeObject, tabType?: string) => {
+    const dateRangeToUse = range || effectiveDateRange;
+    if (!selectedProject || !dateRangeToUse) return;
+
     setLoading(true);
-    setTimeout(() => {
-      setGeneralData(generateGeneralHeatmapData());
-      setCategoryData(generateCategoryHeatmapData());
+    setHasError(false);
+
+    // Use tabType parameter or fallback to activeTab
+    const currentTab = tabType || activeTab;
+
+    // Reset the appropriate data based on active tab
+    if (currentTab === "general") {
+      setGeneralData([]);
+    } else if (currentTab === "categories") {
+      setCategoryData([]);
+    }
+
+    try {
+      const filters = {
+        tenantId: Number(selectedProject.tenant_id),
+        subtenantId: Number(selectedProject.sub_tenant_id),
+        companyId: Number(selectedProject.company_id),
+        departmentId: Number(selectedProject.department_id),
+        fromTime: dateRangeToUse.fromDate,
+        toTime: dateRangeToUse.toDate,
+      };
+
+      if (currentTab === "general") {
+        const response = await callRoutingApiService.TrafficTrendsGeneral(filters);
+
+        if (response?.data && Array.isArray(response.data)) {
+          // Transform API data to heatmap format
+          const transformedData: any[] = [];
+          response.data.forEach((dayData: any, dayIndex: number) => {
+            dayData.hourlyCallCounts.forEach((hourData: any, hourIndex: number) => {
+              transformedData.push({
+                x: hourIndex,
+                y: dayIndex,
+                value: hourData.callCount,
+                hour: hourData.hour,
+                day: new Date(dayData.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+              });
+            });
+          });
+          setGeneralData(transformedData);
+        } else {
+          setGeneralData([]);
+        }
+      } else if (currentTab === "categories") {
+        const response = await callRoutingApiService.TrafficTrendsCategories(filters);
+
+        if (response?.data && Array.isArray(response.data)) {
+          // Transform API data to heatmap format
+          const transformedData: any[] = [];
+          response.data.forEach((categoryData: any, catIndex: number) => {
+            categoryData.hourCounts.forEach((hourData: any, hourIndex: number) => {
+              transformedData.push({
+                x: hourIndex,
+                y: catIndex,
+                value: hourData.callCount,
+                hour: hourData.hour,
+                category: categoryData.categoryName
+              });
+            });
+          });
+          setCategoryData(transformedData);
+        } else {
+          setCategoryData([]);
+        }
+      }
+      
       setLoading(false);
-    }, 500);
+    } catch (error) {
+      setHasError(true);
+      if (currentTab === "general") {
+        setGeneralData([]);
+      } else {
+        setCategoryData([]);
+      }
+      setLoading(false);
+    }
+  };
+
+  const handleDateRangeChange = (range: DateRangeObject) => {
+    setLocalDateRange(range);
+  };
+
+  const handleReload = () => {
+    if (effectiveDateRange && selectedProject) {
+      manualRefreshRef.current.next({ dateRange: effectiveDateRange, tabType: activeTab });
+    }
   };
 
   const maxGeneralValue = Math.max(...generalData.map(d => d.value), 1);
   const maxCategoryValue = Math.max(...categoryData.map(d => d.value), 1);
+
+  // Get unique days from data for labels
+  const uniqueDays = [...new Set(generalData.map(d => d.day))].sort();
 
   return (
     <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
@@ -201,15 +381,31 @@ export default function TrafficTrendsReport() {
                   </Tooltip>
                 </div>
                 <Text type="secondary" className="text-sm">
-                  Visualize traffic trends across time periods
+                  {effectiveDateRange?.dateRangeForDisplay || "Select a date range"}
                 </Text>
               </div>
             </Space>
             
-            <DatePicker 
-              suffixIcon={<IconCalendar />}
-              className="rounded-lg"
-            />
+            <Space size="small" orientation="horizontal">
+              <DatePickerComponent
+                dateInput={dateInputForPicker}
+                onSelectedRangeValueChange={handleDateRangeChange}
+                toolTipValue="Select date range for traffic trends"
+                calenderType=""
+              />
+              <Button 
+                type="text" 
+                icon={<IconRefresh />}
+                onClick={handleReload}
+                className="w-9 h-9"
+                disabled={loading || !effectiveDateRange}
+              />
+              <Button 
+                type="text" 
+                icon={<IconList />}
+                className="w-9 h-9"
+              />
+            </Space>
           </div>
         </div>
         
@@ -227,15 +423,38 @@ export default function TrafficTrendsReport() {
                 children: (
                   <AnimatePresence mode="wait">
                     {loading ? (
+                      <ExceptionHandleView type="loading" />
+                    ) : hasError ? (
                       <motion.div
-                        key="loading-general"
+                        key="error-general"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                         className="flex items-center justify-center h-[400px]"
                       >
-                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <ExceptionHandleView 
+                          type="500" 
+                          title="Error Loading Data"
+                          content="traffic trends data"
+                          onTryAgain={handleReload}
+                        />
+                      </motion.div>
+                    ) : generalData.length === 0 ? (
+                      <motion.div
+                        key="no-data-general"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center justify-center h-[400px]"
+                      >
+                        <ExceptionHandleView 
+                          type="204" 
+                          title="No Traffic Data"
+                          content="traffic trends for the selected period"
+                          onTryAgain={handleReload}
+                        />
                       </motion.div>
                     ) : (
                       <motion.div
@@ -258,7 +477,7 @@ export default function TrafficTrendsReport() {
                           </div>
                           
                           {/* Heatmap grid */}
-                          {['Mon 19', 'Tue 20', 'Wed 21', 'Thu 22', 'Fri 23', 'Sat 24', 'Sun 25'].map((day, dayIndex) => (
+                          {uniqueDays.map((day, dayIndex) => (
                             <div key={day} className="flex items-center mb-2">
                               <div className="w-24 text-xs font-semibold text-right pr-3 shrink-0 truncate" title={day}>{day}</div>
                               <div className="flex gap-1">
@@ -289,15 +508,38 @@ export default function TrafficTrendsReport() {
                 children: (
                   <AnimatePresence mode="wait">
                     {loading ? (
+                      <ExceptionHandleView type="loading" />
+                    ) : hasError ? (
                       <motion.div
-                        key="loading-categories"
+                        key="error-categories"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                         className="flex items-center justify-center h-[400px]"
                       >
-                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <ExceptionHandleView 
+                          type="500" 
+                          title="Error Loading Data"
+                          content="category traffic trends data"
+                          onTryAgain={handleReload}
+                        />
+                      </motion.div>
+                    ) : categoryData.length === 0 ? (
+                      <motion.div
+                        key="no-data-categories"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center justify-center h-[400px]"
+                      >
+                        <ExceptionHandleView 
+                          type="204" 
+                          title="No Category Data"
+                          content="category traffic trends for the selected period"
+                          onTryAgain={handleReload}
+                        />
                       </motion.div>
                     ) : (
                       <motion.div
@@ -320,7 +562,7 @@ export default function TrafficTrendsReport() {
                           </div>
                           
                           {/* Heatmap grid */}
-                          {['Billing Issues', 'Technical Support', 'Account Management', 'Product Inquiry', 'Service Complaint', 'Refund Request', 'General Query'].map((category, catIndex) => (
+                          {[...new Set(categoryData.map(d => d.category))].sort().map((category, catIndex) => (
                             <div key={category} className="flex items-center mb-2">
                               <div className="w-40 text-xs font-semibold text-right pr-3 shrink-0 truncate" title={category}>{category}</div>
                               <div className="flex gap-1">
