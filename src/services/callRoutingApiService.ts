@@ -892,6 +892,178 @@ export class CallRoutingApiService extends BaseApiService {
     const endpoint = `/dynamic_category_subcategory_level_filter${queryParams}`;
     return this.get<any>(endpoint);
   }
+
+  /**
+   * Get call insights CSV export
+   */
+  async getCallInsightsCSV(
+    page: number,
+    size: number,
+    sort: string,
+    sortOrder: string,
+    filters: Filters
+  ): Promise<string> {
+    const url = `${this.baseUrl}/call_logs`;
+    let params = new URLSearchParams();
+
+    if (filters && filters['format'] === 'csv') {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.set(key, value.toString());
+        }
+      });
+    } else {
+      params.set('page', page.toString());
+      params.set('size', size.toString());
+      params.set('sort', sort);
+      params.set('sortOrder', sortOrder);
+      
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.set(key, value.toString());
+          }
+        });
+      }
+    }
+
+    const defaultHeaders: HeadersInit = {
+      'Accept': 'text/csv',
+    };
+
+    if (this.authToken) {
+      defaultHeaders['Authorization'] = `Bearer ${this.authToken}`;
+    }
+
+    try {
+      const response = await fetch(`${url}?${params.toString()}`, {
+        method: 'GET',
+        headers: defaultHeaders,
+      });
+
+      if (!response.ok) {
+        throw new Error(`CSV export failed: ${response.status} ${response.statusText}`);
+      }
+
+      return await response.text();
+    } catch (error) {
+      console.error('Error fetching CSV:', error);
+      throw error;
+    }
+  }
+
+  async AgentPerformanceGroupFilter(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/agent_group_filter${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+  async AgentPerformance(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/agent_performance${queryParams}`;
+    return this.get<any>(endpoint);
+  }
+
+
+  //Get Agent Performance Export as CSV
+
+    async getAgentPerformanceAsCSV(
+    page: number,
+    size: number,
+    sort: string,
+    sortOrder: string,
+    filters: Filters
+  ): Promise<string> {
+    const url = `${this.baseUrl}/agent_performance`;
+    let params = new URLSearchParams();
+
+    if (filters && filters['format'] === 'csv') {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.set(key, value.toString());
+        }
+      });
+    } else {
+      params.set('page', page.toString());
+      params.set('size', size.toString());
+      params.set('sort', sort);
+      params.set('sortOrder', sortOrder);
+      
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            params.set(key, value.toString());
+          }
+        });
+      }
+    }
+
+    const defaultHeaders: HeadersInit = {
+      'Accept': 'text/csv',
+    };
+
+    if (this.authToken) {
+      defaultHeaders['Authorization'] = `Bearer ${this.authToken}`;
+    }
+
+    try {
+      const response = await fetch(`${url}?${params.toString()}`, {
+        method: 'GET',
+        headers: defaultHeaders,
+      });
+
+      if (!response.ok) {
+        throw new Error(`CSV export failed: ${response.status} ${response.statusText}`);
+      }
+
+      return await response.text();
+    } catch (error) {
+      console.error('Error fetching CSV:', error);
+      throw error;
+    }
+  }
+
+  async AgentPerformanceDynamicLevelFilters(
+    filters: Filters
+  ): Promise<CommonResponse<any>> {
+    let queryParams = '';
+
+    if (filters) {
+      const params = Object.entries(filters)
+        .filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+      
+      queryParams = params ? `?${params}` : '';
+    }
+
+    const endpoint = `/dynamic_category_subcategory_level_filter${queryParams}`;
+    return this.get<any>(endpoint);
+  }
   
 }
 

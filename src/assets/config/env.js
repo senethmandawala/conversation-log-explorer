@@ -69,7 +69,7 @@ window.env_vars = {
         { def: 'happyRate', label: 'Happy Rate', visible: false, checkboxVisible: true },
         { def: 'influenceRating', label: 'Influence Rating', visible: false, checkboxVisible: true },
         { def: 'thankYouMessage', label: 'Thank You Message', visible: false, checkboxVisible: true },
-        { def: 'actions', label: 'Actions', visible: true, checkboxVisible: false },
+        { def: 'actions', label: 'Actions', visible: true, checkboxVisible: false }
 
       ],
       permissions: {
@@ -129,13 +129,6 @@ window.env_vars = {
         'second_subcategory': 'Sub Category Level 2',
         'subCategoryLevel1': 'Sub Category Level 3',
         'subCategoryLevel2': 'Sub Category Level 4',
-        'subCategoryLevel3': 'Sub Category Level 5',
-        'subCategoryLevel4': 'Sub Category Level 6',
-        'subCategoryLevel5': 'Sub Category Level 7',
-        'subCategoryLevel6': 'Sub Category Level 8',
-        'subCategoryLevel7': 'Sub Category Level 9',
-        'subCategoryLevel8': 'Sub Category Level 10',
-        'subCategoryLevel9': 'Sub Category Level 11',
       },
       columnDefinitionsCallInsight :[
         { def: 'callid', label: 'Call ID', visible: true, checkboxVisible: true },
@@ -152,13 +145,6 @@ window.env_vars = {
         { def: 'second_subcategory',label: 'Sub Category Level 2', visible: true, checkboxVisible: true },
         { def: 'subCategoryLevel1', label: 'Sub Category Level 3', visible: true, checkboxVisible: true },
         { def: 'subCategoryLevel2', label: 'Sub Category Level 4', visible: true, checkboxVisible: true },
-        { def: 'subCategoryLevel3', label: 'Sub Category Level 5', visible: true, checkboxVisible: true },
-        { def: 'subCategoryLevel4', label: 'Sub Category Level 6', visible: true, checkboxVisible: true },
-        { def: 'subCategoryLevel5', label: 'Sub Category Level 7', visible: true, checkboxVisible: true },
-        { def: 'subCategoryLevel6', label: 'Sub Category Level 8', visible: true, checkboxVisible: true },
-        { def: 'subCategoryLevel7', label: 'Sub Category Level 9', visible: true, checkboxVisible: true },
-        { def: 'subCategoryLevel8', label: 'Sub Category Level 10', visible: true, checkboxVisible: true },
-        { def: 'subCategoryLevel9', label: 'Sub Category Level 11', visible: true, checkboxVisible: true },
         { def: 'actions', label: 'Actions', visible: true, checkboxVisible: false },
       ],
       columnDefinitionsAutopilotConversationHistory: [

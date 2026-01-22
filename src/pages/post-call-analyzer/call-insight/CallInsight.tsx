@@ -376,6 +376,56 @@ export default function CallInsight() {
     fetchCallLogs(1, pagination.pageSize, {});
   };
 
+  // Export to CSV
+  const exportToCSV = useCallback(async () => {
+    const projectFilters = getProjectFilters();
+    const currentFilters = buildApiFilters();
+    const exportFilters = { 
+      ...projectFilters,
+      ...currentFilters, 
+      format: 'csv' 
+    };
+        
+    try {
+      const csvContent = await callRoutingApiService.getCallInsightsCSV(
+        1, 
+        pagination.pageSize, 
+        'call_at', 
+        'asc', 
+        exportFilters
+      );
+      
+      
+      if (!csvContent) {
+        console.error('No CSV content received from API');
+        setError('Failed to export CSV. No data received.');
+        return;
+      }
+
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
+      
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.download = `call_insights_${new Date().toISOString().split('T')[0]}.csv`;
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error in CSV export:', error);
+      setError('Failed to export CSV. Please try again.');
+    }
+  }, [getProjectFilters, buildApiFilters, pagination.pageSize]);
+
   // Helper functions
   const SentimentIcon = ({ sentiment }: { sentiment?: CallRecord["sentiment"] }) => {
     switch (sentiment) {
@@ -677,7 +727,7 @@ export default function CallInsight() {
             }
             extra={
               <Space>
-                <Button icon={<IconDownload />}>Export CSV</Button>
+                <Button icon={<IconDownload />} onClick={exportToCSV}>Export CSV</Button>
                 <Badge count={activeFiltersCount} size="small" offset={[-5, 5]}>
                   <Button 
                     type={filtersVisible ? "primary" : "default"}
@@ -715,6 +765,7 @@ export default function CallInsight() {
                             value={msisdn}
                             onChange={(e) => setMsisdn(e.target.value)}
                             allowClear
+                            className="bg-white"
                           />
                         </div>
                       </Col>
@@ -728,6 +779,7 @@ export default function CallInsight() {
                             value={agentName}
                             onChange={(e) => setAgentName(e.target.value)}
                             allowClear
+                            className="bg-white"
                           />
                         </div>
                       </Col>
@@ -873,6 +925,7 @@ export default function CallInsight() {
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
                             allowClear
+                            className="bg-white"
                           />
                         </div>
                       </Col>
