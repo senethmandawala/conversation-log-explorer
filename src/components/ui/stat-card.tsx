@@ -24,7 +24,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className="rounded-xl h-full min-h-[120px] transition-all duration-300 shadow-sm hover:shadow-lg d-flex align-items-center justify-content-between p-4"
+      className="rounded-xl h-full min-h-[120px] transition-all duration-300 shadow-sm hover:shadow-lg d-flex align-items-center justify-content-start p-4"
       style={{
         border: `1px solid ${color}30`,
         background: `${color}08`,
@@ -41,7 +41,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           {icon}
         </div>
       </div>
-      <div className="flex-grow-1 text-end">
+      <div className="flex-grow-1 text-start">
         <div className="text-sm font-semibold mb-2" style={{ color: color }}>
           {label}
         </div>

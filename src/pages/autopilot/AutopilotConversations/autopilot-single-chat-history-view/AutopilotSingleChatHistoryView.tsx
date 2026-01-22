@@ -285,17 +285,19 @@ export function AutopilotSingleChatHistoryView({ record, open, onClose }: Autopi
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-6xl overflow-y-auto bg-background/95 backdrop-blur-lg border-l border-border/50">
-        <SheetHeader className="pb-6">
+      <SheetContent
+        title={
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <SheetTitle className="text-xl font-semibold flex items-center gap-3">
+            <div className="text-xl font-semibold flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <IconFileText className="h-5 w-5 text-primary" />
               </div>
               Conversation Details
-            </SheetTitle>
+            </div>
           </motion.div>
-        </SheetHeader>
+        }
+        className="w-full overflow-y-auto bg-background/95 backdrop-blur-lg border-l border-border/50"
+      >
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Left Column - Details */}

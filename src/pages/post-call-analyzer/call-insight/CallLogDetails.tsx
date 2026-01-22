@@ -190,17 +190,20 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-lg border-l border-border/50">
-        <SheetHeader className="pb-6">
+      <SheetContent
+        widthVariant="tabs"
+        title={
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <SheetTitle className="text-xl font-semibold flex items-center gap-3">
+            <div className="text-xl font-semibold flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <IconFileText className="h-5 w-5 text-primary" />
               </div>
               Call Details
-            </SheetTitle>
+            </div>
           </motion.div>
-        </SheetHeader>
+        }
+        className="w-full overflow-y-auto bg-background/95 backdrop-blur-lg border-l border-border/50"
+      >
 
         {isLoading ? (
           <div className="space-y-4">
@@ -210,23 +213,22 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
           </div>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full grid grid-cols-3 mb-4">
+            <TabsList className="w-full mb-4" />
               <TabsTrigger value="call-info">Call Info</TabsTrigger>
               <TabsTrigger value="evaluation">Evaluation</TabsTrigger>
               <TabsTrigger value="analysis">Analysis Summary</TabsTrigger>
-            </TabsList>
 
             {/* Call Info Tab */}
             <TabsContent value="call-info" className="space-y-1 mt-0">
-              <DetailItem icon={<IconCalendar className="h-5 w-5 text-primary" />} label="Date" value={callLog.date} delay={0.1} />
-              <DetailItem icon={<IconClock className="h-5 w-5 text-primary" />} label="Time" value={callLog.time} delay={0.15} />
-              <Separator className="my-4" />
-              <DetailItem icon={<IconPhone className="h-5 w-5 text-primary" />} label="MSISDN" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{callLog.msisdn}</code>} delay={0.2} />
-              <DetailItem icon={<IconUser className="h-5 w-5 text-primary" />} label="Agent" value={callLog.agent} delay={0.25} />
-              <Separator className="my-4" />
-              <DetailItem icon={<IconHourglass className="h-5 w-5 text-primary" />} label="Call Duration" value={callLog.callDuration} delay={0.3} />
-              <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Category" value={callLog.category} delay={0.35} />
-              <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Sub Category" value={callLog.subCategory} delay={0.4} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                <DetailItem icon={<IconCalendar className="h-5 w-5 text-primary" />} label="Date" value={callLog.date} delay={0.1} />
+                <DetailItem icon={<IconClock className="h-5 w-5 text-primary" />} label="Time" value={callLog.time} delay={0.15} />
+                <DetailItem icon={<IconPhone className="h-5 w-5 text-primary" />} label="MSISDN" value={<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">{callLog.msisdn}</code>} delay={0.2} />
+                <DetailItem icon={<IconUser className="h-5 w-5 text-primary" />} label="Agent" value={callLog.agent} delay={0.25} />
+                <DetailItem icon={<IconHourglass className="h-5 w-5 text-primary" />} label="Call Duration" value={callLog.callDuration} delay={0.3} />
+                <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Category" value={callLog.category} delay={0.35} />
+                <DetailItem icon={<IconTag className="h-5 w-5 text-primary" />} label="Sub Category" value={callLog.subCategory} delay={0.4} />
+              </div>
               <Separator className="my-4" />
 
               {/* Sentiment Analysis */}
@@ -364,7 +366,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
 
         {/* Evaluation Tab */}
         <TabsContent value="evaluation" className="px-6 py-4 space-y-6">
-          <Card className="border-border/50">
+          <Card className="border-border/50 mb-6">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Performance Metrics</CardTitle>
             </CardHeader>
@@ -418,7 +420,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
         {/* Analysis Summary Tab */}
         <TabsContent value="analysis" className="px-6 py-4 space-y-6">
           {/* Meta Data Section */}
-          <section>
+          <section className="mb-4">
             <div className="mb-3">
               <h6 className="font-semibold">Meta Data</h6>
               <p className="text-xs text-muted-foreground">Compare metadata with conversation values</p>
@@ -448,7 +450,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
           </section>
 
           {/* Recommendations Section */}
-          <section>
+          <section className="mb-4">
             <div className="mb-3">
               <h6 className="font-semibold">Recommendations</h6>
               <p className="text-xs text-muted-foreground">AI-generated recommendations based on call analysis</p>
@@ -466,7 +468,7 @@ export function CallLogDetails({ callLog, open, onClose, isLoading = false }: Ca
           </section>
 
           {/* Retention Strategies Section */}
-          <section>
+          <section className="mb-4">
             <div className="mb-3">
               <h6 className="font-semibold">Retention Strategies</h6>
               <p className="text-xs text-muted-foreground">Strategies applied during the call</p>

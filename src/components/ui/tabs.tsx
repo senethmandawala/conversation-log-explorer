@@ -97,14 +97,8 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
         });
       }
     }, [value, children, context]);
-    
-    if (context?.value !== value) return null;
-    
-    return (
-      <div ref={ref} className={cn("mt-2", className)} {...props}>
-        {children}
-      </div>
-    );
+
+    return null;
   }
 );
 TabsContent.displayName = "TabsContent";

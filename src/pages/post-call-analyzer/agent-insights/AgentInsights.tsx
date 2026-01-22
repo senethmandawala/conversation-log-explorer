@@ -3,6 +3,8 @@ import {
   Card, 
   Button, 
   Badge, 
+  Row,
+  Col,
   Table, 
   Space, 
   Typography, 
@@ -188,52 +190,32 @@ export default function AgentInsights() {
       }}
     >
       <div className="container-fluid p-6 space-y-6">
-        <Card
-          className="rounded-xl border-slate-200 bg-white/80 backdrop-blur-sm"
-          title={
-            <div className="d-flex align-items-center gap-3">
-              <Button
-                type="default"
-                icon={<IconArrowLeft />}
-                onClick={() => setSelectedTab("agent-performance")}
-                className="h-10 w-10 rounded-xl flex items-center justify-center"
+        <div className="d-flex align-items-center gap-3">
+          <Button
+            type="text"
+            icon={<IconArrowLeft className="w-5 h-5" />}
+            onClick={() => setSelectedTab("agent-performance")}
+            className="h-10 w-10 rounded-md leading-none flex items-center justify-center"
+          />
+          <div className="d-flex flex-column">
+            <div className="d-flex align-items-center gap-2">
+              <Title level={4} className="!m-0 !text-xl !font-semibold">
+                Agent Insights
+              </Title>
+              <span className="text-xl text-slate-400">-</span>
+              <Badge
+                count={`${agentName} - ${agentIdDisplay}`}
+                className="bg-slate-100 text-slate-600 font-medium text-sm"
               />
-              <div className="d-flex flex-column">
-                <div className="d-flex align-items-center gap-2">
-                  <Title level={4} className="!m-0 !text-xl !font-semibold">
-                    Agent Insights
-                  </Title>
-                  <span className="text-xl text-slate-400">-</span>
-                  <Badge 
-                    count={`${agentName} - ${agentIdDisplay}`}
-                    className="bg-slate-100 text-slate-600 font-medium text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-          }
-        >
-          <div className="d-flex align-items-center gap-4">
-            <div className="d-flex flex-column">
-              <div className="d-flex align-items-center gap-2">
-                <Title level={4} className="!m-0 !text-base !font-medium">
-                  Agent Insights
-                </Title>
-                <span className="text-base text-slate-400">-</span>
-                <Badge 
-                  count={`${agentName} - ${agentIdDisplay}`}
-                  className="bg-slate-100 text-slate-600 font-medium text-sm"
-                />
-              </div>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <div className="row g-3">
-          <div className="col-12 col-xl-6">
-            <div className="row g-3">
+        <Row gutter={[12, 12]}>
+          <Col xs={24} xl={12}>
+            <Row gutter={[12, 12]}>
               {mockStats.map((stat, index) => (
-                <div className="col-6" key={stat.label}>
+                <Col xs={24} sm={12} key={stat.label}>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -248,12 +230,12 @@ export default function AgentInsights() {
                       isLoading={isLoading}
                     />
                   </motion.div>
-                </div>
+                </Col>
               ))}
-            </div>
-          </div>
+            </Row>
+          </Col>
 
-          <div className="col-12 col-xl-6">
+          <Col xs={24} xl={12}>
             <Card
               className="rounded-xl border-slate-200 bg-white/80 backdrop-blur-sm"
               title={
@@ -307,8 +289,8 @@ export default function AgentInsights() {
                 </ResponsiveContainer>
               )}
             </Card>
-          </div>
-        </div>
+          </Col>
+        </Row>
 
         <Card
           className="rounded-xl border-slate-200 bg-white/80 backdrop-blur-sm"
