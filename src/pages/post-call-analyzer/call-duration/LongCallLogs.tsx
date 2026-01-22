@@ -9,13 +9,12 @@ import { TablerIcon } from "@/components/ui/tabler-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
-interface CallLogsSummaryProps {
-  breadcrumb: string[];
+interface LongCallLogsProps {
   fromTime?: string;
   toTime?: string;
 }
 
-export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummaryProps) {
+export function LongCallLogs({ fromTime, toTime }: LongCallLogsProps) {
   const [loading, setLoading] = useState(false);
   const [callLogs, setCallLogs] = useState<any[]>([]);
   const [error, setError] = useState(false);
@@ -38,7 +37,6 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
     setError(false);
 
     try {
-      // Get IDs from selected project
       const tenantId = parseInt(selectedProject.tenant_id);
       const subtenantId = parseInt(selectedProject.sub_tenant_id);
       const companyId = parseInt(selectedProject.company_id);
@@ -51,22 +49,19 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
         departmentId,
         fromTime,
         toTime,
-        category: breadcrumb[0] || '',
-        subcategory: breadcrumb[1] || '',
-        second_subcategory: breadcrumb[2] || '',
+        longCall: 1,
         page,
         size,
         sort: 'id',
-        sortOrder: 'DESC'
+        sortOrder: 'desc'
       };
 
-      const response = await callRoutingApiService.CaseClassificationCallLogs(filters);
+      const response = await callRoutingApiService.TopCategoryCallDurationCallLogs(filters);
 
-      // Check if response has paginated data and transform it
       if (response?.data?.content && Array.isArray(response.data.content)) {
         setCallLogs(response.data.content);
         setPagination({
-          page: (response.data.number || 0) + 1, // Convert 0-based to 1-based
+          page: (response.data.number || 0) + 1,
           size: response.data.size || size,
           totalElements: response.data.totalElements || 0,
           totalPages: response.data.totalPages || 0,
@@ -85,7 +80,7 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
         });
       }
     } catch (error) {
-      console.error('Error loading call logs:', error);
+      console.error('Error loading long call logs:', error);
       setError(true);
       setCallLogs([]);
     }
@@ -94,8 +89,10 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
   };
 
   useEffect(() => {
-    loadCallLogs();
-  }, [breadcrumb, fromTime, toTime, selectedProject]);
+    if (fromTime && toTime) {
+      loadCallLogs();
+    }
+  }, [fromTime, toTime, selectedProject]);
 
   const handleReload = () => {
     loadCallLogs(pagination.page, pagination.size);
@@ -107,15 +104,21 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
 
   const getSentimentIcon = (sentiment: number) => {
     switch (sentiment) {
-      case 2: // Positive
+      case 2:
         return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={20} />, title: "Positive" };
-      case 1: // Neutral
+      case 1:
         return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
-      case 0: // Negative
+      case 0:
         return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={20} />, title: "Negative" };
       default:
         return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
     }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const getStatusBadge = (statusType: string, status: string) => {
@@ -135,7 +138,7 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
     <div>
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
-          Showing {callLogs.length} of {pagination.totalElements} calls
+          Showing {callLogs.length} of {pagination.totalElements} long calls
         </span>
         <Button 
           variant="ghost" 
@@ -157,8 +160,8 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
       ) : error ? (
         <ExceptionHandleView 
           type="500" 
-          title="Error loading call logs"
-          content="case classification call logs"
+          title="Error loading long call logs"
+          content="long call logs"
           onTryAgain={handleReload}
           className="!p-0"
         />
@@ -170,7 +173,8 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
                 <TableRow>
                   <TableHead className="font-semibold">Date/Time</TableHead>
                   <TableHead className="font-semibold">MSISDN</TableHead>
-                  <TableHead className="font-semibold text-center">Agent Sentiment</TableHead>
+                  <TableHead className="font-semibold">Duration</TableHead>
+                  <TableHead className="font-semibold text-center">Sentiment</TableHead>
                   <TableHead className="font-semibold text-center">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -191,15 +195,16 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">{call.mobile_no}</TableCell>
+                    <TableCell className="font-medium">{formatDuration(call.call_duration)}</TableCell>
                     <TableCell className="text-center">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="inline-flex cursor-help">
-                            {getSentimentIcon(call.agent_sentiment).icon}
+                            {getSentimentIcon(call.user_sentiment).icon}
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{getSentimentIcon(call.agent_sentiment).title}</p>
+                          <p>{getSentimentIcon(call.user_sentiment).title}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TableCell>
@@ -243,8 +248,8 @@ export function CallLogsSummary({ breadcrumb, fromTime, toTime }: CallLogsSummar
       ) : (
         <ExceptionHandleView 
           type="204" 
-          title="No Call Data"
-          content="call logs for this category"
+          title="No Long Call Data"
+          content="long call logs"
           onTryAgain={handleReload}
           className="!p-0"
         />

@@ -1,24 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, Typography, Space, Tooltip } from "antd";
 import { IconInfoCircle, IconChartBar } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell } from "recharts";
 import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
 const { Title, Text } = Typography;
 
-const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
+// Get colors from env.js
+const COLORS = (window as any).env_vars?.colors || ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
 
-const mockData = [
-  { reason: "Technical Issue", count: 45, fill: COLORS[0] },
-  { reason: "Billing Query", count: 38, fill: COLORS[1] },
-  { reason: "Service Request", count: 32, fill: COLORS[2] },
-  { reason: "Product Info", count: 28, fill: COLORS[3] },
-  { reason: "Complaint", count: 22, fill: COLORS[4] },
-];
+interface ReasonWiseRepeatCallProps {
+  data?: any[];
+  loading?: boolean;
+  hasError?: boolean;
+  dateRangeForDisplay?: string;
+  onReload?: () => void;
+}
 
-export function ReasonWiseRepeatCall() {
-  const [loading, setLoading] = useState(false);
+export function ReasonWiseRepeatCall({ data = [], loading = false, hasError = false, dateRangeForDisplay, onReload }: ReasonWiseRepeatCallProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const [internalHasError, setInternalHasError] = useState(false);
+  const [internalData, setInternalData] = useState<any[]>([]);
+
+  // Use parent data if provided, otherwise use internal state
+  const currentData = data.length > 0 ? data : internalData;
+  const currentLoading = loading || internalLoading;
+  const currentHasError = hasError || internalHasError;
+
+  const loadData = async () => {
+    // Only load if no parent data provided
+    if (data.length > 0) return;
+    
+    setInternalLoading(true);
+    setInternalHasError(false);
+    try {
+      // This would be the original API call logic if needed
+      // For now, we'll rely on parent data
+    } catch (error) {
+      console.error('Error loading reason wise repeat call data:', error);
+      setInternalHasError(true);
+    } finally {
+      setInternalLoading(false);
+    }
+  };
+
+  // Watch for external reload trigger
+  useEffect(() => {
+    if (onReload) {
+      loadData();
+    }
+  }, [onReload]);
 
   return (
     <Card className="rounded-xl border-gray-200 bg-white shadow-sm p-4 mt-6">
@@ -44,19 +79,24 @@ export function ReasonWiseRepeatCall() {
                 </Tooltip>
               </div>
               <Text type="secondary" className="text-sm">
-                Jun 19 - Jun 25, 2025
+                {dateRangeForDisplay || 'Select date range'}
               </Text>
             </div>
           </Space>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center h-[300px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : mockData.length > 0 ? (
+        {currentLoading ? (
+          <ExceptionHandleView type="loading" />
+        ) : currentHasError ? (
+          <ExceptionHandleView 
+            type="500" 
+            title="Error Loading Data"
+            content="reason wise repeat call data"
+            onTryAgain={onReload || loadData}
+          />
+        ) : currentData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={mockData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+            <BarChart data={currentData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" vertical={false} />
               <XAxis 
                 dataKey="reason" 
@@ -74,16 +114,19 @@ export function ReasonWiseRepeatCall() {
               />
               <RechartsTooltip content={<BarChartTooltip />} />
               <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                {mockData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {currentData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-[300px] text-gray-500">
-            No data available
-          </div>
+          <ExceptionHandleView 
+            type="204" 
+            title="No Data Available"
+            content="reason wise repeat call data for the selected period"
+            onTryAgain={onReload || loadData}
+          />
         )}
       </Space>
     </Card>

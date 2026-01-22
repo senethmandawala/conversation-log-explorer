@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "antd";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { PieChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 interface AgentsSentimentProps {
   onSentimentSelect: (sentiment: string) => void;
+  data: any;
 }
 
 const COLORS = {
@@ -13,19 +15,27 @@ const COLORS = {
   Negative: '#E57373'
 };
 
-export const AgentsSentiment = ({ onSentimentSelect }: AgentsSentimentProps) => {
-  const [loading, setLoading] = useState(true);
-  const [sentimentData, setSentimentData] = useState({
-    positive: 550,
-    neutral: 380,
-    negative: 70,
-    total: 1000
-  });
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+export const AgentsSentiment = ({ onSentimentSelect, data }: AgentsSentimentProps) => {
+  // Transform API data to expected format
+  const getSentimentData = () => {
+    if (data) {
+      return {
+        positive: data.positiveCount || 0,
+        neutral: data.neutralCount || 0,
+        negative: data.negativeCount || 0,
+        total: data.totalCount || 0
+      };
+    }
+    // Should never reach here since parent handles loading/error states
+    return {
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      total: 0
+    };
+  };
+  
+  const sentimentData = getSentimentData();
 
   const chartData = [
     { name: 'Positive', value: sentimentData.positive, color: COLORS.Positive },
@@ -37,17 +47,37 @@ export const AgentsSentiment = ({ onSentimentSelect }: AgentsSentimentProps) => 
     onSentimentSelect(data.name);
   };
 
-  if (loading) {
+  // Custom tooltip for sentiment charts with colors
+  const SentimentTooltip = ({ active, payload }: any) => {
+    if (!active || !payload || !payload.length) return null;
+
     return (
-      <Card className="border-border/50">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-[400px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-popover/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl min-w-[140px]">
+        <div className="space-y-1.5">
+          {payload.map((item: any, index: number) => {
+            const color = item.payload?.color || item.color || item.fill || "hsl(var(--primary))";
+            const name = item.name || item.dataKey || "Value";
+            const value = item.value;
+
+            return (
+              <div key={index} className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm" 
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="text-sm text-foreground/80">{name}</span>
+                </div>
+                <span className="text-sm font-semibold text-foreground tabular-nums">
+                  {value ?? 0}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     );
-  }
+  };
 
   return (
     <Card className="border-border/50">
@@ -92,7 +122,7 @@ export const AgentsSentiment = ({ onSentimentSelect }: AgentsSentimentProps) => 
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<PieChartTooltip />} />
+              <Tooltip content={<SentimentTooltip />} />
             </PieChart>
           </ResponsiveContainer>
 

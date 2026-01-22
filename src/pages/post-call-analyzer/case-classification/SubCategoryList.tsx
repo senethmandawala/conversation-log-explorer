@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 import { callRoutingApiService } from "@/services/callRoutingApiService";
 import { useProjectSelection } from "@/services/projectSelectionService";
-import { useDate } from "@/contexts/DateContext";
 import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
+import { CallLogsSummary } from "./CallLogsSummary";
 
 interface SubCategoryListProps {
   category: { name: string; color: string };
   level: 3 | 4 | 5;
   breadcrumb: string[];
   onSubCategorySelect: (subCategory: string) => void;
+  onShowCallLogs?: () => void;
+  fromTime?: string;
+  toTime?: string;
 }
 
 
@@ -26,17 +29,17 @@ function generateShades(baseColor: string, count: number): string[] {
   });
 }
 
-export function SubCategoryList({ category, level, breadcrumb, onSubCategorySelect }: SubCategoryListProps) {
+export function SubCategoryList({ category, level, breadcrumb, onSubCategorySelect, onShowCallLogs, fromTime, toTime }: SubCategoryListProps) {
   const [data, setData] = useState<{ name: string; value: number }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [showCallLogs, setShowCallLogs] = useState(false);
   const { selectedProject } = useProjectSelection();
-  const { globalDateRange } = useDate();
   const lastItem = breadcrumb[breadcrumb.length - 1];
 
   useEffect(() => {
     const loadData = async () => {
-      if (!selectedProject || !globalDateRange || !lastItem) {
+      if (!selectedProject || !fromTime || !toTime || !lastItem) {
         return;
       }
 
@@ -54,14 +57,29 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
           subtenantId,
           companyId,
           departmentId,
-          fromTime: globalDateRange.fromDate,
-          toTime: globalDateRange.toDate,
+          fromTime,
+          toTime,
           category: category.name,
-          subcategory: lastItem,
+          subcategory: level === 4 ? breadcrumb[breadcrumb.length - 2] : lastItem,
+          ...(level === 4 && { second_subcategory: lastItem }),
+          ...(level === 5 && { 
+            second_subcategory: breadcrumb[breadcrumb.length - 2],
+            subCategoryLevel1: lastItem 
+          }),
           limit: 10,
         };
 
         const response = await callRoutingApiService.CaseClassificationSubCategoryList(filters);
+
+        // Check for no_category_level response
+        if (response?.data === "no_category_level" || response?.message === "no_category_level") {
+          setShowCallLogs(true);
+          setData([]);
+          if (onShowCallLogs) {
+            onShowCallLogs();
+          }
+          return;
+        }
 
         // Handle the correct response structure
         if (response?.data?.limitedSubCategoryData && Array.isArray(response.data.limitedSubCategoryData)) {
@@ -71,8 +89,10 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
           })).filter((item: any) => item.value > 0);
           
           setData(transformedData);
+          setShowCallLogs(false);
         } else {
           setData([]);
+          setShowCallLogs(false);
         }
       } catch (err) {
         console.error('Error loading subcategory data:', err);
@@ -84,7 +104,7 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
     };
 
     loadData();
-  }, [category, level, breadcrumb, selectedProject, globalDateRange]);
+  }, [category, level, breadcrumb, selectedProject, fromTime, toTime]);
   
   const colors = generateShades(category.color, data.length);
   
@@ -98,6 +118,34 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
       onSubCategorySelect(data.activePayload[0].payload.name);
     }
   };
+
+  // Copy the exact tooltip from Category.tsx
+  const TreemapTooltipContent = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="z-50 overflow-hidden rounded-lg border border-border/50 bg-card px-4 py-2.5 text-sm text-card-foreground backdrop-blur-sm">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 justify-start">
+              <div 
+                className="w-3 h-3 rounded-full flex-shrink-0" 
+                style={{ backgroundColor: data.fill }}
+              />
+              <p className="font-medium m-0">{data.name}</p>
+            </div>
+            <div className="text-sm ml-5">
+              Value: {data.value}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (showCallLogs) {
+    return <CallLogsSummary breadcrumb={breadcrumb} fromTime={fromTime} toTime={toTime} />;
+  }
 
   if (isLoading) {
     return (
@@ -134,10 +182,10 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 min-h-0 mt-4">
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={280}>
           <BarChart
             data={chartData}
-            margin={{ top: 5, right: 5, left: 5, bottom: 20 }}
+            margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
             onClick={handleClick}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" />
@@ -145,22 +193,49 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
               dataKey="name" 
               stroke="#666" 
               fontSize={10}
-              angle={-45}
-              textAnchor="end"
+              tick={false} 
               height={60}
             />
             <YAxis 
               stroke="#666" 
               fontSize={11}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e8e8e8",
-                borderRadius: "8px",
-              }}
+            <Tooltip content={<TreemapTooltipContent />} />
+            <Legend 
+              verticalAlign="bottom"
+              wrapperStyle={{ marginTop: '-8px' }}
+              content={() => (
+                <div style={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  justifyContent: 'center',
+                  gap: '12px',
+                  padding: '4px 0'
+                }}>
+                  {chartData.map((item, idx) => (
+                    <div key={idx} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '6px',
+                      fontSize: '12px',
+                      color: '#666'
+                    }}>
+                      <div 
+                        style={{ 
+                          width: '12px', 
+                          height: '12px', 
+                          backgroundColor: item.fill,
+                          borderRadius: '2px',
+                          border: '1px solid #e8e8e8'
+                        }}
+                      />
+                      <span>{item.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             />
-            <Bar dataKey="value" radius={[4, 4, 0, 0]} cursor="pointer">
+            <Bar dataKey="value" name={category.name || 'Subcategories'} fill={category.color} radius={[4, 4, 0, 0]} cursor="pointer">
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
@@ -169,7 +244,14 @@ export function SubCategoryList({ category, level, breadcrumb, onSubCategorySele
         </ResponsiveContainer>
       </div>
       
-      <div className="text-xs text-center text-gray-500 mt-2 pt-2 border-t border-gray-100"></div>
+      <div style={{ 
+        fontSize: 12, 
+        textAlign: 'center', 
+        color: '#666', 
+        marginTop: 8 
+      }}>
+        Click on a bar to drill down further
+      </div>
     </div>
   );
 }

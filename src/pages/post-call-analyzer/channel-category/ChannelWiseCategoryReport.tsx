@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Card, Typography, Space, DatePicker, Button, Tooltip } from "antd";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Card, Typography, Space, Button, Tooltip } from "antd";
 import { 
   IconInfoCircle, 
   IconRefresh, 
@@ -13,17 +13,47 @@ import {
 } from "@tabler/icons-react";
 import { TablerIcon } from "@/components/ui/tabler-icon";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Label, Treemap } from "recharts";
+import DatePickerComponent from "@/components/common/DatePicker/DatePickerComponent";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import { useDate } from "@/contexts/DateContext";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
 const { Title, Text } = Typography;
 
-// Mock data for channels
-const generateChannelData = () => [
-  { name: "IVR", value: 245, color: "#4CAF50", icon: "phone" },
-  { name: "WhatsApp", value: 178, color: "#FFC107", icon: "message" },
-  { name: "Others", value: 60, color: "#9E9E9E", icon: "Grid" },
-];
+// Get colors from env.js
+const COLORS = (window as any).env_vars?.colors;
 
-const channelDataInitial = generateChannelData();
+// SimpleSubject for reactive state management (same as OverallPerformanceChart)
+class SimpleSubject<T> {
+  private observers: ((value: T) => void)[] = [];
+  private isDestroyed = false;
+  
+  next(value: T) {
+    if (!this.isDestroyed) {
+      this.observers.forEach(observer => observer(value));
+    }
+  }
+  
+  subscribe(observer: (value: T) => void) {
+    if (!this.isDestroyed) {
+      this.observers.push(observer);
+    }
+    return {
+      unsubscribe: () => {
+        const index = this.observers.indexOf(observer);
+        if (index > -1) {
+          this.observers.splice(index, 1);
+        }
+      }
+    };
+  }
+  
+  destroy() {
+    this.isDestroyed = true;
+    this.observers = [];
+  }
+}
 
 const CustomPieTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -125,62 +155,286 @@ const CustomTreemapContent = (props: any) => {
   );
 };
 
-// Mock data for categories by channel
-const categoryDataByChannel: Record<string, Array<{ category: string; percentage: number; count: number; color: string }>> = {
-  IVR: [
-    { category: "Billing Issues", percentage: 28.5, count: 70, color: "#4CAF50" },
-    { category: "Technical Support", percentage: 22.3, count: 55, color: "#2196F3" },
-    { category: "Account Management", percentage: 18.7, count: 46, color: "#FFC107" },
-    { category: "Product Inquiry", percentage: 15.2, count: 37, color: "#9C27B0" },
-    { category: "Service Complaint", percentage: 10.1, count: 25, color: "#FF5722" },
-    { category: "Refund Request", percentage: 5.2, count: 12, color: "#607D8B" },
-  ],
-  WhatsApp: [
-    { category: "Product Inquiry", percentage: 32.1, count: 57, color: "#4CAF50" },
-    { category: "Order Status", percentage: 25.8, count: 46, color: "#2196F3" },
-    { category: "Technical Support", percentage: 18.5, count: 33, color: "#FFC107" },
-    { category: "Billing Issues", percentage: 12.4, count: 22, color: "#9C27B0" },
-    { category: "General Query", percentage: 11.2, count: 20, color: "#FF5722" },
-  ],
-  Messenger: [
-    { category: "General Query", percentage: 35.6, count: 47, color: "#4CAF50" },
-    { category: "Product Inquiry", percentage: 28.8, count: 38, color: "#2196F3" },
-    { category: "Service Request", percentage: 20.5, count: 27, color: "#FFC107" },
-    { category: "Account Management", percentage: 15.1, count: 20, color: "#9C27B0" },
-  ],
-};
-
-const COLORS = [
-  "#4CAF50", "#2196F3", "#FFC107", "#9C27B0", "#FF5722", "#607D8B",
-  "#E91E63", "#00BCD4", "#8BC34A", "#FFEB3B", "#795548", "#03A9F4"
-];
 
 export default function ChannelWiseCategoryReport() {
   const [loading, setLoading] = useState(false);
-  const [channelData, setChannelData] = useState(generateChannelData());
+  const [hasError, setHasError] = useState(false);
+  const [channelData, setChannelData] = useState<any[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [categoryData, setCategoryData] = useState<Array<{ category: string; percentage: number; count: number; color: string }>>([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categoryDetailsData, setCategoryDetailsData] = useState<any>(null);
+  const [categoryDetailsLoading, setCategoryDetailsLoading] = useState(false);
+  const [localDateRange, setLocalDateRange] = useState<any>(null);
+  const { globalDateRange } = useDate();
+  const { selectedProject } = useProjectSelection();
 
-  const handleReload = () => {
-    setLoading(true);
-    setSelectedChannel(null);
-    setTimeout(() => {
-      setChannelData(generateChannelData());
-      setLoading(false);
-    }, 500);
+  // Use local date range if user has set it, otherwise use global
+  const effectiveDateRange = localDateRange || globalDateRange;
+  
+  // Force new reference when global date range changes to trigger DatePickerComponent update
+  const dateInputForPicker = effectiveDateRange ? { ...effectiveDateRange } : null;
+
+  // Reactive state management
+  const destroyRef = useRef(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const manualRefreshRef = useRef(new SimpleSubject<any>());
+
+  // Debounced refresh function for channel data
+  const debouncedRefreshChannelData = useCallback((overrideDateRange?: any) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (selectedProject && !destroyRef.current) {
+        loadData(overrideDateRange);
+      }
+    }, 300);
+  }, [selectedProject]);
+
+  // Debounced refresh function for category data
+  const debouncedRefreshCategoryData = useCallback((channelName: string, overrideDateRange?: any) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (selectedProject && !destroyRef.current) {
+        loadCategoryData(channelName, overrideDateRange);
+      }
+    }, 300);
+  }, [selectedProject]);
+
+  // Extract category data loading logic into separate function
+  const loadCategoryData = async (channelName: string, overrideDateRange?: any) => {
+    // Use override date range if provided, otherwise use effective date range
+    const dateRangeToUse = overrideDateRange || effectiveDateRange;
+    
+    if (!selectedProject || !dateRangeToUse) {
+      setCategoryData([]);
+      setCategoryLoading(false);
+      return;
+    }
+
+    setCategoryLoading(true);
+    try {
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime: dateRangeToUse.fromDate,
+        toTime: dateRangeToUse.toDate,
+        channel: getChannelValue(channelName),
+      };
+
+      const response = await callRoutingApiService.ChannelWiseCategoryDetails(filters);
+      
+      if (response?.data?.callPercentageData && Array.isArray(response.data.callPercentageData)) {
+        const transformedData = response.data.callPercentageData.map((item: any, index: number) => ({
+          category: item.category || 'Unknown',
+          percentage: parseFloat(item.percentage) || 0,
+          count: item.count || 0,
+          color: COLORS[index % COLORS.length]
+        })).sort((a, b) => b.count - a.count);
+        
+        setCategoryData(transformedData);
+      } else {
+        setCategoryData([]);
+      }
+    } catch (error) {
+      console.error('Error loading category data:', error);
+      setCategoryData([]);
+    } finally {
+      setCategoryLoading(false);
+    }
   };
 
-  const handleChannelSelect = (channelName: string) => {
+  const loadData = async (overrideDateRange?: any) => {
+    // Use override date range if provided, otherwise use effective date range
+    const dateRangeToUse = overrideDateRange || effectiveDateRange;
+    
+    if (!selectedProject || !dateRangeToUse) {
+      return;
+    }
+
+    setLoading(true);
+    setHasError(false);
+    try {
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime: dateRangeToUse.fromDate,
+        toTime: dateRangeToUse.toDate,
+      };
+
+      const response = await callRoutingApiService.ChannelWiseCallCount(filters);
+      
+      if (response?.data && Array.isArray(response.data)) {
+        // Transform API response to chart format
+        const transformedData = response.data.map((item: any, index: number) => ({
+          name: item.channel ? item.channel.charAt(0).toUpperCase() + item.channel.slice(1) : 'Unknown',
+          value: item.record_count || 0,
+          color: COLORS[index % COLORS.length],
+          icon: getChannelIconName(item.channel)
+        })).sort((a, b) => b.value - a.value);
+        
+        setChannelData(transformedData);
+      } else {
+        setChannelData([]);
+      }
+    } catch (error) {
+      console.error('Error loading channel wise data:', error);
+      setHasError(true);
+      setChannelData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDateRangeChange = (dateRange: any) => {
+    setLocalDateRange(dateRange);
+  };
+
+  const handleReload = () => {
+    manualRefreshRef.current.next({ type: 'channel', dateRange: effectiveDateRange });
+  };
+
+  // Watch for global date range changes (from ModuleTabs.tsx)
+  useEffect(() => {
+    if (destroyRef.current) return;
+
+    // If global date range changes, clear local selection to allow global to take precedence
+    if (globalDateRange) {
+      setLocalDateRange(null); // Clear local selection
+      // Trigger refresh with global date range
+      manualRefreshRef.current.next({ type: 'channel', dateRange: globalDateRange });
+    }
+  }, [globalDateRange]);
+
+  // Subscribe to manual refresh events
+  useEffect(() => {
+    const subscription = manualRefreshRef.current.subscribe((data) => {
+      if (data.type === 'channel') {
+        debouncedRefreshChannelData(data.dateRange);
+      } else if (data.type === 'category') {
+        debouncedRefreshCategoryData(data.channelName, data.dateRange);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [debouncedRefreshChannelData, debouncedRefreshCategoryData]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      destroyRef.current = true;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Check dependencies and trigger initial data load
+  useEffect(() => {
+    if (selectedProject && effectiveDateRange) {
+      manualRefreshRef.current.next({ type: 'channel', dateRange: effectiveDateRange });
+    } else {
+      setLoading(true);
+    }
+  }, [selectedProject, effectiveDateRange]);
+
+  const getChannelIconName = (channel: string) => {
+    switch (channel?.toLowerCase()) {
+      case "ivr": return "phone";
+      case "whatsapp": return "message";
+      case "messenger": return "users";
+      default: return "message";
+    }
+  };
+
+  const getChannelValue = (channelName: string) => {
+    switch (channelName?.toLowerCase()) {
+      case "ivr": return 1;
+      case "whatsapp": return 2;
+      case "messenger": return 3;
+      default: return 1;
+    }
+  };
+
+  const handleChannelSelect = async (channelName: string) => {
     setSelectedChannel(channelName);
-    setCategoryData(categoryDataByChannel[channelName] || []);
+    setCategoryLoading(true);
+    
+    // Trigger debounced category data loading
+    manualRefreshRef.current.next({ type: 'category', channelName, dateRange: effectiveDateRange });
   };
 
   const handleCloseCategories = () => {
     setSelectedChannel(null);
     setCategoryData([]);
+    setCategoryLoading(false);
+    setSelectedCategory(null);
+    setCategoryDetailsData(null);
+    setCategoryDetailsLoading(false);
   };
 
-  const handleCategoryClick = (category: string) => {
+  const handleCategoryClick = async (category: string) => {
+    setSelectedCategory(category);
+    setCategoryDetailsLoading(true);
+    
+    if (!selectedProject || !effectiveDateRange || !selectedChannel) {
+      setCategoryDetailsData(null);
+      setCategoryDetailsLoading(false);
+      return;
+    }
+
+    try {
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime: effectiveDateRange.fromDate,
+        toTime: effectiveDateRange.toDate,
+        channel: getChannelValue(selectedChannel),
+        category: category,
+      };
+
+      const response = await callRoutingApiService.ChannelWiseCategoryDetails(filters);
+      
+      if (response?.data) {
+        setCategoryDetailsData(response.data);
+      } else {
+        setCategoryDetailsData(null);
+      }
+    } catch (error) {
+      console.error('Error loading category details:', error);
+      setCategoryDetailsData(null);
+    } finally {
+      setCategoryDetailsLoading(false);
+    }
   };
 
   const getChannelIcon = (iconName: string) => {
@@ -221,15 +475,17 @@ export default function ChannelWiseCategoryReport() {
                   </Tooltip>
                 </div>
                 <Text type="secondary" className="text-sm">
-                  Call distribution by channel
+                  {effectiveDateRange?.dateRangeForDisplay || 'Select date range'}
                 </Text>
               </div>
             </Space>
             
             <Space size="small" orientation="horizontal">
-              <DatePicker 
-                suffixIcon={<IconCalendar />}
-                className="rounded-lg"
+              <DatePickerComponent
+                dateInput={dateInputForPicker}
+                onSelectedRangeValueChange={handleDateRangeChange}
+                toolTipValue="Select date range for channel category data"
+                calenderType=""
               />
               <Button 
                 type="text" 
@@ -260,9 +516,14 @@ export default function ChannelWiseCategoryReport() {
             <Title level={5} className="!m-0 !mb-4">Channels</Title>
             
             {loading ? (
-              <div className="flex items-center justify-center h-[300px]">
-                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
+              <ExceptionHandleView type="loading" />
+            ) : hasError ? (
+              <ExceptionHandleView 
+                type="500" 
+                title="Error Loading Data"
+                content="channel wise call count data"
+                onTryAgain={handleReload}
+              />
             ) : channelData.length > 0 ? (
               <>
                 <ResponsiveContainer width="100%" height={300}>
@@ -340,9 +601,12 @@ export default function ChannelWiseCategoryReport() {
                 </Text>
               </>
             ) : (
-              <div className="flex items-center justify-center h-[300px] text-gray-500">
-                No data available
-              </div>
+              <ExceptionHandleView 
+                type="204" 
+                title="No Data Available"
+                content="channel wise call count data for the selected period"
+                onTryAgain={handleReload}
+              />
             )}
           </Card>
 
@@ -372,11 +636,11 @@ export default function ChannelWiseCategoryReport() {
                 />
               </div>
 
-              {loading ? (
+              {categoryLoading ? (
                 <div className="flex items-center justify-center h-[380px]">
                   <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-              ) : (
+              ) : categoryData.length > 0 ? (
                 <>
                   {/* Recharts Treemap */}
                   <Card className="rounded-lg border-gray-200 bg-white p-2 mb-4">
@@ -434,6 +698,87 @@ export default function ChannelWiseCategoryReport() {
                     </div>
                   </div>
                 </>
+              ) : (
+                <ExceptionHandleView 
+                  type="204" 
+                  title="No Category Data Available"
+                  content="category distribution for the selected channel"
+                />
+              )}
+            </Card>
+          )}
+
+          {/* Category Details Card - Only show when category is selected */}
+          {selectedCategory && (
+            <Card
+              style={{
+                borderRadius: 12,
+                border: '1px solid #e8e8e8',
+                background: '#ffffff',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                padding: 16,
+                flex: '0 0 50%',
+                animation: 'slideInFromRight 0.5s ease-out'
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <Title level={5} className="!m-0">Category Details</Title>
+                  <Text type="secondary" className="text-sm">{selectedCategory}</Text>
+                </div>
+                <Button 
+                  type="text" 
+                  icon={<IconX />}
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setCategoryDetailsData(null);
+                    setCategoryDetailsLoading(false);
+                  }}
+                  className="w-9 h-9"
+                />
+              </div>
+
+              {categoryDetailsLoading ? (
+                <div className="flex items-center justify-center h-[200px]">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : categoryDetailsData?.callPercentageData ? (
+                <>
+                  <div className="mb-4">
+                    <Text type="secondary" className="text-sm">
+                      Total Calls: <span className="font-semibold">{categoryDetailsData.totalCallCount}</span>
+                    </Text>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {categoryDetailsData.callPercentageData.map((item: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div 
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: 2,
+                              flexShrink: 0,
+                              backgroundColor: COLORS[index % COLORS.length]
+                            }}
+                          />
+                          <Text className="text-sm font-medium">{item.category}</Text>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-semibold">{item.count}</div>
+                          <div className="text-xs text-gray-500">{item.percentage}%</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <ExceptionHandleView 
+                  type="204" 
+                  title="No Details Available"
+                  content="category details for the selected category"
+                />
               )}
             </Card>
           )}

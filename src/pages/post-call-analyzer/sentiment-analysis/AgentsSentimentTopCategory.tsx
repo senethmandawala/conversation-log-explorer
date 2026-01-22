@@ -4,47 +4,136 @@ import { Button } from "antd";
 import { IconX } from "@tabler/icons-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
 import { BarChartTooltip } from "@/components/ui/custom-chart-tooltip";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
+import { useProjectSelection } from "@/services/projectSelectionService";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
 
 interface AgentsSentimentTopCategoryProps {
   selectedSentiment: string;
   onCategorySelect: (category: { name: string; color: string }) => void;
   onClose: () => void;
+  dateRange?: any;
+  hasError?: boolean;
+  onRetry?: () => void;
 }
 
-const COLORS = ['#4285F4', '#34A853', '#FBBC04', '#EA4335', '#9C27B0', '#FF6F00', '#00ACC1', '#7CB342'];
+// Get colors from environment config
+const COLORS = window.env_vars?.colors;
 
-const mockCategoryData = [
-  { name: 'Billing Issues', count: 125 },
-  { name: 'Technical Support', count: 108 },
-  { name: 'Account Management', count: 88 },
-  { name: 'Product Inquiry', count: 77 },
-  { name: 'Service Complaint', count: 66 },
-  { name: 'Refund Request', count: 55 },
-  { name: 'General Query', count: 44 },
-  { name: 'Feature Request', count: 33 },
-];
+// Custom tooltip for category charts with correct colors
+const CategoryTooltip = ({ active, payload }: any) => {
+  if (!active || !payload || !payload.length) return null;
+
+  return (
+    <div className="bg-popover/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl min-w-[140px]">
+      <div className="space-y-1.5">
+        {payload.map((item: any, index: number) => {
+          const color = item.payload?.color || item.color || item.fill || "hsl(var(--primary))";
+          const name = item.payload?.name || item.name || "Category";
+          const value = item.value;
+
+          return (
+            <div key={index} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm" 
+                  style={{ backgroundColor: color }}
+                />
+                <span className="text-sm text-foreground/80">{name}</span>
+              </div>
+              <span className="text-sm font-semibold text-foreground tabular-nums">
+                {value ?? 0}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 export const AgentsSentimentTopCategory = ({ 
   selectedSentiment, 
   onCategorySelect,
-  onClose 
+  onClose,
+  dateRange,
+  hasError = false,
+  onRetry
 }: AgentsSentimentTopCategoryProps) => {
+  const { selectedProject } = useProjectSelection();
+  
   const [loading, setLoading] = useState(true);
-  const [categoryData, setCategoryData] = useState(mockCategoryData);
+  const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [error, setError] = useState(false);
+  
+  // Use the passed dateRange directly
+  const effectiveDateRange = dateRange;
 
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setCategoryData(mockCategoryData);
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [selectedSentiment]);
+    const loadCategoryData = async () => {
+      if (!selectedProject || !effectiveDateRange || !selectedSentiment) {
+        setCategoryData([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(false);
+      
+      try {
+        const tenantId = parseInt(selectedProject.tenant_id);
+        const subtenantId = parseInt(selectedProject.sub_tenant_id);
+        const companyId = parseInt(selectedProject.company_id);
+        const departmentId = parseInt(selectedProject.department_id);
+
+        const filters = {
+          tenantId,
+          subtenantId,
+          companyId,
+          departmentId,
+          fromTime: effectiveDateRange.fromDate,
+          limit: 10,
+          toTime: effectiveDateRange.toDate,
+          sentiment: 'agent', 
+          sentiment_type: selectedSentiment
+        };
+
+        const response = await callRoutingApiService.AgentSentimentCategory(filters);
+        
+        if (response?.data?.callPercentageData && Array.isArray(response.data.callPercentageData)) {
+          const transformedData = response.data.callPercentageData.map((item: any, index: number) => ({
+            name: item.category || 'Unknown',
+            count: item.count || 0,
+            percentage: parseFloat(item.percentage) || 0,
+            originalIndex: index // Keep original index for color assignment
+          })).sort((a, b) => b.count - a.count);
+          
+          // Assign colors after sorting based on original index
+          const dataWithColors = transformedData.map((item, index) => ({
+            ...item,
+            color: COLORS[item.originalIndex % COLORS.length]
+          }));
+          
+          setCategoryData(dataWithColors);
+        } else {
+          setCategoryData([]);
+        }
+      } catch (error) {
+        console.error('Error loading agent sentiment categories:', error);
+        setError(true);
+        setCategoryData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCategoryData();
+  }, [selectedProject, effectiveDateRange, selectedSentiment]);
 
   const handleBarClick = (data: any, index: number) => {
     onCategorySelect({
       name: data.name,
-      color: COLORS[index % COLORS.length]
+      color: data.color // Use the data's color property
     });
   };
 
@@ -53,7 +142,41 @@ export const AgentsSentimentTopCategory = ({
       <Card className="border-border/50">
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-[400px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <ExceptionHandleView type="loading" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  if (error || hasError) {
+    return (
+      <Card className="border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-[400px]">
+            <ExceptionHandleView 
+              type="500" 
+              title="Error Loading Categories"
+              content="agent sentiment category data"
+              onTryAgain={onRetry}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  if (!categoryData.length) {
+    return (
+      <Card className="border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-[400px]">
+            <ExceptionHandleView 
+              type="204" 
+              title="No Categories Found"
+              content={`${selectedSentiment} agent sentiment categories for the selected period`}
+              onTryAgain={onRetry}
+            />
           </div>
         </CardContent>
       </Card>
@@ -95,7 +218,7 @@ export const AgentsSentimentTopCategory = ({
               label={{ value: 'Call Count', angle: -90, position: 'insideLeft', style: { fontWeight: 700 } }}
             />
             <Tooltip 
-              content={<BarChartTooltip />}
+              content={<CategoryTooltip />}
               cursor={{ fill: 'hsl(var(--muted))' }}
             />
             <Bar 
@@ -105,7 +228,7 @@ export const AgentsSentimentTopCategory = ({
               style={{ cursor: 'pointer' }}
             >
               {categoryData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>
@@ -116,7 +239,7 @@ export const AgentsSentimentTopCategory = ({
             <div key={index} className="flex items-center gap-2 text-xs">
               <div 
                 className="w-3 h-3 rounded-sm" 
-                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                style={{ backgroundColor: item.color }}
               />
               <span className="text-muted-foreground truncate">{item.name}</span>
             </div>

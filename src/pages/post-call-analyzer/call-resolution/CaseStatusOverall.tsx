@@ -1,55 +1,86 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { PieChartTooltip } from "@/components/ui/custom-chart-tooltip";
 
 interface CaseStatusOverallProps {
   onCaseSelect: (caseType: string) => void;
+  data: any;
 }
 
 const COLORS = {
   Open: '#64B5F6',
-  Close: '#B2BDC1'
+  Closed: '#66BB6A'
 };
 
-export const CaseStatusOverall = ({ onCaseSelect }: CaseStatusOverallProps) => {
-  const [loading, setLoading] = useState(true);
-  const [statusData, setStatusData] = useState({
-    open: 320,
-    close: 680,
-    total: 1000
-  });
+// Custom tooltip for case status charts
+const CaseStatusTooltip = ({ active, payload }: any) => {
+  if (!active || !payload || !payload.length) return null;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  return (
+    <div className="bg-popover/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl min-w-[140px]">
+      <div className="space-y-1.5">
+        {payload.map((item: any, index: number) => {
+          const color = item.payload?.color || item.color || item.fill || "hsl(var(--primary))";
+          const name = item.name || item.dataKey || "Value";
+          const value = item.value;
+
+          return (
+            <div key={index} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm" 
+                  style={{ backgroundColor: color }}
+                />
+                <span className="text-sm text-foreground/80">{name}</span>
+              </div>
+              <span className="text-sm font-semibold text-foreground tabular-nums">
+                {value ?? 0}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export const CaseStatusOverall = ({ onCaseSelect, data }: CaseStatusOverallProps) => {
+  // Transform API data to expected format
+  const getStatusData = () => {
+    if (data) {
+      return {
+        open: data.openCasesCount || 0,
+        closed: data.closedCasesCount || 0,
+        total: data.totalCasesCount || 0
+      };
+    }
+    return {
+      open: 0,
+      closed: 0,
+      total: 0
+    };
+  };
+  
+  const statusData = getStatusData();
 
   const chartData = [
     { name: 'Open', value: statusData.open, color: COLORS.Open },
-    { name: 'Close', value: statusData.close, color: COLORS.Close },
+    { name: 'Closed', value: statusData.closed, color: COLORS.Closed },
   ];
 
   const handlePieClick = (data: any, index: number) => {
-    onCaseSelect(data.name);
+    // Map display name to API caseStatus value
+    const caseStatusMap: Record<string, string> = {
+      'Open': 'open',
+      'Closed': 'close'
+    };
+    onCaseSelect(caseStatusMap[data.name] || data.name.toLowerCase());
   };
-
-  if (loading) {
-    return (
-      <Card className="border-border/50">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-[400px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="border-border/50">
       <CardContent className="p-6">
-        <h5 className="text-lg font-semibold mb-4">Overall</h5>
+        <h5 className="text-lg font-semibold mb-4">Overall Case Status</h5>
         
         <div className="flex flex-col items-center">
           <ResponsiveContainer width="100%" height={300}>
@@ -89,7 +120,7 @@ export const CaseStatusOverall = ({ onCaseSelect }: CaseStatusOverallProps) => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<PieChartTooltip />} />
+              <Tooltip content={<CaseStatusTooltip />} />
             </PieChart>
           </ResponsiveContainer>
 
@@ -100,13 +131,13 @@ export const CaseStatusOverall = ({ onCaseSelect }: CaseStatusOverallProps) => {
               <p className="text-xs text-muted-foreground mb-1">Total</p>
               <h3 className="text-2xl font-bold">{statusData.total}</h3>
             </div>
-            <div className="text-center text-amber-500">
+            <div className="text-center" style={{ color: COLORS.Open }}>
               <p className="text-xs text-muted-foreground mb-1">Open</p>
               <h3 className="text-2xl font-bold">{statusData.open}</h3>
             </div>
-            <div className="text-center text-emerald-500">
-              <p className="text-xs text-muted-foreground mb-1">Close</p>
-              <h3 className="text-2xl font-bold">{statusData.close}</h3>
+            <div className="text-center" style={{ color: COLORS.Closed }}>
+              <p className="text-xs text-muted-foreground mb-1">Closed</p>
+              <h3 className="text-2xl font-bold">{statusData.closed}</h3>
             </div>
           </div>
         </div>

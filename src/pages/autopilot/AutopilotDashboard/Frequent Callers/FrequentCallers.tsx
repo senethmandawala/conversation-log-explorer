@@ -34,8 +34,6 @@ const { Title, Text } = Typography;
 
 // Get colors from environment configuration
 const COLORS = (window as any).env_vars?.colors || [
-  '#FB6767', '#5766BC', '#62B766', '#FBA322', '#E83B76', 
-  '#3EA1F0', '#98C861', '#FB6C3E', '#24B1F1', '#D0DD52'
 ];
 
 interface CallerData {

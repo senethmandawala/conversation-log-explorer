@@ -1,173 +1,267 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "antd";
+import { useEffect, useState } from "react";
+import { IconX, IconRefresh } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { IconInfoCircle, IconRefresh } from "@tabler/icons-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Typography, Table as AntTable, Badge as AntBadge, Space, Tooltip as AntTooltip } from "antd";
-import { IconClock, IconUser } from "@tabler/icons-react";
+import { callRoutingApiService } from "@/services/callRoutingApiService";
+import { useProjectSelection } from "@/services/projectSelectionService";
 import { TablerIcon } from "@/components/ui/tabler-icon";
-import { StatusBadge } from "@/components/ui/status-badge";
-import "@/components/ui/status-badge.css";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import ExceptionHandleView from "@/components/ui/ExceptionHandleView";
 
-const { Title, Text } = Typography;
+interface DurationCallLogsProps {
+  category?: string;
+  fromTime?: string;
+  toTime?: string;
+}
 
-const mockCallLogs = [
-  { id: 1, date: "2024-01-15", time: "10:30 AM", msisdn: "+94771234567", duration: "25:30", category: "Technical Issues", agent: "John Smith", sentiment: "Negative", status: "Resolved" },
-  { id: 2, date: "2024-01-15", time: "11:45 AM", msisdn: "+94772345678", duration: "22:15", category: "Account Closure", agent: "Jane Doe", sentiment: "Neutral", status: "Pending" },
-  { id: 3, date: "2024-01-14", time: "02:15 PM", msisdn: "+94773456789", duration: "19:45", category: "Billing Issues", agent: "Mike Johnson", sentiment: "Positive", status: "Resolved" },
-  { id: 4, date: "2024-01-14", time: "03:30 PM", msisdn: "+94774567890", duration: "18:20", category: "Refund Requests", agent: "Sarah Wilson", sentiment: "Negative", status: "Escalated" },
-  { id: 5, date: "2024-01-13", time: "09:20 AM", msisdn: "+94775678901", duration: "17:50", category: "Technical Issues", agent: "Chris Brown", sentiment: "Neutral", status: "Resolved" },
-  { id: 6, date: "2024-01-13", time: "01:10 PM", msisdn: "+94776789012", duration: "16:40", category: "Service Request", agent: "Emily Davis", sentiment: "Positive", status: "Resolved" },
-  { id: 7, date: "2024-01-12", time: "04:25 PM", msisdn: "+94777890123", duration: "15:55", category: "Product Inquiry", agent: "David Lee", sentiment: "Neutral", status: "Resolved" },
-  { id: 8, date: "2024-01-12", time: "11:00 AM", msisdn: "+94778901234", duration: "15:30", category: "Billing Issues", agent: "Lisa Wang", sentiment: "Negative", status: "Pending" },
-];
-
-export function DurationCallLogs() {
+export function DurationCallLogs({ category, fromTime, toTime }: DurationCallLogsProps) {
   const [loading, setLoading] = useState(false);
+  const [callLogs, setCallLogs] = useState<any[]>([]);
+  const [error, setError] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 7,
+    totalElements: 0,
+    totalPages: 0,
+    last: true,
+    first: true
+  });
+  const { selectedProject } = useProjectSelection();
+
+  const loadCallLogs = async (page: number = 1, size: number = 7) => {
+    if (!selectedProject || !fromTime || !toTime) {
+      return;
+    }
+
+    setLoading(true);
+    setError(false);
+
+    try {
+      const tenantId = parseInt(selectedProject.tenant_id);
+      const subtenantId = parseInt(selectedProject.sub_tenant_id);
+      const companyId = parseInt(selectedProject.company_id);
+      const departmentId = parseInt(selectedProject.department_id);
+
+      const filters = {
+        tenantId,
+        subtenantId,
+        companyId,
+        departmentId,
+        fromTime,
+        toTime,
+        category: category || '',
+        page,
+        size,
+        sort: 'id',
+        sortOrder: 'DESC'
+      };
+
+      const response = await callRoutingApiService.TopCategoryCallDurationCallLogs(filters);
+
+      if (response?.data?.content && Array.isArray(response.data.content)) {
+        setCallLogs(response.data.content);
+        setPagination({
+          page: (response.data.number || 0) + 1,
+          size: response.data.size || size,
+          totalElements: response.data.totalElements || 0,
+          totalPages: response.data.totalPages || 0,
+          last: response.data.last || true,
+          first: response.data.first || true
+        });
+      } else {
+        setCallLogs([]);
+        setPagination({
+          page: 1,
+          size: 7,
+          totalElements: 0,
+          totalPages: 0,
+          last: true,
+          first: true
+        });
+      }
+    } catch (error) {
+      console.error('Error loading call logs:', error);
+      setError(true);
+      setCallLogs([]);
+    }
+    
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (category && fromTime && toTime) {
+      loadCallLogs();
+    }
+  }, [category, fromTime, toTime, selectedProject]);
 
   const handleReload = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 500);
+    loadCallLogs(pagination.page, pagination.size);
   };
 
-  const handleCallClick = (call: typeof mockCallLogs[0]) => {
+  const handlePageChange = (newPage: number) => {
+    loadCallLogs(newPage, pagination.size);
   };
 
-  const getSentimentIcon = (sentiment: string) => {
+  const getSentimentIcon = (sentiment: number) => {
     switch (sentiment) {
-      case "positive":
-        return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={24} />, title: "Positive" };
-      case "negative":
-        return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={24} />, title: "Negative" };
+      case 2:
+        return { icon: <TablerIcon name="mood-smile-beam" className="text-green-500" size={20} />, title: "Positive" };
+      case 1:
+        return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
+      case 0:
+        return { icon: <TablerIcon name="mood-sad" className="text-red-500" size={20} />, title: "Negative" };
       default:
-        return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={24} />, title: "Neutral" };
+        return { icon: <TablerIcon name="mood-empty" className="text-yellow-500" size={20} />, title: "Neutral" };
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'resolved':
-        return 'success';
-      case 'pending':
-        return 'amber';
-      case 'escalated':
-        return 'warn';
+  const getGenderBadge = (gender: number) => {
+    switch (gender) {
+      case 1:
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30">Male</Badge>;
+      case 2:
+        return <Badge variant="outline" className="bg-pink-500/10 text-pink-600 border-pink-500/30">Female</Badge>;
       default:
-        return 'basic';
+        return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getStatusBadge = (statusType: string, status: string) => {
+    switch (statusType.toLowerCase()) {
+      case "success":
+        return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">{status}</Badge>;
+      case "warning":
+        return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">{status}</Badge>;
+      case "danger":
+        return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">{status}</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <Text type="secondary">Showing {mockCallLogs.length} calls</Text>
-        </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">
+          Showing {callLogs.length} of {pagination.totalElements} calls
+        </span>
         <Button 
-          type="text" 
-           
-          className="h-9 w-9"
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8"
           onClick={handleReload}
+          disabled={loading}
         >
-          <IconRefresh className="h-4 w-4" />
+          <IconRefresh className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-[300px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <ExceptionHandleView 
+          type="loading" 
+          justLoading={false}
+          className="!p-0"
+        />
+      ) : error ? (
+        <ExceptionHandleView 
+          type="500" 
+          title="Error loading call logs"
+          content="duration call logs"
+          onTryAgain={handleReload}
+          className="!p-0"
+        />
+      ) : callLogs.length > 0 ? (
+        <div className="border border-border/50 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted/50 backdrop-blur-sm z-10">
+                <TableRow>
+                  <TableHead className="font-semibold">Date/Time</TableHead>
+                  <TableHead className="font-semibold">MSISDN</TableHead>
+                  <TableHead className="font-semibold text-center">Sentiment</TableHead>
+                  <TableHead className="font-semibold text-center">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {callLogs.map((call) => (
+                  <TableRow 
+                    key={call.id} 
+                    className="hover:bg-muted/50 cursor-pointer transition-colors"
+                  >
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {new Date(call.call_at).toLocaleDateString()}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(call.call_at).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{call.mobile_no}</TableCell>
+                    <TableCell className="text-center">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="inline-flex cursor-help">
+                            {getSentimentIcon(call.user_sentiment).icon}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getSentimentIcon(call.user_sentiment).title}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getStatusBadge(call.case_status === 0 ? 'warning' : call.case_status === 1 ? 'success' : 'danger', 
+                        call.case_status === 0 ? 'Pending' : call.case_status === 1 ? 'Resolved' : 'Escalated')}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          
+          {/* Pagination Controls */}
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between p-4 border-t border-border/50">
+              <div className="text-sm text-muted-foreground">
+                Page {pagination.page} of {pagination.totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.first || loading}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.last || loading}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
-        <AntTable
-          dataSource={mockCallLogs}
-          rowKey="id"
-          pagination={{
-            pageSize: 8,
-            showTotal: (total, range) => (
-              <Text type="secondary">
-                Showing <Text strong>{range[0]}-{range[1]}</Text> of <Text strong>{total}</Text> results
-              </Text>
-            ),
-            showSizeChanger: true,
-            pageSizeOptions: ['5', '8', '10', '20'],
-          }}
-          className="rounded-xl overflow-hidden"
-          rowClassName={() => 
-            'transition-all duration-200 hover:shadow-[inset_3px_0_0_0_#6366f1]'
-          }
-          columns={[
-            {
-              title: 'Date & Time',
-              key: 'dateTime',
-              align: 'center',
-              render: (_, record) => (
-                <div>
-                  <Text className="block">{record.date}</Text>
-                  <Text type="secondary" className="text-xs">{record.time}</Text>
-                </div>
-              ),
-            },
-            {
-              title: 'MSISDN',
-              dataIndex: 'msisdn',
-              key: 'msisdn',
-              align: 'center',
-              render: (text: string) => (
-                <StatusBadge title={text} color="primary" size="xs" />
-              ),
-            },
-            {
-              title: 'Category',
-              dataIndex: 'category',
-              key: 'category',
-              align: 'center',
-              render: (text: string) => (
-                <StatusBadge title={text} color="basic" size="xs" />
-              ),
-            },
-            {
-              title: 'Agent',
-              dataIndex: 'agent',
-              key: 'agent',
-              render: (text: string) => (
-                <Space>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
-                    <IconUser className="text-white text-sm" />
-                  </div>
-                  <Text strong>{text}</Text>
-                </Space>
-              ),
-            },
-            {
-              title: 'Sentiment',
-              dataIndex: 'sentiment',
-              key: 'sentiment',
-              align: 'center',
-              render: (sentiment: string) => {
-                const sentimentConfig = getSentimentIcon(sentiment);
-                return (
-                  <AntTooltip title={sentimentConfig.title}>
-                    {sentimentConfig.icon}
-                  </AntTooltip>
-                );
-              },
-            },
-            {
-              title: 'Status',
-              dataIndex: 'status',
-              key: 'status',
-              align: 'center',
-              render: (status: string) => (
-                <StatusBadge 
-                  title={status} 
-                  color={getStatusColor(status)} 
-                  size="xs" 
-                />
-              ),
-            },
-          ]}
+        <ExceptionHandleView 
+          type="204" 
+          title="No Call Logs Data"
+          content="duration call logs"
+          onTryAgain={handleReload}
+          className="!p-0"
         />
       )}
     </div>
