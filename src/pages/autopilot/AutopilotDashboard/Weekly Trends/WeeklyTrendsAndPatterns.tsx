@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { IconInfoCircle, IconRefresh, IconCalendar, IconList, IconCalendarEvent } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
@@ -198,8 +198,8 @@ export function WeeklyTrendsAndPatterns() {
             
             <Space size="small">
               <Button 
-                variant="ghost" 
-                size="sm"
+                type="text" 
+                size="small"
                 className="gap-1.5"
               >
                 <IconCalendar className="h-4 w-4" />

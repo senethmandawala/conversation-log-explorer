@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ModuleContextType {
   showModuleTabs: boolean;
@@ -11,7 +12,13 @@ const ModuleContext = createContext<ModuleContextType | undefined>(undefined);
 
 export function ModuleProvider({ children }: { children: ReactNode }) {
   const [showModuleTabs, setShowModuleTabs] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(isMobile);
+
+  // Auto-collapse sidebar on mobile
+  useEffect(() => {
+    setSidebarCollapsed(isMobile);
+  }, [isMobile]);
 
   return (
     <ModuleContext.Provider value={{ 

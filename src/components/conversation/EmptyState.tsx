@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { IconFileOff, IconAlertCircle, IconRefresh, IconInbox } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
@@ -69,8 +69,8 @@ export function EmptyState({ type, message, onRetry }: EmptyStateProps) {
         >
           <Button 
             onClick={onRetry} 
-            variant="outline" 
-            size="sm"
+            type="default" 
+            size="small"
             className="rounded-full px-6 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
           >
             <IconRefresh className="h-4 w-4 mr-2" />

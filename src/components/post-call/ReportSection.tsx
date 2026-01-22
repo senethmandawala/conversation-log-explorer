@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { IconCalendar, IconDownload, IconMaximize, IconInfoCircle } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
@@ -198,7 +198,7 @@ export const ReportSection = ({ title, description, hasChart, hasFilter, note, c
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
+            <Button type="text" size="small" className="h-8 gap-1.5 text-muted-foreground hover:text-foreground">
               <IconCalendar className="h-3.5 w-3.5" />
               Today
             </Button>

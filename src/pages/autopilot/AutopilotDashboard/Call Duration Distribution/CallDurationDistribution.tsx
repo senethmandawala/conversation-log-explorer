@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { IconInfoCircle, IconRefresh, IconCalendar, IconList, IconClock } from "@tabler/icons-react";
 import {
@@ -216,10 +216,10 @@ export function CallDurationDistribution() {
 
   return (
     <AntCard className="rounded-xl border-gray-200 bg-white shadow-sm p-4">
-      <Space orientation="vertical" size="middle" className="w-full">
+      <Space orientation="vertical" size="small" className="w-full">
         <div className="-mt-3">
           <div className="flex justify-between items-center w-full">
-            <Space align="center" size="middle">
+            <Space align="center" size="small">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
                 <IconClock className="text-xl" />
               </div>

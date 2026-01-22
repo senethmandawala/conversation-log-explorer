@@ -1,11 +1,18 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import { IconLayoutSidebarLeftCollapse } from "@tabler/icons-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
+
+const Slot = React.forwardRef<any, any>(({ children, ...props }, ref) => {
+  if (React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, { ref, ...props });
+  }
+  return <span ref={ref} {...props}>{children}</span>;
+});
+Slot.displayName = "Slot";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -107,7 +114,7 @@ const SidebarProvider = React.forwardRef<
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delayDuration={0}>
+      <TooltipProvider>
         <div
           style={
             {
@@ -224,9 +231,8 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
       <Button
         ref={ref}
         data-sidebar="trigger"
-        variant="ghost"
-        size="icon"
-        className={cn("h-7 w-7", className)}
+        type="text"
+        className={cn("h-7 w-7 flex items-center justify-center", className)}
         onClick={(event) => {
           onClick?.(event);
           toggleSidebar();
@@ -468,7 +474,7 @@ const SidebarMenuButton = React.forwardRef<
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent side="right" align="center" hidden={state !== "collapsed" || isMobile} {...tooltip} />
+      <TooltipContent side="right" hidden={state !== "collapsed" || isMobile} {...tooltip} />
     </Tooltip>
   );
 });

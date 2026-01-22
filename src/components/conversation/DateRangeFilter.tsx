@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -83,7 +83,7 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          type="default"
           className={cn(
             "w-full justify-between h-9 text-sm font-normal",
             value && "border-primary/50 bg-primary/5"

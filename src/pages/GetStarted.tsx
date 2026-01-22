@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { IconPhone, IconRobot, IconMessage, IconArrowRight, IconBook, IconSparkles } from "@tabler/icons-react";
+import { Button } from "antd";
+import { IconArrowRight, IconArrowUpRight } from "@tabler/icons-react";
 
 interface ModuleCardProps {
   title: string;
   description: string;
-  icon: React.ElementType;
+  iconSrc?: string;
+  icon?: React.ElementType;
   gradient: string;
   iconBg: string;
   enabled: boolean;
@@ -15,7 +16,7 @@ interface ModuleCardProps {
   delay: number;
 }
 
-const ModuleCard = ({ title, description, icon: Icon, gradient, iconBg, enabled, onClick, delay }: ModuleCardProps) => (
+const ModuleCard = ({ title, description, iconSrc, icon: Icon, gradient, iconBg, enabled, onClick, delay }: ModuleCardProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -35,14 +36,18 @@ const ModuleCard = ({ title, description, icon: Icon, gradient, iconBg, enabled,
       <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${gradient}`} />
       
       {/* Icon */}
-      <div className={`relative w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
-        <Icon className="h-7 w-7 text-white" />
+      <div className={`relative w-14 h-14 rounded-md ${iconBg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
+        {iconSrc ? (
+          <img src={iconSrc} alt={title} className="h-7 w-7" />
+        ) : Icon ? (
+          <Icon className="h-7 w-7 text-white" />
+        ) : null}
       </div>
       
       {/* Content */}
       <div className="relative">
-        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{description}</p>
+        <h3 className="text-lg font-semibold text-heading mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground mb-4">{description}</p>
       </div>
       
       {/* Arrow */}
@@ -52,7 +57,7 @@ const ModuleCard = ({ title, description, icon: Icon, gradient, iconBg, enabled,
             ? "bg-primary/10 group-hover:bg-primary group-hover:text-white" 
             : "bg-muted"
         }`}>
-          <IconArrowRight className={`h-5 w-5 transition-transform duration-300 ${enabled ? "group-hover:translate-x-1" : ""}`} />
+          <IconArrowUpRight className={`h-5 w-5 transition-transform duration-300`} />
         </div>
       </div>
       
@@ -84,13 +89,13 @@ const InfoCard = ({ title, description, buttonText, disabled = true, delay }: In
     <Card className="p-5 border-border/50 bg-card/80 backdrop-blur-sm h-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 h-full">
         <div>
-          <h4 className="font-semibold text-foreground mb-1">{title}</h4>
+          <h4 className="font-semibold text-heading mb-1">{title}</h4>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
         <Button
-          variant="outline"
+          type="default"
           disabled={disabled}
-          className="shrink-0 rounded-xl border-border/60 hover:bg-primary/5 hover:border-primary/50"
+          className="shrink-0 rounded-md border-border/60 hover:bg-primary/5 hover:border-primary/50"
         >
           {buttonText}
         </Button>
@@ -106,27 +111,27 @@ export default function GetStarted() {
     {
       title: "Post Call Analyzer",
       description: "Analyze call recordings with AI-powered insights to improve customer service quality and agent performance.",
-      icon: IconPhone,
-      gradient: "bg-gradient-to-br from-blue-500/10 via-transparent to-transparent",
-      iconBg: "bg-gradient-to-br from-blue-500 to-blue-600",
+      iconSrc: "/src/assets/images/ai-pca-logo-icon.svg",
+      gradient: "bg-gradient-to-br from-primary/10 via-transparent to-transparent",
+      iconBg: "bg-primary/10",
       enabled: true,
       route: "/instances?module=pca",
     },
     {
       title: "Autopilot",
       description: "Automate customer interactions with intelligent AI agents that handle queries 24/7 with human-like responses.",
-      icon: IconRobot,
-      gradient: "bg-gradient-to-br from-purple-500/10 via-transparent to-transparent",
-      iconBg: "bg-gradient-to-br from-purple-500 to-purple-600",
+      iconSrc: "/src/assets/images/autopilot.svg",
+      gradient: "bg-gradient-to-br from-primary/10 via-transparent to-transparent",
+      iconBg: "bg-primary/10",
       enabled: true,
       route: "/instances?module=autopilot",
     },
     {
       title: "Copilot",
       description: "Real-time AI assistance for agents during live calls, providing suggestions and information on demand.",
-      icon: IconMessage,
-      gradient: "bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent",
-      iconBg: "bg-gradient-to-br from-emerald-500 to-emerald-600",
+      iconSrc: "/src/assets/images/copilot.svg",
+      gradient: "bg-gradient-to-br from-primary/10 via-transparent to-transparent",
+      iconBg: "bg-primary/10",
       enabled: false,
       route: "/instances?module=copilot",
     },
@@ -139,7 +144,7 @@ export default function GetStarted() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl p-8 md:p-10 mb-8"
+        className="relative overflow-hidden rounded-md p-8 md:p-10 mb-8"
         style={{
           backgroundImage: 'url("/src/assets/images/sense-ai-banner.webp")',
           backgroundSize: 'cover',
@@ -151,9 +156,6 @@ export default function GetStarted() {
         <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20" />
         
         <div className="relative flex items-center gap-4">
-          <div className="hidden md:flex h-16 w-16 rounded-2xl bg-white/30 backdrop-blur-sm items-center justify-center">
-            <IconSparkles className="h-8 w-8 text-white" />
-          </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
               Welcome to Sense AI

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { IconArrowLeft, IconInfoCircle, IconRefresh, IconCalendar, IconList, IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
 import { usePostCall } from "@/contexts/PostCallContext";
@@ -398,10 +398,10 @@ export default function CallDurationReport() {
               calenderType=""
               dateInput={dateInputForPicker}
             />
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleReload} disabled={loading || !effectiveDateRange}>
+            <Button type="text" className="h-9 w-9 flex items-center justify-center" onClick={handleReload} disabled={loading || !effectiveDateRange}>
               <IconRefresh className={cn(loading && "animate-spin")} />
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
+            <Button type="text"  className="h-9 w-9">
               <IconList className="h-4 w-4" />
             </Button>
           </div>
@@ -413,7 +413,7 @@ export default function CallDurationReport() {
           activeKey={activeTab}
           onChange={(value) => setActiveTab(value)}
           className="w-full"
-          size="large"
+          size="small"
           items={[
             {
               key: "duration",
@@ -510,9 +510,9 @@ export default function CallDurationReport() {
                                       Call Logs - {selectedCategory}
                                     </h5>
                                     <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      className="h-6 w-6" 
+                                      type="text" 
+                                      size="small" 
+                                      className="h-6 w-6 flex items-center justify-center" 
                                       onClick={handleCloseCallLogs}
                                     >
                                       <IconX className="h-3 w-3" />

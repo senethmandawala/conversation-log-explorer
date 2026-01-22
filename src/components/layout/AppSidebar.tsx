@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { motion } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -10,7 +10,7 @@ import {
   IconChevronRight
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { usePostCall } from "@/contexts/PostCallContext";
 import { useAutopilot } from "@/contexts/AutopilotContext";
 import { useModule } from "@/contexts/ModuleContext";
@@ -54,12 +54,18 @@ export function AppSidebar() {
   const { setSelectedInstance: setPostCallInstance } = usePostCall();
   const { setSelectedInstance: setAutopilotInstance } = useAutopilot();
 
+  const isMobile = useIsMobile();
+
   const handleNavClick = (href: string) => {
     // Clear instance when navigating to module root (instances page)
     if (href === "/pca") {
       setPostCallInstance(null);
     } else if (href === "/autopilot") {
       setAutopilotInstance(null);
+    }
+    // Close sidebar on mobile after clicking a nav item
+    if (isMobile) {
+      setSidebarCollapsed(true);
     }
   };
 
@@ -71,21 +77,33 @@ export function AppSidebar() {
       className="h-screen bg-card border-r border-border/50 flex flex-col relative"
     >
       {/* Logo */}
-      <div className="h-12 flex items-center px-3 border-b border-border/30">
-        {!sidebarCollapsed && (
+      <NavLink to="/" className="h-12 flex items-center px-3 border-b border-border/30 cursor-pointer hover:bg-muted/30 transition-colors">
+        {sidebarCollapsed ? (
           <motion.div
             initial={false}
-            animate={{ opacity: sidebarCollapsed ? 0 : 1 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-center w-full"
+          >
+            <img 
+              src="/src/assets/images/sense-ai-icon-transparent.svg" 
+              alt="Sense AI" 
+              className="h-6 w-6"
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={false}
+            animate={{ opacity: 1 }}
             className="flex items-center gap-2"
           >
             <img 
               src="/src/assets/images/sense-ai-logo-transparent.svg" 
               alt="Sense AI Logo" 
-              className="h-6 w-auto"
+              className="h-4 w-auto"
             />
           </motion.div>
         )}
-      </div>
+      </NavLink>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-3 px-2">
@@ -102,21 +120,41 @@ export function AppSidebar() {
             )}
             <ul className="space-y-1">
               {section.items.map((item) => {
-                const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
+                // Check if current route matches this nav item
+                const currentPath = location.pathname;
+                const currentSearch = location.search;
+                const itemUrl = new URL(item.href, window.location.origin);
+                const itemPath = itemUrl.pathname;
+                const itemModule = itemUrl.searchParams.get('module');
+                
+                let isActive = false;
+                if (itemModule) {
+                  // For module links (e.g., /instances?module=pca)
+                  // Active if on instances page with same module OR on module-specific pages
+                  const currentModule = new URLSearchParams(currentSearch).get('module');
+                  isActive = (currentPath === itemPath && currentModule === itemModule) ||
+                             currentPath.startsWith(`/${itemModule}`);
+                } else {
+                  // For regular links
+                  isActive = currentPath === itemPath || currentPath.startsWith(itemPath + "/");
+                }
+                
                 return (
                   <li key={item.title}>
                     <NavLink
                       to={item.href}
                       onClick={() => handleNavClick(item.href)}
                       className={cn(
-                        "flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                        "flex items-center gap-2 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                        sidebarCollapsed ? "px-0 justify-center" : "px-2",
                         isActive
                           ? "bg-primary/10 text-primary shadow-sm"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          : "text-link hover:bg-muted hover:text-primary"
                       )}
                     >
                       <item.icon className={cn(
-                        "h-4 w-4 flex-shrink-0",
+                        "flex-shrink-0",
+                        sidebarCollapsed ? "h-5 w-5" : "h-4 w-4",
                         isActive && "text-primary"
                       )} />
                       {!sidebarCollapsed && (

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { IconDownload, IconFilter, IconSearch, IconX, IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight, IconSparkles } from "@tabler/icons-react";
@@ -219,8 +219,8 @@ export default function ConversationHistory() {
                   className="flex items-center gap-2"
                 >
                   <Button
-                    variant="outline"
-                    size="sm"
+                    type="default"
+                    size="small"
                     onClick={handleExport}
                     className="h-10 px-4 rounded-xl border-border/60 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200"
                   >
@@ -228,8 +228,8 @@ export default function ConversationHistory() {
                     Export CSV
                   </Button>
                   <Button
-                    variant={filtersOpen ? "default" : "outline"}
-                    size="sm"
+                    type={filtersOpen ? "primary" : "default"}
+                    size="small"
                     onClick={() => setFiltersOpen(!filtersOpen)}
                     className={cn(
                       "h-10 px-4 rounded-xl relative transition-all duration-200",
@@ -423,7 +423,7 @@ export default function ConversationHistory() {
                                   exit={{ opacity: 0, scale: 0.8 }}
                                 >
                                   <Button 
-                                    variant="outline" 
+                                    type="default" 
                                     onClick={handleClearFilters}
                                     className="h-10 w-10 p-0 rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-200"
                                   >
@@ -470,8 +470,8 @@ export default function ConversationHistory() {
                         </p>
                         <div className="flex items-center gap-1">
                           <Button
-                            variant="outline"
-                            size="sm"
+                            type="default"
+                            size="small"
                             onClick={() => setCurrentPage(1)}
                             disabled={currentPage === 1}
                             className="h-9 w-9 p-0 rounded-lg"
@@ -479,8 +479,8 @@ export default function ConversationHistory() {
                             <IconChevronsLeft className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            type="default"
+                            size="small"
                             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
                             className="h-9 w-9 p-0 rounded-lg"
@@ -504,8 +504,8 @@ export default function ConversationHistory() {
                               return (
                                 <Button
                                   key={pageNum}
-                                  variant={currentPage === pageNum ? "default" : "outline"}
-                                  size="sm"
+                                  type={currentPage === pageNum ? "primary" : "default"}
+                                  size="small"
                                   onClick={() => setCurrentPage(pageNum)}
                                   className={cn(
                                     "h-9 w-9 p-0 rounded-lg transition-all duration-200",
@@ -519,8 +519,8 @@ export default function ConversationHistory() {
                           </div>
 
                           <Button
-                            variant="outline"
-                            size="sm"
+                            type="default"
+                            size="small"
                             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}
                             className="h-9 w-9 p-0 rounded-lg"
@@ -528,8 +528,8 @@ export default function ConversationHistory() {
                             <IconChevronRight className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            type="default"
+                            size="small"
                             onClick={() => setCurrentPage(totalPages)}
                             disabled={currentPage === totalPages}
                             className="h-9 w-9 p-0 rounded-lg"

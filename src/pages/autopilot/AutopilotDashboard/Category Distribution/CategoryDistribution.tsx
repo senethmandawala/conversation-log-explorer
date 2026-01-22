@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import {
   Treemap,
   PieChart,
@@ -309,8 +309,8 @@ export function CategoryDistribution() {
                   <UITooltip>
                     <TooltipTrigger asChild>
                       <Button 
-                        variant="ghost" 
-                        size="icon" 
+                        type="text" 
+                         
                         onClick={handleCloseSubcategory}
                         className="h-8 w-8"
                       >

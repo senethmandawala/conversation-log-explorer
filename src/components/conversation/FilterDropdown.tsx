@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { Button } from "antd";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,12 +31,10 @@ export function FilterDropdown({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
+          type="default"
           disabled={disabled}
           className={cn(
-            "w-full justify-between h-10 text-sm font-normal rounded-xl transition-all duration-200",
+            "w-full justify-between h-10 text-sm font-normal rounded-md transition-all duration-200",
             "border-border/60 hover:border-primary/50 hover:bg-primary/5",
             hasSelection && "border-primary/50 bg-primary/5 shadow-sm",
             disabled && "opacity-50 cursor-not-allowed"
@@ -145,9 +143,10 @@ export function TextFilterContent({
         </AnimatePresence>
       </div>
       <Button 
+        type="primary"
         onClick={onApply} 
-        className="w-full h-10 rounded-lg bg-primary hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md" 
-        size="sm"
+        className="w-full h-10 rounded-md bg-primary hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md" 
+        size="small"
       >
         Apply Filter
       </Button>
